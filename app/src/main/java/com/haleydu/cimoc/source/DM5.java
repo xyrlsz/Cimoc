@@ -53,7 +53,7 @@ public class DM5 extends MangaParser {
 
     @Override
     public Request getSearchRequest(String keyword, int page) {
-        String url = "http://m.dm5.com/pagerdata.ashx";
+        String url = "https://m.dm5.com/pagerdata.ashx";
         RequestBody body = new FormBody.Builder()
                 .add("t", "7")
                 .add("pageindex", String.valueOf(page))
@@ -92,7 +92,7 @@ public class DM5 extends MangaParser {
 
     @Override
     public String getUrl(String cid) {
-        return "http://www.dm5.com/".concat(cid);
+        return "https://www.dm5.com/".concat(cid);
     }
 
     @Override
@@ -105,7 +105,7 @@ public class DM5 extends MangaParser {
 
     @Override
     public Request getInfoRequest(String cid) {
-        String url = "http://www.dm5.com/".concat(cid);
+        String url = "https://www.dm5.com/".concat(cid);
         return new Request.Builder().url(url).build();
     }
 
@@ -161,10 +161,10 @@ public class DM5 extends MangaParser {
 
     @Override
     public Request getImagesRequest(String cid, String path) {
-        String url = "http://m.dm5.com/".concat(path);
+        String url = "https://m.dm5.com/".concat(path);
         return new Request
                 .Builder()
-                .addHeader("Referer", StringUtils.format("http://m.dm5.com/%s", path))
+                .addHeader("Referer", StringUtils.format("https://m.dm5.com/%s", path))
                 .url(url).build();
     }
 
@@ -194,7 +194,7 @@ public class DM5 extends MangaParser {
     @Override
     public Request getLazyRequest(String url) {
         return new Request.Builder().url(url)
-                .addHeader("Referer", "http://www.dm5.com")
+                .addHeader("Referer", "https://www.dm5.com")
                 .build();
     }
 
@@ -258,7 +258,7 @@ public class DM5 extends MangaParser {
     @Override
     public Headers getHeader(String url) {
         String cid = "m".concat(StringUtils.match("cid=(\\d+)", url, 1));
-        return Headers.of("Referer", "http://m.dm5.com/".concat(cid));
+        return Headers.of("Referer", "https://m.dm5.com/".concat(cid));
     }
 
     @Override
@@ -267,7 +267,7 @@ public class DM5 extends MangaParser {
         if (list != null) {
             cid = list.get(0).getChapter();
         }
-        return Headers.of("Referer", "http://m.dm5.com/".concat(cid));
+        return Headers.of("Referer", "https://m.dm5.com/".concat(cid));
     }
 
     private static class Category extends MangaCategory {
@@ -282,7 +282,7 @@ public class DM5 extends MangaParser {
             String path = args[CATEGORY_SUBJECT].concat(" ").concat(args[CATEGORY_AREA]).concat(" ").concat(args[CATEGORY_PROGRESS])
                     .concat(" ").concat(args[CATEGORY_ORDER]).trim();
             path = path.replaceAll("\\s+", "-");
-            return StringUtils.format("http://www.dm5.com/manhua-list-%s-p%%d", path);
+            return StringUtils.format("https://www.dm5.com/manhua-list-%s-p%%d", path);
         }
 
         @Override
