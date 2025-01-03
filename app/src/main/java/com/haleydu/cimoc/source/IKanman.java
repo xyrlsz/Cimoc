@@ -41,7 +41,7 @@ public class IKanman extends MangaParser {
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, false);
+        return new Source(null, DEFAULT_TITLE, TYPE, true);
     }
 
     @Override
@@ -62,6 +62,7 @@ public class IKanman extends MangaParser {
                 String cid = node.hrefWithSplit("a.bcover", 1);
                 String title = node.text(".book-detail > dl > dt > a");
                 String cover = node.attr("a.bcover > img", "src");
+                cover = "https:" + cover;
 //                String update = node.text("dl:eq(5) > dd");
 //                String author = node.text("dl:eq(2) > dd");
                 return new Comic(TYPE, cid, title, cover, "", "");
@@ -95,6 +96,7 @@ public class IKanman extends MangaParser {
         Node body = new Node(html);
         String title = body.text("div.book-title > h1");
         String cover = body.src("p.hcover > img");
+        cover = "https:" + cover;
         String update = body.text("div.chapter-bar > span.fr > span:eq(1)");
         String author = body.attr("ul.detail-list > li:eq(1) > span:eq(1) > a", "title");
         String intro = body.text("#intro-cut");

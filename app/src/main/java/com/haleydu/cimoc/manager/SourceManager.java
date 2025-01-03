@@ -84,8 +84,8 @@ public class SourceManager {
                 case IKanman.TYPE:
                     parser = new IKanman(source);
                     break;
-                case Dmzj.TYPE:
-                    parser = new Dmzj(source);
+                case Dmzjv3.TYPE:
+                    parser = new Dmzjv3(source);
                     break;
                 case HHAAZZ.TYPE:
                     parser = new HHAAZZ(source);
@@ -214,8 +214,11 @@ public class SourceManager {
                 case YKMH.TYPE:
                     parser = new YKMH(source);
                     break;
-                case DmzjFix.TYPE:
-                    parser = new DmzjFix(source);
+//                case DmzjFix.TYPE:
+//                    parser = new DmzjFix(source);
+//                    break;
+                case Dmzj.TYPE:
+                    parser = new Dmzj(source);
                     break;
                 default:
                     parser = new Null();

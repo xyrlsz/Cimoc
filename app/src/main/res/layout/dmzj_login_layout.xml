@@ -1,0 +1,51 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:elevation="8dp"
+              android:orientation="vertical"
+              android:padding="24dp">
+
+	<TextView
+		android:id="@+id/title"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center_horizontal"
+		android:layout_marginBottom="16dp"
+		android:text="登录"
+		android:textColor="@color/colorPrimaryBlue"
+		android:textSize="20sp"
+		android:textStyle="bold" />
+
+
+	<EditText
+		android:id="@+id/username"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginBottom="16dp"
+
+		android:hint="用户名"
+		android:padding="12dp"
+ />
+
+	<EditText
+		android:id="@+id/password"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginBottom="24dp"
+		android:hint="密码"
+		android:inputType="textPassword"
+		android:padding="12dp"
+  />
+
+
+	<Button
+		android:id="@+id/login_button"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginBottom="8dp"
+		android:padding="12dp"
+		android:stateListAnimator="@null"
+		android:text="登录"
+		android:textSize="16sp" />
+
+</LinearLayout>

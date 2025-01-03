@@ -21,6 +21,35 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
+                <TextView
+                        android:id="@+id/settings_dmzj"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginRight="16dp"
+                        android:layout_marginBottom="10dp"
+                        android:text="@string/settings_dmzj"
+                        android:textColor="?attr/colorPrimary"
+                        android:textSize="14sp" />
+                <com.haleydu.cimoc.ui.widget.Option
+                        android:id="@+id/settings_dmzj_login"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:summary="@string/settings_dmzj_login_summary"
+                        app:title="@string/settings_dmzj_login" />
+
+                <com.haleydu.cimoc.ui.widget.Option
+                    android:id="@+id/settings_dmzj_signup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:title="@string/settings_dmzj_signup" />
+
+                 <com.haleydu.cimoc.ui.widget.Option
+                     android:id="@+id/settings_dmzj_logout"
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content"
+                     app:title="@string/settings_dmzj_logout" />
 
                 <TextView
                     android:id="@+id/settings_reader_title"
@@ -275,6 +304,7 @@
                     android:layout_height="wrap_content"
                     app:summary="@string/settings_other_clear_cache_summary"
                     app:title="@string/settings_other_clear_cache" />
+
             </LinearLayout>
         </ScrollView>
     </LinearLayout>

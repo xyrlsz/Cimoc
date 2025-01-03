@@ -1,16 +1,21 @@
 package com.haleydu.cimoc.ui.activity;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.widget.Button;
+import android.widget.EditText;
 import androidx.core.content.ContextCompat;
 import android.view.View;
 import android.widget.TextView;
 
 import com.haleydu.cimoc.App;
+import com.haleydu.cimoc.Constants;
 import com.haleydu.cimoc.R;
 import com.haleydu.cimoc.global.Extra;
 import com.haleydu.cimoc.manager.PreferenceManager;
@@ -22,6 +27,7 @@ import com.haleydu.cimoc.ui.activity.settings.ReaderConfigActivity;
 import com.haleydu.cimoc.ui.fragment.dialog.MessageDialogFragment;
 import com.haleydu.cimoc.ui.fragment.dialog.StorageEditorDialogFragment;
 import com.haleydu.cimoc.ui.view.SettingsView;
+import com.haleydu.cimoc.ui.widget.Option;
 import com.haleydu.cimoc.ui.widget.preference.CheckBoxPreference;
 import com.haleydu.cimoc.ui.widget.preference.ChoicePreference;
 import com.haleydu.cimoc.ui.widget.preference.SliderPreference;
@@ -30,11 +36,18 @@ import com.haleydu.cimoc.utils.StringUtils;
 import com.haleydu.cimoc.utils.ThemeUtils;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.OnClick;
+import okhttp3.*;
+
+import static com.haleydu.cimoc.Constants.*;
 
 /**
  * Created by Hiroshi on 2016/9/21.
@@ -51,7 +64,10 @@ public class SettingsActivity extends BackActivity implements SettingsView {
     private static final int DIALOG_REQUEST_OTHER_NIGHT_ALPHA = 7;
     private static final int DIALOG_REQUEST_READER_SCALE_FACTOR = 8;
     private static final int DIALOG_REQUEST_READER_CONTROLLER_TRIG_THRESHOLD = 9;
+    private final int[] mResultArray = new int[6];
+    private final Intent mResultIntent = new Intent();
 
+    Option mDmzjLogin;
     @BindViews({R.id.settings_reader_title, R.id.settings_download_title, R.id.settings_other_title, R.id.settings_search_title})
     List<TextView> mTitleList;
     @BindView(R.id.settings_layout)
@@ -106,14 +122,9 @@ public class SettingsActivity extends BackActivity implements SettingsView {
     CheckBoxPreference mFireBaseEvent;
     @BindView(R.id.settings_other_reduce_ad)
     CheckBoxPreference mReduceAd;
-
     private SettingsPresenter mPresenter;
-
     private String mStoragePath;
     private String mTempStorage;
-
-    private int[] mResultArray = new int[6];
-    private Intent mResultIntent = new Intent();
 
     @Override
     protected BasePresenter initPresenter() {
@@ -125,6 +136,13 @@ public class SettingsActivity extends BackActivity implements SettingsView {
     @Override
     protected void initView() {
         super.initView();
+
+        mDmzjLogin = findViewById(R.id.settings_dmzj_login);
+        String dmzjUsername = getSharedPreferences(DMZJ_SHARED, MODE_PRIVATE).getString(DMZJ_SHARED_USERNAME, "");
+        if (!dmzjUsername.isEmpty()) {
+            mDmzjLogin.setSummary(dmzjUsername);
+        }
+
         mStoragePath = getAppInstance().getDocumentFile().getUri().toString();
         mReaderKeepBright.bindPreference(PreferenceManager.PREF_READER_KEEP_BRIGHT, false);
         mReaderHideInfo.bindPreference(PreferenceManager.PREF_READER_HIDE_INFO, false);
@@ -143,7 +161,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         mLoadCoverOnlyWifi.bindPreference(PreferenceManager.PREF_OTHER_LOADCOVER_ONLY_WIFI, false);
         mFireBaseEvent.bindPreference(PreferenceManager.PREF_OTHER_FIREBASE_EVENT, true);
         mReduceAd.bindPreference(PreferenceManager.PREF_OTHER_REDUCE_AD, false);
-        mOtherShowTopbar.bindPreference(PreferenceManager.PREF_OTHER_SHOW_TOPBAR,false);
+        mOtherShowTopbar.bindPreference(PreferenceManager.PREF_OTHER_SHOW_TOPBAR, false);
         mReaderMode.bindPreference(getSupportFragmentManager(), PreferenceManager.PREF_READER_MODE,
                 PreferenceManager.READER_MODE_PAGE, R.array.reader_mode_items, DIALOG_REQUEST_READER_MODE);
         mOtherLaunch.bindPreference(getSupportFragmentManager(), PreferenceManager.PREF_OTHER_LAUNCH,
@@ -309,6 +327,110 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         hideProgressDialog();
     }
 
+    @OnClick(R.id.settings_dmzj_login)
+    void onDmzjLoginClick() {
+        // 创建Dialog
+        Dialog dialog = new Dialog(this, R.style.DialogThemeBlue);
+
+        // 设置自定义布局
+        dialog.setContentView(R.layout.dmzj_login_layout);
+
+        // 获取布局中的控件
+        EditText username = dialog.findViewById(R.id.username);
+        EditText password = dialog.findViewById(R.id.password);
+        Button loginButton = dialog.findViewById(R.id.login_button);
+
+        // 设置按钮点击事件
+        loginButton.setOnClickListener(v -> {
+            String user = username.getText().toString();
+            String pass = password.getText().toString();
+
+            RequestBody formBody = new FormBody.Builder()
+                    .add("nickname", user)
+                    .add("password", pass)
+                    .add("type", "1")
+                    .add("to", "https://i.dmzj.com")
+                    .build();
+
+            // Create the request
+            Request request = new Request.Builder()
+                    .url("https://i.dmzj.com/doLogin")
+                    .addHeader("accept", "application/json, text/javascript, */*; q=0.01")
+                    .addHeader("accept-language", "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6")
+                    .addHeader("cache-control", "no-cache")
+                    .addHeader("content-type", "application/x-www-form-urlencoded; charset=UTF-8")
+                    .addHeader("origin", "https://i.dmzj.com")
+                    .addHeader("pragma", "no-cache")
+                    .addHeader("priority", "u=1, i")
+                    .addHeader("referer", "https://i.dmzj.com/login")
+                    .addHeader("sec-ch-ua", "\"Microsoft Edge\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"")
+                    .addHeader("sec-ch-ua-mobile", "?0")
+                    .addHeader("sec-ch-ua-platform", "\"Windows\"")
+                    .addHeader("sec-fetch-dest", "empty")
+                    .addHeader("sec-fetch-mode", "cors")
+                    .addHeader("sec-fetch-site", "same-origin")
+                    .addHeader("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0")
+                    .addHeader("x-requested-with", "XMLHttpRequest")
+                    .post(formBody)
+                    .build();
+
+            // 例如：验证用户名和密码
+            App.getHttpClient().newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    showSnackbar("登录失败");
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    if (response.isSuccessful() && response.body() != null) {
+                        // 获取cookies
+                        List<String> cookies = response.headers("Set-Cookie");
+                        Set<String> set = new HashSet<>();
+                        for (String s : cookies) {
+                            List<String> tmp = Arrays.asList(s.split("; "));
+                            set.addAll(tmp);
+                        }
+                        String cookieStr = String.join("; ", set);
+                        SharedPreferences sharedPreferences = getSharedPreferences(DMZJ_SHARED, MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString(DMZJ_SHARED_COOKIES, cookieStr);
+                        editor.putString(DMZJ_SHARED_USERNAME, user);
+                        editor.apply();
+                        mDmzjLogin.setSummary(user);
+                        dialog.dismiss();
+                        showSnackbar("登录成功");
+                    } else {
+                        showSnackbar("登录失败");
+                    }
+                }
+            });
+
+
+        });
+
+        // 显示Dialog
+        dialog.show();
+    }
+
+    @OnClick(R.id.settings_dmzj_signup)
+    void onDmzjSignupClick() {
+        String url = "https://m.idmzj.com/login.html";
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(Uri.parse(url));
+        startActivity(intent);
+    }
+
+    @OnClick(R.id.settings_dmzj_logout)
+    void onDmzjLogoutClick(){
+        SharedPreferences sharedPreferences = getSharedPreferences(DMZJ_SHARED,MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(DMZJ_SHARED_COOKIES);
+        editor.remove(DMZJ_SHARED_USERNAME);
+        mDmzjLogin.setSummary(getString(R.string.settings_dmzj_login_summary));
+        editor.apply();
+        showSnackbar("成功");
+    }
     @Override
     public void onFileMoveSuccess() {
         hideProgressDialog();

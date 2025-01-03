@@ -1,26 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.haleydu.cimoc">
+    package="com.haleydu.cimoc" >
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
 
     <application
         android:name=".App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:supportsRtl="true"
-        android:usesCleartextTraffic="true"
-        android:requestLegacyExternalStorage="true"
-        android:preserveLegacyExternalStorage="true"
         android:largeHeap="true"
+        android:preserveLegacyExternalStorage="true"
+        android:requestLegacyExternalStorage="true"
+        android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:ignore="UnusedAttribute">
+        android:usesCleartextTraffic="true"
+        tools:ignore="UnusedAttribute" >
+        <activity
+            android:name=".ui.activity.WebviewActivity"
+            android:exported="false" />
+
         <meta-data
             android:name="EasyGoClient"
             android:value="true" />
@@ -28,7 +32,7 @@
         <activity
             android:name=".ui.activity.MainActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:windowSoftInputMode="adjustPan">
+            android:windowSoftInputMode="adjustPan" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -82,17 +86,17 @@
             android:configChanges="orientation|keyboardHidden|screenSize" />
         <activity
             android:name=".ui.activity.PageReaderActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:forceDarkAllowed="false"
-            android:theme="@style/AppThemeNoDark"
-            android:configChanges="orientation|keyboardHidden|screenSize" />
+            android:theme="@style/AppThemeNoDark" />
         <activity
             android:name=".ui.activity.StreamReaderActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:forceDarkAllowed="false"
-            android:theme="@style/AppThemeNoDark"
-            android:configChanges="orientation|keyboardHidden|screenSize" />
+            android:theme="@style/AppThemeNoDark" />
         <activity
             android:name=".ui.activity.BrowserFilter"
-            android:theme="@android:style/Theme.NoDisplay">
+            android:theme="@android:style/Theme.NoDisplay" >
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
@@ -138,7 +142,8 @@
                 <data
                     android:host="m.dmzj.com"
                     android:scheme="https" />
-                <!-- <data
+                <!--
+                <data
                     android:host="www.manhuagui.com"
                     android:scheme="http" />
                 <data
@@ -155,7 +160,8 @@
                     android:scheme="http" />
                 <data
                     android:host="m.manhuagui.com"
-                    android:scheme="https" /> -->
+                    android:scheme="https" />
+                -->
                 <data
                     android:host="m.5qmh.com"
                     android:scheme="http" />
@@ -198,12 +204,14 @@
                 <data
                     android:host="m.migudm.cn"
                     android:scheme="https" />
-                <!-- <data
+                <!--
+                <data
                     android:host="h5.manhua.163.com"
                     android:scheme="http" />
                 <data
                     android:host="h5.manhua.163.com"
-                    android:scheme="https" /> -->
+                    android:scheme="https" />
+                -->
                 <data
                     android:host="99770.hhxxee.com"
                     android:scheme="http" />
@@ -285,8 +293,8 @@
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}"
             android:exported="false"
-            android:permission="android.permission.MANAGE_DOCUMENTS"
-            android:grantUriPermissions="true">
+            android:grantUriPermissions="true"
+            android:permission="android.permission.MANAGE_DOCUMENTS" >
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths_public" />

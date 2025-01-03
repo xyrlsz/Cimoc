@@ -1,8 +1,13 @@
 package com.haleydu.cimoc.source;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.util.Pair;
 
+import android.widget.Toast;
+import com.haleydu.cimoc.App;
+import com.haleydu.cimoc.Constants;
 import com.haleydu.cimoc.model.Chapter;
 import com.haleydu.cimoc.model.Comic;
 import com.haleydu.cimoc.model.ImageUrl;
@@ -14,6 +19,7 @@ import com.haleydu.cimoc.parser.NodeIterator;
 import com.haleydu.cimoc.parser.SearchIterator;
 import com.haleydu.cimoc.parser.UrlFilter;
 import com.haleydu.cimoc.soup.Node;
+import com.haleydu.cimoc.ui.activity.SettingsActivity;
 import com.haleydu.cimoc.utils.LogUtil;
 import com.haleydu.cimoc.utils.StringUtils;
 import com.haleydu.cimoc.utils.UicodeBackslashU;
@@ -31,6 +37,9 @@ import java.util.Locale;
 
 import okhttp3.Headers;
 import okhttp3.Request;
+
+import static android.content.Context.MODE_PRIVATE;
+import static com.haleydu.cimoc.Constants.DMZJ_SHARED_COOKIES;
 
 /**
  * Created by Hiroshi on 2016/7/8.
@@ -69,7 +78,7 @@ public class Dmzjv2 extends MangaParser {
     public SearchIterator getSearchIterator(String html, int page) {
         try {
             String JsonString = StringUtils.match("var serchArry=(\\[\\{.*?\\}\\])", html, 1);
-            String decodeJsonString = UicodeBackslashU.unicodeToCn(JsonString).replace("\\/","/");
+            String decodeJsonString = UicodeBackslashU.unicodeToCn(JsonString).replace("\\/", "/");
             return new JsonIterator(new JSONArray(decodeJsonString)) {
                 @Override
                 protected Comic parse(JSONObject object) {
@@ -77,7 +86,7 @@ public class Dmzjv2 extends MangaParser {
                         String cid = object.getString("comic_py");
                         String title = object.getString("name");
                         String cover = object.getString("cover");
-                        cover = "https://images.dmzj.com/"+cover;
+                        cover = "https://images.dmzj.com/" + cover;
                         String author = object.optString("authors");
                         long time = Long.parseLong(object.getString("last_updatetime")) * 1000;
                         String update = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date(time));
@@ -125,8 +134,8 @@ public class Dmzjv2 extends MangaParser {
             String JsonArrayString = StringUtils.match("initIntroData\\((.*)\\);", html, 1);
             String decodeJsonArrayString = UicodeBackslashU.unicodeToCn(JsonArrayString);
             JSONArray allJsonArray = new JSONArray(decodeJsonArrayString);
-            int k=0;
-            for (int i=0;i<allJsonArray.length();i++){
+            int k = 0;
+            for (int i = 0; i < allJsonArray.length(); i++) {
                 JSONArray JSONArray = allJsonArray.getJSONObject(i).getJSONArray("data");
                 String tag = allJsonArray.getJSONObject(i).getString("title");
                 for (int j = 0; j != JSONArray.length(); ++j) {
@@ -134,8 +143,8 @@ public class Dmzjv2 extends MangaParser {
                     String title = chapter.getString("chapter_name");
                     String comic_id = chapter.getString("comic_id");
                     String chapter_id = chapter.getString("id");
-                    String path = comic_id + "/" +chapter_id;
-                    list.add(new Chapter(Long.parseLong(sourceComic + "000" + k++), sourceComic, tag+" "+title, path));
+                    String path = comic_id + "/" + chapter_id;
+                    list.add(new Chapter(Long.parseLong(sourceComic + "000" + k++), sourceComic, tag + " " + title, path));
                 }
             }
 
@@ -149,7 +158,16 @@ public class Dmzjv2 extends MangaParser {
     @Override
     public Request getImagesRequest(String cid, String path) {
         String url = StringUtils.format("http://m.dmzj.com/view/%s.html", path);
-        return new Request.Builder().url(url).build();
+        SharedPreferences sharedPreferences = App.getActivity().getSharedPreferences(Constants.DMZJ_SHARED, MODE_PRIVATE);
+        String cookieStr = sharedPreferences.getString(DMZJ_SHARED_COOKIES, "");
+        if (cookieStr == "") {
+            App.getActivity().startActivity(new Intent(App.getAppContext(), SettingsActivity.class));
+            App.getActivity().runOnUiThread(() -> {
+                Toast toast = Toast.makeText(App.getAppContext(), "请先登录动漫之家", Toast.LENGTH_SHORT);
+                toast.show();
+            });
+        }
+        return new Request.Builder().url(url).addHeader("Cookie", cookieStr).build();
     }
 
     @Override

@@ -55,7 +55,7 @@ public class UpdateHelper {
     private static void initSource(DaoSession session) {
         List<Source> list = new ArrayList<>();
         list.add(IKanman.getDefaultSource());
-        list.add(Dmzj.getDefaultSource());
+        list.add(Dmzjv3.getDefaultSource());
         list.add(HHAAZZ.getDefaultSource());
         list.add(CCTuku.getDefaultSource());
         list.add(U17.getDefaultSource());
@@ -99,7 +99,8 @@ public class UpdateHelper {
         list.add(MH160.getDefaultSource());
         list.add(QiMiaoMH.getDefaultSource());
         list.add(YKMH.getDefaultSource());
-        list.add(DmzjFix.getDefaultSource());
+//        list.add(DmzjFix.getDefaultSource());
+        list.add(Dmzj.getDefaultSource());
         session.getSourceDao().insertOrReplaceInTx(list);
     }
 }

@@ -89,14 +89,12 @@ public interface Parser {
      */
     Request getImagesRequest(String cid, String path);
 
-    /**
-     * 解析图片列表，若为惰性加载，则 {@link ImageUrl#lazy} 为 true
-     * 惰性加载的情况，一次性不能拿到所有图片链接，例如网站使用了多次异步请求 {@link DM5#parseImages}，或需要跳转到不同页面
-     * 才能获取 {@link HHSSEE#parseImages}，这些情况一般可以根据页码构造出相应的请求链接，到阅读时再解析
-     * 支持多个链接 {@link ImageUrl#urls}，例如 {@link IKanman#parseImages}
-     *
-     * @param html 页面源代码
-     */
+    /// 解析图片列表，若为惰性加载，则 [#lazy] 为 true
+    /// 惰性加载的情况，一次性不能拿到所有图片链接，例如网站使用了多次异步请求 [#parseImages]，或需要跳转到不同页面
+    /// 才能获取 [#parseImages]，这些情况一般可以根据页码构造出相应的请求链接，到阅读时再解析
+    /// 支持多个链接 [#urls]，例如 [#parseImages]
+    ///
+    /// @param html 页面源代码
     List<ImageUrl> parseImages(String html) throws Manga.NetworkErrorException, JSONException;
 
     /**
@@ -127,11 +125,9 @@ public interface Parser {
      */
     Request getCheckRequest(String cid);
 
-    /**
-     * 解析最后更新时间，用于与原来的比较，一般与 {@link #parseInfo} 获取 {@link Comic#update} 字段的方式相同
-     *
-     * @param html 页面源代码
-     */
+    /// 解析最后更新时间，用于与原来的比较，一般与 [#parseInfo] 获取 [#update] 字段的方式相同
+    ///
+    /// @param html 页面源代码
     String parseCheck(String html);
 
     /**
