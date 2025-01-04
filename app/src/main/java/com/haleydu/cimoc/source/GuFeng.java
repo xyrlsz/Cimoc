@@ -40,7 +40,7 @@ public class GuFeng extends MangaParser {
     public Request getSearchRequest(String keyword, int page) throws UnsupportedEncodingException {
         String url = "";
         if (page == 1) {
-            url = StringUtils.format("https://m.gufengmh8.com/search/?keywords=%s",
+            url = StringUtils.format("https://m.gufengmh.com/search/?keywords=%s",
                     URLEncoder.encode(keyword, "UTF-8"));
         }
         return new Request.Builder()
@@ -57,10 +57,10 @@ public class GuFeng extends MangaParser {
             @Override
             protected Comic parse(Node node) {
 
-                String cover = node.attr("div.itemImg > a > mip-img", "src");
+                String cover = node.attr("div.itemImg > a > img", "src");
 
                 String title = node.text("div.itemTxt > a");
-                String cid = node.attr("div.itemTxt > a", "href").replace("https://m.gufengmh8.com/manhua/", "");
+                String cid = node.attr("div.itemTxt > a", "href").replace("https://m.gufengmh.com/manhua/", "");
                 cid = cid.substring(0, cid.length() - 1);
 
                 String update = node.text("div.itemTxt > p:eq(3) > span.date");
@@ -73,22 +73,32 @@ public class GuFeng extends MangaParser {
 
     @Override
     public Request getInfoRequest(String cid) {
-        String url = "https://m.gufengmh8.com/manhua/".concat(cid) + "/";
+        String url = "https://m.gufengmh.com/manhua/".concat(cid) + "/";
         return new Request.Builder().url(url).build();
     }
 
     @Override
     public Comic parseInfo(String html, Comic comic) throws UnsupportedEncodingException {
         Node body = new Node(html);
-        String cover = body.src("#Cover > mip-img");
-        String intro = body.text("div.comic-view.clearfix > p");
-        String title = body.text("h1.title");
+        // 获取封面图片URL
+        String cover = body.src("#Cover > img");
 
-        String update = body.text("div.pic > dl:eq(4) > dd");
-        String author = body.text("div.pic > dl:eq(2) > dd");
+        // 获取简介
+        String intro = body.text("#simple-des").replace("介绍:", "").trim();
+
+        // 获取标题
+        String title = body.attr("#Cover > img", "title");
+
+        // 获取更新日期
+        String update = body.text(".txtItme .date");
+
+        // 获取作者
+        String author = body.text(".txtItme:eq(0)").replace("まえだくん", "").trim();
 
         // 连载状态
-        boolean status = isFinish("连载");
+        boolean status = body.text(".txtItme:eq(2)").contains("连载中");
+
+        // 设置漫画信息
         comic.setInfo(title, cover, update, intro, author, status);
         return comic;
     }
@@ -107,7 +117,7 @@ public class GuFeng extends MangaParser {
 
     @Override
     public Request getImagesRequest(String cid, String path) {
-        String url = StringUtils.format("https://m.gufengmh8.com/manhua/%s/%s.html", cid, path);
+        String url = StringUtils.format("https://m.gufengmh.com/manhua/%s/%s.html", cid, path);
         return new Request.Builder().url(url).build();
     }
 

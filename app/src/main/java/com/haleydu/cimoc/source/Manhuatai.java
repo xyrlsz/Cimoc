@@ -2,7 +2,6 @@ package com.haleydu.cimoc.source;
 
 import android.util.Pair;
 
-
 import com.google.common.collect.Lists;
 import com.haleydu.cimoc.App;
 import com.haleydu.cimoc.core.Manga;
@@ -23,9 +22,13 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import okhttp3.Headers;
 import okhttp3.Request;
@@ -39,14 +42,15 @@ public class Manhuatai extends MangaParser {
 
     public static final int TYPE = 49;
     public static final String DEFAULT_TITLE = "漫画台";
-    public static final String baseUrl = "https://m.manhuatai.com";
-
-    public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true);
-    }
+    public static final String baseUrl = "https://www.kanman.com";
+    private String _path = null;
 
     public Manhuatai(Source source) {
         init(source, new Category());
+    }
+
+    public static Source getDefaultSource() {
+        return new Source(null, DEFAULT_TITLE, TYPE, true);
     }
 
     @Override
@@ -65,19 +69,16 @@ public class Manhuatai extends MangaParser {
             @Override
             protected Comic parse(JSONObject object) throws JSONException {
                 String title = object.getString("comic_name");
-                String cid = object.getString("comic_newid");
+                String cid = object.getString("comic_id");
                 String cover = "https://image.yqmh.com/mh/" + object.getString("comic_id") + ".jpg-300x400.webp";
-                String author = null;
-                String update = null;
+                String author = object.getString("comic_author");
+                Long timestamp = object.getLong("update_time");
+                Date date = new Date(timestamp);
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String update = sdf.format(date);
                 return new Comic(TYPE, cid, title, cover, update, author);
             }
         };
-    }
-
-    private Node getComicNode(String cid) throws Manga.NetworkErrorException {
-        Request request = getInfoRequest(cid);
-        String html = Manga.getResponseBody(App.getHttpClient(), request);
-        return new Node(html);
     }
 
 //    private String getResponseBody(OkHttpClient client, Request request) throws Manga.NetworkErrorException {
@@ -105,9 +106,15 @@ public class Manhuatai extends MangaParser {
 //        throw new Manga.NetworkErrorException();
 //    }
 
+    private Node getComicNode(String cid) throws Manga.NetworkErrorException {
+        Request request = getInfoRequest(cid);
+        String html = Manga.getResponseBody(App.getHttpClient(), request);
+        return new Node(html);
+    }
+
     @Override
     public Request getInfoRequest(String cid) {
-        String url = "https://www.manhuatai.com/".concat(cid) + "/";
+        String url = "https://www.kanman.com/".concat(cid) + "/";
         return new Request.Builder().url(url).build();
     }
 
@@ -115,66 +122,101 @@ public class Manhuatai extends MangaParser {
     @Override
     public Comic parseInfo(String html, Comic comic) {
         Node body = new Node(html);
-        String title = body.attr("h1#detail-title", "title");
-        String cover = body.attr("div.detail-cover > img", "data-src");
-        cover = "https:" + cover;
-        String update = body.text("span.update").substring(0,10);
-        String author = null;
-        String intro = body.text("div#js_comciDesc > p.desc-content");
+
+        // 获取标题
+        String title = body.attr("h1.title", "title"); // 从 h1.title 的 title 属性中获取标题
+
+        // 获取封面
+        String cover = "https://image.yqmh.com/mh/" + comic.getCid() + ".jpg-300x400.webp";
+
+        // 获取更新日期
+        String update = body.text(".hd > span").replace("更新至", "").trim(); // 从 .hd > span 中提取更新日期
+        update = update.substring(0, 10); // 只取前 10 个字符（即日期部分）
+
+        // 获取简介（假设简介在某个描述区域，需要根据实际 HTML 调整）
+        String intro = body.text(".introduce .content"); // 从 .introduce .content 中提取简介
+
+        // 获取作者（假设作者信息在某个标签中，需要根据实际 HTML 调整）
+        String author = body.text("div.introduce-box[data-index='0'] .username a");
+        int index = author.indexOf("|");
+        if (index > 0) {
+            author = author.substring(0, index - 1);
+        }
+
+        // 设置漫画信息
         comic.setInfo(title, cover, update, intro, author, false);
+
         return comic;
     }
 
     @Override
     public List<Chapter> parseChapter(String html, Comic comic, Long sourceComic) {
         List<Chapter> list = new LinkedList<>();
-        int i=0;
+        int i = 0;
         for (Node node : new Node(html).list("ol#j_chapter_list > li > a")) {
-            String title = node.attr( "title");
+            String title = node.attr("title");
             String path = node.hrefWithSplit(1);
             list.add(new Chapter(Long.parseLong(sourceComic + "000" + i++), sourceComic, title, path));
         }
         return Lists.reverse(list);
     }
 
-    private String _path = null;
-
     //获取漫画图片Request
     @Override
     public Request getImagesRequest(String cid, String path) {
         _path = path;
-        String url = StringUtils.format("https://m.manhuatai.com/api/getcomicinfo_body?product_id=2&productname=mht&platformname=wap&comic_newid=%s", cid);
+//        String url = StringUtils.format("https://www.kanman.com/api/getcomicinfo_body?product_id=2&productname=mht&platformname=wap&comic_id=%s", cid);
+        String url = StringUtils.format("https://www.kanman.com/%s/%s.html", cid, path);
         return new Request.Builder().url(url).build();
     }
 
     @Override
-    public List<ImageUrl> parseImages(String html, Chapter chapter)  {
+    public List<ImageUrl> parseImages(String html, Chapter chapter) {
         List<ImageUrl> list = new LinkedList<>();
         try {
-            JSONObject object = new JSONObject(html);
-            if (object.getInt("status") != 0) {
-                return list;
-            }
+            String regex = "window\\.comicInfo\\s*=\\s*\\{.*?current_chapter\\s*:\\s*(\\{.*?\\})(?:,|\\})";
+            Pattern pattern = Pattern.compile(regex, Pattern.DOTALL); // DOTALL 模式匹配多行
+            Matcher matcher = pattern.matcher(html);
 
-            JSONArray chapters = object.getJSONObject("data").getJSONArray("comic_chapter");
-            JSONObject chapterNew = null;
-            for (int i = 0; i < chapters.length(); i++) {
-                chapterNew = chapters.getJSONObject(i);
-                String a = chapterNew.getString("chapter_id");
-                if(a.equals(_path)) {
-                    break;
+            // 如果找到匹配的内容
+            if (matcher.find()) {
+                String json = matcher.group(1); // 返回 current_chapter 的 JSON 数据
+                JSONObject currChapter = new JSONObject(json);
+                JSONArray imgUrl = currChapter.getJSONArray("chapter_img_list");
+                for (int index = currChapter.getInt("start_num"); index <= currChapter.getInt("end_num"); index++) {
+                    Long comicChapter = chapter.getId();
+                    Long id = Long.parseLong(comicChapter + "000" + index);
+                    String image = imgUrl.getString(index - 1);
+
+                    list.add(new ImageUrl(id, comicChapter, index, image, false));
                 }
+            } else {
+                return null; // 未找到匹配内容
             }
-
-            String ImagePattern = "http://mhpic." + chapterNew.getString("chapter_domain") + chapterNew.getString("rule") + "-mht.low.webp";
-
-            for (int index = chapterNew.getInt("start_num"); index <= chapterNew.getInt("end_num"); index++) {
-                Long comicChapter = chapter.getId();
-                Long id = Long.parseLong(comicChapter + "000" + index);
-
-                String image = ImagePattern.replaceFirst("\\$\\$", Integer.toString(index));
-                list.add(new ImageUrl(id, comicChapter, index, image, false));
-            }
+//            JSONObject object = new JSONObject(html);
+//            if (object.getInt("status") != 0) {
+//                return list;
+//            }
+//
+//            JSONArray chapters = object.getJSONObject("data").getJSONArray("comic_chapter");
+//            JSONObject chapterNew = null;
+//            for (int i = 0; i < chapters.length(); i++) {
+//                chapterNew = chapters.getJSONObject(i);
+//                String a = chapterNew.getString("chapter_id");
+//                if(a.equals(_path)) {
+//                    break;
+//                }
+//            }
+//
+//            String ImagePattern = "http://mhpic." + chapterNew.getString("chapter_domain") + chapterNew.getString("rule") + "-mht.low.webp";
+//
+//            for (int index = chapterNew.getInt("start_num"); index <= chapterNew.getInt("end_num"); index++) {
+//                Long comicChapter = chapter.getId();
+//                Long id = Long.parseLong(comicChapter + "000" + index);
+//
+//                String image = ImagePattern.replaceFirst("\\$\\$", Integer.toString(index));
+//                list.add(new ImageUrl(id, comicChapter, index, image, false));
+//            }
         } catch (JSONException ex) {
             // ignore
         }
@@ -205,7 +247,7 @@ public class Manhuatai extends MangaParser {
 
     @Override
     public String parseCheck(String html) {
-        return new Node(html).text("span.update").substring(0,10);
+        return new Node(html).text("span.update").substring(0, 10);
     }
 
     @Override
@@ -236,6 +278,11 @@ public class Manhuatai extends MangaParser {
         return list;
     }
 
+    @Override
+    public Headers getHeader() {
+        return Headers.of("Referer", "https://www.kanman.com");
+    }
+
     private static class Category extends MangaCategory {
 
         @Override
@@ -245,7 +292,7 @@ public class Manhuatai extends MangaParser {
 
         @Override
         public String getFormat(String... args) {
-            return StringUtils.format("https://www.manhuatai.com/%s_p%%d.html",
+            return StringUtils.format("https://www.kanman.com/%s_p%%d.html",
                     args[CATEGORY_SUBJECT]);
         }
 
@@ -297,11 +344,6 @@ public class Manhuatai extends MangaParser {
             return null;
         }
 
-    }
-
-    @Override
-    public Headers getHeader() {
-        return Headers.of("Referer", "https://m.manhuatai.com");
     }
 
 }

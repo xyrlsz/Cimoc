@@ -41,7 +41,7 @@ public class Animx2 extends MangaParser {
     @Override
     public Request getSearchRequest(String keyword, int page) throws UnsupportedEncodingException {
         if (page != 1) return null;
-        String url = StringUtils.format("http://www.2animx.com/search-index?searchType=1&q=%s&page=%d", keyword, page);
+        String url = StringUtils.format("https://www.2animx.com/search-index?searchType=1&q=%s&page=%d", keyword, page);
         return new Request.Builder().url(url).build();
     }
 
@@ -53,7 +53,7 @@ public class Animx2 extends MangaParser {
             protected Comic parse(Node node) {
                 String cid = node.hrefWithSplit("a", 0);
                 String title = node.text("a > div.tit");
-                String cover = "http://www.2animx.com" + node.attr("a > img", "src");
+                String cover = "https://www.2animx.com" + node.attr("a > img", "src");
                 String update = node.text("a > font");
                 return new Comic(TYPE, cid, title, cover, update, "");
             }
@@ -72,8 +72,8 @@ public class Animx2 extends MangaParser {
 
     @Override
     public Request getInfoRequest(String cid) {
-        if (cid.indexOf("http://www.2animx.com") == -1) {
-            cid = "http://www.2animx.com/".concat(cid);
+        if (cid.indexOf("https://www.2animx.com") == -1) {
+            cid = "https://www.2animx.com/".concat(cid);
         }
         return new Request.Builder().url(cid).addHeader("Cookie", "isAdult=1").build();
     }
@@ -82,7 +82,7 @@ public class Animx2 extends MangaParser {
     public Comic parseInfo(String html, Comic comic) throws UnsupportedEncodingException {
         Node body = new Node(html);
         String title = body.text("div.position > strong");
-        String cover = "http://www.2animx.com/" + body.src("dl.mh-detail > dt > a > img");
+        String cover = "https://www.2animx.com/" + body.src("dl.mh-detail > dt > a > img");
         String update = "";
         String author = "";
         String intro = body.text(".mh-introduce");
@@ -110,8 +110,8 @@ public class Animx2 extends MangaParser {
 
     @Override
     public Request getImagesRequest(String cid, String path) {
-        if (path.indexOf("http://www.2animx.com") == -1) {
-            path = "http://www.2animx.com/".concat(path);
+        if (path.indexOf("https://www.2animx.com") == -1) {
+            path = "https://www.2animx.com/".concat(path);
         }
         _cid = cid;
         _path = path;
