@@ -72,11 +72,11 @@ android {
             signingConfig signingConfigs.debug
         }
 
-        android.applicationVariants.all { variant ->
-            variant.outputs.all {
-                outputFileName = "Cimoc_"+version+".apk"
-            }
-        }
+        // android.applicationVariants.all { variant ->
+        //     variant.outputs.all {
+        //         outputFileName = "Cimoc_"+version+".apk"
+        //     }
+        // }
     }
     dexOptions {
         additionalParameters = ["--minimal-main-dex"]
