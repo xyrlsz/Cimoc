@@ -30,7 +30,7 @@ public class YKMH extends MangaParser {
     public static final int TYPE = 91;
     public static final String DEFAULT_TITLE = "优酷漫画";
     public final String Host = "https://www.ykmh.com/";
-    public final String mHost = "https://wap.ykmh.com/";
+    public final String mHost = "https://m.ykmh.net/";
 
     public YKMH(Source source) {
         init(source, null);
@@ -67,18 +67,18 @@ public class YKMH extends MangaParser {
 
     @Override
     public String getUrl(String cid) {
-        return StringUtils.format("%smanhua/%s", mHost, cid);
+        return StringUtils.format("%smanhua/%s/", mHost, cid);
     }
 
     @Override
     protected void initUrlFilterList() {
-        filter.add(new UrlFilter("m.ykmh.com", "/manhua/(\\w.+)/"));
+        filter.add(new UrlFilter("m.ykmh.net", "/manhua/(\\w.+)/"));
 
     }
 
     @Override
     public Headers getHeader() {
-        return Headers.of("Referer", "https://m.ykmh.com/search/", "user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36");
+        return Headers.of("Referer", "https://m.ykmh.net/search/", "user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36");
     }
 
     @Override
@@ -139,7 +139,7 @@ public class YKMH extends MangaParser {
     public Request getImagesRequest(String cid, String path) {
         Log.d("SourceImage:", String.valueOf(path));
 
-        return new Request.Builder().url(mHost.concat(path)).addHeader("referer", "https://m.ykmh.com/search").addHeader("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36")
+        return new Request.Builder().url(mHost+path).addHeader("referer", "https://m.ykmh.com/search").addHeader("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36")
                 .build();
     }
 
@@ -156,7 +156,7 @@ public class YKMH extends MangaParser {
         try {
             array = new JSONArray(CDATA);
             for (int i = 0; i < array.length(); i++) {
-                String url = StringUtils.format("https://pic.w1fl.com%s", array.getString(i));
+                String url = StringUtils.format("https://js.tingliu.cc%s", array.getString(i));
                 Long comicChapter = chapter.getId();
                 Long id = Long.parseLong(comicChapter + "000" + i + 1);
                 list.add(new ImageUrl(id, comicChapter, i + 1, url, false));
@@ -187,4 +187,5 @@ public class YKMH extends MangaParser {
     public String getTitle() {
         return DEFAULT_TITLE;
     }
+
 }

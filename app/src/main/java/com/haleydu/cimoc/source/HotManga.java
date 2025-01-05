@@ -34,7 +34,7 @@ import static com.haleydu.cimoc.core.Manga.getResponseBody;
 public class HotManga extends MangaParser {
     public static final int TYPE = 102;
     public static final String DEFAULT_TITLE = "热辣漫画";
-    public static final String website = "https://m.manga2020.com/";
+    public static final String website = "https://m.manga2024.com/";
 
     public static Source getDefaultSource() {
         return new Source(null, DEFAULT_TITLE, TYPE, true);
@@ -61,7 +61,7 @@ public class HotManga extends MangaParser {
 
     @Override
     public String getUrl(String cid) {
-        return "https://m.manga2020.com/v2h5/details/comic/".concat(cid);
+        return "https://m.manga2024.com/v2h5/details/comic/".concat(cid);
     }
 
     @Override

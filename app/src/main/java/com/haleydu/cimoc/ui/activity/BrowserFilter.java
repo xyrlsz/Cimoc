@@ -8,25 +8,20 @@ import android.widget.Toast;
 import com.haleydu.cimoc.R;
 import com.haleydu.cimoc.manager.SourceManager;
 import com.haleydu.cimoc.source.Animx2;
-import com.haleydu.cimoc.source.BaiNian;
+
 import com.haleydu.cimoc.source.BuKa;
 import com.haleydu.cimoc.source.Cartoonmad;
-import com.haleydu.cimoc.source.ChuiXue;
+
 import com.haleydu.cimoc.source.DM5;
 import com.haleydu.cimoc.source.Dmzjv2;
-import com.haleydu.cimoc.source.Hhxxee;
+
 import com.haleydu.cimoc.source.HotManga;
 import com.haleydu.cimoc.source.IKanman;
-import com.haleydu.cimoc.source.MH50;
-import com.haleydu.cimoc.source.MH517;
-import com.haleydu.cimoc.source.MH57;
-import com.haleydu.cimoc.source.ManHuaDB;
+
 import com.haleydu.cimoc.source.MiGu;
-import com.haleydu.cimoc.source.PuFei;
-import com.haleydu.cimoc.source.SixMH;
+
 import com.haleydu.cimoc.source.Tencent;
-import com.haleydu.cimoc.source.TuHao;
-import com.haleydu.cimoc.source.U17;
+
 import com.haleydu.cimoc.source.YKMH;
 
 import java.util.ArrayList;
@@ -62,25 +57,25 @@ public class BrowserFilter extends BaseActivity {
 
         list.add(Dmzjv2.TYPE);
         list.add(BuKa.TYPE);
-        list.add(PuFei.TYPE);
+//        list.add(PuFei.TYPE);
         list.add(Cartoonmad.TYPE);
         list.add(Animx2.TYPE);
-        list.add(MH517.TYPE);
-        list.add(BaiNian.TYPE);
+//        list.add(MH517.TYPE);
+//        list.add(BaiNian.TYPE);
         list.add(MiGu.TYPE);
         list.add(Tencent.TYPE);
-        list.add(U17.TYPE);
-        list.add(MH57.TYPE);
-        list.add(MH50.TYPE);
+//        list.add(U17.TYPE);
+//        list.add(MH57.TYPE);
+//        list.add(MH50.TYPE);
         list.add(DM5.TYPE);
         list.add(IKanman.TYPE);
-        list.add(Hhxxee.TYPE);
-        list.add(BaiNian.TYPE);
-        list.add(ChuiXue.TYPE);
-        list.add(ManHuaDB.TYPE);
-        list.add(TuHao.TYPE);
+//        list.add(Hhxxee.TYPE);
+//        list.add(BaiNian.TYPE);
+//        list.add(ChuiXue.TYPE);
+//        list.add(ManHuaDB.TYPE);
+//        list.add(TuHao.TYPE);
         list.add(YKMH.TYPE);
-        list.add(SixMH.TYPE);
+//        list.add(SixMH.TYPE);
         list.add(HotManga.TYPE);
         return list;
     }

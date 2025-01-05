@@ -239,7 +239,10 @@ public class Manhuatai extends MangaParser {
 //        @SerializedName("imgpath")
 //        String imgpath;
 //    }
-
+    @Override
+    public String getUrl(String cid){
+        return StringUtils.format("https://www.kanman.com/%s",cid);
+    }
     @Override
     public Request getCheckRequest(String cid) {
         return getInfoRequest(cid);
