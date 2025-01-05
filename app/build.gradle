@@ -32,7 +32,7 @@ else {
 }
 
 android {
-    compileSdk 33
+    compileSdk 30
 
     lintOptions {
         abortOnError false
@@ -45,7 +45,7 @@ android {
     defaultConfig {
         applicationId "com.haleydu.cimoc"
         minSdkVersion 16
-        targetSdkVersion 33
+        targetSdkVersion 30
         versionCode buildVersion
         versionName version
         resConfigs "en", "zh"
