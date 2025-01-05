@@ -2,7 +2,7 @@ name: Android CI (commit and tag)
 
 on:
   push:
-    tags: [ "v*" ]  # Trigger only when tags starting with "v" are pushed
+    tags: [ "v*" ]  
 
 jobs:
   build:
@@ -35,14 +35,14 @@ jobs:
           path: app/build/outputs/apk/release/app-release.apk
 
       - name: Create GitHub Release and Upload APK
-        uses: elgohr/Github-Release-Action@v5
+        uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/v')  # Ensure this step runs only for tags
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Set GH_TOKEN for GitHub CLI
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
         with:
-          tag: ${{ github.ref_name }}  # Use the current tag name
-          name: Release ${{ github.ref_name }}  # Release name
-          body: "Release ${{ github.ref_name }}. Built from commit ${{ env.GIT_COMMIT_HASH }}."  # Custom release description
-          prerelease: false  # Not a pre-release
+          tag: ${{ github.ref_name }}   
+          name: Release ${{ github.ref_name }}   
+          body: "Release ${{ github.ref_name }}. Built from commit ${{ env.GIT_COMMIT_HASH }}."   
+          prerelease: false   
           files: |
-            app/build/outputs/apk/release/app-release.apk  # Path to the APK file
+            app/build/outputs/apk/release/app-release.apk   
