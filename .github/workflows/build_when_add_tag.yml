@@ -1,0 +1,58 @@
+name: Android CI (commit and tag)
+
+on:
+  push:
+    branches: [ "main" ]
+    tags: [ "v*" ]  # 匹配以 "v" 开头的 tag，例如 v1.0.0
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Get Git commit hash
+        id: git_commit_hash
+        run: echo "GIT_COMMIT_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build -PGIT_COMMIT_HASH=$GIT_COMMIT_HASH
+
+      - name: Upload APK as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release
+          path: app/build/outputs/apk/release/app-release.apk
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v2
+        if: startsWith(github.ref, 'refs/tags/v')   
+        with:
+          tag_name: ${{ github.ref_name }}  # 使用当前 tag 名称
+          release_name: Release ${{ github.ref_name }}  # Release 名称
+          draft: false
+          prerelease: false
+          generate_release_notes: true  # 自动生成 Release 说明
+
+      - name: Upload APK to Release
+        uses: actions/upload-release-asset@v2
+        if: steps.create_release.outputs.id != ''   
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}  # Release 的上传 URL
+          asset_path: app/build/outputs/apk/release/app-release.apk  # APK 文件路径
+          asset_name: app-release-${{ github.ref_name }}.apk  # 自定义 APK 文件名
+          asset_content_type: application/vnd.android.package-archive  # APK 文件类型
