@@ -2,19 +2,16 @@ name: Android CI (commit and tag)
 
 on:
   push:
-    branches: [ "main" ]
-    tags: [ "v*" ]  # 匹配以 "v" 开头的 tag，例如 v1.0.0
-  pull_request:
-    branches: [ "main" ]
+    tags: [ "v*" ]  # 只有在推送以 "v" 开头的 tag 时触发
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
-      - name: set up JDK 11
+
+      - name: Set up JDK 11
         uses: actions/setup-java@v4
         with:
           java-version: '11'
@@ -39,8 +36,8 @@ jobs:
 
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v2
-        if: startsWith(github.ref, 'refs/tags/v')   
+        uses: actions/create-release@v1  # 使用正确的版本 v1
+        if: startsWith(github.ref, 'refs/tags/v')
         with:
           tag_name: ${{ github.ref_name }}  # 使用当前 tag 名称
           release_name: Release ${{ github.ref_name }}  # Release 名称
@@ -49,8 +46,8 @@ jobs:
           generate_release_notes: true  # 自动生成 Release 说明
 
       - name: Upload APK to Release
-        uses: actions/upload-release-asset@v2
-        if: steps.create_release.outputs.id != ''   
+        uses: actions/upload-release-asset@v1  # 使用正确的版本 v1
+        if: steps.create_release.outputs.id != ''
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}  # Release 的上传 URL
           asset_path: app/build/outputs/apk/release/app-release.apk  # APK 文件路径
