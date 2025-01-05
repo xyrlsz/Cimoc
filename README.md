@@ -5,18 +5,13 @@
 Android 平台在线漫画阅读器  
 Online manga reader based on Android
 
-[![Build Status](https://travis-ci.com/Haleydu/Cimoc.svg?branch=release-tci)](https://travis-ci.com/github/Haleydu/Cimoc)
-[![codebeat badge](https://codebeat.co/badges/d8389768-fbb1-428b-b02b-5add8317057a)](https://codebeat.co/projects/github-com-haleydu-cimoc-release-tci)
-[![GitHub release](https://img.shields.io/github/release/Haleydu/Cimoc.svg)](https://github.com/Haleydu/Cimoc/releases)
-[![Join the chat at https://gitter.im/Haleydu_Cimoc/community](https://badges.gitter.im/Haleydu_Cimoc/community.svg)](https://gitter.im/Haleydu_Cimoc/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![](https://img.shields.io/github/downloads/Haleydu/cimoc/total.svg)](https://github.com/Haleydu/Cimoc/releases)
-[![https://t.me/cimoc_haleydu_Channel](https://img.shields.io/badge/💬%20Telegram-Channel-blue.svg?style=flat-square)](https://t.me/cimoc_haleydu_Channel)
-[![https://t.me/cimoc_haleydu](https://img.shields.io/badge/💬%20Telegram-Group-blue.svg?style=flat-square)](https://t.me/cimoc_haleydu)
+
+
 
 # 下载
-> 所有release由`travis-ci`编译发布，如果在release界面某个版本没有apk，那么要么是正在编译，要么就是编译失败了
-> 使用`pre-release`版本会在每次启动时显示检查更新提示。
-> 安卓apk下载地址[软件下载](https://github.com/Haleydu/Cimoc/releases)
+
+可以前往项目的[Action](https://github.com/xyrlsz/Cimoc/actions)处下载。
+
 
 # 漫画源
 > 漫画源工作情况可以在[project](https://github.com/Haleydu/Cimoc/projects/1)中进行查看，请尽量不要重复issues
@@ -29,7 +24,7 @@ Online manga reader based on Android
 - 下载漫画（Download Manga）
 - 本地漫画（Local Reader）
 - 本地备份恢复（Local Backup）
-- webdav云备份功能(WebDav Backup)
+<!-- - webdav云备份功能(WebDav Backup) -->
 
 # 软件使用说明
 - 安装完成后，直接点击右上角的搜索，即可搜索到漫画
@@ -96,6 +91,3 @@ Online manga reader based on Android
 - 如果更新软件的过程中有什么侵权的地方，请在github上留言或者私信我，提供相关版权证明，会马上删除侵权部分的内容。
 - 所有漫画均来自用户在第三方网站上的手动搜索
 
-# 关注Cimoc微信公众号获取最新版本
-<img src="https://gitee.com/Haleydu/picture/raw/master/qrcode_for_gh_c573e41cd30f_258.jpg" width="250">
-- 需要最新源码的关注公众号获取或在github等不定期的源码公开
