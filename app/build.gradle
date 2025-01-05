@@ -5,25 +5,35 @@ apply plugin: 'com.google.gms.google-services'  // Google Services plugin
 apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'com.huawei.agconnect'
 
+def getGitCommitHash = { ->
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'rev-parse', '--short', 'HEAD'
+        standardOutput = stdout
+    }
+    return stdout.toString().trim()
+}
+def cmdGetTagname = 'git describe --tags'
+def cmdGetCommitNums = 'git rev-list HEAD --count'
+
 def buildVersion = 329
 def version = "v1.5.2"
 
-def cmdGetTagname = 'git describe --tags'
-def cmdGetCommitNums = 'git rev-list HEAD --count'
-if(System.getenv("TRAVIS_BUILD_NUMBER") != null){
+if (System.getenv("GIT_COMMIT_HASH") != null) {
+    version = System.getenv("GIT_COMMIT_HASH")
+} else if(System.getenv("TRAVIS_BUILD_NUMBER") != null){
     buildVersion = System.getenv("TRAVIS_BUILD_NUMBER").trim().toInteger()
     version = cmdGetTagname.execute().text.trim()
 }
 else {
     buildVersion = cmdGetCommitNums.execute().text.trim().toInteger()
     cmdGetTagname = 'git describe --abbrev=0'
-
     version = cmdGetTagname.execute().text.trim()
 }
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion '30.0.3'
+    compileSdk 30
+
     lintOptions {
         abortOnError false
     }
@@ -35,7 +45,7 @@ android {
     defaultConfig {
         applicationId "com.haleydu.cimoc"
         minSdkVersion 16
-        targetSdkVersion 30
+        targetSdkVersion 33
         versionCode buildVersion
         versionName version
         resConfigs "en", "zh"
@@ -61,26 +71,17 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             shrinkResources true
-            zipAlignEnabled true
-            signingConfig signingConfigs.release
+
         }
         debug {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             shrinkResources false
-            zipAlignEnabled false
-            signingConfig signingConfigs.debug
+
         }
 
-        // android.applicationVariants.all { variant ->
-        //     variant.outputs.all {
-        //         outputFileName = "Cimoc_"+version+".apk"
-        //     }
-        // }
     }
-    dexOptions {
-        additionalParameters = ["--minimal-main-dex"]
-    }
+
 }
 
 greendao {

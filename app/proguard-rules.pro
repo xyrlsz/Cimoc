@@ -24,7 +24,7 @@
 # Keep our interfaces so they can be used by other ProGuard rules.
 # See http://sourceforge.net/p/proguard/bugs/466/
 -keep,allowobfuscation @interface com.facebook.common.internal.DoNotStrip
--keep,allowobfuscation @interface com.facebook.soloader.DoNotOptimize
+#-keep,allowobfuscation @interface com.facebook.soloader.DoNotOptimize
 
 # Do not strip any method/class that is annotated with @DoNotStrip
 -keep @com.facebook.common.internal.DoNotStrip class *
@@ -33,10 +33,10 @@
 }
 
 # Do not strip any method/class that is annotated with @DoNotOptimize
--keep @com.facebook.soloader.DoNotOptimize class *
--keepclassmembers class * {
-    @com.facebook.soloader.DoNotOptimize *;
-}
+#-keep @com.facebook.soloader.DoNotOptimize class *
+#-keepclassmembers class * {
+#    @com.facebook.soloader.DoNotOptimize *;
+#}
 
 # Keep native methods
 -keepclassmembers class * {
@@ -44,9 +44,9 @@
 }
 
 # Do not strip SoLoader class and init method
--keep public class com.facebook.soloader.SoLoader {
-    public static void init(android.content.Context, int);
-}
+#-keep public class com.facebook.soloader.SoLoader {
+#    public static void init(android.content.Context, int);
+#}
 
 -dontwarn okio.**
 -dontwarn com.squareup.okhttp.**
@@ -128,7 +128,7 @@ public static java.lang.String TABLENAME;
 -dontwarn com.google.j2objc.annotations.**
 -keep class com.google.j2objc.annotations.** { *; }
 -dontwarn java.lang.ClassValue
--keep class java.lang.ClassValue { *; }
+#-keep class java.lang.ClassValue { *; }
 -dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
 -keep class org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement { *; }
 
