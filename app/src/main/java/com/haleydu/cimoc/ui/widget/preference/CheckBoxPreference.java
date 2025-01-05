@@ -1,5 +1,6 @@
 package com.haleydu.cimoc.ui.widget.preference;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
@@ -75,6 +76,7 @@ public class CheckBoxPreference extends FrameLayout implements View.OnClickListe
         mCheckBox.setChecked(mPreferenceManager.getBoolean(key, def));
     }
 
+    @SuppressLint("RestrictedApi")
     public void setColorStateList(ColorStateList stateList) {
         mCheckBox.setSupportButtonTintList(stateList);
     }
