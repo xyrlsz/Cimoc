@@ -102,9 +102,18 @@ public class AboutActivity extends BackActivity implements AboutView, AdapterVie
         }
     }
 
-    @OnClick(R.id.about_resource_ori_btn)
+    @OnClick(R.id.tv_resource_ori_url)
     void onOriResourceClick() {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.about_resource_ori_url)));
+        try {
+            startActivity(intent);
+        } catch (Exception e) {
+            showSnackbar(R.string.about_resource_fail);
+        }
+    }
+    @OnClick(R.id.tv_resource_ori_url_1)
+    void onOriResourceClick1() {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.about_resource_ori_url_1)));
         try {
             startActivity(intent);
         } catch (Exception e) {

@@ -28,6 +28,7 @@
     </group>
     <group android:id="@+id/drawer_group_system">
         <item
+            android:title="@string/drawer_night"
             android:id="@+id/drawer_night"
             android:icon="@drawable/ic_brightness_4_black_24dp" />
         <item
