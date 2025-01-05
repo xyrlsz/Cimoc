@@ -2,7 +2,7 @@ name: Android CI (commit and tag)
 
 on:
   push:
-    tags: [ "v*" ]  # 只有在推送以 "v" 开头的 tag 时触发
+    tags: [ "v*" ]  # Trigger only when tags starting with "v" are pushed
 
 jobs:
   build:
@@ -36,12 +36,13 @@ jobs:
 
       - name: Create GitHub Release and Upload APK
         uses: elgohr/Github-Release-Action@v5
-        if: startsWith(github.ref, 'refs/tags/v')  
+        if: startsWith(github.ref, 'refs/tags/v')  # Ensure this step runs only for tags
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Set GH_TOKEN for GitHub CLI
         with:
-          tag: ${{ github.ref_name }}  # 使用当前 tag 名称
-          name: Release ${{ github.ref_name }}  # Release 名称
-          body: "Release ${{ github.ref_name }}. Built from commit ${{ env.GIT_COMMIT_HASH }}."  # 自定义 Release 说明
-          prerelease: false  # 是否为预发布版本
+          tag: ${{ github.ref_name }}  # Use the current tag name
+          name: Release ${{ github.ref_name }}  # Release name
+          body: "Release ${{ github.ref_name }}. Built from commit ${{ env.GIT_COMMIT_HASH }}."  # Custom release description
+          prerelease: false  # Not a pre-release
           files: |
-            app/build/outputs/apk/release/app-release.apk  # 要上传的文件路径
-          token: ${{ secrets.GITHUB_TOKEN }}  # 使用默认的 GITHUB_TOKEN
+            app/build/outputs/apk/release/app-release.apk  # Path to the APK file
