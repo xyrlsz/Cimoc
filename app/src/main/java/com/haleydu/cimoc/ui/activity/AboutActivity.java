@@ -199,11 +199,11 @@ public class AboutActivity extends BackActivity implements AboutView, AdapterVie
                 update = false;
                 App.getPreferenceManager().putString(PreferenceManager.PREF_UPDATE_CURRENT_URL, App.getUpdateCurrentUrl());
                 break;
-            case 2:
-                App.setUpdateCurrentUrl(Constants.UPDATE_GITEE_URL);
-                update = false;
-                App.getPreferenceManager().putString(PreferenceManager.PREF_UPDATE_CURRENT_URL, App.getUpdateCurrentUrl());
-                break;
+//            case 2:
+//                App.setUpdateCurrentUrl(Constants.UPDATE_GITEE_URL);
+//                update = false;
+//                App.getPreferenceManager().putString(PreferenceManager.PREF_UPDATE_CURRENT_URL, App.getUpdateCurrentUrl());
+//                break;
         }
     }
 
@@ -216,9 +216,10 @@ public class AboutActivity extends BackActivity implements AboutView, AdapterVie
         try {
             if (App.getPreferenceManager().getString(PreferenceManager.PREF_UPDATE_CURRENT_URL).equals(Constants.UPDATE_GITHUB_URL)) {
                 spinner.setSelection(1);
-            } else if (App.getPreferenceManager().getString(PreferenceManager.PREF_UPDATE_CURRENT_URL).equals(Constants.UPDATE_GITEE_URL)) {
-                spinner.setSelection(2);
             }
+//            else if (App.getPreferenceManager().getString(PreferenceManager.PREF_UPDATE_CURRENT_URL).equals(Constants.UPDATE_GITEE_URL)) {
+//                spinner.setSelection(2);
+//            }
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
