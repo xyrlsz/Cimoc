@@ -1,4 +1,4 @@
-name: Android CI (commit and tag)
+name: Android CI (tag)
 
 on:
   push:
