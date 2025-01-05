@@ -44,5 +44,6 @@ jobs:
           name: Release ${{ github.ref_name }}   
           body: "Release ${{ github.ref_name }}. Built from commit ${{ env.GIT_COMMIT_HASH }}."   
           prerelease: false   
+          body_path: CHANGELOG.txt
           files: |
             app/build/outputs/apk/release/app-release.apk   
