@@ -75,7 +75,7 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
     private static Activity sActivity;
 
     // 默认Github源
-    private static String UPDATE_CURRENT_URL = "https://api.github.com/repos/Haleydu/Cimoc/releases/latest";
+    private static String UPDATE_CURRENT_URL = "https://api.github.com/repos/xyrlsz/Cimoc/releases/latest";
     private static final String CRASH_FILE_PATH = "/Cimoc/Log/crash";
 
     @Override

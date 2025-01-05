@@ -118,10 +118,10 @@ public class SettingsActivity extends BackActivity implements SettingsView {
     CheckBoxPreference mConnectOnlyWifi;
     @BindView(R.id.settings_other_loadcover_only_wifi)
     CheckBoxPreference mLoadCoverOnlyWifi;
-    @BindView(R.id.settings_firebase_event)
-    CheckBoxPreference mFireBaseEvent;
-    @BindView(R.id.settings_other_reduce_ad)
-    CheckBoxPreference mReduceAd;
+//    @BindView(R.id.settings_firebase_event)
+//    CheckBoxPreference mFireBaseEvent;
+//    @BindView(R.id.settings_other_reduce_ad)
+//    CheckBoxPreference mReduceAd;
     private SettingsPresenter mPresenter;
     private String mStoragePath;
     private String mTempStorage;
@@ -159,8 +159,8 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         mCheckSoftwareUpdate.bindPreference(PreferenceManager.PREF_OTHER_CHECK_SOFTWARE_UPDATE, true);
         mConnectOnlyWifi.bindPreference(PreferenceManager.PREF_OTHER_CONNECT_ONLY_WIFI, false);
         mLoadCoverOnlyWifi.bindPreference(PreferenceManager.PREF_OTHER_LOADCOVER_ONLY_WIFI, false);
-        mFireBaseEvent.bindPreference(PreferenceManager.PREF_OTHER_FIREBASE_EVENT, true);
-        mReduceAd.bindPreference(PreferenceManager.PREF_OTHER_REDUCE_AD, false);
+//        mFireBaseEvent.bindPreference(PreferenceManager.PREF_OTHER_FIREBASE_EVENT, true);
+//        mReduceAd.bindPreference(PreferenceManager.PREF_OTHER_REDUCE_AD, false);
         mOtherShowTopbar.bindPreference(PreferenceManager.PREF_OTHER_SHOW_TOPBAR, false);
         mReaderMode.bindPreference(getSupportFragmentManager(), PreferenceManager.PREF_READER_MODE,
                 PreferenceManager.READER_MODE_PAGE, R.array.reader_mode_items, DIALOG_REQUEST_READER_MODE);
@@ -290,8 +290,8 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         mCheckSoftwareUpdate.setColorStateList(stateList);
         mConnectOnlyWifi.setColorStateList(stateList);
         mLoadCoverOnlyWifi.setColorStateList(stateList);
-        mFireBaseEvent.setColorStateList(stateList);
-        mReduceAd.setColorStateList(stateList);
+//        mFireBaseEvent.setColorStateList(stateList);
+//        mReduceAd.setColorStateList(stateList);
         mOtherShowTopbar.setColorStateList(stateList);
         mReaderCloseAutoResizeImage.setColorStateList(stateList);
         mReaderVolumeKeyControls.setColorStateList(stateList);

@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'org.greenrobot.greendao'
 apply plugin: 'com.google.gms.google-services'  // Google Services plugin
-apply plugin: 'com.google.firebase.crashlytics'
+//apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'com.huawei.agconnect'
 
 def getGitCommitHash = { ->
@@ -32,7 +32,7 @@ else {
 }
 
 android {
-    compileSdk 30
+    compileSdk 33
 
     lintOptions {
         abortOnError false
@@ -114,9 +114,9 @@ dependencies {
     implementation 'com.alibaba:fastjson:1.2.62'
     implementation "androidx.core:core-ktx:1.6.0"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.5.10"
-    implementation 'com.google.firebase:firebase-analytics:19.0.0'
-    implementation 'com.google.firebase:firebase-crashlytics:18.1.0'
-    implementation 'com.google.firebase:firebase-config:21.0.0'
+//    implementation 'com.google.firebase:firebase-analytics:19.0.0'
+//    implementation 'com.google.firebase:firebase-crashlytics:18.1.0'
+//    implementation 'com.google.firebase:firebase-config:21.0.0'
     implementation 'com.king.app:app-updater:1.0.8-androidx'
     implementation 'com.king.app:app-dialog:1.0.8-androidx'
     implementation 'com.iqiyi.xcrash:xcrash-android-lib:3.0.0'

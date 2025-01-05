@@ -13,8 +13,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StyleRes;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+//import com.google.android.gms.tasks.OnCompleteListener;
+//import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
@@ -35,8 +35,8 @@ import com.facebook.drawee.view.SimpleDraweeView;
 import com.facebook.imagepipeline.common.ResizeOptions;
 import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+//import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+//import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.haleydu.cimoc.App;
 import com.haleydu.cimoc.R;
 import com.haleydu.cimoc.component.ThemeResponsive;
@@ -196,9 +196,9 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
         }
         mPresenter.getSourceBaseUrl();
 
-        showAuthorNotice();
+//        showAuthorNotice();
         showPermission();
-        getMh50KeyIv();
+//        getMh50KeyIv();
 
     }
 
@@ -531,68 +531,68 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
         }
     }
 
-    private void showAuthorNotice() {
-        FirebaseRemoteConfig mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
-        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
-                .setMinimumFetchIntervalInSeconds(3600)
-                .build();
-        mFirebaseRemoteConfig.setConfigSettingsAsync(configSettings);
-        mFirebaseRemoteConfig.setDefaultsAsync(R.xml.remote_config);
-        mFirebaseRemoteConfig.fetchAndActivate()
-                .addOnCompleteListener(this, new OnCompleteListener<Boolean>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Boolean> task) {
-                        if (task.isSuccessful()) {
-                            boolean updated = task.getResult();
-                            Log.d("FireBase_FirstOpenMsg", "Config params updated: " + updated);
-                        } else {
-                            Log.d("FireBase_FirstOpenMsg", "Config params updated Failed. ");
-                        }
+//    private void showAuthorNotice() {
+//        FirebaseRemoteConfig mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+//        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
+//                .setMinimumFetchIntervalInSeconds(3600)
+//                .build();
+//        mFirebaseRemoteConfig.setConfigSettingsAsync(configSettings);
+//        mFirebaseRemoteConfig.setDefaultsAsync(R.xml.remote_config);
+//        mFirebaseRemoteConfig.fetchAndActivate()
+//                .addOnCompleteListener(this, new OnCompleteListener<Boolean>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<Boolean> task) {
+//                        if (task.isSuccessful()) {
+//                            boolean updated = task.getResult();
+//                            Log.d("FireBase_FirstOpenMsg", "Config params updated: " + updated);
+//                        } else {
+//                            Log.d("FireBase_FirstOpenMsg", "Config params updated Failed. ");
+//                        }
+//
+//                        String showMsg = mFirebaseRemoteConfig.getString("first_open_msg");
+//                        if (!mPreference.getBoolean(PreferenceManager.PREF_MAIN_NOTICE, false)
+//                                || showMsg.compareTo(mPreference.getString(PreferenceManager.PREF_MAIN_NOTICE_LAST, "")) != 0) {
+//                            mPreference.putString(PreferenceManager.PREF_MAIN_NOTICE_LAST, showMsg);
+//                            MessageDialogFragment fragment = MessageDialogFragment.newInstance(R.string.main_notice,
+//                                    showMsg, false, DIALOG_REQUEST_NOTICE);
+//                            fragment.show(getSupportFragmentManager(), null);
+//                        }
+//                    }
+//                });
+//    }
 
-                        String showMsg = mFirebaseRemoteConfig.getString("first_open_msg");
-                        if (!mPreference.getBoolean(PreferenceManager.PREF_MAIN_NOTICE, false)
-                                || showMsg.compareTo(mPreference.getString(PreferenceManager.PREF_MAIN_NOTICE_LAST, "")) != 0) {
-                            mPreference.putString(PreferenceManager.PREF_MAIN_NOTICE_LAST, showMsg);
-                            MessageDialogFragment fragment = MessageDialogFragment.newInstance(R.string.main_notice,
-                                    showMsg, false, DIALOG_REQUEST_NOTICE);
-                            fragment.show(getSupportFragmentManager(), null);
-                        }
-                    }
-                });
-    }
-
-    private void getMh50KeyIv() {
-        FirebaseRemoteConfig mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
-        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
-                .setMinimumFetchIntervalInSeconds(60*60)
-                .build();
-        mFirebaseRemoteConfig.setConfigSettingsAsync(configSettings);
-        mFirebaseRemoteConfig.setDefaultsAsync(R.xml.remote_config);
-        mFirebaseRemoteConfig.fetchAndActivate()
-                .addOnCompleteListener(this, new OnCompleteListener<Boolean>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Boolean> task) {
-                        if (task.isSuccessful()) {
-                            boolean updated = task.getResult();
-                            Log.d("FireBase_FirstOpenMsg", "Config params updated: " + updated);
-                        } else {
-                            Log.d("FireBase_FirstOpenMsg", "Config params updated Failed. ");
-                        }
-
-                        String mh50_key = mFirebaseRemoteConfig.getString("mh50_key_msg");
-                        String mh50_iv = mFirebaseRemoteConfig.getString("mh50_iv_msg");
-
-                        if (!mh50_key.equals(mPreference.getString(PreferenceManager.PREFERENCES_MH50_KEY_MSG, "KA58ZAQ321oobbG8"))){
-                            mPreference.putString(PreferenceManager.PREFERENCES_MH50_KEY_MSG, mh50_key);
-                            Toast.makeText(MainActivity.this,"漫画堆key已更新",Toast.LENGTH_LONG).show();
-                        }
-                        if (!mh50_iv.equals(mPreference.getString(PreferenceManager.PREFERENCES_MH50_IV_MSG, "A1B2C3DEF1G321o8"))){
-                            mPreference.putString(PreferenceManager.PREFERENCES_MH50_IV_MSG, mh50_iv);
-                            Toast.makeText(MainActivity.this,"漫画堆iv已更新",Toast.LENGTH_LONG).show();
-                        }
-                    }
-                });
-    }
+//    private void getMh50KeyIv() {
+//        FirebaseRemoteConfig mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+//        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
+//                .setMinimumFetchIntervalInSeconds(60*60)
+//                .build();
+//        mFirebaseRemoteConfig.setConfigSettingsAsync(configSettings);
+//        mFirebaseRemoteConfig.setDefaultsAsync(R.xml.remote_config);
+//        mFirebaseRemoteConfig.fetchAndActivate()
+//                .addOnCompleteListener(this, new OnCompleteListener<Boolean>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<Boolean> task) {
+//                        if (task.isSuccessful()) {
+//                            boolean updated = task.getResult();
+//                            Log.d("FireBase_FirstOpenMsg", "Config params updated: " + updated);
+//                        } else {
+//                            Log.d("FireBase_FirstOpenMsg", "Config params updated Failed. ");
+//                        }
+//
+//                        String mh50_key = mFirebaseRemoteConfig.getString("mh50_key_msg");
+//                        String mh50_iv = mFirebaseRemoteConfig.getString("mh50_iv_msg");
+//
+//                        if (!mh50_key.equals(mPreference.getString(PreferenceManager.PREFERENCES_MH50_KEY_MSG, "KA58ZAQ321oobbG8"))){
+//                            mPreference.putString(PreferenceManager.PREFERENCES_MH50_KEY_MSG, mh50_key);
+//                            Toast.makeText(MainActivity.this,"漫画堆key已更新",Toast.LENGTH_LONG).show();
+//                        }
+//                        if (!mh50_iv.equals(mPreference.getString(PreferenceManager.PREFERENCES_MH50_IV_MSG, "A1B2C3DEF1G321o8"))){
+//                            mPreference.putString(PreferenceManager.PREFERENCES_MH50_IV_MSG, mh50_iv);
+//                            Toast.makeText(MainActivity.this,"漫画堆iv已更新",Toast.LENGTH_LONG).show();
+//                        }
+//                    }
+//                });
+//    }
 
     private void showPermission() {
         if (!PermissionUtils.hasAllPermissions(this)) {
