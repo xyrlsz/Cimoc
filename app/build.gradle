@@ -58,12 +58,14 @@ android {
             storePassword '123456'
             keyAlias 'vr'
             keyPassword '123456'
+
         }
         debug {
             storeFile file("../hellovr10.jks")
             storePassword '123456'
             keyAlias 'vr'
             keyPassword '123456'
+
         }
     }
     buildTypes {
@@ -71,13 +73,13 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             shrinkResources true
-
+            signingConfig signingConfigs.release
         }
         debug {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             shrinkResources false
-
+            signingConfig signingConfigs.debug
         }
 
     }
