@@ -397,7 +397,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
                         editor.putString(DMZJ_SHARED_COOKIES, cookieStr);
                         editor.putString(DMZJ_SHARED_USERNAME, user);
                         editor.apply();
-                        mDmzjLogin.setSummary(user);
+                        runOnUiThread(()-> mDmzjLogin.setSummary(user));
                         dialog.dismiss();
                         showSnackbar("登录成功");
                     } else {
