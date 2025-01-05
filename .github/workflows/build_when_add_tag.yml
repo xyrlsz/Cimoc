@@ -34,22 +34,14 @@ jobs:
           name: app-release
           path: app/build/outputs/apk/release/app-release.apk
 
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1  # 使用正确的版本 v1
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Create GitHub Release and Upload APK
+        uses: elgohr/Github-Release-Action@v4
+        if: startsWith(github.ref, 'refs/tags/v')  
         with:
-          tag_name: ${{ github.ref_name }}  # 使用当前 tag 名称
-          release_name: Release ${{ github.ref_name }}  # Release 名称
-          draft: false
-          prerelease: false
-          generate_release_notes: true  # 自动生成 Release 说明
-
-      - name: Upload APK to Release
-        uses: actions/upload-release-asset@v1  # 使用正确的版本 v1
-        if: steps.create_release.outputs.id != ''
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}  # Release 的上传 URL
-          asset_path: app/build/outputs/apk/release/app-release.apk  # APK 文件路径
-          asset_name: app-release-${{ github.ref_name }}.apk  # 自定义 APK 文件名
-          asset_content_type: application/vnd.android.package-archive  # APK 文件类型
+          tag: ${{ github.ref_name }}  # 使用当前 tag 名称
+          name: Release ${{ github.ref_name }}  # Release 名称
+          body: "Release ${{ github.ref_name }}. Built from commit ${{ env.GIT_COMMIT_HASH }}."  # 自定义 Release 说明
+          prerelease: false  # 是否为预发布版本
+          files: |
+            app/build/outputs/apk/release/app-release.apk  # 要上传的文件路径
+          token: ${{ secrets.GITHUB_TOKEN }}  # 使用默认的 GITHUB_TOKEN
