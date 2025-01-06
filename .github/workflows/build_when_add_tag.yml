@@ -10,6 +10,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up JDK 11
         uses: actions/setup-java@v4
@@ -26,7 +28,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew build -PGIT_COMMIT_HASH=$GIT_COMMIT_HASH
+        run: ./gradlew build
 
       - name: Upload APK as artifact
         uses: actions/upload-artifact@v4
@@ -39,8 +41,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')  # Ensure this step runs only for tags
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
-        with:
-          tag: ${{ github.ref_name }}   
+        with: 
           name: Release ${{ github.ref_name }}   
           body: "Release ${{ github.ref_name }}. Built from commit ${{ env.GIT_COMMIT_HASH }}."   
           prerelease: false   

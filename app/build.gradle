@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'org.greenrobot.greendao'
-apply plugin: 'com.google.gms.google-services'  // Google Services plugin
+apply plugin: 'com.google.gms.google-services' // Google Services plugin
 //apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'com.huawei.agconnect'
 
@@ -13,22 +13,40 @@ def getGitCommitHash = { ->
     }
     return stdout.toString().trim()
 }
-def cmdGetTagname = 'git describe --tags'
-def cmdGetCommitNums = 'git rev-list HEAD --count'
 
-def buildVersion = 329
-def version = "v1.5.2"
-
-if (System.getenv("GIT_COMMIT_HASH") != null) {
-    version = System.getenv("GIT_COMMIT_HASH")
-} else if(System.getenv("TRAVIS_BUILD_NUMBER") != null){
-    buildVersion = System.getenv("TRAVIS_BUILD_NUMBER").trim().toInteger()
-    version = cmdGetTagname.execute().text.trim()
+def getGitTagName = { ->
+    try {
+        def stdout = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'describe', '--tags'
+            standardOutput = stdout
+        }
+        return stdout.toString().trim()
+    } catch (Exception e) {
+        return "v1.0.0"
+    }
 }
-else {
-    buildVersion = cmdGetCommitNums.execute().text.trim().toInteger()
-    cmdGetTagname = 'git describe --abbrev=0'
-    version = cmdGetTagname.execute().text.trim()
+
+def getGitCommitCount = { ->
+    try {
+        def stdout = new ByteArrayOutputStream()
+        exec {
+            commandLine 'git', 'rev-list', '--count', 'HEAD'
+            standardOutput = stdout
+        }
+        return stdout.toString().trim().toInteger()
+    } catch (Exception e) {
+        return 1 // 默认提交计数
+    }
+}
+
+// 动态生成版本号
+def buildVersion = getGitCommitCount()
+def version = getGitTagName()
+ if (System.getenv("CI_BUILD_NUMBER") != null) { // 兼容 CI/CD
+    buildVersion = System.getenv("CI_BUILD_NUMBER").toInteger()
+} else {
+    buildVersion = getGitCommitCount()
 }
 
 android {
@@ -37,6 +55,7 @@ android {
     lintOptions {
         abortOnError false
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -46,28 +65,27 @@ android {
         applicationId "com.haleydu.cimoc"
         minSdkVersion 16
         targetSdkVersion 30
-        versionCode buildVersion
-        versionName version
+        versionCode buildVersion // 动态生成的版本号
+        versionName version      // Git 标签作为版本名
         resConfigs "en", "zh"
         multiDexEnabled true
-
     }
+
     signingConfigs {
         release {
             storeFile file("../hellovr10.jks")
             storePassword '123456'
             keyAlias 'vr'
             keyPassword '123456'
-
         }
         debug {
             storeFile file("../hellovr10.jks")
             storePassword '123456'
             keyAlias 'vr'
             keyPassword '123456'
-
         }
     }
+
     buildTypes {
         release {
             minifyEnabled true
@@ -81,9 +99,7 @@ android {
             shrinkResources false
             signingConfig signingConfigs.debug
         }
-
     }
-
 }
 
 greendao {
@@ -122,11 +138,12 @@ dependencies {
     implementation 'com.iqiyi.xcrash:xcrash-android-lib:3.0.0'
 
     testImplementation 'junit:junit:4.13.2'
-
+    
     // AndroidX Test libraries
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }
+
 repositories {
     mavenCentral()
 }
