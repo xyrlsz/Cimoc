@@ -101,6 +101,7 @@ public class UpdateHelper {
         list.add(YKMH.getDefaultSource());
 //        list.add(DmzjFix.getDefaultSource());
         list.add(Dmzj.getDefaultSource());
+        list.add(Baozi.getDefaultSource());
         session.getSourceDao().insertOrReplaceInTx(list);
     }
 }

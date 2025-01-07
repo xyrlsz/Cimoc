@@ -220,6 +220,9 @@ public class SourceManager {
                 case Dmzj.TYPE:
                     parser = new Dmzj(source);
                     break;
+                case Baozi.TYPE:
+                    parser = new Baozi(source);
+                    break;
                 default:
                     parser = new Null();
                     break;
