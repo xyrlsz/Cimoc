@@ -2,9 +2,9 @@ name: Android CI (commit)
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "dev" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "dev" ]
 
 jobs:
   build:
@@ -22,7 +22,7 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
           cache: gradle
-          
+
       - name: Get Git commit hash
         id: git_commit_hash
         run: echo "GIT_COMMIT_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
