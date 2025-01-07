@@ -1,5 +1,7 @@
 package com.haleydu.cimoc.ui.activity;
 
+import static com.haleydu.cimoc.Constants.GITHUB_RELEASE_URL;
+
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -371,7 +373,10 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
                     }
                     break;
                 case R.id.drawer_comicUpdate:
-                    update.startUpdate(versionName, content, mUrl, versionCode, md5);
+//                    update.startUpdate(versionName, content, mUrl, versionCode, md5);
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(Uri.parse(GITHUB_RELEASE_URL));
+                    startActivity(intent);
                     break;
                 case R.id.drawer_night:
                     onNightSwitch();
@@ -605,8 +610,8 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
     private void checkUpdate() {
         try {
             PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), 0);
-            mPresenter.checkGiteeUpdate(info.versionCode);
-            //mPresenter.checkUpdate(info.versionName);
+//            mPresenter.checkGiteeUpdate(info.versionCode);
+            mPresenter.checkUpdate(info.versionName);
         } catch (Exception e) {
             e.printStackTrace();
         }

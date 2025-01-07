@@ -8,6 +8,8 @@ public final class Constants {
 
 //    public static final String UPDATE_GITEE_URL = "https://gitee.com/api/v5/repos/xyrlsz/Cimoc_Mirror/releases/latest";
 
+    public static final String GITHUB_RELEASE_URL = "https://github.com/xyrlsz/Cimoc/releases";
+
     public static final String DMZJ_SHARED = "dmzj";
     public static final String DMZJ_SHARED_COOKIES = "cookies";
     public static final String DMZJ_SHARED_USERNAME = "username";

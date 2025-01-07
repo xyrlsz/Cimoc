@@ -94,32 +94,32 @@ public class MainPresenter extends BasePresenter<MainView> {
                 }));
     }
 
-    public void checkGiteeUpdate(final int appVersionCode) {
-        mCompositeSubscription.add(Update.checkGitee()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<String>() {
-                    @Override
-                    public void call(String json) {
-                        try {
-                            String versionName = new JSONObject(json).getString(APP_VERSIONNAME);
-                            String versionCodeString = new JSONObject(json).getString(APP_VERSIONCODE);
-                            int ServerAppVersionCode = Integer.parseInt(versionCodeString);
-                            String content = new JSONObject(json).getString(APP_CONTENT);
-                            String md5 = new JSONObject(json).getString(APP_MD5);
-                            String url = new JSONObject(json).getString(APP_URL);
-                            if (appVersionCode < ServerAppVersionCode) {
-                                mBaseView.onUpdateReady(versionName,content,url,ServerAppVersionCode,md5);
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                    }
-                }));
-    }
+//    public void checkGiteeUpdate(final int appVersionCode) {
+//        mCompositeSubscription.add(Update.checkGitee()
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(new Action1<String>() {
+//                    @Override
+//                    public void call(String json) {
+//                        try {
+//                            String versionName = new JSONObject(json).getString(APP_VERSIONNAME);
+//                            String versionCodeString = new JSONObject(json).getString(APP_VERSIONCODE);
+//                            int ServerAppVersionCode = Integer.parseInt(versionCodeString);
+//                            String content = new JSONObject(json).getString(APP_CONTENT);
+//                            String md5 = new JSONObject(json).getString(APP_MD5);
+//                            String url = new JSONObject(json).getString(APP_URL);
+//                            if (appVersionCode < ServerAppVersionCode) {
+//                                mBaseView.onUpdateReady(versionName,content,url,ServerAppVersionCode,md5);
+//                            }
+//                        } catch (JSONException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                }, new Action1<Throwable>() {
+//                    @Override
+//                    public void call(Throwable throwable) {
+//                    }
+//                }));
+//    }
 
 
     public void getSourceBaseUrl() {
