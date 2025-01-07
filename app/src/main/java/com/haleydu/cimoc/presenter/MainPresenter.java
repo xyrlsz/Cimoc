@@ -83,7 +83,10 @@ public class MainPresenter extends BasePresenter<MainView> {
                 .subscribe(new Action1<String>() {
                     @Override
                     public void call(String s) {
-                        if (-1 == version.indexOf(s) && -1 == version.indexOf("t")) {
+//                        if (!version.contains(s) && !version.contains("t")) {
+//                            mBaseView.onUpdateReady();
+//                        }
+                        if(s.compareTo(version)>0){
                             mBaseView.onUpdateReady();
                         }
                     }

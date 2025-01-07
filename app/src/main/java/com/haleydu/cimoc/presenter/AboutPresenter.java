@@ -19,7 +19,7 @@ public class AboutPresenter extends BasePresenter<AboutView> {
                     public void call(String s) {
                         if (version.equals(s)) {
                             mBaseView.onUpdateNone();
-                        } else {
+                        } else if(s.compareTo(version)>0){
                             mBaseView.onUpdateReady();
                         }
                     }
