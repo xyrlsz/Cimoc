@@ -45,8 +45,10 @@ def buildVersion = getGitCommitCount()
 def version = getGitTagName()
  if (System.getenv("CI_BUILD_NUMBER") != null) { // 兼容 CI/CD
     buildVersion = System.getenv("CI_BUILD_NUMBER").toInteger()
-} else {
-    buildVersion = getGitCommitCount()
+}
+
+if(System.getenv("GIT_COMMIT_HASH")!=null){
+    version = getGitTagName()+"-"+System.getenv("GIT_COMMIT_HASH")
 }
 
 android {
