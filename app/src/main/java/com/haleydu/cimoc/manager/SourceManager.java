@@ -131,9 +131,9 @@ public class SourceManager {
                 case BuKa.TYPE:
                     parser = new BuKa(source);
                     break;
-                case EHentai.TYPE:
-                    parser = new EHentai(source);
-                    break;
+//                case EHentai.TYPE:
+//                    parser = new EHentai(source);
+//                    break;
 //                case QiManWu.TYPE:
 //                    parser = new QiManWu(source);
 //                    break;
@@ -182,9 +182,9 @@ public class SourceManager {
 //                case YYLS.TYPE:
 //                    parser = new YYLS(source);
 //                    break;
-                case JMTT.TYPE:
-                    parser = new JMTT(source);
-                    break;
+//                case JMTT.TYPE:
+//                    parser = new JMTT(source);
+//                    break;
 
                 //haleydu
                 case Mangakakalot.TYPE:
@@ -222,6 +222,9 @@ public class SourceManager {
                     break;
                 case Baozi.TYPE:
                     parser = new Baozi(source);
+                    break;
+                case MYCOMIC.TYPE:
+                    parser = new MYCOMIC(source);
                     break;
                 default:
                     parser = new Null();

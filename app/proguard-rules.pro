@@ -43,6 +43,7 @@
     native <methods>;
 }
 
+
 # Do not strip SoLoader class and init method
 #-keep public class com.facebook.soloader.SoLoader {
 #    public static void init(android.content.Context, int);
@@ -60,7 +61,7 @@
 public static java.lang.String TABLENAME;
 }
 #ref: https://juejin.im/post/5d5fb53b51882554a13f8b6a
-#-keep class **$Properties
+-keep class **$Properties
 -keep class **$Properties{*;}
 -dontwarn org.greenrobot.greendao.database.**
 -dontwarn org.greenrobot.greendao.rx.**
@@ -132,3 +133,23 @@ public static java.lang.String TABLENAME;
 -dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
 -keep class org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement { *; }
 
+# Please add these rules to your existing keep rules in order to suppress warnings.
+# This is generated automatically by the Android Gradle plugin.
+-dontwarn com.facebook.common.internal.VisibleForTesting
+-dontwarn java.awt.Color
+-dontwarn java.awt.Font
+-dontwarn java.awt.Point
+-dontwarn java.awt.Rectangle
+-dontwarn org.javamoney.moneta.Money
+-dontwarn org.joda.time.DateTime
+-dontwarn org.joda.time.DateTimeZone
+-dontwarn org.joda.time.Duration
+-dontwarn org.joda.time.Instant
+-dontwarn org.joda.time.LocalDate
+-dontwarn org.joda.time.LocalDateTime
+-dontwarn org.joda.time.LocalTime
+-dontwarn org.joda.time.Period
+-dontwarn org.joda.time.ReadablePartial
+-dontwarn org.joda.time.format.DateTimeFormat
+-dontwarn org.joda.time.format.DateTimeFormatter
+-dontwarn springfox.documentation.spring.web.json.Json
