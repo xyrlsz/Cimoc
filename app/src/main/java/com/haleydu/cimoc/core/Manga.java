@@ -1,5 +1,6 @@
 package com.haleydu.cimoc.core;
 
+import com.github.houbb.opencc4j.util.ZhConverterUtil;
 import com.haleydu.cimoc.App;
 import com.haleydu.cimoc.manager.ChapterManager;
 import com.haleydu.cimoc.manager.SourceManager;
@@ -15,8 +16,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.InterruptedIOException;
+import java.text.Collator;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -36,6 +40,21 @@ public class Manga {
 
     private static boolean indexOfIgnoreCase(String str, String search) {
         return str.toLowerCase().indexOf(search.toLowerCase()) != -1;
+    }
+
+    public static boolean indexOfIgnoreCase(String str, String search, boolean stSame) {
+        if (stSame) {
+            try {
+                String s1 = ZhConverterUtil.toSimple(str);
+                String s2 = ZhConverterUtil.toSimple(search);
+                return s1.toLowerCase().indexOf(s2.toLowerCase()) != -1;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+        } else {
+            return str.toLowerCase().indexOf(search.toLowerCase()) != -1;
+        }
     }
 
     public static Observable<Comic> getSearchResult(final Parser parser, final String keyword, final int page, final boolean strictSearch) {
@@ -68,6 +87,37 @@ public class Manga {
             }
         }).subscribeOn(Schedulers.io());
     }
+    public static Observable<Comic> getSearchResult(final Parser parser, final String keyword, final int page, final boolean strictSearch, final boolean stSame) {
+        return Observable.create(new Observable.OnSubscribe<Comic>() {
+            @Override
+            public void call(Subscriber<? super Comic> subscriber) {
+                try {
+                    Request request = parser.getSearchRequest(keyword, page);
+                    Random random = new Random();
+                    String html = getResponseBody(App.getHttpClient(), request);
+                    SearchIterator iterator = parser.getSearchIterator(html, page);
+                    if (iterator == null || iterator.empty()) {
+                        throw new Exception();
+                    }
+                    while (iterator.hasNext()) {
+                        Comic comic = iterator.next();
+//                        if (comic != null && (comic.getTitle().indexOf(keyword) != -1 || comic.getAuthor().indexOf(keyword) != -1)) {
+                        if (comic != null
+                                && (indexOfIgnoreCase(comic.getTitle(), keyword, stSame)
+                                || indexOfIgnoreCase(comic.getAuthor(), keyword ,stSame)
+                                || (!strictSearch))) {
+                            subscriber.onNext(comic);
+                            Thread.sleep(random.nextInt(200));
+                        }
+                    }
+                    subscriber.onCompleted();
+                } catch (Exception e) {
+                    subscriber.onError(e);
+                }
+            }
+        }).subscribeOn(Schedulers.io());
+    }
+
 
     public static Observable<List<Chapter>> getComicInfo(final Parser parser, final Comic comic) {
         return Observable.create(new Observable.OnSubscribe<List<Chapter>>() {

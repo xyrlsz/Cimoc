@@ -25,6 +25,7 @@ public class ResultPresenter extends BasePresenter<ResultView> {
     private State[] mStateArray;
     private String keyword;
     private boolean strictSearch;
+    private boolean stSameSearch;
     private int error = 0;
     private String keywordTemp;
     private String comicTitleTemp = "";
@@ -32,6 +33,14 @@ public class ResultPresenter extends BasePresenter<ResultView> {
     public ResultPresenter(int[] source, String keyword, boolean strictSearch) {
         this.keyword = keyword;
         this.strictSearch = strictSearch;
+        if (source != null) {
+            initStateArray(source);
+        }
+    }
+    public ResultPresenter(int[] source, String keyword, boolean strictSearch, boolean stSameSearch) {
+        this.keyword = keyword;
+        this.strictSearch = strictSearch;
+        this.stSameSearch = stSameSearch;
         if (source != null) {
             initStateArray(source);
         }
@@ -116,7 +125,7 @@ public class ResultPresenter extends BasePresenter<ResultView> {
             if (obj.state == STATE_NULL) {
                 Parser parser = mSourceManager.getParser(obj.source);
                 obj.state = STATE_DOING;
-                mCompositeSubscription.add(Manga.getSearchResult(parser, keyword, ++obj.page, strictSearch)
+                mCompositeSubscription.add(Manga.getSearchResult(parser, keyword, ++obj.page, strictSearch, stSameSearch)
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Action1<Comic>() {
                             @Override

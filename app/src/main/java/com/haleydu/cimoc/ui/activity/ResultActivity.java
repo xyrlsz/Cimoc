@@ -75,6 +75,12 @@ public class ResultActivity extends BackActivity implements ResultView, BaseAdap
         intent.putExtra(Extra.EXTRA_STRICT, strictSearch);
         return intent;
     }
+    public static Intent createIntent(Context context, String keyword, boolean strictSearch, boolean stSame, int[] array, int type) {
+        Intent intent = createIntent(context, keyword, array, type);
+        intent.putExtra(Extra.EXTRA_STRICT, strictSearch);
+        intent.putExtra(Extra.EXTAR_STSAME, stSame);
+        return intent;
+    }
 
     // 建个Map把漫源搜索的上一个请求的url存下来，最后利用Activity生命周期清掉
     //
@@ -88,7 +94,8 @@ public class ResultActivity extends BackActivity implements ResultView, BaseAdap
         String keyword = getIntent().getStringExtra(Extra.EXTRA_KEYWORD);
         int[] source = getIntent().getIntArrayExtra(Extra.EXTRA_SOURCE);
         boolean strictSearch = getIntent().getBooleanExtra(Extra.EXTRA_STRICT, true);
-        mPresenter = new ResultPresenter(source, keyword, strictSearch);
+        boolean stSameSearch = getIntent().getBooleanExtra(Extra.EXTAR_STSAME, true);
+        mPresenter = new ResultPresenter(source, keyword, strictSearch, stSameSearch);
         mPresenter.attachView(this);
         return mPresenter;
     }

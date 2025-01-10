@@ -46,16 +46,37 @@
                     tools:ignore="TextFields" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <androidx.appcompat.widget.AppCompatCheckBox
-                android:id="@+id/search_strict_checkbox"
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="20dp"
-                android:layout_marginTop="120dp"
-                android:checked="true"
-                android:text="@string/search_strict"
-                android:textColor="@color/white"
-                android:textSize="14sp" />
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="120dp">
+                <androidx.appcompat.widget.AppCompatCheckBox
+                    android:id="@+id/search_strict_checkbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:checked="true"
+                    android:text="@string/search_strict"
+                    android:textColor="@color/white"
+                    android:textSize="14sp" />
+
+                <androidx.appcompat.widget.AppCompatCheckBox
+                    android:id="@+id/search_STSame_checkbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_toRightOf="@id/search_strict_checkbox"
+                    android:checked="true"
+                    android:layout_toEndOf="@id/search_strict_checkbox"
+                    android:layout_marginLeft="5dp"
+                    android:text="@string/search_STSame"
+                    android:textColor="@color/white"
+                    android:textSize="14sp" />
+            </RelativeLayout>
+
         </FrameLayout>
     </LinearLayout>
 

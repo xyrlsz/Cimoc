@@ -19,5 +19,6 @@ public class Extra {
     public static final String EXTRA_IS_LONG = "cimoc.intent.extra.EXTRA_IS_LONG";
     public static final String EXTRA_IS_PORTRAIT = "cimoc.intent.extra.EXTRA_IS_PORTRAIT";
     public static final String EXTRA_IS_STREAM = "cimoc.intent.extra.EXTRA_IS_STREAM";
+    public static final String EXTAR_STSAME = "cimoc.intent.extra.EXTAR_STSAME";
 
 }

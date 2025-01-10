@@ -131,7 +131,10 @@ public static java.lang.String TABLENAME;
 -dontwarn java.lang.ClassValue
 #-keep class java.lang.ClassValue { *; }
 -dontwarn org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement
--keep class org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement { *; }
+#-keep class org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement { *; }
+
+-keep class xyropencc.** { *; }
+-dontwarn xyropencc.**
 
 # Please add these rules to your existing keep rules in order to suppress warnings.
 # This is generated automatically by the Android Gradle plugin.
