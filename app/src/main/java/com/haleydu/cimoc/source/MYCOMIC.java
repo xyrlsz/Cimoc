@@ -130,7 +130,7 @@ public class MYCOMIC extends MangaParser {
 
         }
 
-        return Lists.reverse(list);
+        return list;
     }
 
 
