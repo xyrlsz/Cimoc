@@ -45,7 +45,7 @@ Online manga reader based on Android
 - [Rhino](https://github.com/mozilla/rhino)
 - [BlazingChain](https://github.com/tommyettinger/BlazingChain)
 - [AppUpdater](https://gitee.com/jenly1314/AppUpdater)
-
+- [opencc4j](https://github.com/houbb/opencc4j)
 
 # 应用截图
 <img src="./screenshot/01.png" width="250">
@@ -58,7 +58,7 @@ Online manga reader based on Android
 > 这个没什么大用的感觉，个人不常用，直接删掉不会有什么影响
 - 在 SourceManger 的 getParser() 方法中加入相应分支
 > case 里面无脑添加
-- 在 UpdateHelper 的 initSource() 方法中初始化图源
+- 在 UpdateHelper 的 initSource() 方法中初始化图源，以及修改UpdateHelper()构造方法
 
 ## cimoc设置
 - 阅读模式－翻页模式-卷纸模式
