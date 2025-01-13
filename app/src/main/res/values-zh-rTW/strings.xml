@@ -52,6 +52,8 @@
 
     <string name="chapter">章節列表</string>
     <string name="chapter_all">全選</string>
+    <string name="chapter_none">全不選</string>
+    <string name="chapter_reverse">反向選擇</string>
     <string name="chapter_sort">排序</string>
     <string name="chapter_switch_view">切換視圖</string>
     <string name="chapter_download_perm_fail">取得權限失敗</string>
@@ -228,6 +230,7 @@
     <string name="backup_clear_record_summary">清除所有备份记录，清除后请尽快备份以免数据丢失</string>
 
 
+    <string name="backup_clear_record_notice_summary">清除後請儘快備份以免備份數據丟失，無法恢復備份內容</string>
     <string name="home_page">首頁</string>
     <string name="home_page_cimqus">Cimqus</string>
     <string name="home_page_gitter">Gitter</string>
@@ -237,6 +240,7 @@
     <string name="about_support">意見回饋</string>
     <string name="about_update">檢查更新</string>
     <string name="about_update_summary">點擊前往 Github Releases 頁面</string>
+    <string name="about_update_app_auto">自動檢查更新APP</string>
     <string name="about_update_latest">當前已經是最新版本</string>
     <string name="about_update_download">點擊下載最新版本</string>
     <string name="about_update_doing">正在檢查更新</string>
@@ -247,6 +251,7 @@
     <string name="dialog_confirm">操作確認</string>
     <string name="dialog_positive">確定</string>
     <string name="dialog_negative">取消</string>
+    <string name="dialog_close">關閉</string>
     <string name="dialog_doing">正在執行中</string>
     <string name="app_dialog_update">升級</string>
 
@@ -316,4 +321,9 @@
 
     <string name="the_public">Cimoc微信公衆號</string>
     <string name="the_public_summary">關注公衆號查看最新版本</string>
+    <string name="settings_dmzj">動漫之家</string>
+    <string name="settings_dmzj_login_summary">未登錄</string>
+    <string name="settings_dmzj_login">登錄</string>
+    <string name="settings_dmzj_signup">註冊</string>
+    <string name="settings_dmzj_logout">退出登錄</string>
 </resources>

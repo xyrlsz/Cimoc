@@ -108,6 +108,18 @@ public class ChapterActivity extends BackActivity implements BaseAdapter.OnItemC
                     }
                     mChapterAdapter.notifyDataSetChanged();
                     break;
+                case R.id.chapter_none:
+                    for (Switcher<Chapter> switcher : mChapterAdapter.getDateSet()) {
+                        switcher.setEnable(false);
+                    }
+                    mChapterAdapter.notifyDataSetChanged();
+                    break;
+                case R.id.chapter_opposition:
+                    for (Switcher<Chapter> switcher : mChapterAdapter.getDateSet()) {
+                        switcher.setEnable(!switcher.isEnable());
+                    }
+                    mChapterAdapter.notifyDataSetChanged();
+                    break;
                 case R.id.chapter_sort:
                     mChapterAdapter.reverse();
                     isAscendMode = !isAscendMode;

@@ -3,8 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/chapter_all"
-        android:icon="@drawable/ic_done_all_white_24dp"
+        android:icon="@drawable/hugeiconstickdouble01"
         android:title="@string/chapter_all"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/chapter_none"
+        android:icon="@drawable/hugeiconscheckunread02"
+        android:title="@string/chapter_none"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/chapter_opposition"
+        android:icon="@drawable/hugeiconscheckunread01"
+        android:title="@string/chapter_reverse"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/chapter_sort"
