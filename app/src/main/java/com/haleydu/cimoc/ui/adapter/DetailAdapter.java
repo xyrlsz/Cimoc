@@ -192,8 +192,11 @@ public class DetailAdapter extends BaseAdapter<Chapter> {
                     if (cover != null) {
                         headerHolder.mComicImage.setController(mControllerSupplier.get().setUri(cover).build());
                     }
+                    headerHolder.mComicTitle.setTextIsSelectable(true);
                     headerHolder.mComicTitle.setText(title);
+                    headerHolder.mComicIntro.setTextIsSelectable(true);
                     headerHolder.mComicIntro.setText(intro);
+                    headerHolder.mComicAuthor.setTextIsSelectable(true);
                     if (finish != null) {
                         headerHolder.mComicStatus.setText(finish ? "完结" : "连载中");
                     }
