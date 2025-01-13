@@ -349,8 +349,12 @@
     <string name="settings_dmzj_login">登录</string>
     <string name="settings_dmzj_signup">注册</string>
     <string name="settings_dmzj_logout">退出登录</string>
-    <string name="message">message</string>
-    <string name="title">title</string>
+    <string name="message" translatable="false">message</string>
+    <string name="title" translatable="false">title</string>
+    <string name="login">登录</string>
+    <string name="username_item">账户名</string>
+    <string name="password">密码</string>
+    <string name="register">注册</string>
 
 
 </resources>

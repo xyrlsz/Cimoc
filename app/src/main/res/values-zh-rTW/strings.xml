@@ -327,4 +327,8 @@
     <string name="settings_dmzj_login">登錄</string>
     <string name="settings_dmzj_signup">註冊</string>
     <string name="settings_dmzj_logout">退出登錄</string>
+    <string name="login">登錄</string>
+    <string name="username_item">賬戶名</string>
+    <string name="password">密碼</string>
+    <string name="register">註冊</string>
 </resources>

@@ -343,18 +343,22 @@ public class SettingsActivity extends BackActivity implements SettingsView {
 
     @OnClick(R.id.settings_dmzj_login)
     void onDmzjLoginClick() {
-        // 创建Dialog
-        Dialog dialog = new Dialog(this, R.style.DialogThemeBlue);
 
-        // 设置自定义布局
+        Dialog dialog = new Dialog(this, R.style.DialogThemeBlue);
         dialog.setContentView(R.layout.dmzj_login_layout);
 
-        // 获取布局中的控件
         EditText username = dialog.findViewById(R.id.username);
         EditText password = dialog.findViewById(R.id.password);
         Button loginButton = dialog.findViewById(R.id.login_button);
+        Button registerButton = dialog.findViewById(R.id.register_button);
 
-        // 设置按钮点击事件
+        registerButton.setOnClickListener(view -> {
+            String url = "https://m.idmzj.com/register.html";
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(url));
+            startActivity(intent);
+        });
+
         loginButton.setOnClickListener(v -> {
             String user = username.getText().toString();
             String pass = password.getText().toString();
@@ -366,7 +370,6 @@ public class SettingsActivity extends BackActivity implements SettingsView {
                     .add("to", "https://i.dmzj.com")
                     .build();
 
-            // Create the request
             Request request = new Request.Builder()
                     .url("https://i.dmzj.com/doLogin")
                     .addHeader("accept", "application/json, text/javascript, */*; q=0.01")
@@ -388,7 +391,6 @@ public class SettingsActivity extends BackActivity implements SettingsView {
                     .post(formBody)
                     .build();
 
-            // 例如：验证用户名和密码
             App.getHttpClient().newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
@@ -398,7 +400,6 @@ public class SettingsActivity extends BackActivity implements SettingsView {
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
                     if (response.isSuccessful() && response.body() != null) {
-                        // 获取cookies
                         List<String> cookies = response.headers("Set-Cookie");
                         Set<String> set = new HashSet<>();
                         for (String s : cookies) {
@@ -423,17 +424,9 @@ public class SettingsActivity extends BackActivity implements SettingsView {
 
         });
 
-        // 显示Dialog
         dialog.show();
     }
 
-    @OnClick(R.id.settings_dmzj_signup)
-    void onDmzjSignupClick() {
-        String url = "https://m.idmzj.com/login.html";
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(Uri.parse(url));
-        startActivity(intent);
-    }
 
     @OnClick(R.id.settings_dmzj_logout)
     void onDmzjLogoutClick() {

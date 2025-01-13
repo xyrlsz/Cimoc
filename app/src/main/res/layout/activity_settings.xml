@@ -39,11 +39,7 @@
                         app:summary="@string/settings_dmzj_login_summary"
                         app:title="@string/settings_dmzj_login" />
 
-                <com.haleydu.cimoc.ui.widget.Option
-                    android:id="@+id/settings_dmzj_signup"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:title="@string/settings_dmzj_signup" />
+
 
                  <com.haleydu.cimoc.ui.widget.Option
                      android:id="@+id/settings_dmzj_logout"
