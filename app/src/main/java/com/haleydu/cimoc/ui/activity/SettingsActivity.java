@@ -1,5 +1,9 @@
 package com.haleydu.cimoc.ui.activity;
 
+import static com.haleydu.cimoc.Constants.DMZJ_SHARED;
+import static com.haleydu.cimoc.Constants.DMZJ_SHARED_COOKIES;
+import static com.haleydu.cimoc.Constants.DMZJ_SHARED_USERNAME;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
@@ -8,14 +12,14 @@ import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import androidx.core.content.ContextCompat;
-import android.view.View;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
+
 import com.haleydu.cimoc.App;
-import com.haleydu.cimoc.Constants;
 import com.haleydu.cimoc.R;
 import com.haleydu.cimoc.global.Extra;
 import com.haleydu.cimoc.manager.PreferenceManager;
@@ -45,9 +49,12 @@ import java.util.Set;
 import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.OnClick;
-import okhttp3.*;
-
-import static com.haleydu.cimoc.Constants.*;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  * Created by Hiroshi on 2016/9/21.
@@ -64,6 +71,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
     private static final int DIALOG_REQUEST_OTHER_NIGHT_ALPHA = 7;
     private static final int DIALOG_REQUEST_READER_SCALE_FACTOR = 8;
     private static final int DIALOG_REQUEST_READER_CONTROLLER_TRIG_THRESHOLD = 9;
+    private static final int DIALOG_REQUEST_DETAIL_TEXT_ST = 10;
     private final int[] mResultArray = new int[6];
     private final Intent mResultIntent = new Intent();
 
@@ -118,10 +126,12 @@ public class SettingsActivity extends BackActivity implements SettingsView {
     CheckBoxPreference mConnectOnlyWifi;
     @BindView(R.id.settings_other_loadcover_only_wifi)
     CheckBoxPreference mLoadCoverOnlyWifi;
-//    @BindView(R.id.settings_firebase_event)
+    //    @BindView(R.id.settings_firebase_event)
 //    CheckBoxPreference mFireBaseEvent;
 //    @BindView(R.id.settings_other_reduce_ad)
 //    CheckBoxPreference mReduceAd;
+    @BindView(R.id.settings_detail_text_st)
+    ChoicePreference mDetailTextSt;
     private SettingsPresenter mPresenter;
     private String mStoragePath;
     private String mTempStorage;
@@ -176,6 +186,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
                 R.string.settings_other_night_alpha, DIALOG_REQUEST_OTHER_NIGHT_ALPHA);
         mDownloadThread.bindPreference(getSupportFragmentManager(), PreferenceManager.PREF_DOWNLOAD_THREAD, 2,
                 R.string.settings_download_thread, DIALOG_REQUEST_DOWNLOAD_THREAD);
+        mDetailTextSt.bindPreference(getSupportFragmentManager(), PreferenceManager.PREF_DETAIL_TEXT_ST, PreferenceManager.DETAIL_TEXT_DEFAULT, R.array.detail_text_st, DIALOG_REQUEST_DETAIL_TEXT_ST);
     }
 
     @OnClick(R.id.settings_reader_config)
@@ -264,6 +275,9 @@ public class SettingsActivity extends BackActivity implements SettingsView {
                 mResultArray[5] = alpha;
                 mResultIntent.putExtra(Extra.EXTRA_RESULT, mResultArray);
                 setResult(Activity.RESULT_OK, mResultIntent);
+                break;
+            case DIALOG_REQUEST_DETAIL_TEXT_ST:
+                mDetailTextSt.setValue(bundle.getInt(EXTRA_DIALOG_RESULT_INDEX));
                 break;
         }
     }
@@ -397,7 +411,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
                         editor.putString(DMZJ_SHARED_COOKIES, cookieStr);
                         editor.putString(DMZJ_SHARED_USERNAME, user);
                         editor.apply();
-                        runOnUiThread(()-> mDmzjLogin.setSummary(user));
+                        runOnUiThread(() -> mDmzjLogin.setSummary(user));
                         dialog.dismiss();
                         showSnackbar("登录成功");
                     } else {
@@ -422,8 +436,8 @@ public class SettingsActivity extends BackActivity implements SettingsView {
     }
 
     @OnClick(R.id.settings_dmzj_logout)
-    void onDmzjLogoutClick(){
-        SharedPreferences sharedPreferences = getSharedPreferences(DMZJ_SHARED,MODE_PRIVATE);
+    void onDmzjLogoutClick() {
+        SharedPreferences sharedPreferences = getSharedPreferences(DMZJ_SHARED, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(DMZJ_SHARED_COOKIES);
         editor.remove(DMZJ_SHARED_USERNAME);
@@ -431,6 +445,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         editor.apply();
         showSnackbar("成功");
     }
+
     @Override
     public void onFileMoveSuccess() {
         hideProgressDialog();

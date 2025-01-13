@@ -30,6 +30,11 @@
         <item>粉色</item>
         <item>棕色</item>
     </string-array>
+    <string-array name="detail_text_st">
+        <item>默认</item>
+        <item>简体</item>
+        <item>繁体</item>
+    </string-array>
     <string-array name="event_items">
         <item>无</item>
         <item>上一页</item>

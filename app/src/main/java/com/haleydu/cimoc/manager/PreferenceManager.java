@@ -28,6 +28,10 @@ public class PreferenceManager {
     public static final int HOME_DOWNLOAD = 4;
     public static final int HOME_LOCAL = 5;
 
+    public static final int DETAIL_TEXT_DEFAULT = 0;
+    public static final int DETAIL_TEXT_SIMPLE = 1;
+    public static final int DETAIL_TEXT_TRADITIONAL = 2;
+
     public static final String PREF_APP_VERSION = "pref_app_version";
 
     public static final String PREF_MAIN_NOTICE = "pref_main_notice";
@@ -144,6 +148,8 @@ public class PreferenceManager {
 
     public static final String PREF_HHAAZZ_BASEURL = "pref_hhaazz_baseurl";
     public static final String PREF_HHAAZZ_SW = "pref_hhaazz_sw";
+
+    public static final String PREF_DETAIL_TEXT_ST = "pref_detail_text_st";
 
     private SharedPreferences mSharedPreferences;
 

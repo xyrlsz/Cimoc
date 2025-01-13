@@ -8,9 +8,11 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import com.facebook.imagepipeline.core.ImagePipelineFactory;
 import com.google.common.collect.Lists;
@@ -256,8 +258,16 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
     public boolean onItemLongClick(View view, int position) {
         if (position == 0) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle(mDetailAdapter.title)
-                    .setMessage(mDetailAdapter.intro)
+
+            View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_selectable_text, null);
+            TextView textViewTitle = dialogView.findViewById(R.id.textViewTitle);
+            TextView textViewMessage = dialogView.findViewById(R.id.textViewMessage);
+
+            textViewTitle.setText(mDetailAdapter.title);
+            textViewMessage.setText(mDetailAdapter.intro);
+            textViewMessage.setTextIsSelectable(true);
+            textViewTitle.setTextIsSelectable(true);
+            builder.setView(dialogView)
                     .setPositiveButton(R.string.dialog_close, null)
                     .show();
         }
