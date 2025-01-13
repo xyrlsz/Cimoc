@@ -50,8 +50,8 @@ jobs:
       - name: Upload APK as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-release
-          path: app/build/outputs/apk/release/app-release.apk
+          name: app-universal-release
+          path: app/build/outputs/apk/release/app-universal-release.apk
 
       - name: Create GitHub Release and Upload APK
         uses: softprops/action-gh-release@v2
