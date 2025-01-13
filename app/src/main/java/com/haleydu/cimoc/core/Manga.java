@@ -1,6 +1,5 @@
 package com.haleydu.cimoc.core;
 
-import com.github.houbb.opencc4j.util.ZhConverterUtil;
 import com.haleydu.cimoc.App;
 import com.haleydu.cimoc.manager.ChapterManager;
 import com.haleydu.cimoc.manager.SourceManager;
@@ -45,8 +44,8 @@ public class Manga {
     public static boolean indexOfIgnoreCase(String str, String search, boolean stSame) {
         if (stSame) {
             try {
-                String s1 = ZhConverterUtil.toSimple(str);
-                String s2 = ZhConverterUtil.toSimple(search);
+                String s1 = xyropencc.Xyropencc.t2S(str);
+                String s2 =xyropencc.Xyropencc.t2S(search);
                 return s1.toLowerCase().indexOf(s2.toLowerCase()) != -1;
             } catch (Exception e) {
                 e.printStackTrace();

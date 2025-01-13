@@ -22,19 +22,56 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
           cache: gradle
+      
+      - name: Set up Go environment
+        uses: actions/setup-go@v5
+        with:
+          go-version: '>=1.22'
 
-      # - name: Get Git commit hash
-      #   id: git_commit_hash
-      #   run: echo "GIT_COMMIT_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+      - name: Install gomobile
+        run: |
+          go install golang.org/x/mobile/cmd/gomobile@latest
+          gomobile init
 
+      - name: Build xyropencc
+        run: |
+          cd xyropencc
+          chmod +x build.sh
+          ./build.sh
+          cd ..
+          
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Build with Gradle
         run: ./gradlew build
 
-      - name: Upload APK
+      - name: Upload APK (arm64-v8a)
         uses: actions/upload-artifact@v4
         with:
-          name: app-release
-          path: app/build/outputs/apk/release/app-release.apk
+          name: app-arm64-v8a-release
+          path: app/build/outputs/apk/release/app-arm64-v8a-release.apk
+
+      - name: Upload APK (armeabi-v7a)
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-armeabi-v7a-release
+          path: app/build/outputs/apk/release/app-armeabi-v7a-release.apk
+
+      - name: Upload APK (universal)
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-universal-release
+          path: app/build/outputs/apk/release/app-universal-release.apk
+
+      - name: Upload APK (x86_64)
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-x86_64-release
+          path: app/build/outputs/apk/release/app-x86_64-release.apk
+
+      - name: Upload APK (x86)
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-x86-release
+          path: app/build/outputs/apk/release/app-x86-release.apk

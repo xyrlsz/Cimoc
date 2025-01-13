@@ -134,6 +134,7 @@ public static java.lang.String TABLENAME;
 #-keep class org.codehaus.mojo.animal_sniffer.IgnoreJRERequirement { *; }
 
 -keep class xyropencc.** { *; }
+-keep interface xyropencc.** { *; }
 -dontwarn xyropencc.**
 
 # Please add these rules to your existing keep rules in order to suppress warnings.
