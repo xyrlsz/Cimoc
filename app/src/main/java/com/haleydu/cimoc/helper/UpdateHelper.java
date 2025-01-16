@@ -15,11 +15,11 @@ import com.haleydu.cimoc.source.DM5;
 import com.haleydu.cimoc.source.Dmzj;
 import com.haleydu.cimoc.source.Dmzjv2;
 import com.haleydu.cimoc.source.Dmzjv3;
+import com.haleydu.cimoc.source.DuManWu;
 import com.haleydu.cimoc.source.GuFeng;
 import com.haleydu.cimoc.source.HHAAZZ;
 import com.haleydu.cimoc.source.HotManga;
 import com.haleydu.cimoc.source.IKanman;
-//import com.haleydu.cimoc.source.JMTT;
 import com.haleydu.cimoc.source.MYCOMIC;
 import com.haleydu.cimoc.source.MangaBZ;
 import com.haleydu.cimoc.source.MangaNel;
@@ -50,7 +50,7 @@ public class UpdateHelper {
     public UpdateHelper() {
 
         ComicSourceHash.put(Animx2.TYPE, Animx2.getDefaultSource());
-        ComicSourceHash.put(Baozi.TYPE, Baozi.getDefaultSource());
+        ComicSourceHash.put(Baozi.TYPE, DuManWu.getDefaultSource());
         ComicSourceHash.put(BuKa.TYPE, BuKa.getDefaultSource());
         ComicSourceHash.put(Cartoonmad.TYPE, Cartoonmad.getDefaultSource());
         ComicSourceHash.put(DM5.TYPE, DM5.getDefaultSource());
@@ -72,7 +72,7 @@ public class UpdateHelper {
         ComicSourceHash.put(Webtoon.TYPE, Webtoon.getDefaultSource());
         ComicSourceHash.put(WebtoonDongManManHua.TYPE, WebtoonDongManManHua.getDefaultSource());
         ComicSourceHash.put(YKMH.TYPE, YKMH.getDefaultSource());
-
+        ComicSourceHash.put(DuManWu.TYPE, DuManWu.getDefaultSource());
     }
 
     public static void update(PreferenceManager manager, final DaoSession session) {
@@ -159,6 +159,7 @@ public class UpdateHelper {
         list.add(Dmzj.getDefaultSource());
         list.add(Baozi.getDefaultSource());
         list.add(MYCOMIC.getDefaultSource());
+        list.add(DuManWu.getDefaultSource());
         session.getSourceDao().insertOrReplaceInTx(list);
     }
 

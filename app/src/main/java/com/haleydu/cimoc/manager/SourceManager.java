@@ -6,9 +6,32 @@ import com.haleydu.cimoc.component.AppGetter;
 import com.haleydu.cimoc.model.Source;
 import com.haleydu.cimoc.model.SourceDao;
 import com.haleydu.cimoc.model.SourceDao.Properties;
-import com.haleydu.cimoc.parser.Parser;
-import com.haleydu.cimoc.source.*;
+import com.haleydu.cimoc.parser.MangaParser;
+import com.haleydu.cimoc.source.Animx2;
+import com.haleydu.cimoc.source.Baozi;
+import com.haleydu.cimoc.source.BuKa;
+import com.haleydu.cimoc.source.Cartoonmad;
+import com.haleydu.cimoc.source.DM5;
+import com.haleydu.cimoc.source.Dmzj;
+import com.haleydu.cimoc.source.Dmzjv2;
+import com.haleydu.cimoc.source.Dmzjv3;
+import com.haleydu.cimoc.source.DuManWu;
+import com.haleydu.cimoc.source.GuFeng;
+import com.haleydu.cimoc.source.HHAAZZ;
+import com.haleydu.cimoc.source.HotManga;
+import com.haleydu.cimoc.source.IKanman;
+import com.haleydu.cimoc.source.Locality;
+import com.haleydu.cimoc.source.MYCOMIC;
+import com.haleydu.cimoc.source.MangaBZ;
+import com.haleydu.cimoc.source.MangaNel;
+import com.haleydu.cimoc.source.Mangakakalot;
+import com.haleydu.cimoc.source.Manhuatai;
+import com.haleydu.cimoc.source.MiGu;
+import com.haleydu.cimoc.source.Null;
+import com.haleydu.cimoc.source.Tencent;
+import com.haleydu.cimoc.source.Webtoon;
 import com.haleydu.cimoc.source.WebtoonDongManManHua;
+import com.haleydu.cimoc.source.YKMH;
 
 import java.util.List;
 
@@ -22,8 +45,8 @@ public class SourceManager {
 
     private static SourceManager mInstance;
 
-    private SourceDao mSourceDao;
-    private SparseArray<Parser> mParserArray = new SparseArray<>();
+    private final SourceDao mSourceDao;
+    private final SparseArray<MangaParser> mParserArray = new SparseArray<>();
 
     private SourceManager(AppGetter getter) {
         mSourceDao = getter.getAppInstance().getDaoSession().getSourceDao();
@@ -76,8 +99,8 @@ public class SourceManager {
         mSourceDao.update(source);
     }
 
-    public Parser getParser(int type) {
-        Parser parser = mParserArray.get(type);
+    public MangaParser getParser(int type) {
+        MangaParser parser = mParserArray.get(type);
         if (parser == null) {
             Source source = load(type);
             switch (type) {
@@ -225,6 +248,9 @@ public class SourceManager {
                     break;
                 case MYCOMIC.TYPE:
                     parser = new MYCOMIC(source);
+                    break;
+                case DuManWu.TYPE:
+                    parser = new DuManWu(source);
                     break;
                 default:
                     parser = new Null();

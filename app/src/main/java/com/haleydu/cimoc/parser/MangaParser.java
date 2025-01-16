@@ -25,6 +25,7 @@ public abstract class MangaParser implements Parser {
     protected String mTitle;
     protected List<UrlFilter> filter = new ArrayList<>();
     private Category mCategory;
+    private boolean isUseWebView = false;
 
     protected void init(Source source, Category category) {
         mTitle = source.getTitle();
@@ -147,4 +148,11 @@ public abstract class MangaParser implements Parser {
         return null;
     }
 
+    public boolean getIsUseWebView() {
+        return isUseWebView;
+    }
+
+    public void setIsUseWebView(boolean isUseWebView) {
+        this.isUseWebView = isUseWebView;
+    }
 }

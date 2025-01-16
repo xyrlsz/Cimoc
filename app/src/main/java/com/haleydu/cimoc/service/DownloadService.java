@@ -6,10 +6,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.util.Pair;
+
 import androidx.annotation.Nullable;
 import androidx.collection.LongSparseArray;
-
-import android.util.Pair;
 
 import com.haleydu.cimoc.App;
 import com.haleydu.cimoc.R;
@@ -24,7 +24,7 @@ import com.haleydu.cimoc.manager.TaskManager;
 import com.haleydu.cimoc.misc.NotificationWrapper;
 import com.haleydu.cimoc.model.ImageUrl;
 import com.haleydu.cimoc.model.Task;
-import com.haleydu.cimoc.parser.Parser;
+import com.haleydu.cimoc.parser.MangaParser;
 import com.haleydu.cimoc.rx.RxBus;
 import com.haleydu.cimoc.rx.RxEvent;
 import com.haleydu.cimoc.saf.DocumentFile;
@@ -86,7 +86,8 @@ public class DownloadService extends Service implements AppGetter {
     @Override
     public void onCreate() {
         super.onCreate();
-        PreferenceManager manager = ((App) getApplication()).getPreferenceManager();
+        getApplication();
+        PreferenceManager manager = App.getPreferenceManager();
         int num = manager.getInt(PreferenceManager.PREF_DOWNLOAD_THREAD, 2);
         mWorkerArray = new LongSparseArray<>();
         mExecutorService = Executors.newFixedThreadPool(num);
@@ -173,8 +174,8 @@ public class DownloadService extends Service implements AppGetter {
 
     public class Worker implements Runnable {
 
-        private Task mTask;
-        private Parser mParse;
+        private final Task mTask;
+        private final MangaParser mParse;
 
         Worker(Task task) {
             mTask = task;
@@ -230,7 +231,7 @@ public class DownloadService extends Service implements AppGetter {
             if (request != null) {
                 Response response = null;
                 try {
-                    if (mTask.getSource() == 72){
+                    if (mTask.getSource() == 72) {
                         OkHttpClient mJMTTHttpClient = new OkHttpClient().newBuilder()
                                 .followRedirects(true)
                                 .followSslRedirects(true)
@@ -238,9 +239,10 @@ public class DownloadService extends Service implements AppGetter {
                                 .addInterceptor(chain -> {
                                     String url1 = chain.request().url().toString();
                                     Response response1 = chain.proceed(chain.request());
-                                    if (!url1.toLowerCase().contains("media/photos")) return response1;
+                                    if (!url1.toLowerCase().contains("media/photos"))
+                                        return response1;
                                     int cha = Integer.parseInt(url1.substring(url1.indexOf("photos/") + 7, url1.lastIndexOf("/")));
-                                    if ( cha < 220980) return response1;
+                                    if (cha < 220980) return response1;
                                     byte[] res = new JMTTUtil().decodeImage(response1.body().byteStream());
                                     MediaType mediaType = MediaType.parse("image/avif,image/webp,image/apng,image/*,*/*");
                                     ResponseBody outputBytes = ResponseBody.create(mediaType, res);
@@ -248,12 +250,12 @@ public class DownloadService extends Service implements AppGetter {
                                 })
                                 .build();
                         response = mJMTTHttpClient.newCall(request).execute();
-                    }else {
+                    } else {
                         response = mHttpClient.newCall(request).execute();
                     }
                     if (response.isSuccessful()) {
                         String displayName = buildFileName(num, url);
-                        displayName = displayName.replaceAll("[:/(\\\\)(\\?)<>\"(\\|)(\\.)]", "_")+".jpg";
+                        displayName = displayName.replaceAll("[:/(\\\\)(\\?)<>\"(\\|)(\\.)]", "_") + ".jpg";
                         DocumentFile file = DocumentUtils.getOrCreateFile(parent, displayName);
                         DocumentUtils.writeBinaryToFile(mContentResolver, file, response.body().byteStream());
                         return true;
