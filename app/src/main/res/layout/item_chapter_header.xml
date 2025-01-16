@@ -49,7 +49,7 @@
             android:layout_alignLeft="@id/item_header_comic_title"
             android:layout_marginTop="6dp"
             android:ellipsize="end"
-            android:maxLines="5"
+            android:maxLines="4"
             android:textColor="@color/white"
             android:textSize="12sp" />
     </RelativeLayout>
