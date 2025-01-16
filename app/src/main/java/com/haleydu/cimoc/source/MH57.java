@@ -113,7 +113,7 @@
 //        for (Node node : body.list("#chapterList > ul > li > a")) {
 //            String title = node.text();
 //            String path = node.hrefWithSplit(1);
-//            list.add(new Chapter(Long.parseLong(sourceComic + "000" + i++), sourceComic, title, path));
+//            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
 //        }
 //        return list;
 //    }
@@ -140,7 +140,7 @@
 //                        url = servers[0] + url;
 //                    }
 //                    Long comicChapter = chapter.getId();
-//                    Long id = Long.parseLong(comicChapter + "000" + i);
+//                    Long id = Long.parseLong(comicChapter + "0" + i);
 //                    list.add(new ImageUrl(id, comicChapter, i + 1, url, false));
 //                }
 //            } catch (Exception e) {

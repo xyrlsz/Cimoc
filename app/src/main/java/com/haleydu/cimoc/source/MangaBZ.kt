@@ -81,7 +81,7 @@ class MangaBZ(source: Source?) : MangaParser() {
             val path = node.href().trim('/')
 
             //list.add(Chapter(title, path))
-            list.add(Chapter((sourceComic.toString() + "000" + i++).toLong(), sourceComic, title, path))
+            list.add(Chapter((sourceComic.toString() + "0" + i++).toLong(), sourceComic, title, path))
         }
         return list
     }
@@ -117,7 +117,7 @@ class MangaBZ(source: Source?) : MangaParser() {
                 //list.add(ImageUrl(i + 1, url, true))
 
                 val comicChapter = chapter.id
-                val id = (comicChapter.toString() + "000" + i).toLong()
+                val id = (comicChapter.toString() + "0" + i).toLong()
                 list.add(ImageUrl(id, comicChapter, i + 1, url, true))
             }
         } catch (e: Exception) {

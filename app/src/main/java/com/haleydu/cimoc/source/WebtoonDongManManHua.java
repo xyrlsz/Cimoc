@@ -98,7 +98,7 @@ public class WebtoonDongManManHua extends MangaParser {
         for (Node node : body.list("ul#_listUl > li > a")) {
             String title = node.text("span.subj > span")+" "+node.text("span.tx");
             String path = "https:" + node.href();
-            list.add(new Chapter(Long.parseLong(sourceComic + "000" + k++), sourceComic, title, path));
+            list.add(new Chapter(Long.parseLong(sourceComic + "0" + k++), sourceComic, title, path));
         }
         return list;
     }
@@ -155,7 +155,7 @@ public class WebtoonDongManManHua extends MangaParser {
         int i = 1;
         for (Node node : body.list("div#_imageList > img")) {
             Long comicChapter = chapter.getId();
-            Long id = Long.parseLong(comicChapter + "000" + i);
+            Long id = Long.parseLong(comicChapter + "0" + i);
             String url = node.attr("img", "data-url");
             list.add(new ImageUrl(id, comicChapter, i++, url, false));
         }
@@ -177,7 +177,7 @@ public class WebtoonDongManManHua extends MangaParser {
                 String key = Json_Iterator.next();
                 if (key.contains("layer")) {
                     Long comicChapter = chapter.getId();
-                    Long id = Long.parseLong(comicChapter + "000" + i);
+                    Long id = Long.parseLong(comicChapter + "0" + i);
                     list.add(new ImageUrl(id, comicChapter, i++, motiontoonPath + motiontoonJson.getString(key), false));
                 }
             }

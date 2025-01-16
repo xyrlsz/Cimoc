@@ -118,7 +118,7 @@ public class HHAAZZ extends MangaParser {
             for (Node cnode : node.list("li")) {
                 String title = cnode.attr("a", "title").replace(this.title, "").trim();
                 String path = cnode.href("a");
-                list.add(new Chapter(Long.parseLong(sourceComic + "000" + i++), sourceComic, title, path));
+                list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
             }
         }
         return list;
@@ -145,7 +145,7 @@ public class HHAAZZ extends MangaParser {
         int i = 1;
         for (Node node : body.list("#iPageHtm > a")) {
             Long comicChapter = chapter.getId();
-            Long id = Long.parseLong(comicChapter + "000" + i);
+            Long id = Long.parseLong(comicChapter + "0" + i);
             list.add(new ImageUrl(id, comicChapter, i,
                     StringUtils.format(baseUrl+"/%s/%d.html?s=%s&d=0", pathId, i, pathS),
                     true));

@@ -138,14 +138,14 @@ public class Mangakakalot extends MangaParser {
             for (Node node : body.list(".chapter-list > div")) {
                 String title = node.text("span > a");
                 String path = node.href("span > a");
-                set.add(new Chapter(Long.parseLong(sourceComic + "000" + i++), sourceComic, title, path));
+                set.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
             }
         }else if (cidUrl.contains("manganelo")){
             int i=0;
             for (Node node : body.list(".row-content-chapter > li")) {
                 String title = node.text("a");
                 String path = node.href("a");
-                set.add(new Chapter(Long.parseLong(sourceComic + "000" + i++), sourceComic, title, path));
+                set.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
             }
         }
         return new LinkedList<>(set);
@@ -178,13 +178,13 @@ public class Mangakakalot extends MangaParser {
         if (cidUrl.contains("mangakakalot")){
             for (Node node : body.list("div#vungdoc > img")) {
                 Long comicChapter = chapter.getId();
-                Long id = Long.parseLong(comicChapter + "000" + i);
+                Long id = Long.parseLong(comicChapter + "0" + i);
                 list.add(new ImageUrl(id,comicChapter,++i, node.src(), false));
             }
         }else if (cidUrl.contains("manganelo")){
             for (Node node : body.list("div.container-chapter-reader > img")) {
                 Long comicChapter = chapter.getId();
-                Long id = Long.parseLong(comicChapter + "000" + i);
+                Long id = Long.parseLong(comicChapter + "0" + i);
                 list.add(new ImageUrl(id,comicChapter,++i, node.src(), false));
             }
         }

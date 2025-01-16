@@ -156,7 +156,7 @@ public class Manhuatai extends MangaParser {
         for (Node node : new Node(html).list("ol#j_chapter_list > li > a")) {
             String title = node.attr("title");
             String path = node.hrefWithSplit(1);
-            list.add(new Chapter(Long.parseLong(sourceComic + "000" + i++), sourceComic, title, path));
+            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
         }
         return Lists.reverse(list);
     }
@@ -185,7 +185,7 @@ public class Manhuatai extends MangaParser {
                 JSONArray imgUrl = currChapter.getJSONArray("chapter_img_list");
                 for (int index = currChapter.getInt("start_num"); index <= currChapter.getInt("end_num"); index++) {
                     Long comicChapter = chapter.getId();
-                    Long id = Long.parseLong(comicChapter + "000" + index);
+                    Long id = Long.parseLong(comicChapter + "0" + index);
                     String image = imgUrl.getString(index - 1);
 
                     list.add(new ImageUrl(id, comicChapter, index, image, false));
@@ -212,7 +212,7 @@ public class Manhuatai extends MangaParser {
 //
 //            for (int index = chapterNew.getInt("start_num"); index <= chapterNew.getInt("end_num"); index++) {
 //                Long comicChapter = chapter.getId();
-//                Long id = Long.parseLong(comicChapter + "000" + index);
+//                Long id = Long.parseLong(comicChapter + "0" + index);
 //
 //                String image = ImagePattern.replaceFirst("\\$\\$", Integer.toString(index));
 //                list.add(new ImageUrl(id, comicChapter, index, image, false));

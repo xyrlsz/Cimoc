@@ -147,7 +147,7 @@
 //        for (int i = 0; i < array.length(); ++i) {
 //            String title = array.getJSONObject(i).getString("name");
 //            String path = array.getJSONObject(i).getString("uuid");
-//            list.add(new Chapter(Long.parseLong(sourceComic + "000" + i), sourceComic, title, path, "默认"));
+//            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i), sourceComic, title, path, "默认"));
 //        }
 //        try {
 //            JSONObject groups = (JSONObject) comic.note;
@@ -168,7 +168,7 @@
 //                for (int i = 0; i < array.length(); ++i) {
 //                    String title = array.getJSONObject(i).getString("name");
 //                    String path = array.getJSONObject(i).getString("uuid");
-//                    list.add(new Chapter(Long.parseLong(sourceComic + "000" + i), sourceComic, title, path, PathName));
+//                    list.add(new Chapter(Long.parseLong(sourceComic + "0" + i), sourceComic, title, path, PathName));
 //                }
 //
 //            }
@@ -206,7 +206,7 @@
 //            JSONArray array = new JSONArray(jsonString);
 //            for (int i = 0; i < array.length(); ++i) {
 //                Long comicChapter = chapter.getId();
-//                Long id = Long.parseLong(comicChapter + "000" + i);
+//                Long id = Long.parseLong(comicChapter + "0" + i);
 //                String url = array.getJSONObject(i).getString("url");
 //                list.add(new ImageUrl(id, comicChapter,i + 1, url, false));
 //            }

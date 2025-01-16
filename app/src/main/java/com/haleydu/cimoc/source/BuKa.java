@@ -127,7 +127,7 @@ public class BuKa extends MangaParser {
         for (Node node : new Node(html).list("div.chapter-center > a")) {
             String title = node.text();
             String path = node.href().split("/")[3];
-            list.add(new Chapter(Long.parseLong(sourceComic + "000" + i++), sourceComic, title, path));
+            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
         }
         return list;
     }
@@ -150,7 +150,7 @@ public class BuKa extends MangaParser {
                 int i = 0;
                 do {
                     Long comicChapter = chapter.getId();
-                    Long id = Long.parseLong(comicChapter + "000" + i);
+                    Long id = Long.parseLong(comicChapter + "0" + i);
                     list.add(new ImageUrl(id,comicChapter,++i, StringUtils.match("http.*jpg", m.group(0), 0), false));
                 } while (m.find());
             } catch (Exception e) {

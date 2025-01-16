@@ -96,7 +96,7 @@
 //            String title = node.text();
 //            String path = node.href();
 //            path = path.substring(17, path.length() - 1);
-//            list.add(new Chapter(Long.parseLong(sourceComic + "000" + i++), sourceComic, title, path));
+//            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
 //        }
 //        Collections.reverse(list);
 //        return list;
@@ -119,7 +119,7 @@
 //        int page = Integer.parseInt(NumMatcher.group(1));
 //        for (int i = 1; i <= page; ++i) {
 //            Long comicChapter = chapter.getId();
-//            Long id = Long.parseLong(comicChapter + "000" + i);
+//            Long id = Long.parseLong(comicChapter + "0" + i);
 //            list.add(new ImageUrl(id,comicChapter,i, StringUtils.format("%s//%03d.jpg", pageMatcher.group(1), i), false));
 //        }
 //        return list;

@@ -133,7 +133,7 @@
 //                String comic_id = chapter.getString("comic_id");
 //                String chapter_id = chapter.getString("id");
 //                String path = comic_id + "/" + chapter_id;
-//                list.add(new Chapter(Long.parseLong(sourceComic + "000" + i + 1), sourceComic, title, path, "默认线路"));
+//                list.add(new Chapter(Long.parseLong(sourceComic + "0" + i + 1), sourceComic, title, path, "默认线路"));
 //                list1.add(new Chapter(Long.parseLong(sourceComic + "001" + i + 1), sourceComic, title.concat(" (备用)"), path + "x", "备用线路"));
 //
 //
@@ -165,7 +165,7 @@
 //        for (int i = 0; i < root.length(); i++) {
 //            Long comicChapter = chapter.getId();
 //            String url = root.getString(i);
-//            Long id = Long.parseLong(comicChapter + "000" + i);
+//            Long id = Long.parseLong(comicChapter + "0" + i);
 //
 //            if (flag.startsWith("001")) {
 //                url = url.replace("dmzj", "dmzj1");

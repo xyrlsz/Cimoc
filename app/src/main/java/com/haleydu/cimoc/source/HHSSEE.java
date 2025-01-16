@@ -100,7 +100,7 @@
 ////            } else {
 ////                sourceComic = Long.parseLong(comic.getSource() + sourceToComic + comic.getId());
 ////            }
-////            Long id = Long.parseLong(sourceComic+"000"+i);
+////            Long id = Long.parseLong(sourceComic+"0"+i);
 ////
 ////            String title = node.text();
 ////            title = title.replaceFirst(name, "").trim();
@@ -129,7 +129,7 @@
 ////        String server = body.attr("#hdS", "value");
 ////        for (int i = 1; i <= page; ++i) {
 ////            Long comicChapter = chapter.getId();
-////            Long id = Long.parseLong(comicChapter + "000" + i);
+////            Long id = Long.parseLong(comicChapter + "0" + i);
 ////            list.add(new ImageUrl(id, comicChapter, i, StringUtils.format("http://www.hhmmoo.com/page%s/%d.html?s=%s", path, i, server), true));
 ////        }
 ////        return list;

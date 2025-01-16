@@ -138,7 +138,7 @@ public class Dmzj extends MangaParser {
                     String comic_id = chapter.getString("comic_id");
                     String chapter_id = chapter.getString("id");
                     String path = comic_id + "/" + chapter_id;
-                    list.add(new Chapter(Long.parseLong(sourceComic + "000" + k++), sourceComic, tag + " " + title, path));
+                    list.add(new Chapter(Long.parseLong(sourceComic + "0" + k++), sourceComic, tag + " " + title, path));
                 }
             }
 
@@ -173,7 +173,7 @@ public class Dmzj extends MangaParser {
                 JSONArray array = new JSONArray(jsonString);
                 for (int i = 0; i != array.length(); ++i) {
                     Long comicChapter = chapter.getId();
-                    Long id = Long.parseLong(comicChapter + "000" + i);
+                    Long id = Long.parseLong(comicChapter + "0" + i);
                     list.add(new ImageUrl(id, comicChapter, i + 1, array.getString(i), false));
                 }
             } catch (Exception e) {

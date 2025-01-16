@@ -110,7 +110,7 @@ public class Cartoonmad extends MangaParser {
         while (mChapter.find()) {
             String title = mChapter.group(2);
             String path = mChapter.group(1);
-            list.add(new Chapter(Long.parseLong(sourceComic + "000" + i++), sourceComic, title, path));
+            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
         }
         return Lists.reverse(list);
     }
@@ -133,7 +133,7 @@ public class Cartoonmad extends MangaParser {
         int page = Integer.parseInt(pageMatcher.group(2));
         for (int i = 1; i <= page; ++i) {
             Long comicChapter = chapter.getId();
-            Long id = Long.parseLong(comicChapter + "000" + i);
+            Long id = Long.parseLong(comicChapter + "0" + i);
             list.add(new ImageUrl(id, comicChapter, i, StringUtils.format("https://www.cartoonmad.com/comic/%s%03d.html", pageMatcher.group(1), i), true));
         }
         return list;

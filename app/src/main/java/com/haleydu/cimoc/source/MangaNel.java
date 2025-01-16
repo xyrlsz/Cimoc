@@ -134,7 +134,7 @@ public class MangaNel extends MangaParser {
         for (Node node : body.list(".row-content-chapter > li")) {
             String title = node.text("a");
             String path = node.href("a");
-            set.add(new Chapter(Long.parseLong(sourceComic + "000" + i++), sourceComic, title, path));
+            set.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
         }
         return new LinkedList<>(set);
     }
@@ -165,7 +165,7 @@ public class MangaNel extends MangaParser {
         int i = 0;
         for (Node node : body.list("div.container-chapter-reader > img")) {
             Long comicChapter = chapter.getId();
-            Long id = Long.parseLong(comicChapter + "000" + i);
+            Long id = Long.parseLong(comicChapter + "0" + i);
             list.add(new ImageUrl(id, comicChapter, ++i, node.src(), false));
         }
         return list;

@@ -108,7 +108,7 @@
 //        for (Node node : new Node(html).list("div.tabs_block > ul > li > a")) {
 //            String title = node.text();
 //            String path = node.href();
-//            list.add(new Chapter(Long.parseLong(sourceComic + "000" + i++), sourceComic, title, path));
+//            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
 //        }
 //        return list;
 //    }
@@ -130,7 +130,7 @@
 //                for (int i = 0; i != array.length; ++i) {
 //                    String path = array[i].replace("\"","").replace("\\","");
 //                    Long comicChapter = chapter.getId();
-//                    Long id = Long.parseLong(comicChapter + "000" + i);
+//                    Long id = Long.parseLong(comicChapter + "0" + i);
 //                    list.add(new ImageUrl(id,comicChapter,i + 1, host+"/"+path, false));
 //                }
 //            } catch (Exception e) {

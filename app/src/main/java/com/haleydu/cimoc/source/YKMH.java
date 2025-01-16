@@ -130,7 +130,7 @@ public class YKMH extends MangaParser {
             String title = node.text();
 //            String path = StringUtils.split(node.href(), "/", 3);
             String path = node.hrefWithSubString(1);
-            list.add(new Chapter(Long.parseLong(sourceComic + "000" + i++), sourceComic, title, path));
+            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
         }
         return list;
     }
@@ -158,7 +158,7 @@ public class YKMH extends MangaParser {
             for (int i = 0; i < array.length(); i++) {
                 String url = StringUtils.format("https://js.tingliu.cc%s", array.getString(i));
                 Long comicChapter = chapter.getId();
-                Long id = Long.parseLong(comicChapter + "000" + i + 1);
+                Long id = Long.parseLong(comicChapter + "0" + i + 1);
                 list.add(new ImageUrl(id, comicChapter, i + 1, url, false));
 
             }

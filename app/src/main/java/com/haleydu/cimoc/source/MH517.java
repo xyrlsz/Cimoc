@@ -104,7 +104,7 @@
 //            String title = node.text("a > span");
 //            String path = node.hrefWithSplit("a", 2);
 //
-//            list.add(new Chapter(Long.parseLong(sourceComic + "000" + i++), sourceComic, title, path));
+//            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
 //        }
 //        return list;
 //    }
@@ -129,7 +129,7 @@
 //                final String url = "http://m.517manhua.com/statics/pic/?p=" + item + "&wapif=1&picid=" + mangaid + "&m_httpurl=";
 //
 //                Long comicChapter = chapter.getId();
-//                Long id = Long.parseLong(comicChapter + "000" + i);
+//                Long id = Long.parseLong(comicChapter + "0" + i);
 //                list.add(new ImageUrl(id, comicChapter, ++i, url, false));
 //            }
 //        } finally {

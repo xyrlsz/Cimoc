@@ -116,7 +116,7 @@ public class Tencent extends MangaParser {
         for (Node node : new Node(html).list("ul.normal > li.chapter-item")) {
             String title = node.text("a");
             String path = node.href("a").substring("/chapter/index/id/518333/cid/".length());
-            list.add(new Chapter(Long.parseLong(sourceComic + "000" + i++), sourceComic, title, path));
+            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
         }
         return Lists.reverse(list);
     }
@@ -163,7 +163,7 @@ public class Tencent extends MangaParser {
                 JSONArray array = object.getJSONArray("picture");
                 for (int i = 0; i != array.length(); ++i) {
                     Long comicChapter = chapter.getId();
-                    Long id = Long.parseLong(comicChapter + "000" + i);
+                    Long id = Long.parseLong(comicChapter + "0" + i);
                     list.add(new ImageUrl(id, comicChapter, i + 1, array.getJSONObject(i).getString("url"), false));
                 }
             } catch (Exception e) {

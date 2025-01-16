@@ -114,7 +114,7 @@ public class MiGu extends MangaParser {
         Matcher m = Pattern.compile("<a stat='.*?' href=\"(?:.*?)(\\d+)\\.html\" class=\"item ellipsis\" title=\"(.*?)\" data-opusname=\"(?:.*?)\" data-index=\"(?:.*?)\" data-url=\"(?:.*?)\" target=\"_blank\">").matcher(html);
         int i=0;
         while (m.find()) {
-            list.add(new Chapter(Long.parseLong(sourceComic + "000" + i++), sourceComic, m.group(2), m.group(1)));
+            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, m.group(2), m.group(1)));
         }
         return Lists.reverse(list);
     }
@@ -158,7 +158,7 @@ public class MiGu extends MangaParser {
             JSONArray jpgJsonArr = json.getJSONObject("data").getJSONArray("jpgList");
             for (int i = 0; i < jpgJsonArr.length(); i++) {
                 Long comicChapter = chapter.getId();
-                Long id = Long.parseLong(comicChapter + "000" + i);
+                Long id = Long.parseLong(comicChapter + "0" + i);
                 JSONObject j = jpgJsonArr.getJSONObject(i);
                 list.add(new ImageUrl(id, comicChapter, i + 1, j.getString("url"), false));
             }

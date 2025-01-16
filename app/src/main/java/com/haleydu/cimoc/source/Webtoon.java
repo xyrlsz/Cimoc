@@ -104,7 +104,7 @@ public class Webtoon extends MangaParser {
         for (Node node : body.list("#_episodeList > li > a")) {
             String title = node.text("div.row > div.info > p.sub_title > span");
             String path = node.hrefWithSubString(30);
-            list.add(new Chapter(Long.parseLong(sourceComic + "000" + i++), sourceComic, title, path));
+            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
         }
         return list;
     }
@@ -125,7 +125,7 @@ public class Webtoon extends MangaParser {
                 int size = array.length();
                 for (int i = 0; i != size; ++i) {
                     Long comicChapter = chapter.getId();
-                    Long id = Long.parseLong(comicChapter + "000" + i);
+                    Long id = Long.parseLong(comicChapter + "0" + i);
                     JSONObject object = array.getJSONObject(i);
                     list.add(new ImageUrl(id, comicChapter, i + 1, object.getString("url"), false));
                 }

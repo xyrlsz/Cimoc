@@ -119,14 +119,14 @@
 //            for (Node node : new Node(ChapterHtml).list("div.cy_plist > ul > li")) {
 //                String title = node.text();
 //                String path = node.hrefWithSplit("a", 1);
-//                list.add(new Chapter(Long.parseLong(sourceComic + "000" + i++), sourceComic, title, path));
+//                list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
 //            }
 //            JSONArray array = new JSONArray(html);
 //            for (int k = 0; k != array.length(); ++k) {
 //                JSONObject chapter = array.getJSONObject(k);
 //                String title = chapter.getString("chaptername");
 //                String path = chapter.getString("chapterid");
-//                list.add(new Chapter(Long.parseLong(sourceComic + "000" + i++), sourceComic, title, path));
+//                list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
 //            }
 //        } catch (Exception e) {
 //            e.printStackTrace();
@@ -150,7 +150,7 @@
 //        int i = 0;
 //        for (String url : Objects.requireNonNull(str).split(",")) {
 //            Long comicChapter = chapter.getId();
-//            Long id = Long.parseLong(comicChapter + "000" + i);
+//            Long id = Long.parseLong(comicChapter + "0" + i);
 //            list.add(new ImageUrl(id, comicChapter, ++i, url, false));
 //        }
 //
