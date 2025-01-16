@@ -45,7 +45,7 @@ Online manga reader based on Android
 - [Rhino](https://github.com/mozilla/rhino)
 - [BlazingChain](https://github.com/tommyettinger/BlazingChain)
 - [AppUpdater](https://gitee.com/jenly1314/AppUpdater)
-- [opencc4j](https://github.com/houbb/opencc4j)
+- [OpenCC for Go](https://github.com/longbridge/opencc)
 
 # 应用截图
 <img src="./screenshot/01.png" width="250">
