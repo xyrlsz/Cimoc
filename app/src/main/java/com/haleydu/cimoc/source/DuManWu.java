@@ -99,8 +99,9 @@ public class DuManWu extends MangaParser {
         String title = body.text(".banner-title");
         String cover = body.attr(".banner-pic", "data-src");
         String author = body.text(".author").split(" ")[0].replace("作者：", "");
+        String update = body.text(".author").split(" ")[1];
         String intro = body.text(".introduction");
-        comic.setInfo(title, cover, "", intro, author, false);
+        comic.setInfo(title, cover, update, intro, author, false);
         return comic;
     }
 
