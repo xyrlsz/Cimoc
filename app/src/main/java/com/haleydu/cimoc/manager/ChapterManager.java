@@ -1,13 +1,9 @@
 package com.haleydu.cimoc.manager;
 
-import android.util.Log;
-
 import com.haleydu.cimoc.component.AppGetter;
+import com.haleydu.cimoc.database.AppDatabase;
 import com.haleydu.cimoc.model.Chapter;
-import com.haleydu.cimoc.model.ChapterDao;
-import com.haleydu.cimoc.model.ChapterDao.Properties;
-import com.haleydu.cimoc.model.Comic;
-import com.haleydu.cimoc.model.ComicDao;
+import com.haleydu.cimoc.utils.ObservableUtils;
 
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -17,15 +13,16 @@ import rx.Observable;
 
 /**
  * Created by Hiroshi on 2016/7/9.
+ * Modified for Room database.
  */
 public class ChapterManager {
 
     private static ChapterManager mInstance;
 
-    private ChapterDao mChapterDao;
+    private AppDatabase mDatabase;
 
     private ChapterManager(AppGetter getter) {
-        mChapterDao = getter.getAppInstance().getDaoSession().getChapterDao();
+        mDatabase = getter.getAppInstance().getAppDatabase();
     }
 
     public static ChapterManager getInstance(AppGetter getter) {
@@ -40,67 +37,63 @@ public class ChapterManager {
     }
 
     public void runInTx(Runnable runnable) {
-        mChapterDao.getSession().runInTx(runnable);
+        mDatabase.runInTransaction(runnable);
     }
 
     public <T> T callInTx(Callable<T> callable) {
-        return mChapterDao.getSession().callInTxNoException(callable);
+        return mDatabase.runInTransaction(callable);
     }
 
     public Observable<List<Chapter>> getListChapter(Long sourceComic) {
-        return mChapterDao.queryBuilder()
-                .where(Properties.SourceComic.eq(sourceComic))
-                .rx()
-                .list();
+        return ObservableUtils.V3toV1(mDatabase.chapterDao().findBySourceComicRx(sourceComic).toObservable());
     }
 
-    public List<Chapter> getChapter(String path,String title) {
-        return mChapterDao.queryBuilder()
-                .where(ChapterDao.Properties.Path.eq(path),ChapterDao.Properties.Title.eq(title))
-                .list();
+    public List<Chapter> getChapter(String path, String title) {
+        return mDatabase.chapterDao().findByPathAndTitle(path, title);
     }
-
 
     public Chapter load(long id) {
-        return mChapterDao.load(id);
+        return mDatabase.chapterDao().findById(id);
     }
 
-
     public void cancelHighlight() {
-        mChapterDao.getDatabase().execSQL("UPDATE \"COMIC\" SET \"HIGHLIGHT\" = 0 WHERE \"HIGHLIGHT\" = 1");
+        mDatabase.comicDao().cancelHighlight();
     }
 
     public void updateOrInsert(List<Chapter> chapterList) {
-        for (Chapter chapter : chapterList) {
-            if (chapter.getId() == null) {
-                insert(chapter);
-            } else {
-                update(chapter);
+        mDatabase.runInTransaction(() -> {
+            for (Chapter chapter : chapterList) {
+                if (chapter.getId() == null) {
+                    insert(chapter);
+                } else {
+                    update(chapter);
+                }
             }
-        }
+        });
     }
 
     public void insertOrReplace(List<Chapter> chapterList) {
-        for (Chapter chapter:chapterList) {
-            if (chapter.getId()!=null) {
-                mChapterDao.insertOrReplace(chapter);
+        mDatabase.runInTransaction(() -> {
+            for (Chapter chapter : chapterList) {
+                if (chapter.getId() != null) {
+                    mDatabase.chapterDao().insertOrReplace(chapter);
+                }
             }
-        }
+        });
     }
 
     public void update(Chapter chapter) {
-        if (chapter.getId()!=null) {
-            mChapterDao.update(chapter);
+        if (chapter.getId() != null) {
+            mDatabase.chapterDao().update(chapter);
         }
     }
 
     public void deleteByKey(long key) {
-        mChapterDao.deleteByKey(key);
+        mDatabase.chapterDao().deleteById(key);
     }
 
     public void insert(Chapter chapter) {
-        long id = mChapterDao.insert(chapter);
+        long id = mDatabase.chapterDao().insert(chapter);
         chapter.setId(id);
     }
-
 }

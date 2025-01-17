@@ -1,11 +1,11 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'org.greenrobot.greendao'
-apply plugin: 'com.google.gms.google-services' // Google Services plugin
+//apply plugin: 'org.greenrobot.greendao'
+//apply plugin: 'com.google.gms.google-services' // Google Services plugin
 //apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'com.huawei.agconnect'
 
-def getGitCommitHash = { ->
+def getGitCommitHash = {->
     def stdout = new ByteArrayOutputStream()
     exec {
         commandLine 'git', 'rev-parse', '--short', 'HEAD'
@@ -14,7 +14,7 @@ def getGitCommitHash = { ->
     return stdout.toString().trim()
 }
 
-def getGitTagName = { ->
+def getGitTagName = {->
     try {
         def stdout = new ByteArrayOutputStream()
         exec {
@@ -27,7 +27,7 @@ def getGitTagName = { ->
     }
 }
 
-def getGitCommitCount = { ->
+def getGitCommitCount = {->
     try {
         def stdout = new ByteArrayOutputStream()
         exec {
@@ -50,19 +50,23 @@ if (System.getenv("CI_BUILD_NUMBER") != null) { // 兼容 CI/CD
 // if(System.getenv("GIT_COMMIT_HASH")!=null){
 //     version = getGitTagName()+"-"+System.getenv("GIT_COMMIT_HASH")
 // }
-
+kotlin {
+    jvmToolchain(11) // 或者你希望使用的 Java 版本
+}
 android {
-    compileSdk 30
+    compileSdk 35
 
     lintOptions {
         abortOnError false
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
+
+    namespace "com.haleydu.cimoc"
     defaultConfig {
         applicationId "com.haleydu.cimoc"
         minSdkVersion 21
@@ -113,9 +117,9 @@ android {
     }
 }
 
-greendao {
-    schemaVersion 12
-}
+//greendao {
+//    schemaVersion 12
+//}
 
 dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
@@ -127,7 +131,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.4.0'
     implementation 'com.jakewharton:butterknife:10.2.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:10.1.0'
-    implementation 'org.greenrobot:greendao:3.3.0'
+//    implementation 'org.greenrobot:greendao:3.3.0'
     //noinspection GradleDependency : for support android low api devices,not update OKHTTP
     implementation 'com.squareup.okhttp3:okhttp:3.12.3'
     implementation 'com.facebook.fresco:fresco:2.3.0'
@@ -142,17 +146,29 @@ dependencies {
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'com.alibaba:fastjson:1.2.62'
-    implementation "androidx.core:core-ktx:1.6.0"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.5.10"
+    implementation "androidx.core:core-ktx:1.15.0"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.0"
+//    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.1.0"
 //    implementation 'com.google.firebase:firebase-analytics:19.0.0'
 //    implementation 'com.google.firebase:firebase-crashlytics:18.1.0'
 //    implementation 'com.google.firebase:firebase-config:21.0.0'
     implementation 'com.king.app:app-updater:1.0.8-androidx'
     implementation 'com.king.app:app-dialog:1.0.8-androidx'
     implementation 'com.iqiyi.xcrash:xcrash-android-lib:3.0.0'
+    implementation "androidx.room:room-runtime:2.6.1"
+    annotationProcessor "androidx.room:room-compiler:2.6.1"
+    implementation "com.github.akarnokd:rxjava3-interop:3.0.2"
+    implementation 'io.reactivex.rxjava3:rxjava:3.1.5'
+    implementation 'io.reactivex.rxjava3:rxandroid:3.0.2'
+    implementation "androidx.room:room-rxjava3:2.6.1"  // Use the correct version of Room
+//    implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
+    // Because RxAndroid releases are few and far between, it is recommended you also
+    // explicitly depend on RxJava's latest version for bug fixes and new features.
+    // (see https://github.com/ReactiveX/RxJava/releases for latest 3.x.x version)
+//    implementation 'io.reactivex.rxjava3:rxjava:3.1.5'
 
     testImplementation 'junit:junit:4.13.2'
-    
+
     // AndroidX Test libraries
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'

@@ -1,29 +1,26 @@
 package com.haleydu.cimoc.model;
 
-import org.greenrobot.greendao.annotation.Entity;
-import org.greenrobot.greendao.annotation.Generated;
-import org.greenrobot.greendao.annotation.Id;
-import org.greenrobot.greendao.annotation.NotNull;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+import androidx.room.ColumnInfo;
 
-/**
- * Created by Hiroshi on 2016/10/10.
- */
-@Entity
+@Entity(tableName = "tag")
 public class Tag {
 
-    @Id(autoincrement = true)
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "id")
     private Long id;
-    @NotNull
-    private String title;
 
-    @Generated(hash = 836804519)
-    public Tag(Long id, @NotNull String title) {
-        this.id = id;
-        this.title = title;
+    @ColumnInfo(name = "title")
+    private String title;
+    @Ignore
+    public Tag() {
     }
 
-    @Generated(hash = 1605720318)
-    public Tag() {
+    public Tag(Long id,   String title) {
+        this.id = id;
+        this.title = title;
     }
 
     @Override
@@ -51,5 +48,4 @@ public class Tag {
     public void setTitle(String title) {
         this.title = title;
     }
-
 }

@@ -3,16 +3,12 @@ package com.haleydu.cimoc.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import org.greenrobot.greendao.annotation.Entity;
-import org.greenrobot.greendao.annotation.Generated;
-import org.greenrobot.greendao.annotation.Id;
-import org.greenrobot.greendao.annotation.NotNull;
-import org.greenrobot.greendao.annotation.Transient;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+import androidx.room.ColumnInfo;
+import androidx.room.Ignore;
 
-/**
- * Created by Hiroshi on 2016/9/1.
- */
-@Entity
+@Entity(tableName = "task")
 public class Task implements Parcelable {
 
     public static final int STATE_FINISH = 0;
@@ -21,7 +17,8 @@ public class Task implements Parcelable {
     public static final int STATE_DOING = 3;
     public static final int STATE_WAIT = 4;
     public static final int STATE_ERROR = 5;
-    public final static Parcelable.Creator<Task> CREATOR = new Parcelable.Creator<Task>() {
+
+    public static final Parcelable.Creator<Task> CREATOR = new Parcelable.Creator<Task>() {
         @Override
         public Task createFromParcel(Parcel source) {
             return new Task(source);
@@ -32,25 +29,49 @@ public class Task implements Parcelable {
             return new Task[size];
         }
     };
-    @Id(autoincrement = true)
-    private Long id;
-    @NotNull
-    private long key;      // 漫画主键
-    @NotNull
-    private String path;
-    @NotNull
-    private String title;
-    @NotNull
-    private int progress;
-    @NotNull
-    private int max;
-    @Transient
-    private int source;
-    @Transient
-    private String cid;  // 漫画 ID
-    @Transient
-    private int state;
 
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "id")
+    private Long id;
+
+    @ColumnInfo(name = "key")
+    private long key;      // 漫画主键
+
+    @ColumnInfo(name = "path")
+    private String path;
+
+    @ColumnInfo(name = "title")
+    private String title;
+
+    @ColumnInfo(name = "progress")
+
+    private int progress;
+
+    @ColumnInfo(name = "max")
+
+    private int max;
+
+    @Ignore
+    private int source;
+
+    @Ignore
+    private String cid;  // 漫画 ID
+
+    @Ignore
+    private int state;
+    @Ignore
+    public Task() {
+    }
+
+    public Task(Long id, long key, String path,  String title, int progress, int max) {
+        this.id = id;
+        this.key = key;
+        this.path = path;
+        this.title = title;
+        this.progress = progress;
+        this.max = max;
+    }
+    @Ignore
     public Task(Parcel source) {
         this.id = source.readLong();
         this.key = source.readLong();
@@ -61,21 +82,6 @@ public class Task implements Parcelable {
         this.source = source.readInt();
         this.cid = source.readString();
         this.state = source.readInt();
-    }
-
-    @Generated(hash = 1668809946)
-    public Task(Long id, long key, @NotNull String path, @NotNull String title, int progress,
-                int max) {
-        this.id = id;
-        this.key = key;
-        this.path = path;
-        this.title = title;
-        this.progress = progress;
-        this.max = max;
-    }
-
-    @Generated(hash = 733837707)
-    public Task() {
     }
 
     @Override
@@ -181,5 +187,4 @@ public class Task implements Parcelable {
         dest.writeString(cid);
         dest.writeInt(state);
     }
-
 }

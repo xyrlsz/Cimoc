@@ -1,27 +1,27 @@
 package com.haleydu.cimoc.manager;
 
 import com.haleydu.cimoc.component.AppGetter;
+import com.haleydu.cimoc.database.AppDatabase;
 import com.haleydu.cimoc.model.Task;
-import com.haleydu.cimoc.model.TaskDao;
-import com.haleydu.cimoc.model.TaskDao.Properties;
-
-import org.greenrobot.greendao.query.QueryBuilder;
+import com.haleydu.cimoc.utils.ObservableUtils;
 
 import java.util.List;
 
 import rx.Observable;
 
+
 /**
  * Created by Hiroshi on 2016/9/4.
+ * Modified for Room database.
  */
 public class TaskManager {
 
     private static TaskManager mInstance;
 
-    private TaskDao mTaskDao;
+    private AppDatabase mDatabase;
 
     private TaskManager(AppGetter getter) {
-        mTaskDao = getter.getAppInstance().getDaoSession().getTaskDao();
+        mDatabase = getter.getAppInstance().getAppDatabase();
     }
 
     public static TaskManager getInstance(AppGetter getter) {
@@ -36,79 +36,62 @@ public class TaskManager {
     }
 
     public List<Task> list() {
-        return mTaskDao.queryBuilder().list();
+        return mDatabase.taskDao().getAllTasks();
     }
 
     public List<Task> listValid() {
-        return mTaskDao.queryBuilder()
-                .where(Properties.Max.notEq(0))
-                .list();
+        return mDatabase.taskDao().getValidTasks();
     }
 
     public List<Task> list(long key) {
-        return mTaskDao.queryBuilder()
-                .where(Properties.Key.eq(key))
-                .list();
+        return mDatabase.taskDao().getTasksByKey(key);
     }
 
     public Observable<List<Task>> listInRx(long key) {
-        return mTaskDao.queryBuilder()
-                .where(Properties.Key.eq(key))
-                .rx()
-                .list();
+        return ObservableUtils.V3toV1(mDatabase.taskDao().getTasksByKeyRx(key).toObservable());
     }
 
     public Observable<List<Task>> listInRx() {
-        return mTaskDao.queryBuilder()
-                .rx()
-                .list();
+        return ObservableUtils.V3toV1( mDatabase.taskDao().getAllTasksRx().toObservable());
     }
 
     public void insert(Task task) {
-        long id = mTaskDao.insert(task);
+        long id = mDatabase.taskDao().insert(task);
         task.setId(id);
     }
 
     public void insertInTx(Iterable<Task> entities) {
-        mTaskDao.insertInTx(entities);
+        mDatabase.taskDao().insertTasks(entities);
     }
 
     public void update(Task task) {
-        mTaskDao.update(task);
+        mDatabase.taskDao().update(task);
     }
 
     public void delete(Task task) {
-        mTaskDao.delete(task);
+        mDatabase.taskDao().delete(task);
     }
 
     public void delete(long id) {
-        mTaskDao.deleteByKey(id);
+        mDatabase.taskDao().deleteById(id);
     }
 
     public void deleteInTx(Iterable<Task> entities) {
-        mTaskDao.deleteInTx(entities);
+        mDatabase.taskDao().deleteTasks(entities);
     }
 
     public void deleteByComicId(long id) {
-        mTaskDao.queryBuilder()
-                .where(Properties.Key.eq(id))
-                .buildDelete()
-                .executeDeleteWithoutDetachingEntities();
+        mDatabase.taskDao().deleteByComicId(id);
     }
 
     public void insertIfNotExist(final Iterable<Task> entities) {
-        mTaskDao.getSession().runInTx(new Runnable() {
-            @Override
-            public void run() {
-                for (Task task : entities) {
-                    QueryBuilder<Task> builder = mTaskDao.queryBuilder()
-                            .where(Properties.Key.eq(task.getKey()), Properties.Path.eq(task.getPath()));
-                    if (builder.unique() == null) {
-                        mTaskDao.insert(task);
-                    }
+        mDatabase.runInTransaction(() -> {
+            for (Task task : entities) {
+                Task existingTask = mDatabase.taskDao().findTaskByKeyAndPath(task.getKey(), task.getPath());
+                if (existingTask == null) {
+                    mDatabase.taskDao().insert(task);
                 }
             }
         });
     }
-
 }

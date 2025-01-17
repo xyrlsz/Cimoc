@@ -65,17 +65,7 @@ public class TagPresenter extends BasePresenter<TagView> {
                 mTagManager.delete(tag);
             }
         }).observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Void>() {
-                    @Override
-                    public void call(Void aVoid) {
-                        mBaseView.onTagDeleteSuccess(tag);
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        mBaseView.onTagDeleteFail();
-                    }
-                }));
+                .subscribe());
     }
 
 }

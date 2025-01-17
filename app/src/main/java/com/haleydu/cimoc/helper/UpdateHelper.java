@@ -2,11 +2,9 @@ package com.haleydu.cimoc.helper;
 
 import com.haleydu.cimoc.BuildConfig;
 import com.haleydu.cimoc.manager.PreferenceManager;
+import com.haleydu.cimoc.database.AppDatabase;
 import com.haleydu.cimoc.model.Comic;
-import com.haleydu.cimoc.model.ComicDao;
-import com.haleydu.cimoc.model.DaoSession;
 import com.haleydu.cimoc.model.Source;
-import com.haleydu.cimoc.model.SourceDao;
 import com.haleydu.cimoc.source.Animx2;
 import com.haleydu.cimoc.source.Baozi;
 import com.haleydu.cimoc.source.BuKa;
@@ -36,11 +34,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by Hiroshi on 2017/1/18.
+ * Modified for Room database.
  */
-
 public class UpdateHelper {
 
     // 1.04.08.008
@@ -49,7 +49,6 @@ public class UpdateHelper {
     private static final Map<Integer, Source> ComicSourceHash = new HashMap<>();
 
     public UpdateHelper() {
-
         ComicSourceHash.put(Animx2.TYPE, Animx2.getDefaultSource());
         ComicSourceHash.put(Baozi.TYPE, DuManWu.getDefaultSource());
         ComicSourceHash.put(BuKa.TYPE, BuKa.getDefaultSource());
@@ -62,7 +61,6 @@ public class UpdateHelper {
         ComicSourceHash.put(HHAAZZ.TYPE, HHAAZZ.getDefaultSource());
         ComicSourceHash.put(HotManga.TYPE, HotManga.getDefaultSource());
         ComicSourceHash.put(IKanman.TYPE, IKanman.getDefaultSource());
-//        ComicSourceHash.put(JMTT.TYPE, JMTT.getDefaultSource());
         ComicSourceHash.put(Mangakakalot.TYPE, Mangakakalot.getDefaultSource());
         ComicSourceHash.put(MangaBZ.TYPE, MangaBZ.getDefaultSource());
         ComicSourceHash.put(MangaNel.TYPE, MangaNel.getDefaultSource());
@@ -77,31 +75,27 @@ public class UpdateHelper {
         ComicSourceHash.put(DuManWuOrg.TYPE, DuManWuOrg.getDefaultSource());
     }
 
-    public static void update(PreferenceManager manager, final DaoSession session) {
+    public static void update(PreferenceManager manager, AppDatabase database) {
         int version = manager.getInt(PreferenceManager.PREF_APP_VERSION, 0);
         if (version != VERSION) {
-            initSource(session);
+            initSource(database);
             manager.putInt(PreferenceManager.PREF_APP_VERSION, VERSION);
         }
-        new UpdateHelper().updateComicSource(session);
+        new UpdateHelper().updateComicSource(database);
     }
 
     /**
      * app: 1.4.8.0 -> 1.4.8.1
      * 删除本地漫画中 download 字段的值
      */
-    private static void deleteDownloadFromLocal(final DaoSession session) {
-        session.runInTx(new Runnable() {
-            @Override
-            public void run() {
-                ComicDao dao = session.getComicDao();
-                List<Comic> list = dao.queryBuilder().where(ComicDao.Properties.Local.eq(true)).list();
-                if (!list.isEmpty()) {
-                    for (Comic comic : list) {
-                        comic.setDownload(null);
-                    }
-                    dao.updateInTx(list);
+    private static void deleteDownloadFromLocal(final AppDatabase database) {
+        database.runInTransaction(() -> {
+            List<Comic> list = database.comicDao().findLocalComics();
+            if (!list.isEmpty()) {
+                for (Comic comic : list) {
+                    comic.setDownload(null);
                 }
+                database.comicDao().updateComics(list);
             }
         });
     }
@@ -109,92 +103,72 @@ public class UpdateHelper {
     /**
      * 初始化图源
      */
-    private static void initSource(DaoSession session) {
-
+    private static void initSource(AppDatabase database) {
         List<Source> list = new ArrayList<>();
         list.add(IKanman.getDefaultSource());
         list.add(Dmzjv3.getDefaultSource());
         list.add(HHAAZZ.getDefaultSource());
-//        list.add(CCTuku.getDefaultSource());
-//        list.add(U17.getDefaultSource());
         list.add(DM5.getDefaultSource());
         list.add(Webtoon.getDefaultSource());
-        //list.add(HHSSEE.getDefaultSource());
-//        list.add(MH57.getDefaultSource());
-//        list.add(MH50.getDefaultSource());
         list.add(Dmzjv2.getDefaultSource());
         list.add(MangaNel.getDefaultSource());
         list.add(Mangakakalot.getDefaultSource());
-//        list.add(PuFei.getDefaultSource());
         list.add(Cartoonmad.getDefaultSource());
         list.add(Animx2.getDefaultSource());
-//        list.add(MH517.getDefaultSource());
-//        list.add(BaiNian.getDefaultSource());
         list.add(MiGu.getDefaultSource());
         list.add(Tencent.getDefaultSource());
         list.add(BuKa.getDefaultSource());
-//        list.add(EHentai.getDefaultSource());
-//        list.add(QiManWu.getDefaultSource());
-//        list.add(Hhxxee.getDefaultSource());
-//        list.add(ChuiXue.getDefaultSource());
-//        list.add(BaiNian.getDefaultSource());
-//        list.add(TuHao.getDefaultSource());
-//        list.add(SixMH.getDefaultSource());
         list.add(MangaBZ.getDefaultSource());
-//        list.add(ManHuaDB.getDefaultSource());
         list.add(Manhuatai.getDefaultSource());
         list.add(GuFeng.getDefaultSource());
-//        list.add(CCMH.getDefaultSource());
-        list.add(Manhuatai.getDefaultSource());
-//        list.add(MHLove.getDefaultSource());
-        list.add(GuFeng.getDefaultSource());
-//        list.add(YYLS.getDefaultSource());
-//        list.add(JMTT.getDefaultSource());
-//        list.add(Ohmanhua.getDefaultSource());
-//        list.add(CopyMH.getDefaultSource());
         list.add(HotManga.getDefaultSource());
         list.add(WebtoonDongManManHua.getDefaultSource());
-//        list.add(MH160.getDefaultSource());
-//        list.add(QiMiaoMH.getDefaultSource());
         list.add(YKMH.getDefaultSource());
-//        list.add(DmzjFix.getDefaultSource());
         list.add(Dmzj.getDefaultSource());
         list.add(Baozi.getDefaultSource());
         list.add(MYCOMIC.getDefaultSource());
         list.add(DuManWu.getDefaultSource());
         list.add(DuManWuOrg.getDefaultSource());
-        session.getSourceDao().insertOrReplaceInTx(list);
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(() -> {
+            database.sourceDao().insertSources(list);
+        });
+
     }
 
-    public void updateComicSource(DaoSession session) {
-        SourceDao sourceDao = session.getSourceDao();
-        List<Source> sourceList = sourceDao.loadAll();
-        List<Source> sourcesToDelete = new ArrayList<>();
-        List<Source> sourcesToAdd = new ArrayList<>();
-        for (Source source : sourceList) {
-            if (!ComicSourceHash.containsKey(source.getType())) {
-                sourcesToDelete.add(source);
-            }
-        }
+    public void updateComicSource(AppDatabase database) {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(() -> {
+            List<Source> sourceList = database.sourceDao().getAllSources();
+            List<Source> sourcesToDelete = new ArrayList<>();
+            List<Source> sourcesToAdd = new ArrayList<>();
 
-        for (Integer cType : ComicSourceHash.keySet()) {
-            boolean isExist = false;
             for (Source source : sourceList) {
-                if (source.getType() == cType) {
-                    isExist = true;
-                    break;
+                if (!ComicSourceHash.containsKey(source.getType())) {
+                    sourcesToDelete.add(source);
                 }
             }
-            if (!isExist) {
-                sourcesToAdd.add(ComicSourceHash.get(cType));
-            }
-        }
 
-        if (!sourcesToDelete.isEmpty()) {
-            sourceDao.deleteInTx(sourcesToDelete);
-        }
-        if (!sourcesToAdd.isEmpty()) {
-            sourceDao.insertOrReplaceInTx(sourcesToAdd);
-        }
+            for (Integer cType : ComicSourceHash.keySet()) {
+                boolean isExist = false;
+                for (Source source : sourceList) {
+                    if (source.getType() == cType) {
+                        isExist = true;
+                        break;
+                    }
+                }
+                if (!isExist) {
+                    sourcesToAdd.add(ComicSourceHash.get(cType));
+                }
+            }
+
+            if (!sourcesToDelete.isEmpty()) {
+                database.sourceDao().deleteSources(sourcesToDelete);
+            }
+            if (!sourcesToAdd.isEmpty()) {
+                database.sourceDao().insertSources(sourcesToAdd);
+            }
+        });
+
     }
 }

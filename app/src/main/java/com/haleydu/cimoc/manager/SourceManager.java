@@ -3,9 +3,8 @@ package com.haleydu.cimoc.manager;
 import android.util.SparseArray;
 
 import com.haleydu.cimoc.component.AppGetter;
+import com.haleydu.cimoc.database.AppDatabase;
 import com.haleydu.cimoc.model.Source;
-import com.haleydu.cimoc.model.SourceDao;
-import com.haleydu.cimoc.model.SourceDao.Properties;
 import com.haleydu.cimoc.parser.MangaParser;
 import com.haleydu.cimoc.source.Animx2;
 import com.haleydu.cimoc.source.Baozi;
@@ -33,24 +32,33 @@ import com.haleydu.cimoc.source.Tencent;
 import com.haleydu.cimoc.source.Webtoon;
 import com.haleydu.cimoc.source.WebtoonDongManManHua;
 import com.haleydu.cimoc.source.YKMH;
+import com.haleydu.cimoc.utils.ObservableUtils;
 
 import java.util.List;
+import java.util.concurrent.Callable;
 
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import okhttp3.Headers;
 import rx.Observable;
 
+
 /**
  * Created by Hiroshi on 2016/8/11.
+ * Modified for Room database.
  */
 public class SourceManager {
 
     private static SourceManager mInstance;
 
-    private final SourceDao mSourceDao;
+    private final AppDatabase mDatabase;
     private final SparseArray<MangaParser> mParserArray = new SparseArray<>();
 
     private SourceManager(AppGetter getter) {
-        mSourceDao = getter.getAppInstance().getDaoSession().getSourceDao();
+        mDatabase = getter.getAppInstance().getAppDatabase();
     }
 
     public static SourceManager getInstance(AppGetter getter) {
@@ -65,219 +73,144 @@ public class SourceManager {
     }
 
     public Observable<List<Source>> list() {
-        return mSourceDao.queryBuilder()
-                .orderAsc(Properties.Type)
-                .rx()
-                .list();
+        return ObservableUtils.V3toV1(mDatabase.sourceDao()
+                .getAllSourcesObservable()
+                .toObservable());
     }
 
     public Observable<List<Source>> listEnableInRx() {
-        return mSourceDao.queryBuilder()
-                .where(Properties.Enable.eq(true))
-                .orderAsc(Properties.Type)
-                .rx()
-                .list();
+        return ObservableUtils.V3toV1(mDatabase.sourceDao()
+                .getEnableSourcesObservable()
+                .toObservable());
+    }
+    public void runInTx(Runnable runnable) {
+        mDatabase.runInTransaction(runnable);
+    }
+
+    public <T> T callInTx(Callable<T> callable) {
+        return mDatabase.runInTransaction(callable);
     }
 
     public List<Source> listEnable() {
-        return mSourceDao.queryBuilder()
-                .where(Properties.Enable.eq(true))
-                .orderAsc(Properties.Type)
-                .list();
+        return mDatabase.sourceDao().getEnableSources();
     }
 
-    public Source load(int type) {
-        return mSourceDao.queryBuilder()
-                .where(Properties.Type.eq(type))
-                .unique();
+    public Flowable<Source> load(int type) {
+        return mDatabase.sourceDao().getSourceByType(type);
     }
 
     public long insert(Source source) {
-        return mSourceDao.insert(source);
+        return mDatabase.sourceDao().insert(source);
     }
 
     public void update(Source source) {
-        mSourceDao.update(source);
+        mDatabase.sourceDao().update(source);
     }
 
     public MangaParser getParser(int type) {
-        MangaParser parser = mParserArray.get(type);
-        if (parser == null) {
-            Source source = load(type);
-            switch (type) {
-                case IKanman.TYPE:
-                    parser = new IKanman(source);
-                    break;
-                case Dmzjv3.TYPE:
-                    parser = new Dmzjv3(source);
-                    break;
-                case HHAAZZ.TYPE:
-                    parser = new HHAAZZ(source);
-                    break;
-//                case CCTuku.TYPE:
-//                    parser = new CCTuku(source);
-//                    break;
-//                case U17.TYPE:
-//                    parser = new U17(source);
-//                    break;
-                case DM5.TYPE:
-                    parser = new DM5(source);
-                    break;
-                case Webtoon.TYPE:
-                    parser = new Webtoon(source);
-                    break;
-//                case HHSSEE.TYPE:
-//                    parser = new HHSSEE(source);
-//                    break;
-//                case MH57.TYPE:
-//                    parser = new MH57(source);
-//                    break;
-//                case MH50.TYPE:
-//                    parser = new MH50(source);
-//                    break;
-                case Dmzjv2.TYPE:
-                    parser = new Dmzjv2(source);
-                    break;
-                case Locality.TYPE:
-                    parser = new Locality();
-                    break;
-                case MangaNel.TYPE:
-                    parser = new MangaNel(source);
-                    break;
+        final MangaParser[] parser = {mParserArray.get(type)};
+        if (parser[0] == null) {
+            Disposable disposable =  load(type).subscribeOn(AndroidSchedulers.mainThread())
+                    .observeOn(Schedulers.single())
+                    .subscribe(source -> {
+                        switch (type) {
+                            case IKanman.TYPE:
+                                parser[0] = new IKanman(source);
+                                break;
+                            case Dmzjv3.TYPE:
+                                parser[0] = new Dmzjv3(source);
+                                break;
+                            case HHAAZZ.TYPE:
+                                parser[0] = new HHAAZZ(source);
+                                break;
+                            case DM5.TYPE:
+                                parser[0] = new DM5(source);
+                                break;
+                            case Webtoon.TYPE:
+                                parser[0] = new Webtoon(source);
+                                break;
+                            case Dmzjv2.TYPE:
+                                parser[0] = new Dmzjv2(source);
+                                break;
+                            case Locality.TYPE:
+                                parser[0] = new Locality();
+                                break;
+                            case MangaNel.TYPE:
+                                parser[0] = new MangaNel(source);
+                                break;
+                            case Tencent.TYPE:
+                                parser[0] = new Tencent(source);
+                                break;
+                            case BuKa.TYPE:
+                                parser[0] = new BuKa(source);
+                                break;
+                            case Cartoonmad.TYPE:
+                                parser[0] = new Cartoonmad(source);
+                                break;
+                            case Animx2.TYPE:
+                                parser[0] = new Animx2(source);
+                                break;
+                            case MiGu.TYPE:
+                                parser[0] = new MiGu(source);
+                                break;
+                            case Manhuatai.TYPE:
+                                parser[0] = new Manhuatai(source);
+                                break;
+                            case GuFeng.TYPE:
+                                parser[0] = new GuFeng(source);
+                                break;
+                            case Mangakakalot.TYPE:
+                                parser[0] = new Mangakakalot(source);
+                                break;
+                            case HotManga.TYPE:
+                                parser[0] = new HotManga(source);
+                                break;
+                            case MangaBZ.TYPE:
+                                parser[0] = new MangaBZ(source);
+                                break;
+                            case WebtoonDongManManHua.TYPE:
+                                parser[0] = new WebtoonDongManManHua(source);
+                                break;
+                            case YKMH.TYPE:
+                                parser[0] = new YKMH(source);
+                                break;
+                            case Dmzj.TYPE:
+                                parser[0] = new Dmzj(source);
+                                break;
+                            case Baozi.TYPE:
+                                parser[0] = new Baozi(source);
+                                break;
+                            case MYCOMIC.TYPE:
+                                parser[0] = new MYCOMIC(source);
+                                break;
+                            case DuManWu.TYPE:
+                                parser[0] = new DuManWu(source);
+                                break;
+                            case DuManWuOrg.TYPE:
+                                parser[0] = new DuManWuOrg(source);
+                                break;
+                            default:
+                                parser[0] = new Null();
+                                break;
+                        }
+                    });
 
-                //feilong
-//                case PuFei.TYPE:
-//                    parser = new PuFei(source);
-//                    break;
-                case Tencent.TYPE:
-                    parser = new Tencent(source);
-                    break;
-                case BuKa.TYPE:
-                    parser = new BuKa(source);
-                    break;
-//                case EHentai.TYPE:
-//                    parser = new EHentai(source);
-//                    break;
-//                case QiManWu.TYPE:
-//                    parser = new QiManWu(source);
-//                    break;
-//                case Hhxxee.TYPE:
-//                    parser = new Hhxxee(source);
-//                    break;
-                case Cartoonmad.TYPE:
-                    parser = new Cartoonmad(source);
-                    break;
-                case Animx2.TYPE:
-                    parser = new Animx2(source);
-                    break;
-//                case MH517.TYPE:
-//                    parser = new MH517(source);
-//                    break;
-                case MiGu.TYPE:
-                    parser = new MiGu(source);
-                    break;
-//                case BaiNian.TYPE:
-//                    parser = new BaiNian(source);
-//                    break;
-//                case ChuiXue.TYPE:
-//                    parser = new ChuiXue(source);
-//                    break;
-//                case TuHao.TYPE:
-//                    parser = new TuHao(source);
-//                    break;
-//                case SixMH.TYPE:
-//                    parser = new SixMH(source);
-//                    break;
-//                case ManHuaDB.TYPE:
-//                    parser = new ManHuaDB(source);
-//                    break;
-                case Manhuatai.TYPE:
-                    parser = new Manhuatai(source);
-                    break;
-                case GuFeng.TYPE:
-                    parser = new GuFeng(source);
-                    break;
-//                case CCMH.TYPE:
-//                    parser = new CCMH(source);
-//                    break;
-//                case MHLove.TYPE:
-//                    parser = new MHLove(source);
-//                    break;
-//                case YYLS.TYPE:
-//                    parser = new YYLS(source);
-//                    break;
-//                case JMTT.TYPE:
-//                    parser = new JMTT(source);
-//                    break;
+                mParserArray.put(type, parser[0]);
+                disposable.dispose();
 
-                //haleydu
-                case Mangakakalot.TYPE:
-                    parser = new Mangakakalot(source);
-                    break;
-//                case Ohmanhua.TYPE:
-//                    parser = new Ohmanhua(source);
-//                    break;
-//                case CopyMH.TYPE:
-//                    parser = new CopyMH(source);
-//                    break;
-                case HotManga.TYPE:
-                    parser = new HotManga(source);
-                    break;
-                case MangaBZ.TYPE:
-                    parser = new MangaBZ(source);
-                    break;
-                case WebtoonDongManManHua.TYPE:
-                    parser = new WebtoonDongManManHua(source);
-                    break;
-//                case MH160.TYPE:
-//                    parser = new MH160(source);
-//                    break;
-//                case QiMiaoMH.TYPE:
-//                    parser = new QiMiaoMH(source);
-//                    break;
-                case YKMH.TYPE:
-                    parser = new YKMH(source);
-                    break;
-//                case DmzjFix.TYPE:
-//                    parser = new DmzjFix(source);
-//                    break;
-                case Dmzj.TYPE:
-                    parser = new Dmzj(source);
-                    break;
-                case Baozi.TYPE:
-                    parser = new Baozi(source);
-                    break;
-                case MYCOMIC.TYPE:
-                    parser = new MYCOMIC(source);
-                    break;
-                case DuManWu.TYPE:
-                    parser = new DuManWu(source);
-                    break;
-                case DuManWuOrg.TYPE:
-                    parser = new DuManWuOrg(source);
-                    break;
-                default:
-                    parser = new Null();
-                    break;
-            }
-            mParserArray.put(type, parser);
         }
-        return parser;
+        return parser[0];
     }
 
     public class TitleGetter {
-
         public String getTitle(int type) {
             return getParser(type).getTitle();
         }
-
     }
 
     public class HeaderGetter {
-
         public Headers getHeader(int type) {
             return getParser(type).getHeader();
         }
-
     }
 }

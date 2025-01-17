@@ -1,68 +1,89 @@
 package com.haleydu.cimoc.model;
 
-import org.greenrobot.greendao.annotation.Entity;
-import org.greenrobot.greendao.annotation.Generated;
-import org.greenrobot.greendao.annotation.Id;
-import org.greenrobot.greendao.annotation.NotNull;
-import org.greenrobot.greendao.annotation.Transient;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+import androidx.room.ColumnInfo;
 
-/**
- * Created by Hiroshi on 2016/7/20.
- */
-@Entity
+@Entity(tableName = "comic")
 public class Comic {
 
-    @Id(autoincrement = true)
+    @PrimaryKey(autoGenerate = true)
     private Long id;
-    @NotNull
+
+    @ColumnInfo(name = "source")
     private int source;
-    @NotNull
+
+    @ColumnInfo(name = "cid")
     private String cid;
-    @NotNull
+
+    @ColumnInfo(name = "title")
     private String title;
-    @NotNull
+
+    @ColumnInfo(name = "cover")
     private String cover;
-    @NotNull
+
+    @ColumnInfo(name = "highlight")
     private boolean highlight;
-    @NotNull
+
+    @ColumnInfo(name = "local")
     private boolean local;
+
+    @ColumnInfo(name = "update")
     private String update;
+
+    @ColumnInfo(name = "finish")
     private Boolean finish;
+
+    @ColumnInfo(name = "favorite")
     private Long favorite;
+
+    @ColumnInfo(name = "history")
     private Long history;
+
+    @ColumnInfo(name = "download")
     private Long download;
+
+    @ColumnInfo(name = "last")
     private String last;
+
+    @ColumnInfo(name = "page")
     private Integer page;
+
+    @ColumnInfo(name = "chapter")
     private String chapter;
+
+    @ColumnInfo(name = "url")
     private String url;
-    @Transient
-    public Object note;
 
-
+    @ColumnInfo(name = "intro")
     private String intro;
 
+    @ColumnInfo(name = "author")
     private String author;
 
+    // Transient fields are ignored by Room
+    public transient Object note;
+    @Ignore
     public Comic(int source, String cid, String title, String cover, String update, String author) {
         this(null, source, cid, title, cover == null ? "" : cover, false, false, update,
                 null, null, null, null, null, null, null, null, null, null);
         this.author = author;
     }
-
+    @Ignore
     public Comic(int source, String cid) {
         this.source = source;
         this.cid = cid;
     }
-
+    @Ignore
     public Comic(int source, String cid, String title, String cover, long download) {
         this(null, source, cid, title, cover == null ? "" : cover, false, false, null,
-                null, null, null, download, null, null, null, null,null,null);
+                null, null, null, download, null, null, null, null, null, null);
     }
 
-    @Generated(hash = 705801731)
-    public Comic(Long id, int source, @NotNull String cid, @NotNull String title, @NotNull String cover, boolean highlight,
-            boolean local, String update, Boolean finish, Long favorite, Long history, Long download, String last, Integer page,
-            String chapter, String url, String intro, String author) {
+    public Comic(Long id, int source,   String cid,   String title,  String cover, boolean highlight,
+                 boolean local, String update, Boolean finish, Long favorite, Long history, Long download, String last, Integer page,
+                 String chapter, String url, String intro, String author) {
         this.id = id;
         this.source = source;
         this.cid = cid;
@@ -81,10 +102,6 @@ public class Comic {
         this.url = url;
         this.intro = intro;
         this.author = author;
-    }
-
-    @Generated(hash = 1347984162)
-    public Comic() {
     }
 
     @Override

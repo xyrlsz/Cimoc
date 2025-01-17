@@ -1,32 +1,34 @@
 package com.haleydu.cimoc.model;
 
-import org.greenrobot.greendao.annotation.Entity;
-import org.greenrobot.greendao.annotation.Generated;
-import org.greenrobot.greendao.annotation.Id;
-import org.greenrobot.greendao.annotation.NotNull;
-import org.greenrobot.greendao.annotation.Unique;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+import androidx.room.ColumnInfo;
+import androidx.room.Index;
 
-/**
- * Created by Hiroshi on 2016/8/11.
- */
-@Entity
+
+@Entity(tableName = "source",indices = {@Index(value = {"type"}, unique = true)})
 public class Source {
 
-    @Id
+    @PrimaryKey
+    @ColumnInfo(name = "id")
     private Long id;
-    @NotNull
-    private String title;
-    @Unique
-    private int type;
-    @NotNull
-    private boolean enable;
 
-    @Generated(hash = 615387317)
+    @ColumnInfo(name = "title")
+
+    private String title;
+
+    @ColumnInfo(name = "type")
+    private int type;
+
+    @ColumnInfo(name = "enable")
+
+    private boolean enable;
+    @Ignore
     public Source() {
     }
 
-    @Generated(hash = 1339691905)
-    public Source(Long id, @NotNull String title, int type, boolean enable) {
+    public Source(Long id,   String title, int type, boolean enable) {
         this.id = id;
         this.title = title;
         this.type = type;
@@ -74,5 +76,4 @@ public class Source {
     public void setEnable(boolean enable) {
         this.enable = enable;
     }
-
 }

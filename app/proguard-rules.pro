@@ -57,14 +57,14 @@
 -dontwarn com.facebook.infer.**
 
 # greenDAO
--keepclassmembers class * extends org.greenrobot.greendao.AbstractDao {
-public static java.lang.String TABLENAME;
-}
-#ref: https://juejin.im/post/5d5fb53b51882554a13f8b6a
--keep class **$Properties
--keep class **$Properties{*;}
--dontwarn org.greenrobot.greendao.database.**
--dontwarn org.greenrobot.greendao.rx.**
+#-keepclassmembers class * extends org.greenrobot.greendao.AbstractDao {
+#public static java.lang.String TABLENAME;
+#}
+##ref: https://juejin.im/post/5d5fb53b51882554a13f8b6a
+#-keep class **$Properties
+#-keep class **$Properties{*;}
+#-dontwarn org.greenrobot.greendao.database.**
+#-dontwarn org.greenrobot.greendao.rx.**
 
 # ButterKnife
 # Retain generated class which implement Unbinder.
@@ -105,7 +105,8 @@ public static java.lang.String TABLENAME;
 -keepclassmembers class rx.internal.util.unsafe.BaseLinkedQueueConsumerNodeRef {
     rx.internal.util.atomic.LinkedQueueNode consumerNode;
 }
-
+-keep class io.reactivex.** { *; }
+-keep class hu.akarnokd.rxjava.interop.** { *; }
 #mongodb
 -dontwarn javax.**
 -dontwarn java.lang.management.**

@@ -1,32 +1,30 @@
 package com.haleydu.cimoc.model;
 
-import org.greenrobot.greendao.annotation.Entity;
-import org.greenrobot.greendao.annotation.Generated;
-import org.greenrobot.greendao.annotation.Id;
-import org.greenrobot.greendao.annotation.NotNull;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+import androidx.room.ColumnInfo;
 
-/**
- * Created by Hiroshi on 2016/10/10.
- */
-@Entity
+@Entity(tableName = "tag_ref")
 public class TagRef {
 
-    @Id(autoincrement = true)
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "id")
     private Long id;
-    @NotNull
-    private long tid;
-    @NotNull
-    private long cid;
 
-    @Generated(hash = 1744842042)
+    @ColumnInfo(name = "tid")
+    private long tid;
+
+    @ColumnInfo(name = "cid")
+    private long cid;
+    @Ignore
+    public TagRef() {
+    }
+
     public TagRef(Long id, long tid, long cid) {
         this.id = id;
         this.tid = tid;
         this.cid = cid;
-    }
-
-    @Generated(hash = 942776696)
-    public TagRef() {
     }
 
     public Long getId() {
@@ -52,5 +50,4 @@ public class TagRef {
     public void setCid(long cid) {
         this.cid = cid;
     }
-
 }

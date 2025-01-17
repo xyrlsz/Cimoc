@@ -1,8 +1,8 @@
 package com.haleydu.cimoc.manager;
 
 import com.haleydu.cimoc.component.AppGetter;
+import com.haleydu.cimoc.database.AppDatabase;
 import com.haleydu.cimoc.model.TagRef;
-import com.haleydu.cimoc.model.TagRefDao;
 
 import java.util.List;
 
@@ -10,16 +10,16 @@ import rx.Observable;
 
 /**
  * Created by Hiroshi on 2017/1/16.
+ * Modified for Room database.
  */
-
 public class TagRefManager {
 
     private static TagRefManager mInstance;
 
-    private TagRefDao mRefDao;
+    private AppDatabase mDatabase;
 
     private TagRefManager(AppGetter getter) {
-        mRefDao = getter.getAppInstance().getDaoSession().getTagRefDao();
+        mDatabase = getter.getAppInstance().getAppDatabase();
     }
 
     public static TagRefManager getInstance(AppGetter getter) {
@@ -33,63 +33,52 @@ public class TagRefManager {
         return mInstance;
     }
 
-    public Observable<Void> runInRx(Runnable runnable) {
-        return mRefDao.getSession().rxTx().run(runnable);
-    }
-
-    public void runInTx(Runnable runnable) {
-        mRefDao.getSession().runInTx(runnable);
-    }
-
     public List<TagRef> listByTag(long tid) {
-        return mRefDao.queryBuilder()
-                .where(TagRefDao.Properties.Tid.eq(tid))
-                .list();
+        return mDatabase.tagRefDao().findByTagId(tid);
     }
 
     public List<TagRef> listByComic(long cid) {
-        return mRefDao.queryBuilder()
-                .where(TagRefDao.Properties.Cid.eq(cid))
-                .list();
+        return mDatabase.tagRefDao().findByComicId(cid);
     }
 
     public TagRef load(long tid, long cid) {
-        return mRefDao.queryBuilder()
-                .where(TagRefDao.Properties.Tid.eq(tid), TagRefDao.Properties.Cid.eq(cid))
-                .unique();
+        return mDatabase.tagRefDao().findByTagAndComicId(tid, cid);
     }
 
     public long insert(TagRef ref) {
-        return mRefDao.insert(ref);
+        return mDatabase.tagRefDao().insert(ref);
     }
 
     public void insert(Iterable<TagRef> entities) {
-        mRefDao.insertInTx(entities);
+        mDatabase.tagRefDao().insertAll(entities);
     }
 
     public void insertInTx(Iterable<TagRef> entities) {
-        mRefDao.insertInTx(entities);
+        mDatabase.runInTransaction(() -> mDatabase.tagRefDao().insertAll(entities));
     }
 
     public void deleteByTag(long tid) {
-        mRefDao.queryBuilder()
-                .where(TagRefDao.Properties.Tid.eq(tid))
-                .buildDelete()
-                .executeDeleteWithoutDetachingEntities();
+        mDatabase.tagRefDao().deleteByTagId(tid);
     }
 
     public void deleteByComic(long cid) {
-        mRefDao.queryBuilder()
-                .where(TagRefDao.Properties.Cid.eq(cid))
-                .buildDelete()
-                .executeDeleteWithoutDetachingEntities();
+        mDatabase.tagRefDao().deleteByComicId(cid);
     }
 
     public void delete(long tid, long cid) {
-        mRefDao.queryBuilder()
-                .where(TagRefDao.Properties.Tid.eq(tid), TagRefDao.Properties.Cid.eq(cid))
-                .buildDelete()
-                .executeDeleteWithoutDetachingEntities();
+        mDatabase.tagRefDao().deleteByTagAndComicId(tid, cid);
     }
 
+    public void runInTx(Runnable runnable)
+    {
+        mDatabase.runInTransaction(runnable);
+    }
+
+    public Observable<Object> runInRx(Runnable runnable) {
+        return Observable.unsafeCreate(subscriber -> {
+            mDatabase.runInTransaction(runnable);
+            subscriber.onNext(null);
+            subscriber.onCompleted();
+        });
+    }
 }

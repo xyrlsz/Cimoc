@@ -79,7 +79,6 @@ class MangaBZ(source: Source?) : MangaParser() {
             var title = node.attr("title")
             if (title == "") title = node.text()
             val path = node.href().trim('/')
-
             //list.add(Chapter(title, path))
             list.add(Chapter((sourceComic.toString() + "0" + i++).toLong(), sourceComic, title, path))
         }

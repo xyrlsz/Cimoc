@@ -17,20 +17,17 @@ import android.view.WindowManager;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.haleydu.cimoc.component.AppGetter;
 import com.haleydu.cimoc.core.Storage;
+import com.haleydu.cimoc.database.AppDatabase;
 import com.haleydu.cimoc.fresco.ControllerBuilderProvider;
 import com.haleydu.cimoc.helper.DBOpenHelper;
 import com.haleydu.cimoc.helper.UpdateHelper;
 import com.haleydu.cimoc.manager.PreferenceManager;
 import com.haleydu.cimoc.manager.SourceManager;
 import com.haleydu.cimoc.misc.ActivityLifecycle;
-import com.haleydu.cimoc.model.DaoMaster;
-import com.haleydu.cimoc.model.DaoSession;
 import com.haleydu.cimoc.saf.DocumentFile;
 import com.haleydu.cimoc.ui.adapter.GridAdapter;
 import com.haleydu.cimoc.utils.DocumentUtils;
 import com.haleydu.cimoc.utils.StringUtils;
-
-import org.greenrobot.greendao.identityscope.IdentityScopeType;
 
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
@@ -50,6 +47,7 @@ import androidx.multidex.MultiDexApplication;
 
 /**
  * Created by Hiroshi on 2016/7/5.
+ * Modified for Room database.
  */
 public class App extends MultiDexApplication implements AppGetter, Thread.UncaughtExceptionHandler {
 
@@ -64,11 +62,10 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
     private DocumentFile mDocumentFile;
     private static PreferenceManager mPreferenceManager;
     private ControllerBuilderProvider mBuilderProvider;
-    
-    private RecyclerView.RecycledViewPool mRecycledPool;
-    private DaoSession mDaoSession;
-    private ActivityLifecycle mActivityLifecycle;
 
+    private RecyclerView.RecycledViewPool mRecycledPool;
+    private AppDatabase mAppDatabase;
+    private ActivityLifecycle mActivityLifecycle;
 
     private static WifiManager manager_wifi;
     private static App mApp;
@@ -86,51 +83,48 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         mActivityLifecycle = new ActivityLifecycle();
         registerActivityLifecycleCallbacks(mActivityLifecycle);
         mPreferenceManager = new PreferenceManager(this);
-        DBOpenHelper helper = new DBOpenHelper(this, "cimoc.db");
-        mDaoSession = new DaoMaster(helper.getWritableDatabase()).newSession(IdentityScopeType.None);
-        UpdateHelper.update(mPreferenceManager, getDaoSession());
+
+        // 初始化 Room 数据库
+        DBOpenHelper helper = new DBOpenHelper(this);
+        mAppDatabase = helper.getDatabase() ;
+
+        // 更新数据库
+        UpdateHelper.update(mPreferenceManager, mAppDatabase);
+
         Fresco.initialize(this);
         initPixels();
 
         manager_wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        //获取栈顶Activity以及当前App上下文
+        // 获取栈顶 Activity 以及当前 App 上下文
         mApp = this;
         this.registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
             @Override
             public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-//                Log.d("ActivityLifecycle:",activity+"onActivityCreated");
             }
 
             @Override
             public void onActivityStarted(Activity activity) {
-//                Log.d("ActivityLifecycle:",activity+"onActivityStarted");
                 sActivity = activity;
-
             }
 
             @Override
             public void onActivityResumed(Activity activity) {
-
             }
 
             @Override
             public void onActivityPaused(Activity activity) {
-
             }
 
             @Override
             public void onActivityStopped(Activity activity) {
-
             }
 
             @Override
             public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-
             }
 
             @Override
             public void onActivityDestroyed(Activity activity) {
-
             }
         });
     }
@@ -200,8 +194,8 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         return mDocumentFile;
     }
 
-    public DaoSession getDaoSession() {
-        return mDaoSession;
+    public AppDatabase getAppDatabase() {
+        return mAppDatabase;
     }
 
     public static PreferenceManager getPreferenceManager() {
@@ -239,15 +233,13 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
     }
 
     public static OkHttpClient getHttpClient() {
-
-        //OkHttpClient返回null实现"仅WiFi联网"，后面要注意空指针处理
+        // OkHttpClient 返回 null 实现 "仅WiFi联网"，后面要注意空指针处理
         if (!manager_wifi.isWifiEnabled() && mPreferenceManager.getBoolean(PreferenceManager.PREF_OTHER_CONNECT_ONLY_WIFI, false)) {
             return null;
         }
 
         if (mHttpClient == null) {
-
-            // 3.OkHttp访问https的Client实例
+            // 3.OkHttp 访问 https 的 Client 实例
             mHttpClient = new OkHttpClient().newBuilder()
                     .sslSocketFactory(createSSLSocketFactory())
                     .hostnameVerifier(new TrustAllHostnameVerifier())
@@ -260,7 +252,7 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         return mHttpClient;
     }
 
-    // 1.实现X509TrustManager接口
+    // 1.实现 X509TrustManager 接口
     private static class TrustAllCerts implements X509TrustManager {
         @Override
         public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
@@ -276,7 +268,7 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         }
     }
 
-    // 2.实现HostnameVerifier接口
+    // 2.实现 HostnameVerifier 接口
     private static class TrustAllHostnameVerifier implements HostnameVerifier {
         @Override
         public boolean verify(String hostname, SSLSession session) {
@@ -298,13 +290,13 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         return ssfFactory;
     }
 
-    private void initXCrash(){
-        //异常捕捉框架,xcrash的native捕捉会导致系统死机，将之去掉不使用20200817
+    private void initXCrash() {
+        // 异常捕捉框架，xcrash 的 native 捕捉会导致系统死机，将之去掉不使用 20200817
         XCrash.InitParameters initParameters = new XCrash.InitParameters();
-        //不处理native层的崩溃异常
-        initParameters.setLogDir(Environment.getExternalStorageDirectory().getAbsolutePath()+CRASH_FILE_PATH);
+        // 不处理 native 层的崩溃异常
+        initParameters.setLogDir(Environment.getExternalStorageDirectory().getAbsolutePath() + CRASH_FILE_PATH);
         initParameters.disableNativeCrashHandler();
-        //java崩溃异常文件的最大数量
+        // java 崩溃异常文件的最大数量
         initParameters.setJavaLogCountMax(200);
         initParameters.setJavaDumpAllThreadsCountMax(25);
         XCrash.init(this, initParameters);
