@@ -16,6 +16,7 @@ import com.haleydu.cimoc.source.Dmzj;
 import com.haleydu.cimoc.source.Dmzjv2;
 import com.haleydu.cimoc.source.Dmzjv3;
 import com.haleydu.cimoc.source.DuManWu;
+import com.haleydu.cimoc.source.DuManWuOrg;
 import com.haleydu.cimoc.source.GuFeng;
 import com.haleydu.cimoc.source.HHAAZZ;
 import com.haleydu.cimoc.source.HotManga;
@@ -251,6 +252,9 @@ public class SourceManager {
                     break;
                 case DuManWu.TYPE:
                     parser = new DuManWu(source);
+                    break;
+                case DuManWuOrg.TYPE:
+                    parser = new DuManWuOrg(source);
                     break;
                 default:
                     parser = new Null();
