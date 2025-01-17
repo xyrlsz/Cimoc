@@ -90,6 +90,9 @@ public class DuManWuOrg extends MangaParser {
     public Comic parseInfo(String html, Comic comic) throws UnsupportedEncodingException {
         Node body = new Node(html);
         String title = body.text(".comicInfo > .info > .title");
+        if(title.contains("分")){
+            title = title.substring(title.indexOf("分")+1);
+        }
         String cover = body.src(".comicInfo > .cover > .img > img");
         List<Node> infoList = body.list(".comicInfo > .info > p > span");
         String author = "";
