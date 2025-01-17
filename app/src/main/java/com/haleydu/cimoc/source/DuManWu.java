@@ -36,7 +36,6 @@ public class DuManWu extends MangaParser {
 
     public static final int TYPE = 104;
     public static final String DEFAULT_TITLE = "读漫屋";
-    //    private static String baseUrl = "https://www.baozimh.com";
     private static final String baseUrl = "https://dumanwu.com";
 
     public DuManWu(Source source) {
@@ -51,7 +50,8 @@ public class DuManWu extends MangaParser {
     @Override
     public Request getSearchRequest(String keyword, int page) throws UnsupportedEncodingException {
         String url = baseUrl + "/s";
-        RequestBody body = RequestBody.create(MediaType.parse("application/x-www-form-urlencoded; charset=UTF-8"), "k=" + URLEncoder.encode(keyword.substring(0, 12), "utf-8"));
+        int index = Math.min(keyword.length(), 12);
+        RequestBody body = RequestBody.create(MediaType.parse("application/x-www-form-urlencoded; charset=UTF-8"), "k=" + URLEncoder.encode(keyword.substring(0, index), "utf-8"));
         return new Request.Builder().url(url).post(body).build();
     }
 
