@@ -113,7 +113,9 @@ public class WebParser {
                         .replace("\\u003E", ">")
                         .replace("\\n", "\n")
                         .replace("\\\"", "\"")
-                        .replace("\\'", "'");
+                        .replace("\\'", "'")
+                        .replace("\\t","    ")
+                        .replace("\\\\/","\\/");
                 htmlStr = decodedHtml;
                 latch.countDown(); // 释放锁，表示 HTML 已加载完成
             }
