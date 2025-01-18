@@ -166,6 +166,10 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
 
     @Override
     protected void initView() {
+        boolean isWhiteBackground  = App.getPreferenceManager().getBoolean(PreferenceManager.PREF_READER_WHITE_BACKGROUND, false);
+        if(isWhiteBackground){
+            mLoadingText.setTextColor(getResources().getColor(R.color.black));
+        }
         mHideInfo = mPreference.getBoolean(PreferenceManager.PREF_READER_HIDE_INFO, false);
         mControllerTrigThreshold = mPreference.getInt(PreferenceManager.PREF_READER_CONTROLLER_TRIG_THRESHOLD, 30) * 0.01f;
         mInfoLayout.setVisibility(mHideInfo ? View.INVISIBLE : View.VISIBLE);
@@ -702,7 +706,7 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
                 } else {
                     ImagePipelineFactory factory = imageUrl.getSize() > App.mLargePixels ?
                             mLargeImagePipelineFactory : mImagePipelineFactory;
-                    BinaryResource resource = factory.getMainFileCache().getResource(new SimpleCacheKey(url));
+                    BinaryResource resource = factory.getDiskCachesStoreSupplier().get().getMainFileCache().getResource(new SimpleCacheKey(url));
                     if (resource != null) {
                         mPresenter.savePicture(resource.openStream(), url, title, progress);
                         return;
