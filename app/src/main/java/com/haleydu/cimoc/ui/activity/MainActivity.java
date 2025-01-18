@@ -1,5 +1,6 @@
 package com.haleydu.cimoc.ui.activity;
 
+import static com.haleydu.cimoc.Constants.GITEE_RELEASE_URL;
 import static com.haleydu.cimoc.Constants.GITHUB_RELEASE_URL;
 
 import android.Manifest;
@@ -54,7 +55,11 @@ import com.haleydu.cimoc.utils.HintUtils;
 import com.haleydu.cimoc.utils.PermissionUtils;
 import com.king.app.updater.constant.Constants;
 
+import java.io.IOException;
+
 import butterknife.BindView;
+import okhttp3.Request;
+import okhttp3.Response;
 
 
 /**
@@ -365,9 +370,27 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
                     break;
                 case R.id.drawer_comicUpdate:
 //                    update.startUpdate(versionName, content, mUrl, versionCode, md5);
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setData(Uri.parse(GITHUB_RELEASE_URL));
-                    startActivity(intent);
+                    new Thread(()->{
+                        boolean checkGithubOk = false;
+                        try {
+                            Request request = new Request.Builder().url(GITHUB_RELEASE_URL).build();
+                            Response response = App.getHttpClient().newCall(request).execute();
+                            if (response.isSuccessful()) {
+                                checkGithubOk = true;
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        String releaseUrl;
+                        if (checkGithubOk) {
+                            releaseUrl = GITHUB_RELEASE_URL;
+                        } else {
+                            releaseUrl = GITEE_RELEASE_URL;
+                        }
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setData(Uri.parse(releaseUrl));
+                        startActivity(intent);
+                    }).start();
                     break;
                 case R.id.drawer_night:
                     onNightSwitch();

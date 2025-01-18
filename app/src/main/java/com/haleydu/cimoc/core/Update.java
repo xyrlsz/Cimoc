@@ -1,6 +1,10 @@
 package com.haleydu.cimoc.core;
 
 //import com.alibaba.fastjson.JSONObject;
+
+import static com.haleydu.cimoc.Constants.UPDATE_GITEE_URL;
+import static com.haleydu.cimoc.Constants.UPDATE_GITHUB_URL;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,7 +23,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import rx.Observable;
-import rx.Subscriber;
 import rx.schedulers.Schedulers;
 
 //import com.azhon.appupdate.config.UpdateConfiguration;
@@ -30,7 +33,7 @@ import rx.schedulers.Schedulers;
  */
 public class Update {
 
-    private static final String UPDATE_URL = "https://api.github.com/repos/xyrlsz/cimoc/releases/latest";
+    //    private static final String UPDATE_URL = "https://api.github.com/repos/xyrlsz/cimoc/releases/latest";
 //    private static final String UPDATE_URL_GITHUB = "https://raw.githubusercontent.com/xyrlsz/update/master/Update.json";
 //    private static final String UPDATE_URL_GITEE = "https://gitee.com/Haleydu/update/raw/master/Update.json";
     private static final String SERVER_FILENAME = "tag_name";
@@ -38,17 +41,35 @@ public class Update {
 //    private static final String LIST = "list";
 
     public static Observable<String> check() {
-        return Observable.create(new Observable.OnSubscribe<String>() {
-            @Override
-            public void call(Subscriber<? super String> subscriber) {
-                OkHttpClient client = App.getHttpClient();
-                Request request = new Request.Builder().url(UPDATE_URL).build();
-                Response response = null;
+        return Observable.create((Observable.OnSubscribe<String>) subscriber -> {
+            OkHttpClient client = App.getHttpClient();
+            Request request = new Request.Builder().url(UPDATE_GITHUB_URL).build();
+            Response response = null;
+            boolean checkGithubOk = false;
+            try {
+                response = client.newCall(request).execute();
+                if (response.isSuccessful()) {
+                    String json = response.body().string();
+//                        JSONObject object = new JSONObject(json).getJSONArray(LIST).getJSONObject(0);
+                    String version = new JSONObject(json).getString(SERVER_FILENAME);
+                    subscriber.onNext(version);
+                    subscriber.onCompleted();
+                    checkGithubOk = true;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (response != null) {
+                    response.close();
+                }
+            }
+            if (!checkGithubOk) {
+                request = new Request.Builder().url(UPDATE_GITEE_URL).build();
                 try {
                     response = client.newCall(request).execute();
                     if (response.isSuccessful()) {
                         String json = response.body().string();
-//                        JSONObject object = new JSONObject(json).getJSONArray(LIST).getJSONObject(0);
+//                              JSONObject object = new JSONObject(json).getJSONArray(LIST).getJSONObject(0);
                         String version = new JSONObject(json).getString(SERVER_FILENAME);
                         subscriber.onNext(version);
                         subscriber.onCompleted();
@@ -60,8 +81,8 @@ public class Update {
                         response.close();
                     }
                 }
-                subscriber.onError(new Exception());
             }
+            subscriber.onError(new Exception());
         }).subscribeOn(Schedulers.io());
     }
 
@@ -175,7 +196,7 @@ public class Update {
                         .serUrl(mUrl)
                         .setVersionCode(versionCode)//支持versionCode校验，设置versionCode之后，新版本versionCode相同的apk只下载一次,优先取本地缓存,推荐使用MD5校验的方式
                         .setVibrate(true)  //振动
-                        .setFilename("Cimoc_"+versionName+".apk")
+                        .setFilename("Cimoc_" + versionName + ".apk")
                         .build(getContext());
 
                 mAppUpdater.setHttpManager(OkHttpManager.getInstance()).start();
