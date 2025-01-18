@@ -35,7 +35,7 @@ public class Storage {
 
     public static DocumentFile initRoot(Context context, String uri) {
         if (uri == null) {
-            File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "Cimoc");
+            File file = new File( Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "Cimoc");
             if (file.exists() || file.mkdirs()) {
                 return DocumentFile.fromFile(file);
             } else {
