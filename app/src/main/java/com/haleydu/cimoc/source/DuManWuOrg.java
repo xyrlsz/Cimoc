@@ -98,9 +98,9 @@ public class DuManWuOrg extends MangaParser {
         String author = "";
         String status = "";
         for (Node info : infoList) {
-            if (info.text().contains("作  者")) {
+            if (info.text().contains("作 者")) {
                 author = info.text().split("：")[1];
-            } else if (info.text().contains("状  态")) {
+            } else if (info.text().contains("状 态")) {
                 status = info.text().split("：")[1];
             }
         }
