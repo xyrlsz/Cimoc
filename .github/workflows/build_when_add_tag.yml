@@ -80,13 +80,13 @@ jobs:
       
       - name: Create Gitee release
         run: |
-          RELEASE_ID=$(curl -X POST --header 'Content-Type: application/json;charset=UTF-8' 'https://gitee.com/api/v5/repos/xyrlsz/Cimoc/releases' -d '{"access_token":"${{ secrets.GITEE_TOKEN }}","tag_name":"${{ github.ref_name }}","name":"Release ${{ github.ref_name }} ","body":"${{ github.ref_name }}. Built from commit ${{ env.GIT_COMMIT_HASH }}. \n https://github.com/${{ env.GIT_REPO_OWNER }}/${{ env.GIT_REPO_NAME }}/releases/tag/${{ github.ref_name }}","target_commitish":"main"}' | jq '.id')
+          RELEASE_ID=$(curl -X POST --header 'Content-Type: application/json;charset=UTF-8' 'https://gitee.com/api/v5/repos/${{ env.GIT_REPO_OWNER }}/${{ env.GIT_REPO_NAME }}/releases' -d '{"access_token":"${{ secrets.GITEE_TOKEN }}","tag_name":"${{ github.ref_name }}","name":"Release ${{ github.ref_name }} ","body":"${{ github.ref_name }}. Built from commit ${{ env.GIT_COMMIT_HASH }}. \n https://github.com/${{ env.GIT_REPO_OWNER }}/${{ env.GIT_REPO_NAME }}/releases/tag/${{ github.ref_name }}","target_commitish":"main"}' | jq '.id')
           echo "GITEE_RELEASE_ID=$RELEASE_ID" >> $GITHUB_ENV
           echo "Release ID: $RELEASE_ID"
 
       - name: Upload APK to Gitee
         run: |
           echo "Release ID: ${{ env.GITEE_RELEASE_ID }}"
-          curl -X POST "https://gitee.com/api/v5/repos/xyrlsz/Cimoc/releases/${{ env.GITEE_RELEASE_ID }}/attach_files" \
+          curl -X POST "https://gitee.com/api/v5/repos/${{ env.GIT_REPO_OWNER }}/${{ env.GIT_REPO_NAME }}/releases/${{ env.GITEE_RELEASE_ID }}/attach_files" \
           -H "Authorization: Bearer ${{ secrets.GITEE_TOKEN }}" \
           -F "file=@app/build/outputs/apk/release/app-universal-release.apk" 
