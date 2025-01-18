@@ -2,6 +2,7 @@ package com.haleydu.cimoc.ui.activity;
 
 import static com.haleydu.cimoc.Constants.GITHUB_RELEASE_URL;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -10,35 +11,30 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.annotation.ColorRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.StyleRes;
-
-//import com.google.android.gms.tasks.OnCompleteListener;
-//import com.google.android.gms.tasks.Task;
-import com.google.android.material.navigation.NavigationView;
-import androidx.core.content.ContextCompat;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import android.os.Environment;
 import android.provider.Settings;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import androidx.annotation.ColorRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StyleRes;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.facebook.imagepipeline.common.ResizeOptions;
 import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
-//import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
-//import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+import com.google.android.material.navigation.NavigationView;
 import com.haleydu.cimoc.App;
 import com.haleydu.cimoc.R;
 import com.haleydu.cimoc.component.ThemeResponsive;
@@ -56,10 +52,9 @@ import com.haleydu.cimoc.ui.fragment.recyclerview.SourceFragment;
 import com.haleydu.cimoc.ui.view.MainView;
 import com.haleydu.cimoc.utils.HintUtils;
 import com.haleydu.cimoc.utils.PermissionUtils;
-
 import com.king.app.updater.constant.Constants;
-import butterknife.BindView;
 
+import butterknife.BindView;
 
 
 /**
@@ -75,32 +70,27 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
     private static final int REQUEST_ACTIVITY_SETTINGS = 0;
 
     private static final int FRAGMENT_NUM = 3;
-
+    private final Update update = new Update();
     @BindView(R.id.main_layout)
     DrawerLayout mDrawerLayout;
     @BindView(R.id.main_navigation_view)
     NavigationView mNavigationView;
     @BindView(R.id.main_fragment_container)
     FrameLayout mFrameLayout;
-
     private TextView mLastText;
     private SimpleDraweeView mDraweeView;
     private ControllerBuilderProvider mControllerBuilderProvider;
-
     private MainPresenter mPresenter;
     private ActionBarDrawerToggle mDrawerToggle;
     private long mExitTime = 0;
     private long mLastId = -1;
     private int mLastSource = -1;
     private String mLastCid;
-
     private int mCheckItem;
     private SparseArray<BaseFragment> mFragmentArray;
     private BaseFragment mCurrentFragment;
     private boolean night;
-
-    private Update update = new Update();
-    private String versionName,content,mUrl,md5;
+    private String versionName, content, mUrl, md5;
     private int versionCode;
     //auth0
 //    private Auth0 auth0;
@@ -339,6 +329,7 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
 
     @Override
     public void onBackPressed() {
+        super.onBackPressed();
         if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
             mDrawerLayout.closeDrawer(GravityCompat.START);
         } else if (System.currentTimeMillis() - mExitTime > 2000) {
@@ -425,14 +416,44 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
                 mPreference.putBoolean(PreferenceManager.PREF_MAIN_NOTICE, true);
                 //showPermission();
                 break;
+//            case DIALOG_REQUEST_PERMISSION:
+            //ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
+//                com.king.app.updater.util.PermissionUtils.verifyReadAndWritePermissions(this, Constants.RE_CODE_STORAGE_PERMISSION);
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
+//                    Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+//                    startActivity(intent);
+//                }
             case DIALOG_REQUEST_PERMISSION:
-                //ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
-                com.king.app.updater.util.PermissionUtils.verifyReadAndWritePermissions(this, Constants.RE_CODE_STORAGE_PERMISSION);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
-                    Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-                    startActivity(intent);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    //Above Android 11 (API 30)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        // Android 13 (API 33) and above
+                        ActivityCompat.requestPermissions(this, new String[]{
+                                Manifest.permission.READ_MEDIA_IMAGES,
+                                Manifest.permission.READ_MEDIA_VIDEO,
+                                Manifest.permission.READ_MEDIA_AUDIO
+                        }, Constants.RE_CODE_STORAGE_PERMISSION);
+
+                    }
+                    if (!Environment.isExternalStorageManager()) {
+                        Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                        startActivity(intent);
+                    } else {
+                        // Fallback to request READ/WRITE_EXTERNAL_STORAGE for Android 11 and 12
+                        ActivityCompat.requestPermissions(this, new String[]{
+                                Manifest.permission.READ_EXTERNAL_STORAGE,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                        }, Constants.RE_CODE_STORAGE_PERMISSION);
+                    }
+                } else {
+                    // Below Android 11
+                    ActivityCompat.requestPermissions(this, new String[]{
+                            Manifest.permission.READ_EXTERNAL_STORAGE,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    }, Constants.RE_CODE_STORAGE_PERMISSION);
                 }
                 break;
+
 //            case DIALOG_REQUEST_LOGOUT:
 //                logout();
 //                break;
@@ -468,7 +489,7 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
     @Override
     public void onUpdateReady() {
         HintUtils.showToast(this, R.string.main_ready_update);
-        if (mPreference.getBoolean(PreferenceManager.PREF_OTHER_CHECK_SOFTWARE_UPDATE, true)){
+        if (mPreference.getBoolean(PreferenceManager.PREF_OTHER_CHECK_SOFTWARE_UPDATE, true)) {
             mNavigationView.getMenu().findItem(R.id.drawer_comicUpdate).setVisible(true);
         }
 //        Update.update(this);
@@ -484,7 +505,7 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
         if (mPreference.getBoolean(PreferenceManager.PREF_OTHER_CHECK_SOFTWARE_UPDATE, true)) {
             mNavigationView.getMenu().findItem(R.id.drawer_comicUpdate).setVisible(true);
             update.startUpdate(versionName, content, mUrl, versionCode, md5);
-        }else {
+        } else {
             HintUtils.showToast(this, R.string.main_ready_update);
         }
     }

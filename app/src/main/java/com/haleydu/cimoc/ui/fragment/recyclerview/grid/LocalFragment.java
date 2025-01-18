@@ -75,8 +75,13 @@ public class LocalFragment extends GridFragment implements LocalView {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         Uri uri = data.getData();
                         if (uri != null) {
-                            int flags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                            getActivity().getContentResolver().takePersistableUriPermission(uri, flags);
+                            // Ensure that you're passing only one of the flags
+                            int flags = data.getFlags();
+                            if ((flags & Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0) {
+                                getActivity().getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                            } else if ((flags & Intent.FLAG_GRANT_WRITE_URI_PERMISSION) != 0) {
+                                getActivity().getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                            }
                             mPresenter.scan(DocumentFile.fromTreeUri(getActivity(), uri));
                         }
                     } else {
@@ -95,6 +100,7 @@ public class LocalFragment extends GridFragment implements LocalView {
             }
         }
     }
+
 
     @Override
     public void onItemClick(View view, int position) {

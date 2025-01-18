@@ -204,10 +204,18 @@ public class SettingsActivity extends BackActivity implements SettingsView {
                     showProgressDialog();
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         Uri uri = data.getData();
-                        int flags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                        getContentResolver().takePersistableUriPermission(uri, flags);
-                        mTempStorage = uri.toString();
-                        mPresenter.moveFiles(DocumentFile.fromTreeUri(this, uri));
+                        if (uri != null) {
+                            // Explicitly check and apply each flag based on the URI's needs
+                            int flags = data.getFlags();
+                            if ((flags & Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0) {
+                                getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                            }
+                            if ((flags & Intent.FLAG_GRANT_WRITE_URI_PERMISSION) != 0) {
+                                getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                            }
+                            mTempStorage = uri.toString();
+                            mPresenter.moveFiles(DocumentFile.fromTreeUri(this, uri));
+                        }
                     } else {
                         String path = data.getStringExtra(Extra.EXTRA_PICKER_PATH);
                         if (!StringUtils.isEmpty(path)) {
@@ -222,6 +230,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
             }
         }
     }
+
 
     @Override
     public void onDialogResult(int requestCode, Bundle bundle) {

@@ -157,3 +157,4 @@ public static java.lang.String TABLENAME;
 -dontwarn org.joda.time.format.DateTimeFormat
 -dontwarn org.joda.time.format.DateTimeFormatter
 -dontwarn springfox.documentation.spring.web.json.Json
+-dontwarn org.glassfish.jersey.**

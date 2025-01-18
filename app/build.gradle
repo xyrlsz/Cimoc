@@ -22,7 +22,7 @@ def getGitTagName = { ->
             standardOutput = stdout
         }
         return stdout.toString().trim()
-    } catch (Exception e) {
+    } catch (Exception ignored) {
         return "v1.0.0"
     }
 }
@@ -35,7 +35,7 @@ def getGitCommitCount = { ->
             standardOutput = stdout
         }
         return stdout.toString().trim().toInteger()
-    } catch (Exception e) {
+    } catch (Exception ignored) {
         return 1 // 默认提交计数
     }
 }
@@ -52,25 +52,24 @@ if (System.getenv("CI_BUILD_NUMBER") != null) { // 兼容 CI/CD
 // }
 
 android {
-    compileSdk 30
-
-    lintOptions {
-        abortOnError false
-    }
-
+    compileSdk 35
+    namespace "com.haleydu.cimoc"
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
-
+    kotlinOptions {
+        jvmTarget = '11'
+    }
     defaultConfig {
         applicationId "com.haleydu.cimoc"
         minSdkVersion 21
-        //noinspection ExpiredTargetSdkVersion
-        targetSdkVersion 30
+        //noinspection EditedTargetSdkVersion,ExpiredTargetSdkVersion
+        targetSdkVersion 35
         versionCode buildVersion // 动态生成的版本号
-        versionName version      // Git 标签作为版本名
-        resConfigs "en", "zh"
+        versionName version
+        resourceConfigurations += ['en', 'zh']
+// Git 标签作为版本名
         multiDexEnabled true
     }
 
@@ -88,19 +87,23 @@ android {
             keyPassword '123456'
         }
     }
-
+    buildFeatures {
+        buildConfig true
+    }
     buildTypes {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             shrinkResources true
             signingConfig signingConfigs.release
+            buildConfigField "boolean", "USE_FINAL_RESOURCE_IDS", "true"
         }
         debug {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             shrinkResources false
             signingConfig signingConfigs.debug
+            buildConfigField "boolean", "USE_FINAL_RESOURCE_IDS", "true"
         }
     }
     splits {
@@ -111,6 +114,10 @@ android {
             universalApk true // 是否生成包含所有 ABI 的通用 APK
         }
     }
+    lint {
+        abortOnError false
+        disable 'ResourcePrefix'
+    }
 }
 
 greendao {
@@ -118,21 +125,23 @@ greendao {
 }
 
 dependencies {
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation fileTree("libs")
     implementation 'androidx.legacy:legacy-support-v13:1.0.0'
-    implementation 'androidx.appcompat:appcompat:1.3.0'
-    implementation 'androidx.recyclerview:recyclerview:1.2.1'
-    implementation 'com.google.android.material:material:1.4.0'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.recyclerview:recyclerview:1.4.0'
+    implementation 'com.google.android.material:material:1.12.0'
     implementation 'com.jakewharton:butterknife:10.2.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:10.1.0'
     implementation 'org.greenrobot:greendao:3.3.0'
     //noinspection GradleDependency : for support android low api devices,not update OKHTTP
     implementation 'com.squareup.okhttp3:okhttp:3.12.3'
-    implementation 'com.facebook.fresco:fresco:2.3.0'
-//    implementation 'com.facebook.fresco:imagepipeline-okhttp3:2.3.0'
-//    implementation 'com.facebook.infer.annotation:infer-annotation:0.18.0'
+    implementation 'com.facebook.fresco:fresco:3.6.0'
+    implementation 'com.facebook.fresco:middleware:3.6.0'
+//    implementation 'com.facebook.fresco:imagepipeline:3.6.0'
+//    implementation 'com.facebook.fresco:imagepipeline-okhttp3:2.6.0'
+    implementation 'com.facebook.infer.annotation:infer-annotation:0.18.0'
     implementation 'org.jsoup:jsoup:1.13.1'
     implementation 'org.adw.library:discrete-seekbar:1.0.1'
     implementation 'io.reactivex:rxjava:1.3.8'
@@ -140,10 +149,10 @@ dependencies {
     api 'com.google.guava:guava:31.1-android'
 
     implementation 'androidx.multidex:multidex:2.0.1'
-    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'com.alibaba:fastjson:1.2.62'
-    implementation "androidx.core:core-ktx:1.6.0"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.5.10"
+    implementation "androidx.core:core-ktx:1.15.0"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.1.0"
 //    implementation 'com.google.firebase:firebase-analytics:19.0.0'
 //    implementation 'com.google.firebase:firebase-crashlytics:18.1.0'
 //    implementation 'com.google.firebase:firebase-config:21.0.0'
@@ -154,8 +163,8 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     
     // AndroidX Test libraries
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 }
 
 repositories {
