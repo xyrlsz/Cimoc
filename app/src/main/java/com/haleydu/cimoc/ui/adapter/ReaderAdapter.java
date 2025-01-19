@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.facebook.drawee.backends.pipeline.PipelineDraweeControllerBuilder;
 import com.facebook.drawee.backends.pipeline.PipelineDraweeControllerBuilderSupplier;
 import com.facebook.drawee.controller.BaseControllerListener;
-import com.facebook.drawee.drawable.ScalingUtils;
 import com.facebook.drawee.generic.GenericDraweeHierarchy;
 import com.facebook.drawee.view.DraweeView;
 import com.facebook.imagepipeline.common.ResizeOptions;
@@ -72,8 +71,15 @@ public class ReaderAdapter extends BaseAdapter<ImageUrl> {
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        int resId = viewType == TYPE_IMAGE ? (reader == READER_PAGE ?
-                R.layout.item_picture : R.layout.item_picture_stream) : R.layout.item_loading;
+        boolean isWhiteBackground = App.getPreferenceManager().getBoolean(PreferenceManager.PREF_READER_WHITE_BACKGROUND, false);
+        int resId;
+        if (isWhiteBackground) {
+            resId = viewType == TYPE_IMAGE ? (reader == READER_PAGE ?
+                    R.layout.item_picture_black : R.layout.item_picture_stream_black) : R.layout.item_loading_black;
+        } else {
+            resId = viewType == TYPE_IMAGE ? (reader == READER_PAGE ?
+                    R.layout.item_picture : R.layout.item_picture_stream) : R.layout.item_loading;
+        }
         View view = mInflater.inflate(resId, parent, false);
         return new ImageHolder(view);
     }
@@ -297,21 +303,6 @@ public class ReaderAdapter extends BaseAdapter<ImageUrl> {
 
         ImageHolder(View view) {
             super(view);
-            boolean isWhiteBackground = App.getPreferenceManager().getBoolean(PreferenceManager.PREF_READER_WHITE_BACKGROUND, false);
-            if (isWhiteBackground) {
-                GenericDraweeHierarchy hierarchy = draweeView.getHierarchy();
-                switch (reader) {
-                    default:
-                    case READER_PAGE:
-                        hierarchy.setFailureImage(R.drawable.materialsymbolscloseblack, ScalingUtils.ScaleType.CENTER);
-                        hierarchy.setRetryImage(R.drawable.raphaelrefreshblack, ScalingUtils.ScaleType.CENTER);
-                        break;
-                    case READER_STREAM:
-                        hierarchy.setPlaceholderImage(R.drawable.ioncafeblack, ScalingUtils.ScaleType.CENTER);
-                        break;
-                }
-                draweeView.setHierarchy(hierarchy);
-            }
         }
     }
 
