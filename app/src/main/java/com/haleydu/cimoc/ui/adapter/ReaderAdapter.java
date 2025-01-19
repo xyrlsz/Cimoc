@@ -4,16 +4,17 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
 import android.net.Uri;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.IntDef;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.view.View;
-import android.view.ViewGroup;
-
 import com.facebook.drawee.backends.pipeline.PipelineDraweeControllerBuilder;
 import com.facebook.drawee.backends.pipeline.PipelineDraweeControllerBuilderSupplier;
 import com.facebook.drawee.controller.BaseControllerListener;
+import com.facebook.drawee.drawable.ScalingUtils;
+import com.facebook.drawee.generic.GenericDraweeHierarchy;
 import com.facebook.drawee.view.DraweeView;
 import com.facebook.imagepipeline.common.ResizeOptions;
 import com.facebook.imagepipeline.image.ImageInfo;
@@ -23,6 +24,7 @@ import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.haleydu.cimoc.App;
 import com.haleydu.cimoc.R;
 import com.haleydu.cimoc.fresco.processor.MangaPostprocessor;
+import com.haleydu.cimoc.manager.PreferenceManager;
 import com.haleydu.cimoc.model.ImageUrl;
 import com.haleydu.cimoc.ui.widget.OnTapGestureListener;
 import com.haleydu.cimoc.ui.widget.PhotoDraweeView;
@@ -44,12 +46,11 @@ public class ReaderAdapter extends BaseAdapter<ImageUrl> {
 
     private static final int TYPE_LOADING = 2016101214;
     private static final int TYPE_IMAGE = 2016101215;
+    private static @ReaderMode int reader;
     private PipelineDraweeControllerBuilderSupplier mControllerSupplier;
     private PipelineDraweeControllerBuilderSupplier mLargeControllerSupplier;
     private OnTapGestureListener mTapGestureListener;
     private OnLazyLoadListener mLazyLoadListener;
-    private @ReaderMode
-    int reader;
     private boolean isVertical; // 开页方向
     private boolean isPaging;
     private boolean isPagingReverse;
@@ -132,7 +133,7 @@ public class ReaderAdapter extends BaseAdapter<ImageUrl> {
         ImageRequest[] request = new ImageRequest[urls.length];
         for (int i = 0; i != urls.length; ++i) {
             final String url = urls[i];
-            if (url==null){
+            if (url == null) {
                 continue;
             }
             ImageRequestBuilder imageRequestBuilder = ImageRequestBuilder
@@ -206,7 +207,7 @@ public class ReaderAdapter extends BaseAdapter<ImageUrl> {
     }
 
     public void setReaderMode(@ReaderMode int reader) {
-        this.reader = reader;
+        ReaderAdapter.reader = reader;
     }
 
     private boolean isNeedResize(ImageUrl imageUrl) {
@@ -296,6 +297,21 @@ public class ReaderAdapter extends BaseAdapter<ImageUrl> {
 
         ImageHolder(View view) {
             super(view);
+            boolean isWhiteBackground = App.getPreferenceManager().getBoolean(PreferenceManager.PREF_READER_WHITE_BACKGROUND, false);
+            if (isWhiteBackground) {
+                GenericDraweeHierarchy hierarchy = draweeView.getHierarchy();
+                switch (reader) {
+                    default:
+                    case READER_PAGE:
+                        hierarchy.setFailureImage(R.drawable.materialsymbolscloseblack, ScalingUtils.ScaleType.CENTER);
+                        hierarchy.setRetryImage(R.drawable.raphaelrefreshblack, ScalingUtils.ScaleType.CENTER);
+                        break;
+                    case READER_STREAM:
+                        hierarchy.setPlaceholderImage(R.drawable.ioncafeblack, ScalingUtils.ScaleType.CENTER);
+                        break;
+                }
+                draweeView.setHierarchy(hierarchy);
+            }
         }
     }
 

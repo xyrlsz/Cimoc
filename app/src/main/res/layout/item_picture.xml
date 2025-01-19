@@ -4,10 +4,10 @@
     android:id="@+id/reader_image_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    fresco:failureImage="@drawable/ic_clear_white_24dp"
+    fresco:failureImage="@drawable/materialsymbolsclose"
     fresco:failureImageScaleType="center"
     fresco:progressBarImage="@drawable/reader_progress"
     fresco:progressBarImageScaleType="center"
-    fresco:retryImage="@drawable/ic_replay_white_24dp"
+    fresco:retryImage="@drawable/raphaelrefresh"
     fresco:fadeDuration="0"
     fresco:retryImageScaleType="center" />

@@ -5,5 +5,5 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     fresco:actualImageUri="@null"
-    fresco:placeholderImage="@drawable/ic_local_cafe_white_24dp"
+    fresco:placeholderImage="@drawable/ioncafe"
     fresco:placeholderImageScaleType="center" />
