@@ -25,8 +25,10 @@ public abstract class MangaParser implements Parser {
     protected String mTitle;
     protected List<UrlFilter> filter = new ArrayList<>();
     private Category mCategory;
-    private boolean isUseWebView = false;
-
+    private boolean getSearchUseWebView = false;
+    private boolean parseInfoUseWebView = false;
+    private boolean parseChapterUseWebView = false;
+    private boolean parseImagesUseWebView = false;
     protected void init(Source source, Category category) {
         mTitle = source.getTitle();
         mCategory = category;
@@ -148,11 +150,35 @@ public abstract class MangaParser implements Parser {
         return null;
     }
 
-    public boolean getIsUseWebView() {
-        return isUseWebView;
+    public boolean isParseImagesUseWebView() {
+        return parseImagesUseWebView;
     }
 
-    public void setIsUseWebView(boolean isUseWebView) {
-        this.isUseWebView = isUseWebView;
+    protected void setParseImagesUseWebView(boolean isUseWebView) {
+        this.parseImagesUseWebView = isUseWebView;
+    }
+
+    public boolean isParseChapterUseWebView() {
+        return parseChapterUseWebView;
+    }
+
+    protected void setParseChapterUseWebView(boolean parseChapterUseWebView) {
+        this.parseChapterUseWebView = parseChapterUseWebView;
+    }
+
+    public boolean isParseInfoUseWebView() {
+        return parseInfoUseWebView;
+    }
+
+    protected void setParseInfoUseWebView(boolean parseInfoUseWebView) {
+        this.parseInfoUseWebView = parseInfoUseWebView;
+    }
+
+    public boolean isGetSearchUseWebView() {
+        return getSearchUseWebView;
+    }
+
+    protected void setGetSearchUseWebView(boolean getSearchUseWebView) {
+        this.getSearchUseWebView = getSearchUseWebView;
     }
 }

@@ -4,6 +4,7 @@ import com.haleydu.cimoc.core.Manga;
 import com.haleydu.cimoc.manager.SourceManager;
 import com.haleydu.cimoc.model.Comic;
 import com.haleydu.cimoc.model.Source;
+import com.haleydu.cimoc.parser.MangaParser;
 import com.haleydu.cimoc.parser.Parser;
 import com.haleydu.cimoc.ui.view.ResultView;
 
@@ -123,7 +124,7 @@ public class ResultPresenter extends BasePresenter<ResultView> {
         }
         for (final State obj : mStateArray) {
             if (obj.state == STATE_NULL) {
-                Parser parser = mSourceManager.getParser(obj.source);
+                MangaParser parser = mSourceManager.getParser(obj.source);
                 obj.state = STATE_DOING;
                 mCompositeSubscription.add(Manga.getSearchResult(parser, keyword, ++obj.page, strictSearch, stSameSearch)
                         .observeOn(AndroidSchedulers.mainThread())

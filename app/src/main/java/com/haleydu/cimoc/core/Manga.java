@@ -1,10 +1,5 @@
 package com.haleydu.cimoc.core;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.os.Looper;
-import android.webkit.WebView;
-
 import com.haleydu.cimoc.App;
 import com.haleydu.cimoc.manager.ChapterManager;
 import com.haleydu.cimoc.manager.SourceManager;
@@ -17,18 +12,13 @@ import com.haleydu.cimoc.parser.SearchIterator;
 import com.haleydu.cimoc.parser.WebParser;
 import com.haleydu.cimoc.rx.RxBus;
 import com.haleydu.cimoc.rx.RxEvent;
-import com.haleydu.cimoc.ui.activity.WebviewActivity;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.InterruptedIOException;
-import java.text.Collator;
-import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -54,7 +44,7 @@ public class Manga {
         if (stSame) {
             try {
                 String s1 = xyropencc.Xyropencc.t2S(str);
-                String s2 =xyropencc.Xyropencc.t2S(search);
+                String s2 = xyropencc.Xyropencc.t2S(search);
                 return s1.toLowerCase().indexOf(s2.toLowerCase()) != -1;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -65,14 +55,20 @@ public class Manga {
         }
     }
 
-    public static Observable<Comic> getSearchResult(final Parser parser, final String keyword, final int page, final boolean strictSearch) {
+    public static Observable<Comic> getSearchResult(final MangaParser parser, final String keyword, final int page, final boolean strictSearch) {
         return Observable.create(new Observable.OnSubscribe<Comic>() {
             @Override
             public void call(Subscriber<? super Comic> subscriber) {
                 try {
                     Request request = parser.getSearchRequest(keyword, page);
                     Random random = new Random();
-                    String html = getResponseBody(App.getHttpClient(), request);
+                    String html;
+                    if(parser.isGetSearchUseWebView()){
+                        WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
+                        html = webParser.getHtmlStrSync();
+                    }else{
+                        html = getResponseBody(App.getHttpClient(), request);
+                    }
                     SearchIterator iterator = parser.getSearchIterator(html, page);
                     if (iterator == null || iterator.empty()) {
                         throw new Exception();
@@ -95,14 +91,21 @@ public class Manga {
             }
         }).subscribeOn(Schedulers.io());
     }
-    public static Observable<Comic> getSearchResult(final Parser parser, final String keyword, final int page, final boolean strictSearch, final boolean stSame) {
+
+    public static Observable<Comic> getSearchResult(final MangaParser parser, final String keyword, final int page, final boolean strictSearch, final boolean stSame) {
         return Observable.create(new Observable.OnSubscribe<Comic>() {
             @Override
             public void call(Subscriber<? super Comic> subscriber) {
                 try {
                     Request request = parser.getSearchRequest(keyword, page);
                     Random random = new Random();
-                    String html = getResponseBody(App.getHttpClient(), request);
+                    String html;
+                    if (parser.isGetSearchUseWebView()) {
+                        WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
+                        html = webParser.getHtmlStrSync();
+                    } else {
+                        html = getResponseBody(App.getHttpClient(), request);
+                    }
                     SearchIterator iterator = parser.getSearchIterator(html, page);
                     if (iterator == null || iterator.empty()) {
                         throw new Exception();
@@ -112,7 +115,7 @@ public class Manga {
 //                        if (comic != null && (comic.getTitle().indexOf(keyword) != -1 || comic.getAuthor().indexOf(keyword) != -1)) {
                         if (comic != null
                                 && (indexOfIgnoreCase(comic.getTitle(), keyword, stSame)
-                                || indexOfIgnoreCase(comic.getAuthor(), keyword ,stSame)
+                                || indexOfIgnoreCase(comic.getAuthor(), keyword, stSame)
                                 || (!strictSearch))) {
                             subscriber.onNext(comic);
                             Thread.sleep(random.nextInt(200));
@@ -127,7 +130,7 @@ public class Manga {
     }
 
 
-    public static Observable<List<Chapter>> getComicInfo(final Parser parser, final Comic comic) {
+    public static Observable<List<Chapter>> getComicInfo(final MangaParser parser, final Comic comic) {
         return Observable.create(new Observable.OnSubscribe<List<Chapter>>() {
             @Override
             public void call(Subscriber<? super List<Chapter>> subscriber) {
@@ -139,12 +142,23 @@ public class Manga {
                     if (list.isEmpty()) {
                         comic.setUrl(parser.getUrl(comic.getCid()));
                         Request request = parser.getInfoRequest(comic.getCid());
-                        String html = getResponseBody(App.getHttpClient(), request);
+                        String html ;
+                        if(parser.isParseInfoUseWebView()){
+                            WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
+                            html = webParser.getHtmlStrSync();
+                        }else{
+                            html =  getResponseBody(App.getHttpClient(), request);
+                        }
                         Comic newComic = parser.parseInfo(html, comic);
                         RxBus.getInstance().post(new RxEvent(RxEvent.EVENT_COMIC_UPDATE_INFO, newComic));
                         request = parser.getChapterRequest(html, comic.getCid());
                         if (request != null) {
-                            html = getResponseBody(App.getHttpClient(), request);
+                            if(parser.isParseChapterUseWebView()){
+                                WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
+                                html = webParser.getHtmlStrSync();
+                            }else{
+                                html = getResponseBody(App.getHttpClient(), request);
+                            }
                         }
                         Long sourceComic = Long.parseLong(comic.getSource() + "0" + (comic.getId() == null ? "00" : comic.getId()));
                         list = parser.parseChapter(html, comic, sourceComic);
@@ -203,17 +217,17 @@ public class Manga {
 //                    list.addAll(mongo.QueryComicChapter(mComic, path));
                     if (list.isEmpty()) {
                         Request request = parser.getImagesRequest(cid, path);
-                        if(parser.getIsUseWebView()){
+                        if (parser.isParseImagesUseWebView()) {
                             String url = request.url().toString();
                             WebParser webParser = new WebParser(App.getAppContext(), url, request.headers());
 
                             html = webParser.getHtmlStrSync(); // 同步获取 HTML
-                            list = parser.parseImages(html,chapter);
+                            list = parser.parseImages(html, chapter);
 
-                        }else{
+                        } else {
                             html = getResponseBody(App.getHttpClient(), request);
-                            list = parser.parseImages(html,chapter);
-                            if (list == null || list.size()==0) {
+                            list = parser.parseImages(html, chapter);
+                            if (list == null || list.size() == 0) {
                                 list = parser.parseImages(html);
                             }
 //                        if (!list.isEmpty()) {
@@ -248,7 +262,7 @@ public class Manga {
                 return list;
             }
             Request request = parser.getImagesRequest(cid, path);
-            if(!parser.getIsUseWebView()){
+            if (!parser.isParseImagesUseWebView()) {
                 response = App.getHttpClient().newCall(request).execute();
                 if (response.isSuccessful()) {
                     List<Chapter> chapter = mChapterManager.getChapter(path, title);
@@ -262,13 +276,13 @@ public class Manga {
                 } else {
                     throw new NetworkErrorException();
                 }
-            }else{
+            } else {
                 WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
 
                 String html = webParser.getHtmlStrSync();
                 List<Chapter> chapter = mChapterManager.getChapter(path, title);
                 if (chapter != null && chapter.size() >= 1) {
-                    list.addAll(parser.parseImages(html , chapter.get(0)));
+                    list.addAll(parser.parseImages(html, chapter.get(0)));
                 }
                 if (list.size() == 0) {
                     list.addAll(parser.parseImages(html));
