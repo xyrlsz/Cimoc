@@ -11,6 +11,7 @@ import com.haleydu.cimoc.source.Animx2;
 import com.haleydu.cimoc.source.Baozi;
 import com.haleydu.cimoc.source.BuKa;
 import com.haleydu.cimoc.source.Cartoonmad;
+import com.haleydu.cimoc.source.CopyMH;
 import com.haleydu.cimoc.source.DM5;
 import com.haleydu.cimoc.source.Dmzj;
 import com.haleydu.cimoc.source.Dmzjv2;
@@ -217,9 +218,9 @@ public class SourceManager {
 //                case Ohmanhua.TYPE:
 //                    parser = new Ohmanhua(source);
 //                    break;
-//                case CopyMH.TYPE:
-//                    parser = new CopyMH(source);
-//                    break;
+                case CopyMH.TYPE:
+                    parser = new CopyMH(source);
+                    break;
                 case HotManga.TYPE:
                     parser = new HotManga(source);
                     break;
@@ -244,6 +245,8 @@ public class SourceManager {
                 case Dmzj.TYPE:
                     parser = new Dmzj(source);
                     break;
+
+                //
                 case Baozi.TYPE:
                     parser = new Baozi(source);
                     break;

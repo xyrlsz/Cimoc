@@ -67,9 +67,9 @@ public class WebParser {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                new Handler().postDelayed(() -> {
+//                new Handler().postDelayed(() -> {
                     smoothScrollToBottom();
-                }, delay);
+//                }, delay);
             }
         });
 
