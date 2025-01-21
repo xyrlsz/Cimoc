@@ -33,7 +33,7 @@ public class DuManWuOrg extends MangaParser {
 
     public DuManWuOrg(Source source) {
         init(source, null);
-        setParseImagesUseWebView(true);
+        setParseImagesUseWebParser(true);
     }
 
     public static Source getDefaultSource() {

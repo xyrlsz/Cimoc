@@ -25,10 +25,10 @@ public abstract class MangaParser implements Parser {
     protected String mTitle;
     protected List<UrlFilter> filter = new ArrayList<>();
     private Category mCategory;
-    private boolean getSearchUseWebView = false;
-    private boolean parseInfoUseWebView = false;
-    private boolean parseChapterUseWebView = false;
-    private boolean parseImagesUseWebView = false;
+    private boolean getSearchUseWebParser = false;
+    private boolean parseInfoUseWebParser = false;
+    private boolean parseChapterUseWebParser = false;
+    private boolean parseImagesUseWebParser = false;
     protected void init(Source source, Category category) {
         mTitle = source.getTitle();
         mCategory = category;
@@ -150,35 +150,35 @@ public abstract class MangaParser implements Parser {
         return null;
     }
 
-    public boolean isParseImagesUseWebView() {
-        return parseImagesUseWebView;
+    public boolean isParseImagesUseWebParser() {
+        return parseImagesUseWebParser;
     }
 
-    protected void setParseImagesUseWebView(boolean isUseWebView) {
-        this.parseImagesUseWebView = isUseWebView;
+    protected void setParseImagesUseWebParser(boolean isUseWebView) {
+        this.parseImagesUseWebParser = isUseWebView;
     }
 
-    public boolean isParseChapterUseWebView() {
-        return parseChapterUseWebView;
+    public boolean isParseChapterUseWebParser() {
+        return parseChapterUseWebParser;
     }
 
-    protected void setParseChapterUseWebView(boolean parseChapterUseWebView) {
-        this.parseChapterUseWebView = parseChapterUseWebView;
+    protected void setParseChapterUseWebParser(boolean parseChapterUseWebParser) {
+        this.parseChapterUseWebParser = parseChapterUseWebParser;
     }
 
-    public boolean isParseInfoUseWebView() {
-        return parseInfoUseWebView;
+    public boolean isParseInfoUseWebParser() {
+        return parseInfoUseWebParser;
     }
 
-    protected void setParseInfoUseWebView(boolean parseInfoUseWebView) {
-        this.parseInfoUseWebView = parseInfoUseWebView;
+    protected void setParseInfoUseWebParser(boolean parseInfoUseWebParser) {
+        this.parseInfoUseWebParser = parseInfoUseWebParser;
     }
 
-    public boolean isGetSearchUseWebView() {
-        return getSearchUseWebView;
+    public boolean isGetSearchUseWebParser() {
+        return getSearchUseWebParser;
     }
 
-    protected void setGetSearchUseWebView(boolean getSearchUseWebView) {
-        this.getSearchUseWebView = getSearchUseWebView;
+    protected void setGetSearchUseWebParser(boolean getSearchUseWebParser) {
+        this.getSearchUseWebParser = getSearchUseWebParser;
     }
 }

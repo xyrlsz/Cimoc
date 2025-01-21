@@ -16,13 +16,14 @@ import java.util.concurrent.CountDownLatch;
 
 import okhttp3.Headers;
 
+// 解析动态加载的网页
 public class WebParser {
     private final String url;
     private final Context context;
     private final Headers headers;
+    private final CountDownLatch latch;
     private String htmlStr;
     private WebView webView;
-    private final CountDownLatch latch;
     private int delay = 50;
 
     public WebParser(Context context, String url, Headers headers) {
@@ -109,14 +110,13 @@ public class WebParser {
         String js = "document.documentElement.outerHTML";
         webView.evaluateJavascript(js, value -> {
             if (value != null) {
-                String decodedHtml = value.replace("\\u003C", "<")
+                htmlStr = value.replace("\\u003C", "<")
                         .replace("\\u003E", ">")
                         .replace("\\n", "\n")
                         .replace("\\\"", "\"")
                         .replace("\\'", "'")
-                        .replace("\\t","    ")
-                        .replace("\\\\/","\\/");
-                htmlStr = decodedHtml;
+                        .replace("\\t", "    ")
+                        .replace("\\\\/", "\\/");
                 latch.countDown(); // 释放锁，表示 HTML 已加载完成
             }
         });

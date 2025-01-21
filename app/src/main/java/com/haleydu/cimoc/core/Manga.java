@@ -63,7 +63,7 @@ public class Manga {
                     Request request = parser.getSearchRequest(keyword, page);
                     Random random = new Random();
                     String html;
-                    if(parser.isGetSearchUseWebView()){
+                    if(parser.isGetSearchUseWebParser()){
                         WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
                         html = webParser.getHtmlStrSync();
                     }else{
@@ -100,7 +100,7 @@ public class Manga {
                     Request request = parser.getSearchRequest(keyword, page);
                     Random random = new Random();
                     String html;
-                    if (parser.isGetSearchUseWebView()) {
+                    if (parser.isGetSearchUseWebParser()) {
                         WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
                         html = webParser.getHtmlStrSync();
                     } else {
@@ -143,7 +143,7 @@ public class Manga {
                         comic.setUrl(parser.getUrl(comic.getCid()));
                         Request request = parser.getInfoRequest(comic.getCid());
                         String html ;
-                        if(parser.isParseInfoUseWebView()){
+                        if(parser.isParseInfoUseWebParser()){
                             WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
                             html = webParser.getHtmlStrSync();
                         }else{
@@ -153,7 +153,7 @@ public class Manga {
                         RxBus.getInstance().post(new RxEvent(RxEvent.EVENT_COMIC_UPDATE_INFO, newComic));
                         request = parser.getChapterRequest(html, comic.getCid());
                         if (request != null) {
-                            if(parser.isParseChapterUseWebView()){
+                            if(parser.isParseChapterUseWebParser()){
                                 WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
                                 html = webParser.getHtmlStrSync();
                             }else{
@@ -217,7 +217,7 @@ public class Manga {
 //                    list.addAll(mongo.QueryComicChapter(mComic, path));
                     if (list.isEmpty()) {
                         Request request = parser.getImagesRequest(cid, path);
-                        if (parser.isParseImagesUseWebView()) {
+                        if (parser.isParseImagesUseWebParser()) {
                             String url = request.url().toString();
                             WebParser webParser = new WebParser(App.getAppContext(), url, request.headers());
 
@@ -262,7 +262,7 @@ public class Manga {
                 return list;
             }
             Request request = parser.getImagesRequest(cid, path);
-            if (!parser.isParseImagesUseWebView()) {
+            if (!parser.isParseImagesUseWebParser()) {
                 response = App.getHttpClient().newCall(request).execute();
                 if (response.isSuccessful()) {
                     List<Chapter> chapter = mChapterManager.getChapter(path, title);
