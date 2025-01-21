@@ -47,7 +47,7 @@ public class CopyMH extends MangaParser {
 //            JChineseConvertor jChineseConvertor = JChineseConvertor.getInstance();
 //            keyword = jChineseConvertor.s2t(keyword);
             url = StringUtils.format(
-                    "https://www.mangacopy.com/api/kb/web/searchbc/comics?offset=0&platform=2&limit=12&q=%sq_type=", keyword);
+                    "%s/api/kb/web/searchbc/comics?offset=0&platform=2&limit=12&q=%sq_type=",website, keyword);
             return new Request.Builder()
                     .url(url)
                     .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
@@ -94,7 +94,7 @@ public class CopyMH extends MangaParser {
 
     @Override
     public Request getInfoRequest(String cid) {
-        String url = StringUtils.format("%s/comic/%s", website, cid);
+        String url = StringUtils.format("%s/api/v3/comic2/%s", website, cid);
         return new Request.Builder()
                 .url(url)
                 .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
@@ -103,29 +103,25 @@ public class CopyMH extends MangaParser {
 
     @Override
     public Comic parseInfo(String html, Comic comic) {
-        Node body = new Node(html);
-        Node titleBody = body.getChild(".comicParticulars-title");
-        String title = titleBody.text("li > [title]");
-        List<Node> info = body.list(".comicParticulars-title-right > ul > li");
-        String cover, update = "", intro, author = "";
-        boolean finish = false;
-        cover = titleBody.attr(".comicParticulars-left-img > img", "data-src");
-        for (Node node : info) {
-            String tmp = node.text();
-            if (tmp.contains("作者：")) {
-                author = tmp.substring(3).strip();
+        JSONObject body = null;
+        try {
+            JSONObject comicInfo = new JSONObject(html).getJSONObject("results");
+            body = comicInfo.getJSONObject("comic");
+            String cover = body.getString("cover");
+            String intro = body.getString("brief");
+            String title = body.getString("name");
+            String update = body.getString("datetime_updated");
+            String author = ((JSONObject) body.getJSONArray("author").get(0)).getString("name");
+            // 连载状态
+            boolean finish = body.getJSONObject("status").getInt("value") != 0;
+            JSONObject group = comicInfo.getJSONObject("groups");
+            comic.note = group;
 
-            }
-            if (tmp.contains("最後更新：")) {
-                update = tmp.substring(5).strip();
-            }
-            if (tmp.contains("狀態：")) {
-                finish = !tmp.contains("連載中");
-            }
+
+            comic.setInfo(title, cover, update, intro, author, finish);
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-        intro = body.text(".intro");
-
-        comic.setInfo(title, cover, update, intro, author, finish);
 
 
         return comic;
