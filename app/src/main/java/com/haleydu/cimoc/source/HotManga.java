@@ -1,8 +1,7 @@
 package com.haleydu.cimoc.source;
 
-import android.util.Base64;
+import static com.haleydu.cimoc.core.Manga.getResponseBody;
 
-import com.facebook.common.util.Hex;
 import com.google.common.collect.Lists;
 import com.haleydu.cimoc.App;
 import com.haleydu.cimoc.model.Chapter;
@@ -13,8 +12,6 @@ import com.haleydu.cimoc.parser.JsonIterator;
 import com.haleydu.cimoc.parser.MangaParser;
 import com.haleydu.cimoc.parser.SearchIterator;
 import com.haleydu.cimoc.parser.UrlFilter;
-import com.haleydu.cimoc.soup.Node;
-import com.haleydu.cimoc.utils.DecryptionUtils;
 import com.haleydu.cimoc.utils.StringUtils;
 
 import org.json.JSONArray;
@@ -29,19 +26,17 @@ import okhttp3.Headers;
 import okhttp3.Request;
 import taobe.tec.jcc.JChineseConvertor;
 
-import static com.haleydu.cimoc.core.Manga.getResponseBody;
-
 public class HotManga extends MangaParser {
     public static final int TYPE = 102;
     public static final String DEFAULT_TITLE = "热辣漫画";
-    public static final String website = "https://m.manga2024.com/";
-
-    public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true);
-    }
+    public static final String website = "https://www.manga2025.com";
 
     public HotManga(Source source) {
         init(source, null);
+    }
+
+    public static Source getDefaultSource() {
+        return new Source(null, DEFAULT_TITLE, TYPE, true);
     }
 
     @Override
@@ -50,23 +45,23 @@ public class HotManga extends MangaParser {
         if (page == 1) {
 //            JChineseConvertor jChineseConvertor = JChineseConvertor.getInstance();
 //            keyword = jChineseConvertor.s2t(keyword);
-            url = StringUtils.format("https://mapi.hotmangasg.com:12001/api/v3/search/comic?platform=1&limit=30&offset=0&q=%s", keyword);
+            url = StringUtils.format("%s/api/v3/search/comic?platform=1&limit=30&offset=0&q=%s", website, keyword);
             return new Request.Builder()
-                .url(url)
-                .addHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36")
-                .build();
+                    .url(url)
+                    .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
+                    .build();
         }
         return null;
     }
 
     @Override
     public String getUrl(String cid) {
-        return "https://m.manga2024.com/v2h5/details/comic/".concat(cid);
+        return website + "/comic/".concat(cid);
     }
 
     @Override
     protected void initUrlFilterList() {
-        filter.add(new UrlFilter("m.manga2020.com", "/comic/(\\w.+)"));
+        filter.add(new UrlFilter("www.manga2024.com", "/comic/(\\w.+)"));
     }
 
     @Override
@@ -97,11 +92,11 @@ public class HotManga extends MangaParser {
 
     @Override
     public Request getInfoRequest(String cid) {
-        String url = "https://mapi.hotmangasd.com:12001/api/v3/comic2/".concat(cid);
+        String url = StringUtils.format("%s/api/v3/comic2/%s", website, cid);
         return new Request.Builder()
-            .url(url)
-            .addHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36")
-            .build();
+                .url(url)
+                .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
+                .build();
     }
 
     @Override
@@ -132,11 +127,11 @@ public class HotManga extends MangaParser {
 
     @Override
     public Request getChapterRequest(String html, String cid) {
-        String url = String.format("https://mapi.hotmangasg.com:12001/api/v3/comic/%s/group/default/chapters?limit=500&offset=0", cid);
+        String url = String.format("%s/api/v3/comic/%s/group/default/chapters?limit=500&offset=0", website, cid);
         return new Request.Builder()
-            .url(url)
-            .addHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36")
-            .build();
+                .url(url)
+                .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
+                .build();
     }
 
     @Override
@@ -157,11 +152,11 @@ public class HotManga extends MangaParser {
                 if (key.equals("default")) continue;
                 String path_word = groups.getJSONObject(key).getString("path_word");
                 String PathName = groups.getJSONObject(key).getString("name");
-                String url = String.format("https://mapi.hotmangasg.com:12001/api/v3/comic/%s/group/%s/chapters?limit=500&offset=0", comic.getCid(), path_word);
+                String url = String.format("%s/api/v3/comic/%s/group/%s/chapters?limit=500&offset=0", website, comic.getCid(), path_word);
                 Request request = new Request.Builder()
-                    .url(url)
-                    .addHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36")
-                    .build();
+                        .url(url)
+                        .addHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36")
+                        .build();
                 html = getResponseBody(App.getHttpClient(), request);
                 jsonObject = new JSONObject(html);
                 array = jsonObject.getJSONObject("results").getJSONArray("list");
@@ -183,11 +178,11 @@ public class HotManga extends MangaParser {
 
     @Override
     public Request getImagesRequest(String cid, String path) {
-        String url = StringUtils.format("https://mapi.hotmangasd.com:12001/api/v3/comic/%s/chapter/%s", cid, path);
+        String url = StringUtils.format("%s/api/v3/comic/%s/chapter/%s", website, cid, path);
         return new Request.Builder()
-            .url(url)
-            .addHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36")
-            .build();
+                .url(url)
+                .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
+                .build();
     }
 
     @Override
@@ -199,8 +194,8 @@ public class HotManga extends MangaParser {
             for (int i = 0; i < array.length(); ++i) {
                 Long comicChapter = chapter.getId();
                 Long id = Long.parseLong(comicChapter + "0" + i);
-                String url = array.getJSONObject(i).getString("url").replace("m_read","kb_m_read_large");
-                list.add(new ImageUrl(id, comicChapter,i + 1, url, false));
+                String url = array.getJSONObject(i).getString("url").replace("m_read", "kb_m_read_large");
+                list.add(new ImageUrl(id, comicChapter, i + 1, url, false));
             }
         } catch (Exception e) {
             e.printStackTrace();
