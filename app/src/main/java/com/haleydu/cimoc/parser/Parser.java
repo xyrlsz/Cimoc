@@ -52,7 +52,7 @@ public interface Parser {
      * @param html  页面源代码
      * @param comic 漫画实体类，需要设置其中的字段
      */
-    Comic parseInfo(String html, Comic comic) throws UnsupportedEncodingException;
+    Comic parseInfo(String html, Comic comic) throws UnsupportedEncodingException, JSONException;
 
 
     /**

@@ -13,15 +13,17 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.facebook.drawee.backends.pipeline.PipelineDraweeControllerBuilder;
 import com.facebook.drawee.backends.pipeline.PipelineDraweeControllerBuilderSupplier;
 import com.facebook.drawee.controller.BaseControllerListener;
-import com.facebook.drawee.generic.GenericDraweeHierarchy;
 import com.facebook.drawee.view.DraweeView;
 import com.facebook.imagepipeline.common.ResizeOptions;
+import com.facebook.imagepipeline.core.ImagePipelineFactory;
 import com.facebook.imagepipeline.image.ImageInfo;
 import com.facebook.imagepipeline.listener.BaseRequestListener;
 import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.haleydu.cimoc.App;
 import com.haleydu.cimoc.R;
+import com.haleydu.cimoc.fresco.ControllerBuilderSupplierFactory;
+import com.haleydu.cimoc.fresco.ImagePipelineFactoryBuilder;
 import com.haleydu.cimoc.fresco.processor.MangaPostprocessor;
 import com.haleydu.cimoc.manager.PreferenceManager;
 import com.haleydu.cimoc.model.ImageUrl;
@@ -34,6 +36,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 import butterknife.BindView;
+import okhttp3.Headers;
 
 /**
  * Created by Hiroshi on 2016/8/5.
@@ -97,8 +100,21 @@ public class ReaderAdapter extends BaseAdapter<ImageUrl> {
 
         final DraweeView draweeView = ((ImageHolder) holder).draweeView;
 
+        Headers currHeaders = imageUrl.getHeaders();
+        if (currHeaders != null) {
+            Context context = App.getAppContext();
+            ImagePipelineFactory mImagePipelineFactory = ImagePipelineFactoryBuilder
+                    .build(context, imageUrl.isDownload() ? null : currHeaders, false);
+            ImagePipelineFactory mLargeImagePipelineFactory = ImagePipelineFactoryBuilder
+                    .build(context, imageUrl.isDownload() ? null : currHeaders, true);
+            setControllerSupplier(ControllerBuilderSupplierFactory.get(context, mImagePipelineFactory),
+                    ControllerBuilderSupplierFactory.get(context, mLargeImagePipelineFactory));
+
+        }
+
         PipelineDraweeControllerBuilder builder = isNeedResize(imageUrl) ?
                 mLargeControllerSupplier.get() : mControllerSupplier.get();
+
         switch (reader) {
             case READER_PAGE:
                 ((PhotoDraweeView) draweeView).setTapListenerListener(mTapGestureListener);

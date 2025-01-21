@@ -19,9 +19,9 @@ import com.haleydu.cimoc.source.Dmzjv3;
 import com.haleydu.cimoc.source.DuManWu;
 import com.haleydu.cimoc.source.DuManWuOrg;
 import com.haleydu.cimoc.source.GuFeng;
-//import com.haleydu.cimoc.source.HHAAZZ;
 import com.haleydu.cimoc.source.HotManga;
 import com.haleydu.cimoc.source.IKanman;
+import com.haleydu.cimoc.source.Komiic;
 import com.haleydu.cimoc.source.Locality;
 import com.haleydu.cimoc.source.MYCOMIC;
 import com.haleydu.cimoc.source.MangaBZ;
@@ -258,6 +258,9 @@ public class SourceManager {
                     break;
                 case DuManWuOrg.TYPE:
                     parser = new DuManWuOrg(source);
+                    break;
+                case Komiic.TYPE:
+                    parser = new Komiic(source);
                     break;
                 default:
                     parser = new Null();

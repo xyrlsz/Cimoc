@@ -202,7 +202,8 @@ public class DownloadService extends Service implements AppGetter {
                                 String[] urls = image.getUrls();
                                 for (int j = 0; !success && j < urls.length; ++j) {
                                     String url = image.isLazy() ? Manga.getLazyUrl(mParse, urls[j]) : urls[j];
-                                    Request request = buildRequest(mParse.getHeader(url), url);
+                                    Headers imgHeaders = image.getHeaders();
+                                    Request request = buildRequest(imgHeaders == null ? mParse.getHeader(url) : imgHeaders, url);
                                     success = RequestAndWrite(dir, request, i + 1, url);
                                 }
                             }

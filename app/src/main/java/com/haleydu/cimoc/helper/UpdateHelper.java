@@ -22,6 +22,7 @@ import com.haleydu.cimoc.source.GuFeng;
 //import com.haleydu.cimoc.source.HHAAZZ;
 import com.haleydu.cimoc.source.HotManga;
 import com.haleydu.cimoc.source.IKanman;
+import com.haleydu.cimoc.source.Komiic;
 import com.haleydu.cimoc.source.MYCOMIC;
 import com.haleydu.cimoc.source.MangaBZ;
 import com.haleydu.cimoc.source.MangaNel;
@@ -77,6 +78,7 @@ public class UpdateHelper {
         ComicSourceHash.put(YKMH.TYPE, YKMH.getDefaultSource());
         ComicSourceHash.put(DuManWu.TYPE, DuManWu.getDefaultSource());
         ComicSourceHash.put(DuManWuOrg.TYPE, DuManWuOrg.getDefaultSource());
+        ComicSourceHash.put(Komiic.TYPE, Komiic.getDefaultSource());
     }
 
     public static void update(PreferenceManager manager, final DaoSession session) {
@@ -165,6 +167,7 @@ public class UpdateHelper {
         list.add(MYCOMIC.getDefaultSource());
         list.add(DuManWu.getDefaultSource());
         list.add(DuManWuOrg.getDefaultSource());
+        list.add(Komiic.getDefaultSource());
         session.getSourceDao().insertOrReplaceInTx(list);
     }
 
