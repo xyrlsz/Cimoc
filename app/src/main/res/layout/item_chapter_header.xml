@@ -16,17 +16,22 @@
             android:id="@+id/item_header_comic_image"
             android:layout_width="100dp"
             android:layout_height="match_parent"
-            android:layout_marginRight="10dp"
+            android:layout_marginEnd="10dp"
             fresco:actualImageScaleType="centerCrop" />
 
         <TextView
             android:id="@+id/item_header_comic_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/item_header_comic_image"
-            android:ellipsize="end"
-            android:maxLines="1"
+            android:layout_toEndOf="@id/item_header_comic_image"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:scrollHorizontally="true"
+            android:singleLine="true"
             android:textColor="@color/white"
+            android:freezesText="true"
             android:textSize="18sp" />
 
         <TextView
@@ -35,7 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/item_header_comic_title"
             android:layout_marginTop="6dp"
-            android:layout_toRightOf="@id/item_header_comic_image"
+            android:layout_toEndOf="@id/item_header_comic_image"
             android:ellipsize="end"
             android:maxLines="1"
             android:textColor="@color/white"
@@ -46,7 +51,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/item_header_comic_author"
-            android:layout_alignLeft="@id/item_header_comic_title"
+            android:layout_alignStart="@id/item_header_comic_title"
             android:layout_marginTop="6dp"
             android:ellipsize="end"
             android:maxLines="4"
@@ -69,7 +74,7 @@
             android:id="@+id/item_header_comic_update"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:textSize="12sp" />
     </RelativeLayout>
 </LinearLayout>

@@ -188,7 +188,8 @@ public class DetailAdapter extends BaseAdapter<Chapter> {
                         headerHolder.mComicImage.setController(mControllerSupplier.get().setUri(cover).build());
                     }
 
-                    headerHolder.mComicTitle.setTextIsSelectable(true);
+//                    headerHolder.mComicTitle.setTextIsSelectable(true);
+                    headerHolder.mComicTitle.setSelected(true);
                     headerHolder.mComicTitle.setText(STConvertUtils.convert(title));
 //                    headerHolder.mComicIntro.setTextIsSelectable(true);
                     headerHolder.mComicIntro.setText(STConvertUtils.convert(intro));
