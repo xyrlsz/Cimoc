@@ -33,6 +33,7 @@ import com.haleydu.cimoc.service.DownloadService;
 import com.haleydu.cimoc.ui.adapter.BaseAdapter;
 import com.haleydu.cimoc.ui.adapter.DetailAdapter;
 import com.haleydu.cimoc.ui.view.DetailView;
+import com.haleydu.cimoc.utils.STConvertUtils;
 import com.haleydu.cimoc.utils.StringUtils;
 
 import java.util.ArrayList;
@@ -263,8 +264,8 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
             TextView textViewTitle = dialogView.findViewById(R.id.textViewTitle);
             TextView textViewMessage = dialogView.findViewById(R.id.textViewMessage);
 
-            textViewTitle.setText(mDetailAdapter.title);
-            textViewMessage.setText(mDetailAdapter.intro);
+            textViewTitle.setText(STConvertUtils.convert(mDetailAdapter.title));
+            textViewMessage.setText(STConvertUtils.convert(mDetailAdapter.intro));
             textViewMessage.setTextIsSelectable(true);
             textViewTitle.setTextIsSelectable(true);
             builder.setView(dialogView)
