@@ -19,7 +19,7 @@ import com.haleydu.cimoc.source.Dmzjv3;
 import com.haleydu.cimoc.source.DuManWu;
 import com.haleydu.cimoc.source.DuManWuOrg;
 import com.haleydu.cimoc.source.GuFeng;
-import com.haleydu.cimoc.source.HHAAZZ;
+//import com.haleydu.cimoc.source.HHAAZZ;
 import com.haleydu.cimoc.source.HotManga;
 import com.haleydu.cimoc.source.IKanman;
 import com.haleydu.cimoc.source.MYCOMIC;
@@ -61,7 +61,7 @@ public class UpdateHelper {
         ComicSourceHash.put(Dmzjv2.TYPE, Dmzjv2.getDefaultSource());
         ComicSourceHash.put(Dmzjv3.TYPE, Dmzjv3.getDefaultSource());
         ComicSourceHash.put(GuFeng.TYPE, GuFeng.getDefaultSource());
-        ComicSourceHash.put(HHAAZZ.TYPE, HHAAZZ.getDefaultSource());
+//        ComicSourceHash.put(HHAAZZ.TYPE, HHAAZZ.getDefaultSource());
         ComicSourceHash.put(HotManga.TYPE, HotManga.getDefaultSource());
         ComicSourceHash.put(IKanman.TYPE, IKanman.getDefaultSource());
 //        ComicSourceHash.put(JMTT.TYPE, JMTT.getDefaultSource());
@@ -116,7 +116,7 @@ public class UpdateHelper {
         List<Source> list = new ArrayList<>();
         list.add(IKanman.getDefaultSource());
         list.add(Dmzjv3.getDefaultSource());
-        list.add(HHAAZZ.getDefaultSource());
+//        list.add(HHAAZZ.getDefaultSource());
 //        list.add(CCTuku.getDefaultSource());
 //        list.add(U17.getDefaultSource());
         list.add(DM5.getDefaultSource());

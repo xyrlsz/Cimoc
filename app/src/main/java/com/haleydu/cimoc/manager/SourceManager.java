@@ -19,7 +19,7 @@ import com.haleydu.cimoc.source.Dmzjv3;
 import com.haleydu.cimoc.source.DuManWu;
 import com.haleydu.cimoc.source.DuManWuOrg;
 import com.haleydu.cimoc.source.GuFeng;
-import com.haleydu.cimoc.source.HHAAZZ;
+//import com.haleydu.cimoc.source.HHAAZZ;
 import com.haleydu.cimoc.source.HotManga;
 import com.haleydu.cimoc.source.IKanman;
 import com.haleydu.cimoc.source.Locality;
@@ -112,9 +112,9 @@ public class SourceManager {
                 case Dmzjv3.TYPE:
                     parser = new Dmzjv3(source);
                     break;
-                case HHAAZZ.TYPE:
-                    parser = new HHAAZZ(source);
-                    break;
+//                case HHAAZZ.TYPE:
+//                    parser = new HHAAZZ(source);
+//                    break;
 //                case CCTuku.TYPE:
 //                    parser = new CCTuku(source);
 //                    break;
