@@ -53,6 +53,7 @@ import com.haleydu.cimoc.ui.fragment.recyclerview.SourceFragment;
 import com.haleydu.cimoc.ui.view.MainView;
 import com.haleydu.cimoc.utils.HintUtils;
 import com.haleydu.cimoc.utils.PermissionUtils;
+import com.haleydu.cimoc.utils.STConvertUtils;
 import com.king.app.updater.constant.Constants;
 
 import java.io.IOException;
@@ -548,7 +549,7 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
         mLastId = id;
         mLastSource = source;
         mLastCid = cid;
-        mLastText.setText(title);
+        mLastText.setText(STConvertUtils.convert(title));
         ImageRequest request = ImageRequestBuilder
                 .newBuilderWithSource(Uri.parse(cover))
                 .setResizeOptions(new ResizeOptions(App.mWidthPixels, App.mHeightPixels))

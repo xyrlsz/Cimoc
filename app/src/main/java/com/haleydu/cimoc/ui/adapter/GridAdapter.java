@@ -3,11 +3,12 @@ package com.haleydu.cimoc.ui.adapter;
 import android.content.Context;
 import android.graphics.Rect;
 import android.net.Uri;
-import java.util.List;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.facebook.imagepipeline.common.ResizeOptions;
@@ -20,7 +21,12 @@ import com.haleydu.cimoc.manager.PreferenceManager;
 import com.haleydu.cimoc.manager.SourceManager;
 import com.haleydu.cimoc.model.MiniComic;
 import com.haleydu.cimoc.utils.FrescoUtils;
+import com.haleydu.cimoc.utils.STConvertUtils;
+
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
+
 import butterknife.BindView;
 
 /**
@@ -59,7 +65,9 @@ public class GridAdapter extends BaseAdapter<Object> {
             default:
                 MiniComic comic = (MiniComic) mDataSet.get(position);
                 GridHolder gridHolder = (GridHolder) holder;
-                gridHolder.comicTitle.setText(comic.getTitle());
+
+
+                gridHolder.comicTitle.setText(STConvertUtils.convert(comic.getTitle()));
                 gridHolder.comicSource.setText(mTitleGetter.getTitle(comic.getSource()));
                 if (mProvider != null) {
                     //            ImageRequest request = ImageRequestBuilder

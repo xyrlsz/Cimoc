@@ -2,16 +2,18 @@ package com.haleydu.cimoc.ui.adapter;
 
 import android.content.Context;
 import android.graphics.Rect;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.haleydu.cimoc.R;
 import com.haleydu.cimoc.misc.Switcher;
 import com.haleydu.cimoc.model.Chapter;
 import com.haleydu.cimoc.ui.widget.ChapterButton;
+import com.haleydu.cimoc.utils.STConvertUtils;
 
 import java.util.List;
 
@@ -53,7 +55,7 @@ public class ChapterAdapter extends BaseAdapter<Switcher<Chapter>> {
         Switcher<Chapter> switcher = mDataSet.get(position);
         if (isButtonMode) {
             final ButtonHolder viewHolder = (ButtonHolder) holder;
-            viewHolder.chapterButton.setText(switcher.getElement().getTitle());
+            viewHolder.chapterButton.setText(STConvertUtils.convert(switcher.getElement().getTitle()));
             if (switcher.getElement().isDownload()) {
                 viewHolder.chapterButton.setDownload(true);
                 viewHolder.chapterButton.setSelected(false);
@@ -63,7 +65,7 @@ public class ChapterAdapter extends BaseAdapter<Switcher<Chapter>> {
             }
         } else {
             ItemHolder viewHolder = (ItemHolder) holder;
-            viewHolder.chapterTitle.setText(switcher.getElement().getTitle());
+            viewHolder.chapterTitle.setText(STConvertUtils.convert(switcher.getElement().getTitle()));
             viewHolder.chapterChoice.setEnabled(!switcher.getElement().isDownload());
             viewHolder.chapterChoice.setChecked(switcher.isEnable());
         }

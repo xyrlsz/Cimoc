@@ -16,9 +16,9 @@ import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.haleydu.cimoc.App;
 import com.haleydu.cimoc.R;
 import com.haleydu.cimoc.fresco.ControllerBuilderProvider;
-import com.haleydu.cimoc.manager.PreferenceManager;
 import com.haleydu.cimoc.manager.SourceManager;
 import com.haleydu.cimoc.model.Comic;
+import com.haleydu.cimoc.utils.STConvertUtils;
 
 import java.util.List;
 
@@ -47,27 +47,8 @@ public class ResultAdapter extends BaseAdapter<Comic> {
         super.onBindViewHolder(holder, position);
         Comic comic = mDataSet.get(position);
         ResultViewHolder viewHolder = (ResultViewHolder) holder;
-        String title = comic.getTitle();
-        PreferenceManager manager = App.getPreferenceManager();
-        switch (manager.getInt(PreferenceManager.PREF_DETAIL_TEXT_ST,PreferenceManager.DETAIL_TEXT_DEFAULT)){
-            case PreferenceManager.DETAIL_TEXT_SIMPLE:
-                try {
-                    title = xyropencc.Xyropencc.t2S(title);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                break;
-            case PreferenceManager.DETAIL_TEXT_TRADITIONAL:
-                try {
-                    title = xyropencc.Xyropencc.s2T(title);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                break;
-            default:
-                break;
-        }
-        viewHolder.comicTitle.setText(title);
+
+        viewHolder.comicTitle.setText(STConvertUtils.convert(comic.getTitle()));
         viewHolder.comicAuthor.setText(comic.getAuthor());
         viewHolder.comicSource.setText(mTitleGetter.getTitle(comic.getSource()));
         viewHolder.comicUpdate.setText(comic.getUpdate());

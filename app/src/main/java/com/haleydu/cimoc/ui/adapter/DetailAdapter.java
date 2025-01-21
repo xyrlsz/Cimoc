@@ -18,11 +18,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.facebook.drawee.backends.pipeline.PipelineDraweeControllerBuilderSupplier;
 import com.facebook.drawee.view.SimpleDraweeView;
-import com.haleydu.cimoc.App;
 import com.haleydu.cimoc.R;
-import com.haleydu.cimoc.manager.PreferenceManager;
 import com.haleydu.cimoc.model.Chapter;
 import com.haleydu.cimoc.ui.widget.ChapterButton;
+import com.haleydu.cimoc.utils.STConvertUtils;
 
 import java.util.List;
 
@@ -188,32 +187,11 @@ public class DetailAdapter extends BaseAdapter<Chapter> {
                     if (cover != null) {
                         headerHolder.mComicImage.setController(mControllerSupplier.get().setUri(cover).build());
                     }
-                    PreferenceManager preferenceManager = App.getPreferenceManager();
-                    switch (preferenceManager.getInt(PreferenceManager.PREF_DETAIL_TEXT_ST, PreferenceManager.DETAIL_TEXT_DEFAULT)) {
-                        case PreferenceManager.DETAIL_TEXT_SIMPLE:
-                            try {
-                                title = xyropencc.Xyropencc.t2S(title);
-                                intro = xyropencc.Xyropencc.t2S(intro);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            break;
-                        case PreferenceManager.DETAIL_TEXT_TRADITIONAL:
-                            try {
-                                title = xyropencc.Xyropencc.s2T(title);
-                                intro = xyropencc.Xyropencc.s2T(intro);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            break;
-                        default:
-                            break;
-                    }
 
                     headerHolder.mComicTitle.setTextIsSelectable(true);
-                    headerHolder.mComicTitle.setText(title);
+                    headerHolder.mComicTitle.setText(STConvertUtils.convert(title));
 //                    headerHolder.mComicIntro.setTextIsSelectable(true);
-                    headerHolder.mComicIntro.setText(intro);
+                    headerHolder.mComicIntro.setText(STConvertUtils.convert(intro));
                     headerHolder.mComicAuthor.setTextIsSelectable(true);
                     if (finish != null) {
                         headerHolder.mComicStatus.setText(finish ? "完结" : "连载中");
@@ -226,7 +204,7 @@ public class DetailAdapter extends BaseAdapter<Chapter> {
             } else {
                 Chapter chapter = mDataSet.get(position - 1);
                 ChapterHolder viewHolder = (ChapterHolder) holder;
-                viewHolder.chapterButton.setText(chapter.getTitle());
+                viewHolder.chapterButton.setText(STConvertUtils.convert(chapter.getTitle()));
                 viewHolder.chapterButton.setDownload(chapter.isComplete());
                 if (chapter.getPath() != null && chapter.getPath().equals(last)) {
                     viewHolder.chapterButton.setSelected(true);

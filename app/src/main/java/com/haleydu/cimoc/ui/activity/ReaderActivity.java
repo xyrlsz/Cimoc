@@ -8,8 +8,6 @@ import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Build;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -19,6 +17,9 @@ import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.facebook.binaryresource.BinaryResource;
 import com.facebook.cache.common.SimpleCacheKey;
@@ -43,6 +44,7 @@ import com.haleydu.cimoc.ui.widget.PreCacheLayoutManager;
 import com.haleydu.cimoc.ui.widget.RetryDraweeView;
 import com.haleydu.cimoc.ui.widget.ReverseSeekBar;
 import com.haleydu.cimoc.utils.HintUtils;
+import com.haleydu.cimoc.utils.STConvertUtils;
 import com.haleydu.cimoc.utils.StringUtils;
 
 import org.adw.library.widgets.discreteseekbar.DiscreteSeekBar;
@@ -107,7 +109,7 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
     private boolean mShowTopbar;
     private int[] mClickArray;
     private int[] mLongClickArray;
-    private BroadcastReceiver batteryReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver batteryReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())) {
@@ -120,6 +122,9 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
     };
     private int _source;
     private boolean _local;
+    private final boolean[] JoyLock = {false, false};
+    private final int[] JoyEvent = {7, 8};
+    private float mControllerTrigThreshold = 0.3f;
 
     public static Intent createIntent(Context context, long id, List<Chapter> list, int mode) {
         Intent intent = getIntent(context, mode);
@@ -166,8 +171,8 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
 
     @Override
     protected void initView() {
-        boolean isWhiteBackground  = App.getPreferenceManager().getBoolean(PreferenceManager.PREF_READER_WHITE_BACKGROUND, false);
-        if(isWhiteBackground){
+        boolean isWhiteBackground = App.getPreferenceManager().getBoolean(PreferenceManager.PREF_READER_WHITE_BACKGROUND, false);
+        if (isWhiteBackground) {
             mLoadingText.setTextColor(getResources().getColor(R.color.black));
         }
         mHideInfo = mPreference.getBoolean(PreferenceManager.PREF_READER_HIDE_INFO, false);
@@ -262,7 +267,7 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
             long id = getIntent().getLongExtra(Extra.EXTRA_ID, -1);
             List<Chapter> list = getIntent().getParcelableArrayListExtra(Extra.EXTRA_CHAPTER);
             mPresenter.loadInit(id, Objects.requireNonNull(list).toArray(new Chapter[list.size()]));
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -363,7 +368,7 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
     @Override
     public void onPicturePaging(ImageUrl image) {
         int pos = mReaderAdapter.getPositionById(image.getId());
-        mReaderAdapter.add(pos + 1, new ImageUrl(image.getId()+900,image.getComicChapter(),image.getNum(), image.getUrls(),
+        mReaderAdapter.add(pos + 1, new ImageUrl(image.getId() + 900, image.getComicChapter(), image.getNum(), image.getUrls(),
                 image.getChapter(), ImageUrl.STATE_PAGE_2, false));
     }
 
@@ -419,9 +424,9 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
         final String title = chapter.getTitle();
         final int titleLengthMax = 15;
         mChapterTitle.setText(
-                title.length() > titleLengthMax ?
+                STConvertUtils.convert(title.length() > titleLengthMax ?
                         title.substring(0, titleLengthMax).concat("...") :
-                        title
+                        title)
         );
     }
 
@@ -550,11 +555,6 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
         }
         return super.onGenericMotionEvent(event);
     }
-
-    private boolean[] JoyLock = {false, false};
-    private int[] JoyEvent = {7, 8};
-    private float mControllerTrigThreshold = 0.3f;
-
 
     private void checkKey(float val, ClickEvents.JoyLocks joy) {
         //unlock

@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.haleydu.cimoc.App;
 import com.haleydu.cimoc.R;
 import com.haleydu.cimoc.model.Task;
+import com.haleydu.cimoc.utils.STConvertUtils;
 import com.haleydu.cimoc.utils.StringUtils;
 
 import java.util.HashSet;
@@ -47,7 +48,7 @@ public class TaskAdapter extends BaseAdapter<Task> {
         super.onBindViewHolder(holder, position);
         Task task = mDataSet.get(position);
         TaskHolder viewHolder = (TaskHolder) holder;
-        viewHolder.taskTitle.setText(task.getTitle());
+        viewHolder.taskTitle.setText(STConvertUtils.convert(task.getTitle()));
         viewHolder.taskState.setText(getState(task));
         int progress = task.getProgress();
         int max = task.getMax();
