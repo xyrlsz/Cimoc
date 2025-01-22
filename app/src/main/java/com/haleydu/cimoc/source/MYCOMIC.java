@@ -1,6 +1,5 @@
 package com.haleydu.cimoc.source;
 
-import com.google.common.collect.Lists;
 import com.haleydu.cimoc.model.Chapter;
 import com.haleydu.cimoc.model.Comic;
 import com.haleydu.cimoc.model.ImageUrl;
@@ -8,7 +7,6 @@ import com.haleydu.cimoc.model.Source;
 import com.haleydu.cimoc.parser.MangaParser;
 import com.haleydu.cimoc.parser.NodeIterator;
 import com.haleydu.cimoc.parser.SearchIterator;
-import com.haleydu.cimoc.parser.UrlFilter;
 import com.haleydu.cimoc.soup.Node;
 import com.haleydu.cimoc.utils.StringUtils;
 
@@ -18,13 +16,10 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import okhttp3.Headers;
 import okhttp3.Request;
@@ -65,8 +60,11 @@ public class MYCOMIC extends MangaParser {
                 String title = node.text("[data-flux-subheading]");
 //                String author = node.text(".comics-card__info > small");
                 String[] tmp = node.href("div > a").split("/");
-                String cid = tmp[tmp.length-1];
-                String cover = node.src("div > a > img");
+                String cid = tmp[tmp.length - 1];
+                String cover = node.attr("div > a > img", "data-src");
+                if (cover.isEmpty()) {
+                    cover = node.src("div > a > img");
+                }
                 return new Comic(TYPE, cid, title, cover, "", "");
             }
         };
@@ -85,7 +83,7 @@ public class MYCOMIC extends MangaParser {
     @Override
     public Request getInfoRequest(String cid) {
         String url = baseUrl + "/comics/" + cid;
-        return new Request.Builder().url(url).header("Referer","https://mycomic.com/").build();
+        return new Request.Builder().url(url).header("Referer", "https://mycomic.com/").build();
     }
 
     @Override
@@ -99,7 +97,7 @@ public class MYCOMIC extends MangaParser {
         boolean status = body.text("[data-flux-badge]").equals("已完結")
 //                ||body.text("[data-flux-badge]").equals("已完结")
                 ;
-        String update = body.attr("time","datetime");
+        String update = body.attr("time", "datetime");
         comic.setInfo(title, cover, update, intro, author, status);
         return comic;
     }
@@ -113,11 +111,11 @@ public class MYCOMIC extends MangaParser {
         int i = 0;
 
         for (Node chapterNode : chapterNodes) {
-            String chaptersJson = StringUtils.match("chapters:\\s*(\\[.*?\\])",chapterNode.attr("x-data"),1);
-            try{
+            String chaptersJson = StringUtils.match("chapters:\\s*(\\[.*?\\])", chapterNode.attr("x-data"), 1);
+            try {
                 JSONArray chaptersData = new JSONArray(chaptersJson);
 
-                for(int j=0;j<chaptersData.length();j++){
+                for (int j = 0; j < chaptersData.length(); j++) {
                     JSONObject chapter = chaptersData.getJSONObject(j);
                     String title = chapter.getString("title");
                     String path = chapter.getString("id");
@@ -137,7 +135,7 @@ public class MYCOMIC extends MangaParser {
     @Override
     public Request getImagesRequest(String cid, String path) {
         String url = StringUtils.format("%s/chapters/%s", baseUrl, path);
-        return new Request.Builder().url(url).header("Referer","https://mycomic.com/").build();
+        return new Request.Builder().url(url).header("Referer", "https://mycomic.com/").build();
     }
 
     @Override
@@ -149,7 +147,7 @@ public class MYCOMIC extends MangaParser {
             Long comicChapter = chapter.getId();
             Long id = Long.parseLong(comicChapter + "0" + i);
             String imgUrl = imageNodes.get(i - 1).src();
-            if(imgUrl.isEmpty()){
+            if (imgUrl.isEmpty()) {
                 imgUrl = imageNodes.get(i - 1).attr("data-src");
             }
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false));
@@ -160,15 +158,15 @@ public class MYCOMIC extends MangaParser {
 
     @Override
     public Headers getHeader() {
-        Map<String,String> heads = new HashMap<>();
-        heads.put("referer","https://mycomic.com/");
+        Map<String, String> heads = new HashMap<>();
+        heads.put("referer", "https://mycomic.com/");
         return Headers.of(heads);
     }
 
     @Override
     public Headers getHeader(List<ImageUrl> list) {
-        Map<String,String> heads = new HashMap<>();
-        heads.put("referer","https://mycomic.com/");
+        Map<String, String> heads = new HashMap<>();
+        heads.put("referer", "https://mycomic.com/");
         return Headers.of(heads);
     }
 
