@@ -72,6 +72,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
     private static final int DIALOG_REQUEST_READER_SCALE_FACTOR = 8;
     private static final int DIALOG_REQUEST_READER_CONTROLLER_TRIG_THRESHOLD = 9;
     private static final int DIALOG_REQUEST_DETAIL_TEXT_ST = 10;
+    private static final int DIALOG_REQUEST_ST_ENGINE = 11;
     private final int[] mResultArray = new int[6];
     private final Intent mResultIntent = new Intent();
 
@@ -132,6 +133,10 @@ public class SettingsActivity extends BackActivity implements SettingsView {
 //    CheckBoxPreference mReduceAd;
     @BindView(R.id.settings_detail_text_st)
     ChoicePreference mDetailTextSt;
+
+    @BindView(R.id.settings_st_engine)
+    ChoicePreference mStEngine;
+
     private SettingsPresenter mPresenter;
     private String mStoragePath;
     private String mTempStorage;
@@ -186,7 +191,10 @@ public class SettingsActivity extends BackActivity implements SettingsView {
                 R.string.settings_other_night_alpha, DIALOG_REQUEST_OTHER_NIGHT_ALPHA);
         mDownloadThread.bindPreference(getSupportFragmentManager(), PreferenceManager.PREF_DOWNLOAD_THREAD, 2,
                 R.string.settings_download_thread, DIALOG_REQUEST_DOWNLOAD_THREAD);
-        mDetailTextSt.bindPreference(getSupportFragmentManager(), PreferenceManager.PREF_DETAIL_TEXT_ST, PreferenceManager.DETAIL_TEXT_DEFAULT, R.array.detail_text_st, DIALOG_REQUEST_DETAIL_TEXT_ST);
+        mDetailTextSt.bindPreference(getSupportFragmentManager(), PreferenceManager.PREF_DETAIL_TEXT_ST,
+                PreferenceManager.DETAIL_TEXT_DEFAULT, R.array.detail_text_st, DIALOG_REQUEST_DETAIL_TEXT_ST);
+        mStEngine.bindPreference(getSupportFragmentManager(), PreferenceManager.PREF_ST_ENGINE,
+                PreferenceManager.ST_JCC, R.array.st_engine_items, DIALOG_REQUEST_ST_ENGINE);
     }
 
     @OnClick(R.id.settings_reader_config)
@@ -287,6 +295,9 @@ public class SettingsActivity extends BackActivity implements SettingsView {
                 break;
             case DIALOG_REQUEST_DETAIL_TEXT_ST:
                 mDetailTextSt.setValue(bundle.getInt(EXTRA_DIALOG_RESULT_INDEX));
+                break;
+            case DIALOG_REQUEST_ST_ENGINE:
+                mStEngine.setValue(bundle.getInt(EXTRA_DIALOG_RESULT_INDEX));
                 break;
         }
     }

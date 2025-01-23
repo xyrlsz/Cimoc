@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="launch_items">
+        <item>收藏</item>
+        <item>圖源</item>
+        <item>標籤</item>
+        <item>歷史</item>
+        <item>下載</item>
+        <item>本地</item>
+    </string-array>
+    <string-array name="reader_mode_items">
+        <item>翻頁模式</item>
+        <item>卷紙模式</item>
+    </string-array>
+    <string-array name="reader_turn_items">
+        <item>從左到右</item>
+        <item>從右到左</item>
+        <item>從上到下</item>
+    </string-array>
+    <string-array name="reader_orientation_items">
+        <item>豎屏</item>
+        <item>橫屏</item>
+        <item>跟隨系統</item>
+    </string-array>
+    <string-array name="theme_items">
+        <item>天藍</item>
+        <item>藍灰</item>
+        <item>青綠</item>
+        <item>紫色</item>
+        <item>粉色</item>
+        <item>棕色</item>
+    </string-array>
+    <string-array name="detail_text_st">
+        <item>默認</item>
+        <item>簡體</item>
+        <item>繁體</item>
+<!--        <item>繁體（台灣）</item>-->
+    </string-array>
+    <string-array name="st_engine_items">
+        <item>JCC（快）</item>
+        <item>opencc4j（較快）</item>
+        <item>OpenCC for Go（較慢，字典版本較新）</item>
+    </string-array>
+    <string-array name="event_items">
+        <item>無</item>
+        <item>上一頁</item>
+        <item>下一頁</item>
+        <item>保存圖片</item>
+        <item>加載上一章</item>
+        <item>加載下一章</item>
+        <item>退出閱讀器</item>
+        <item>跳到第一頁</item>
+        <item>跳到最後一頁</item>
+        <item>切換屏幕方向</item>
+        <item>切換閱讀模式</item>
+        <item>顯示/隱藏進度條</item>
+        <item>重新加載圖片</item>
+        <item>切換夜間模式</item>
+    </string-array>
+</resources>

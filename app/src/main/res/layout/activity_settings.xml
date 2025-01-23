@@ -230,6 +230,13 @@
                     android:layout_height="wrap_content"
                     app:title="@string/settings_detail_text_st" />
 
+                <com.haleydu.cimoc.ui.widget.preference.ChoicePreference
+                    android:id="@+id/settings_st_engine"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:title="@string/settings_st_engine" />
+
+
                 <com.haleydu.cimoc.ui.widget.preference.CheckBoxPreference
                     android:id="@+id/settings_other_connect_only_wifi"
                     android:layout_width="match_parent"

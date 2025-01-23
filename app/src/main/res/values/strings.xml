@@ -202,6 +202,8 @@
     <string name="settings_other_reduce_ad">减少页面广告</string>
     <string name="settings_other_reduce_ad_summary">减少历史和收藏页广告，下载和本地页不显示广告</string>
     <string name="settings_detail_text_st">漫画详情字体</string>
+    <string name="settings_st_engine">繁简转换引擎</string>
+
     <string name="backup_save">备份</string>
     <string name="backup_save_comic_auto">自动备份</string>
     <string name="backup_save_comic_auto_summary">自动备份收藏和历史漫画</string>

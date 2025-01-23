@@ -31,6 +31,11 @@ public class PreferenceManager {
     public static final int DETAIL_TEXT_DEFAULT = 0;
     public static final int DETAIL_TEXT_SIMPLE = 1;
     public static final int DETAIL_TEXT_TRADITIONAL = 2;
+    public static final int DETAIL_TEXT_TRADITIONAL_TW = 3;
+
+    public static final int ST_JCC = 0;
+    public static final int ST_OPENCC4J = 1;
+    public static final int ST_OPENCCGO = 2;
 
     public static final String PREF_APP_VERSION = "pref_app_version";
 
@@ -150,7 +155,7 @@ public class PreferenceManager {
     public static final String PREF_HHAAZZ_SW = "pref_hhaazz_sw";
 
     public static final String PREF_DETAIL_TEXT_ST = "pref_detail_text_st";
-
+    public static final String PREF_ST_ENGINE= "pref_st_engine";
     private SharedPreferences mSharedPreferences;
 
     public PreferenceManager(Context context) {
