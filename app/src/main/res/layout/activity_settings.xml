@@ -32,7 +32,7 @@
                     android:layout_marginBottom="10dp"
                     android:text="@string/settings_dmzj"
                     android:textColor="?attr/colorPrimary"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"/>
 
                 <com.haleydu.cimoc.ui.widget.Option
                     android:id="@+id/settings_dmzj_login"
@@ -50,8 +50,9 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
-                            android:layout_marginEnd="5dp"
+                            android:layout_marginEnd="10dp"
                             android:text="@string/settings_dmzj_logout"
+                            android:background="?attr/colorPrimary"
                             android:visibility="gone"/>
 
                     </RelativeLayout>

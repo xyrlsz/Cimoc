@@ -44,7 +44,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import okhttp3.OkHttpClient;
-import xcrash.XCrash;
+//import xcrash.XCrash;
 
 import androidx.multidex.MultiDexApplication;
 
@@ -297,16 +297,16 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
 
         return ssfFactory;
     }
-
-    private void initXCrash(){
-        //异常捕捉框架,xcrash的native捕捉会导致系统死机，将之去掉不使用20200817
-        XCrash.InitParameters initParameters = new XCrash.InitParameters();
-        //不处理native层的崩溃异常
-        initParameters.setLogDir(Environment.getExternalStorageDirectory().getAbsolutePath()+CRASH_FILE_PATH);
-        initParameters.disableNativeCrashHandler();
-        //java崩溃异常文件的最大数量
-        initParameters.setJavaLogCountMax(200);
-        initParameters.setJavaDumpAllThreadsCountMax(25);
-        XCrash.init(this, initParameters);
-    }
+//
+//    private void initXCrash(){
+//        //异常捕捉框架,xcrash的native捕捉会导致系统死机，将之去掉不使用20200817
+//        XCrash.InitParameters initParameters = new XCrash.InitParameters();
+//        //不处理native层的崩溃异常
+//        initParameters.setLogDir(Environment.getExternalStorageDirectory().getAbsolutePath()+CRASH_FILE_PATH);
+//        initParameters.disableNativeCrashHandler();
+//        //java崩溃异常文件的最大数量
+//        initParameters.setJavaLogCountMax(200);
+//        initParameters.setJavaDumpAllThreadsCountMax(25);
+//        XCrash.init(this, initParameters);
+//    }
 }

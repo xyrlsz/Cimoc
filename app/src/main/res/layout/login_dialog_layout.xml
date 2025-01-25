@@ -12,7 +12,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="16dp"
         android:text="@string/login"
-        android:textColor="@color/colorPrimaryBlue"
+        android:textColor="?attr/colorAccent"
         android:textSize="20sp"
         android:textStyle="bold" />
 
@@ -33,7 +33,7 @@
             android:layout_width="match_parent"
             android:layout_height="2dp"
             android:layout_below="@id/username"
-            android:background="@color/colorPrimaryBlue" />
+            android:background="?attr/colorAccent" />
     </RelativeLayout>
 
 
@@ -65,7 +65,7 @@
             android:layout_width="match_parent"
             android:layout_height="2dp"
             android:layout_below="@id/password"
-            android:background="@color/colorPrimaryBlue" />
+            android:background="?attr/colorAccent" />
 
 
     </RelativeLayout>
@@ -77,6 +77,7 @@
         android:layout_marginBottom="8dp"
         android:padding="12dp"
         android:stateListAnimator="@null"
+        android:background="?attr/colorAccent"
         android:text="@string/login"
         android:textSize="16sp" />
 
@@ -87,6 +88,7 @@
         android:layout_marginBottom="8dp"
         android:padding="12dp"
         android:stateListAnimator="@null"
+        android:background="?attr/colorAccent"
         android:text="@string/register"
         android:textSize="16sp" />
 

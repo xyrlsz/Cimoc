@@ -41,5 +41,22 @@ public class ThemeUtils {
                 return R.style.AppThemeBrown;
         }
     }
+    public static int getDialogThemeById(int id) {
+        switch (id) {
+            default:
+            case THEME_BLUE:
+                return R.style.DialogThemeBlue;
+            case THEME_GREY:
+                return R.style.DialogThemeGrey;
+            case THEME_TEAL:
+                return R.style.DialogThemeTeal;
+            case THEME_PURPLE:
+                return R.style.DialogThemePurple;
+            case THEME_PINK:
+                return R.style.DialogThemePink;
+            case THEME_BROWN:
+                return R.style.DialogThemeBrown;
+        }
+    }
 
 }

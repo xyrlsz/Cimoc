@@ -1,5 +1,6 @@
 package com.haleydu.cimoc.core;
 
+import com.github.houbb.opencc4j.util.ZhConverterUtil;
 import com.haleydu.cimoc.App;
 import com.haleydu.cimoc.manager.ChapterManager;
 import com.haleydu.cimoc.manager.SourceManager;
@@ -37,21 +38,21 @@ import rx.schedulers.Schedulers;
 public class Manga {
 
     private static boolean indexOfIgnoreCase(String str, String search) {
-        return str.toLowerCase().indexOf(search.toLowerCase()) != -1;
+        return str.toLowerCase().contains(search.toLowerCase());
     }
 
     public static boolean indexOfIgnoreCase(String str, String search, boolean stSame) {
         if (stSame) {
             try {
-                String s1 = xyropencc.Xyropencc.t2S(str);
-                String s2 = xyropencc.Xyropencc.t2S(search);
-                return s1.toLowerCase().indexOf(s2.toLowerCase()) != -1;
+                String s1 = ZhConverterUtil.toSimple(str);
+                String s2 = ZhConverterUtil.toSimple(search);
+                return s1.toLowerCase().contains(s2.toLowerCase());
             } catch (Exception e) {
                 e.printStackTrace();
                 return false;
             }
         } else {
-            return str.toLowerCase().indexOf(search.toLowerCase()) != -1;
+            return str.toLowerCase().contains(search.toLowerCase());
         }
     }
 

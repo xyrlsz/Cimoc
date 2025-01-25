@@ -333,6 +333,7 @@
     <string name="user_login_logout_sucess">注销成功</string>
     <string name="user_login_logout_tips">您确定要注销么？</string>
     <string name="user_login_logout">注销</string>
+    <string name="user_login_empty">账户或密码为空</string>
 
     <!--祝愿不被乱改，请大家手下留情，可以随意下载，不要乱加东西-->
     <string name="mongo_str" translatable="false">mongodb://comic:ba93Z5qUerhSJE3q@ds014118.mlab.com:14118</string>

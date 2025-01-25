@@ -5,7 +5,6 @@ import static com.haleydu.cimoc.Constants.DMZJ_SHARED_COOKIES;
 import static com.haleydu.cimoc.Constants.DMZJ_SHARED_USERNAME;
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
@@ -14,7 +13,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
@@ -76,9 +74,9 @@ public class SettingsActivity extends BackActivity implements SettingsView {
     private static final int DIALOG_REQUEST_ST_ENGINE = 11;
     private final int[] mResultArray = new int[6];
     private final Intent mResultIntent = new Intent();
-
+    @BindView(R.id.settings_dmzj_login)
     Option mDmzjLogin;
-    @BindViews({R.id.settings_reader_title, R.id.settings_download_title, R.id.settings_other_title, R.id.settings_search_title})
+    @BindViews({R.id.settings_reader_title, R.id.settings_download_title, R.id.settings_other_title, R.id.settings_search_title,R.id.settings_dmzj})
     List<TextView> mTitleList;
     @BindView(R.id.settings_layout)
     View mSettingsLayout;
@@ -141,6 +139,9 @@ public class SettingsActivity extends BackActivity implements SettingsView {
     @BindView(R.id.settings_dmzj_logout)
     Button mDmzjLogout;
 
+
+
+
     private SettingsPresenter mPresenter;
     private String mStoragePath;
     private String mTempStorage;
@@ -156,7 +157,6 @@ public class SettingsActivity extends BackActivity implements SettingsView {
     protected void initView() {
         super.initView();
 
-        mDmzjLogin = findViewById(R.id.settings_dmzj_login);
         String dmzjUsername = getSharedPreferences(DMZJ_SHARED, MODE_PRIVATE).getString(DMZJ_SHARED_USERNAME, "");
         if (!dmzjUsername.isEmpty()) {
             mDmzjLogin.setSummary(dmzjUsername);
@@ -335,6 +335,8 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         mOtherShowTopbar.setColorStateList(stateList);
         mReaderCloseAutoResizeImage.setColorStateList(stateList);
         mReaderVolumeKeyControls.setColorStateList(stateList);
+
+        mDmzjLogout.setBackgroundColor(ContextCompat.getColor(this, primary));
     }
 
     @OnClick(R.id.settings_other_storage)
@@ -369,9 +371,14 @@ public class SettingsActivity extends BackActivity implements SettingsView {
 
     @OnClick(R.id.settings_dmzj_login)
     void onDmzjLoginClick() {
-        LoginDialog loginDialog = new LoginDialog(this);
+        int theme = mPreference.getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_BLUE);
+        LoginDialog loginDialog = new LoginDialog(this,ThemeUtils.getDialogThemeById(theme));
         loginDialog.setOnLoginListener((username, password) -> {
-
+            if(username.isEmpty()||password.isEmpty()){
+                loginDialog.dismiss();
+                showSnackbar(getString(R.string.user_login_empty));
+                return;
+            }
             RequestBody formBody = new FormBody.Builder()
                     .add("nickname", username)
                     .add("password", password)
@@ -403,7 +410,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
             App.getHttpClient().newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
-                    showSnackbar("登录失败");
+                    showSnackbar(getString(R.string.user_login_failed));
                 }
 
                 @Override
@@ -427,9 +434,9 @@ public class SettingsActivity extends BackActivity implements SettingsView {
                             mDmzjLogout.setVisibility(View.VISIBLE);
                         });
                         loginDialog.dismiss();
-                        showSnackbar("登录成功");
+                        showSnackbar(getString(R.string.user_login_sucess));
                     } else {
-                        showSnackbar("登录失败");
+                        showSnackbar(getString(R.string.user_login_failed));
                     }
                 }
             });
@@ -457,7 +464,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         mDmzjLogin.setSummary(getString(R.string.settings_dmzj_login_summary));
         mDmzjLogout.setVisibility(View.GONE);
         editor.apply();
-        showSnackbar("成功");
+        showSnackbar(getString(R.string.user_login_logout_sucess));
     }
 
     @Override
