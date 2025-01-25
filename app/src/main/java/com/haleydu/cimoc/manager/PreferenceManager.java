@@ -35,7 +35,7 @@ public class PreferenceManager {
 
     public static final int ST_JCC = 0;
     public static final int ST_OPENCC4J = 1;
-    public static final int ST_OPENCCGO = 2;
+//    public static final int ST_OPENCCGO = 2;
 
     public static final String PREF_APP_VERSION = "pref_app_version";
 
