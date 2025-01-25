@@ -53,5 +53,8 @@ public class Option extends FrameLayout {
     public void setSummary(CharSequence text) {
         mSummaryView.setText(text);
     }
+    public void setTitle(CharSequence text) {
+        mTitleView.setText(text);
+    }
 
 }

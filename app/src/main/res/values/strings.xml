@@ -349,6 +349,7 @@
     <string name="settings_dmzj">动漫之家</string>
     <string name="settings_dmzj_login_summary">未登录</string>
     <string name="settings_dmzj_login">登录</string>
+    <string name="settings_dmzj_logined">已登录</string>
     <string name="settings_dmzj_signup">注册</string>
     <string name="settings_dmzj_logout">退出登录</string>
     <string name="message" translatable="false">message</string>

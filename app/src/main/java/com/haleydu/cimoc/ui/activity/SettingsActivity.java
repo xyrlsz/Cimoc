@@ -31,6 +31,7 @@ import com.haleydu.cimoc.ui.activity.settings.ReaderConfigActivity;
 import com.haleydu.cimoc.ui.fragment.dialog.MessageDialogFragment;
 import com.haleydu.cimoc.ui.fragment.dialog.StorageEditorDialogFragment;
 import com.haleydu.cimoc.ui.view.SettingsView;
+import com.haleydu.cimoc.ui.widget.LoginDialog;
 import com.haleydu.cimoc.ui.widget.Option;
 import com.haleydu.cimoc.ui.widget.preference.CheckBoxPreference;
 import com.haleydu.cimoc.ui.widget.preference.ChoicePreference;
@@ -137,6 +138,9 @@ public class SettingsActivity extends BackActivity implements SettingsView {
     @BindView(R.id.settings_st_engine)
     ChoicePreference mStEngine;
 
+    @BindView(R.id.settings_dmzj_logout)
+    Button mDmzjLogout;
+
     private SettingsPresenter mPresenter;
     private String mStoragePath;
     private String mTempStorage;
@@ -156,6 +160,8 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         String dmzjUsername = getSharedPreferences(DMZJ_SHARED, MODE_PRIVATE).getString(DMZJ_SHARED_USERNAME, "");
         if (!dmzjUsername.isEmpty()) {
             mDmzjLogin.setSummary(dmzjUsername);
+            mDmzjLogin.setTitle(getString(R.string.settings_dmzj_logined));
+            mDmzjLogout.setVisibility(View.VISIBLE);
         }
 
         mStoragePath = getAppInstance().getDocumentFile().getUri().toString();
@@ -363,29 +369,12 @@ public class SettingsActivity extends BackActivity implements SettingsView {
 
     @OnClick(R.id.settings_dmzj_login)
     void onDmzjLoginClick() {
-
-        Dialog dialog = new Dialog(this, R.style.DialogThemeBlue);
-        dialog.setContentView(R.layout.dmzj_login_layout);
-
-        EditText username = dialog.findViewById(R.id.username);
-        EditText password = dialog.findViewById(R.id.password);
-        Button loginButton = dialog.findViewById(R.id.login_button);
-        Button registerButton = dialog.findViewById(R.id.register_button);
-
-        registerButton.setOnClickListener(view -> {
-            String url = "https://m.idmzj.com/register.html";
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse(url));
-            startActivity(intent);
-        });
-
-        loginButton.setOnClickListener(v -> {
-            String user = username.getText().toString();
-            String pass = password.getText().toString();
+        LoginDialog loginDialog = new LoginDialog(this);
+        loginDialog.setOnLoginListener((username, password) -> {
 
             RequestBody formBody = new FormBody.Builder()
-                    .add("nickname", user)
-                    .add("password", pass)
+                    .add("nickname", username)
+                    .add("password", password)
                     .add("type", "1")
                     .add("to", "https://i.dmzj.com")
                     .build();
@@ -430,10 +419,14 @@ public class SettingsActivity extends BackActivity implements SettingsView {
                         SharedPreferences sharedPreferences = getSharedPreferences(DMZJ_SHARED, MODE_PRIVATE);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
                         editor.putString(DMZJ_SHARED_COOKIES, cookieStr);
-                        editor.putString(DMZJ_SHARED_USERNAME, user);
+                        editor.putString(DMZJ_SHARED_USERNAME, username);
                         editor.apply();
-                        runOnUiThread(() -> mDmzjLogin.setSummary(user));
-                        dialog.dismiss();
+                        runOnUiThread(() -> {
+                            mDmzjLogin.setSummary(username);
+                            mDmzjLogin.setTitle(getString(R.string.settings_dmzj_logined));
+                            mDmzjLogout.setVisibility(View.VISIBLE);
+                        });
+                        loginDialog.dismiss();
                         showSnackbar("登录成功");
                     } else {
                         showSnackbar("登录失败");
@@ -443,8 +436,15 @@ public class SettingsActivity extends BackActivity implements SettingsView {
 
 
         });
+        loginDialog.setOnRegisterListener(() -> {
+            String url = "https://m.idmzj.com/register.html";
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(url));
+            startActivity(intent);
+        });
+        loginDialog.show();
 
-        dialog.show();
+
     }
 
 
@@ -455,6 +455,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         editor.remove(DMZJ_SHARED_COOKIES);
         editor.remove(DMZJ_SHARED_USERNAME);
         mDmzjLogin.setSummary(getString(R.string.settings_dmzj_login_summary));
+        mDmzjLogout.setVisibility(View.GONE);
         editor.apply();
         showSnackbar("成功");
     }

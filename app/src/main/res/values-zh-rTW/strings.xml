@@ -326,6 +326,7 @@
     <string name="settings_dmzj">動漫之家</string>
     <string name="settings_dmzj_login_summary">未登錄</string>
     <string name="settings_dmzj_login">登錄</string>
+    <string name="settings_dmzj_logined">已登錄</string>
     <string name="settings_dmzj_signup">註冊</string>
     <string name="settings_dmzj_logout">退出登錄</string>
     <string name="login">登錄</string>
