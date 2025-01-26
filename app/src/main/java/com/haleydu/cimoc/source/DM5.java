@@ -1,6 +1,5 @@
 package com.haleydu.cimoc.source;
 
-import android.util.Log;
 import android.util.Pair;
 
 import com.google.common.collect.Lists;
@@ -24,11 +23,9 @@ import org.json.JSONObject;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 import okhttp3.FormBody;
 import okhttp3.Headers;
@@ -44,7 +41,8 @@ public class DM5 extends MangaParser {
     public static final String DEFAULT_TITLE = "动漫屋";
 
     public DM5(Source source) {
-        init(source, new Category());
+//        init(source, new Category());
+        init(source, null);
     }
 
     public static Source getDefaultSource() {
@@ -150,7 +148,7 @@ public class DM5 extends MangaParser {
     public List<Chapter> parseChapter(String html, Comic comic, Long sourceComic) {
         List<Chapter> list = new LinkedList<>();
         Node body = new Node(html);
-        int i=0;
+        int i = 0;
         for (Node node : body.list("#chapterlistload > ul  li > a")) {
             String title = StringUtils.split(node.text(), " ", 0);
             String path = node.hrefWithSplit(0);

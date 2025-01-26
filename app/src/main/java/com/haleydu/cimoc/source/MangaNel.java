@@ -1,24 +1,17 @@
 package com.haleydu.cimoc.source;
 
-import android.util.Log;
 import android.util.Pair;
 
 import com.haleydu.cimoc.model.Chapter;
 import com.haleydu.cimoc.model.Comic;
 import com.haleydu.cimoc.model.ImageUrl;
 import com.haleydu.cimoc.model.Source;
-import com.haleydu.cimoc.parser.JsonIterator;
 import com.haleydu.cimoc.parser.MangaCategory;
 import com.haleydu.cimoc.parser.MangaParser;
 import com.haleydu.cimoc.parser.NodeIterator;
 import com.haleydu.cimoc.parser.SearchIterator;
 import com.haleydu.cimoc.soup.Node;
-import com.haleydu.cimoc.utils.LogUtil;
 import com.haleydu.cimoc.utils.StringUtils;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -26,16 +19,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import okhttp3.FormBody;
 import okhttp3.Headers;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 
 /**
- *
  * Created by nich on 2017/8/6.
  * fix by haleydu on 2020/8/16.
- *
  */
 
 public class MangaNel extends MangaParser {
@@ -44,7 +33,8 @@ public class MangaNel extends MangaParser {
     public static final String DEFAULT_TITLE = "MangaNel";
 
     public MangaNel(Source source) {
-        init(source, new Category());
+//        init(source, new Category());
+        init(source, null);
     }
 
     public static Source getDefaultSource() {
@@ -59,7 +49,7 @@ public class MangaNel extends MangaParser {
      */
     @Override
     public Request getSearchRequest(String keyword, int page) {
-        if (page !=1 ) return null;
+        if (page != 1) return null;
         String url = "https://manganelo.com/search/story/" + keyword;
         return new Request.Builder().url(url).build();
     }
@@ -76,10 +66,10 @@ public class MangaNel extends MangaParser {
         return new NodeIterator(body.list(".search-story-item")) {
             @Override
             protected Comic parse(Node node) {
-                String cid = node.href("h3 > a").replace("https://manganelo.com/manga/","");
-                String title = node.attr("img","alt");
+                String cid = node.href("h3 > a").replace("https://manganelo.com/manga/", "");
+                String title = node.attr("img", "alt");
                 String cover = node.src("img");
-                String update = node.text("span.text-nowrap.item-time").replace("Updated :","").trim();
+                String update = node.text("span.text-nowrap.item-time").replace("Updated :", "").trim();
                 String author = node.text("span.text-nowrap.item-author");
                 return new Comic(TYPE, cid, title, cover, update, author);
             }
@@ -111,11 +101,11 @@ public class MangaNel extends MangaParser {
     @Override
     public Comic parseInfo(String html, Comic comic) {
         Node body = new Node(html);
-        String title = body.attr(".info-image > img","title");
+        String title = body.attr(".info-image > img", "title");
         String cover = body.src(".info-image > img");
         String update = body.text("div.story-info-right-extent > p:eq(0) > span.stre-value");
         String author = body.text("table.variations-tableInfo > tbody > tr:eq(1) > td.table-value > a");
-        String intro = body.text("#panel-story-info-description").replace("Description :","");
+        String intro = body.text("#panel-story-info-description").replace("Description :", "");
         boolean status = isFinish(body.text("table.variations-tableInfo > tbody > tr:eq(2) > td.table-value > a"));
         comic.setInfo(title, cover, update, intro, author, status);
         return comic;
@@ -130,7 +120,7 @@ public class MangaNel extends MangaParser {
     public List<Chapter> parseChapter(String html, Comic comic, Long sourceComic) {
         Set<Chapter> set = new LinkedHashSet<>();
         Node body = new Node(html);
-        int i=0;
+        int i = 0;
         for (Node node : body.list(".row-content-chapter > li")) {
             String title = node.text("a");
             String path = node.href("a");
@@ -150,14 +140,12 @@ public class MangaNel extends MangaParser {
         return new Request.Builder().url(path).build();
     }
 
-    /**
-     * 解析图片列表，若为惰性加载，则 {@link ImageUrl lazy} 为 true
-     * 惰性加载的情况，一次性不能拿到所有图片链接，例如网站使用了多次异步请求 {@link DM5#parseImages}，或需要跳转到不同页面
-     * 才能获取 {@link HHSSEE#parseImages}，这些情况一般可以根据页码构造出相应的请求链接，到阅读时再解析
-     * 支持多个链接 ，例如 {@link IKanman#parseImages}
-     *
-     * @param html 页面源代码
-     */
+    /// 解析图片列表，若为惰性加载，则 [lazy][ImageUrl] 为 true
+    /// 惰性加载的情况，一次性不能拿到所有图片链接，例如网站使用了多次异步请求 [#parseImages]，或需要跳转到不同页面
+    /// 才能获取 [#parseImages]，这些情况一般可以根据页码构造出相应的请求链接，到阅读时再解析
+    /// 支持多个链接 ，例如 [#parseImages]
+    ///
+    /// @param html 页面源代码
     @Override
     public List<ImageUrl> parseImages(String html, Chapter chapter) {
         List<ImageUrl> list = new LinkedList<>();

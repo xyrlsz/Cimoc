@@ -22,6 +22,7 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -46,7 +47,8 @@ public class Manhuatai extends MangaParser {
     private String _path = null;
 
     public Manhuatai(Source source) {
-        init(source, new Category());
+//        init(source, new Category());
+        init(source, null);
     }
 
     public static Source getDefaultSource() {
@@ -56,7 +58,7 @@ public class Manhuatai extends MangaParser {
     @Override
     public Request getSearchRequest(String keyword, int page) throws UnsupportedEncodingException {
         String url = StringUtils.format(baseUrl + "/api/getsortlist/?product_id=2&productname=mht&platformname=wap&orderby=click&search_key=%s&page=%d&size=48",
-                URLEncoder.encode(keyword, "UTF-8"), page);
+                URLEncoder.encode(keyword, StandardCharsets.UTF_8), page);
 
         return new Request.Builder().url(url).build();
     }
@@ -223,7 +225,8 @@ public class Manhuatai extends MangaParser {
 
         return list;
     }
-//
+
+    //
 //
 //    class MhInfo {
 //        @SerializedName("startimg")
@@ -240,9 +243,10 @@ public class Manhuatai extends MangaParser {
 //        String imgpath;
 //    }
     @Override
-    public String getUrl(String cid){
-        return StringUtils.format("https://www.kanman.com/%s",cid);
+    public String getUrl(String cid) {
+        return StringUtils.format("https://www.kanman.com/%s", cid);
     }
+
     @Override
     public Request getCheckRequest(String cid) {
         return getInfoRequest(cid);

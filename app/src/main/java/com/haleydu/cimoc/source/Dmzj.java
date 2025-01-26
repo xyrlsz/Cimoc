@@ -1,11 +1,13 @@
 package com.haleydu.cimoc.source;
 
-import android.content.Context;
+import static android.content.Context.MODE_PRIVATE;
+import static com.haleydu.cimoc.Constants.DMZJ_SHARED_COOKIES;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Pair;
-
 import android.widget.Toast;
+
 import com.haleydu.cimoc.App;
 import com.haleydu.cimoc.Constants;
 import com.haleydu.cimoc.model.Chapter;
@@ -36,9 +38,6 @@ import java.util.Locale;
 import okhttp3.Headers;
 import okhttp3.Request;
 
-import static android.content.Context.MODE_PRIVATE;
-import static com.haleydu.cimoc.Constants.DMZJ_SHARED_COOKIES;
-
 public class Dmzj extends MangaParser {
 
     public static final int TYPE = 1000;
@@ -47,7 +46,8 @@ public class Dmzj extends MangaParser {
 //    private List<UrlFilter> filter = new ArrayList<>();
 
     public Dmzj(Source source) {
-        init(source, new Category());
+//        init(source, new Category());
+        init(source, null);
     }
 
     public static Source getDefaultSource() {

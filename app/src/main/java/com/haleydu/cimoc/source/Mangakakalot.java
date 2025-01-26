@@ -24,10 +24,8 @@ import okhttp3.Headers;
 import okhttp3.Request;
 
 /**
- *
  * Created by nich on 2017/8/6.
  * fix by haleydu on 2020/8/16.
- *
  */
 
 public class Mangakakalot extends MangaParser {
@@ -37,7 +35,8 @@ public class Mangakakalot extends MangaParser {
     private static String cidUrl;
 
     public Mangakakalot(Source source) {
-        init(source, new Category());
+//        init(source, new Category());
+        init(source, null);
     }
 
     public static Source getDefaultSource() {
@@ -52,7 +51,7 @@ public class Mangakakalot extends MangaParser {
      */
     @Override
     public Request getSearchRequest(String keyword, int page) {
-        if (page !=1 ) return null;
+        if (page != 1) return null;
         String url = "https://mangakakalot.to/search/story/" + keyword;
         return new Request.Builder().url(url).addHeader("Referer", "https://mangakakalot.com/").build();
     }
@@ -70,10 +69,10 @@ public class Mangakakalot extends MangaParser {
             @Override
             protected Comic parse(Node node) {
                 String cid = node.href("a");
-                String title = node.attr("img","alt");
+                String title = node.attr("img", "alt");
                 String cover = node.src("img");
-                String update = node.text("div.story_item_right > span:eq(4)").replace("Updated :","").trim();
-                String author = node.text("div.story_item_right > span:eq(3)").replace("Author(s) :","").trim();
+                String update = node.text("div.story_item_right > span:eq(4)").replace("Updated :", "").trim();
+                String author = node.text("div.story_item_right > span:eq(3)").replace("Author(s) :", "").trim();
                 return new Comic(TYPE, cid, title, cover, update, author);
             }
         };
@@ -104,20 +103,20 @@ public class Mangakakalot extends MangaParser {
     @Override
     public Comic parseInfo(String html, Comic comic) {
         Node body = new Node(html);
-        if (cidUrl.contains("mangakakalot")){
-            String title = body.attr(".manga-info-pic > img","alt");
+        if (cidUrl.contains("mangakakalot")) {
+            String title = body.attr(".manga-info-pic > img", "alt");
             String cover = body.src(".manga-info-pic > img");
-            String update = body.text(".manga-info-text > :eq(3)").replace("Last updated :","").trim();
-            String author = body.text(".manga-info-text > :eq(3)").replace("Author(s) :","").trim();
+            String update = body.text(".manga-info-text > :eq(3)").replace("Last updated :", "").trim();
+            String author = body.text(".manga-info-text > :eq(3)").replace("Author(s) :", "").trim();
             String intro = body.text("#noidungm");
             boolean status = isFinish(body.text(".manga-info-text > :eq(2)"));
             comic.setInfo(title, cover, update, intro, author, status);
-        }else if (cidUrl.contains("manganelo")){
-            String title = body.attr(".info-image > img","alt");
+        } else if (cidUrl.contains("manganelo")) {
+            String title = body.attr(".info-image > img", "alt");
             String cover = body.src(".info-image > img");
             String update = body.text("div.story-info-right-extent > p:eq(0) > span.stre-value");
             String author = body.text("table.variations-tableInfo > tbody > tr:eq(1) > td.table-value > a");
-            String intro = body.text("#panel-story-info-description").replace("Description :","");
+            String intro = body.text("#panel-story-info-description").replace("Description :", "");
             boolean status = isFinish(body.text("table.variations-tableInfo > tbody > tr:eq(2) > td.table-value > a"));
             comic.setInfo(title, cover, update, intro, author, status);
         }
@@ -134,14 +133,14 @@ public class Mangakakalot extends MangaParser {
         Set<Chapter> set = new LinkedHashSet<>();
         Node body = new Node(html);
         if (cidUrl.contains("mangakakalot")) {
-            int i=0;
+            int i = 0;
             for (Node node : body.list(".chapter-list > div")) {
                 String title = node.text("span > a");
                 String path = node.href("span > a");
                 set.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
             }
-        }else if (cidUrl.contains("manganelo")){
-            int i=0;
+        } else if (cidUrl.contains("manganelo")) {
+            int i = 0;
             for (Node node : body.list(".row-content-chapter > li")) {
                 String title = node.text("a");
                 String path = node.href("a");
@@ -162,30 +161,28 @@ public class Mangakakalot extends MangaParser {
         return new Request.Builder().url(path).addHeader("Referer", "https://mangakakalot.com/").build();
     }
 
-    /**
-     * 解析图片列表，若为惰性加载，则 {@link ImageUrl lazy} 为 true
-     * 惰性加载的情况，一次性不能拿到所有图片链接，例如网站使用了多次异步请求 {@link DM5#parseImages}，或需要跳转到不同页面
-     * 才能获取 {@link HHSSEE parseImages}，这些情况一般可以根据页码构造出相应的请求链接，到阅读时再解析
-     * 支持多个链接 ，例如 {@link IKanman#parseImages}
-     *
-     * @param html 页面源代码
-     */
+    /// 解析图片列表，若为惰性加载，则 [lazy][ImageUrl] 为 true
+    /// 惰性加载的情况，一次性不能拿到所有图片链接，例如网站使用了多次异步请求 [#parseImages]，或需要跳转到不同页面
+    /// 才能获取 [parseImages][]，这些情况一般可以根据页码构造出相应的请求链接，到阅读时再解析
+    /// 支持多个链接 ，例如 [#parseImages]
+    ///
+    /// @param html 页面源代码
     @Override
     public List<ImageUrl> parseImages(String html, Chapter chapter) {
         List<ImageUrl> list = new LinkedList<>();
         Node body = new Node(html);
         int i = 0;
-        if (cidUrl.contains("mangakakalot")){
+        if (cidUrl.contains("mangakakalot")) {
             for (Node node : body.list("div#vungdoc > img")) {
                 Long comicChapter = chapter.getId();
                 Long id = Long.parseLong(comicChapter + "0" + i);
-                list.add(new ImageUrl(id,comicChapter,++i, node.src(), false));
+                list.add(new ImageUrl(id, comicChapter, ++i, node.src(), false));
             }
-        }else if (cidUrl.contains("manganelo")){
+        } else if (cidUrl.contains("manganelo")) {
             for (Node node : body.list("div.container-chapter-reader > img")) {
                 Long comicChapter = chapter.getId();
                 Long id = Long.parseLong(comicChapter + "0" + i);
-                list.add(new ImageUrl(id,comicChapter,++i, node.src(), false));
+                list.add(new ImageUrl(id, comicChapter, ++i, node.src(), false));
             }
         }
         return list;
