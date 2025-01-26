@@ -359,6 +359,7 @@
     <string name="username_item">账户名</string>
     <string name="password">密码</string>
     <string name="register">注册</string>
+    <string name="show_passwd">显示密码</string>
 
 
 </resources>

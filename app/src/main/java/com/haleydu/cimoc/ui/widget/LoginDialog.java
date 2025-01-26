@@ -7,10 +7,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 
-import com.haleydu.cimoc.App;
 import com.haleydu.cimoc.R;
-import com.haleydu.cimoc.manager.PreferenceManager;
-import com.haleydu.cimoc.utils.ThemeUtils;
 
 public class LoginDialog extends Dialog {
     private EditText usernameEditText;
@@ -27,8 +24,9 @@ public class LoginDialog extends Dialog {
         super(context);
         init(context);
     }
+
     public LoginDialog(Context context, int themeResId) {
-      super(context, themeResId);
+        super(context, themeResId);
         init(context);
     }
 

@@ -32,7 +32,7 @@
                     android:layout_marginBottom="10dp"
                     android:text="@string/settings_dmzj"
                     android:textColor="?attr/colorPrimary"
-                    android:textSize="14sp"/>
+                    android:textSize="14sp" />
 
                 <com.haleydu.cimoc.ui.widget.Option
                     android:id="@+id/settings_dmzj_login"
@@ -44,16 +44,17 @@
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent">
-                        <androidx.appcompat.widget.AppCompatButton
+
+                        <ImageButton
                             android:id="@+id/settings_dmzj_logout"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
-                            android:layout_marginEnd="10dp"
-                            android:text="@string/settings_dmzj_logout"
-                            android:background="?attr/colorPrimary"
-                            android:visibility="gone"/>
+                            android:layout_marginEnd="20dp"
+                            android:background="@color/transparent"
+                            android:src="@drawable/ic_logout"
+                            android:visibility="gone" />
 
                     </RelativeLayout>
                 </com.haleydu.cimoc.ui.widget.Option>

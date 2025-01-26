@@ -12,7 +12,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
@@ -76,7 +76,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
     private final Intent mResultIntent = new Intent();
     @BindView(R.id.settings_dmzj_login)
     Option mDmzjLogin;
-    @BindViews({R.id.settings_reader_title, R.id.settings_download_title, R.id.settings_other_title, R.id.settings_search_title,R.id.settings_dmzj})
+    @BindViews({R.id.settings_reader_title, R.id.settings_download_title, R.id.settings_other_title, R.id.settings_search_title, R.id.settings_dmzj})
     List<TextView> mTitleList;
     @BindView(R.id.settings_layout)
     View mSettingsLayout;
@@ -137,9 +137,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
     ChoicePreference mStEngine;
 
     @BindView(R.id.settings_dmzj_logout)
-    Button mDmzjLogout;
-
-
+    ImageButton mDmzjLogout;
 
 
     private SettingsPresenter mPresenter;
@@ -335,8 +333,6 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         mOtherShowTopbar.setColorStateList(stateList);
         mReaderCloseAutoResizeImage.setColorStateList(stateList);
         mReaderVolumeKeyControls.setColorStateList(stateList);
-
-        mDmzjLogout.setBackgroundColor(ContextCompat.getColor(this, primary));
     }
 
     @OnClick(R.id.settings_other_storage)
@@ -372,9 +368,9 @@ public class SettingsActivity extends BackActivity implements SettingsView {
     @OnClick(R.id.settings_dmzj_login)
     void onDmzjLoginClick() {
         int theme = mPreference.getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_BLUE);
-        LoginDialog loginDialog = new LoginDialog(this,ThemeUtils.getDialogThemeById(theme));
+        LoginDialog loginDialog = new LoginDialog(this, ThemeUtils.getDialogThemeById(theme));
         loginDialog.setOnLoginListener((username, password) -> {
-            if(username.isEmpty()||password.isEmpty()){
+            if (username.isEmpty() || password.isEmpty()) {
                 loginDialog.dismiss();
                 showSnackbar(getString(R.string.user_login_empty));
                 return;
@@ -415,8 +411,8 @@ public class SettingsActivity extends BackActivity implements SettingsView {
 
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
-                    if (response.isSuccessful() && response.body() != null) {
-                        List<String> cookies = response.headers("Set-Cookie");
+                    List<String> cookies = response.headers("Set-Cookie");
+                    if (response.isSuccessful() && response.body() != null && !cookies.isEmpty()) {
                         Set<String> set = new HashSet<>();
                         for (String s : cookies) {
                             List<String> tmp = Arrays.asList(s.split("; "));
@@ -436,6 +432,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
                         loginDialog.dismiss();
                         showSnackbar(getString(R.string.user_login_sucess));
                     } else {
+                        loginDialog.dismiss();
                         showSnackbar(getString(R.string.user_login_failed));
                     }
                 }
@@ -462,6 +459,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         editor.remove(DMZJ_SHARED_COOKIES);
         editor.remove(DMZJ_SHARED_USERNAME);
         mDmzjLogin.setSummary(getString(R.string.settings_dmzj_login_summary));
+        mDmzjLogin.setTitle(getString(R.string.settings_dmzj_login));
         mDmzjLogout.setVisibility(View.GONE);
         editor.apply();
         showSnackbar(getString(R.string.user_login_logout_sucess));

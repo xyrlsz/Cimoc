@@ -334,4 +334,5 @@
     <string name="password">密碼</string>
     <string name="register">註冊</string>
     <string name="user_login_empty">賬戶或密碼為空</string>
+    <string name="show_passwd">顯示密碼</string>
 </resources>
