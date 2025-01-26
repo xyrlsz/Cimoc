@@ -1,9 +1,12 @@
 package com.haleydu.cimoc.utils;
 
 import android.content.Context;
-import com.google.android.material.snackbar.Snackbar;
 import android.view.View;
 import android.widget.Toast;
+
+import com.google.android.material.snackbar.Snackbar;
+import com.haleydu.cimoc.App;
+import com.haleydu.cimoc.manager.PreferenceManager;
 
 /**
  * Created by Hiroshi on 2016/9/22.
@@ -13,7 +16,10 @@ public class HintUtils {
 
     public static void showSnackbar(View layout, String msg) {
         if (layout != null && layout.isShown()) {
-            Snackbar.make(layout, msg, Snackbar.LENGTH_SHORT).show();
+            Snackbar snackbar = Snackbar.make(layout, msg, Snackbar.LENGTH_SHORT);
+            int theme = App.getPreferenceManager().getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_BLUE);
+            snackbar.setBackgroundTint(App.getAppContext().getResources().getColor(ThemeUtils.getThemeColorById(theme)));
+            snackbar.show();
         }
     }
 
