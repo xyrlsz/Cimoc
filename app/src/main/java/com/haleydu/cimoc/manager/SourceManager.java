@@ -31,8 +31,8 @@ import com.haleydu.cimoc.source.Manhuatai;
 import com.haleydu.cimoc.source.MiGu;
 import com.haleydu.cimoc.source.Null;
 import com.haleydu.cimoc.source.Tencent;
-import com.haleydu.cimoc.source.Webtoon;
-import com.haleydu.cimoc.source.WebtoonDongManManHua;
+//import com.haleydu.cimoc.source.Webtoon;
+import com.haleydu.cimoc.source.DongManManHua;
 import com.haleydu.cimoc.source.YKMH;
 
 import java.util.List;
@@ -124,9 +124,9 @@ public class SourceManager {
                 case DM5.TYPE:
                     parser = new DM5(source);
                     break;
-                case Webtoon.TYPE:
-                    parser = new Webtoon(source);
-                    break;
+//                case Webtoon.TYPE:
+//                    parser = new Webtoon(source);
+//                    break;
 //                case HHSSEE.TYPE:
 //                    parser = new HHSSEE(source);
 //                    break;
@@ -227,8 +227,8 @@ public class SourceManager {
                 case MangaBZ.TYPE:
                     parser = new MangaBZ(source);
                     break;
-                case WebtoonDongManManHua.TYPE:
-                    parser = new WebtoonDongManManHua(source);
+                case DongManManHua.TYPE:
+                    parser = new DongManManHua(source);
                     break;
 //                case MH160.TYPE:
 //                    parser = new MH160(source);

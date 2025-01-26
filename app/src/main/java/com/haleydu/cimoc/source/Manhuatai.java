@@ -1,5 +1,6 @@
 package com.haleydu.cimoc.source;
 
+import android.os.Build;
 import android.util.Pair;
 
 import com.google.common.collect.Lists;
@@ -57,8 +58,14 @@ public class Manhuatai extends MangaParser {
 
     @Override
     public Request getSearchRequest(String keyword, int page) throws UnsupportedEncodingException {
-        String url = StringUtils.format(baseUrl + "/api/getsortlist/?product_id=2&productname=mht&platformname=wap&orderby=click&search_key=%s&page=%d&size=48",
-                URLEncoder.encode(keyword, StandardCharsets.UTF_8), page);
+        String url = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            url = StringUtils.format(baseUrl + "/api/getsortlist/?product_id=2&productname=mht&platformname=wap&orderby=click&search_key=%s&page=%d&size=48",
+                    URLEncoder.encode(keyword, StandardCharsets.UTF_8), page);
+        }else{
+            url = StringUtils.format(baseUrl + "/api/getsortlist/?product_id=2&productname=mht&platformname=wap&orderby=click&search_key=%s&page=%d&size=48",
+                    URLEncoder.encode(keyword, "UTF-8"), page);
+        }
 
         return new Request.Builder().url(url).build();
     }

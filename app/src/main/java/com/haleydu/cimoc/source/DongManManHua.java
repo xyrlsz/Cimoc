@@ -29,13 +29,13 @@ import static com.haleydu.cimoc.core.Manga.getResponseBody;
  * Created by Haleydu on 2020/08/07.
  */
 
-public class WebtoonDongManManHua extends MangaParser {
+public class DongManManHua extends MangaParser {
 
     public static final int TYPE = 11;
     public static final String DEFAULT_TITLE = "咚漫漫画";
     public static final String baseUrl = "https://www.dongmanmanhua.cn";
 
-    public WebtoonDongManManHua(Source source) {
+    public DongManManHua(Source source) {
         init(source, null);
     }
 

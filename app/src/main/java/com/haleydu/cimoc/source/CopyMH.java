@@ -33,7 +33,6 @@ public class CopyMH extends MangaParser {
 
     public CopyMH(Source source) {
         init(source, null);
-//        setParseImagesUseWebParser(true);
     }
 
     public static Source getDefaultSource() {

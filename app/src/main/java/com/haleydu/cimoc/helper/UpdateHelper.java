@@ -30,8 +30,8 @@ import com.haleydu.cimoc.source.Mangakakalot;
 import com.haleydu.cimoc.source.Manhuatai;
 import com.haleydu.cimoc.source.MiGu;
 import com.haleydu.cimoc.source.Tencent;
-import com.haleydu.cimoc.source.Webtoon;
-import com.haleydu.cimoc.source.WebtoonDongManManHua;
+//import com.haleydu.cimoc.source.Webtoon;
+import com.haleydu.cimoc.source.DongManManHua;
 import com.haleydu.cimoc.source.YKMH;
 
 import java.util.ArrayList;
@@ -73,8 +73,8 @@ public class UpdateHelper {
         ComicSourceHash.put(MiGu.TYPE, MiGu.getDefaultSource());
         ComicSourceHash.put(MYCOMIC.TYPE, MYCOMIC.getDefaultSource());
         ComicSourceHash.put(Tencent.TYPE, Tencent.getDefaultSource());
-        ComicSourceHash.put(Webtoon.TYPE, Webtoon.getDefaultSource());
-        ComicSourceHash.put(WebtoonDongManManHua.TYPE, WebtoonDongManManHua.getDefaultSource());
+//        ComicSourceHash.put(Webtoon.TYPE, Webtoon.getDefaultSource());
+        ComicSourceHash.put(DongManManHua.TYPE, DongManManHua.getDefaultSource());
         ComicSourceHash.put(YKMH.TYPE, YKMH.getDefaultSource());
         ComicSourceHash.put(DuManWu.TYPE, DuManWu.getDefaultSource());
         ComicSourceHash.put(DuManWuOrg.TYPE, DuManWuOrg.getDefaultSource());
@@ -122,7 +122,7 @@ public class UpdateHelper {
 //        list.add(CCTuku.getDefaultSource());
 //        list.add(U17.getDefaultSource());
         list.add(DM5.getDefaultSource());
-        list.add(Webtoon.getDefaultSource());
+//        list.add(Webtoon.getDefaultSource());
         //list.add(HHSSEE.getDefaultSource());
 //        list.add(MH57.getDefaultSource());
 //        list.add(MH50.getDefaultSource());
@@ -157,7 +157,7 @@ public class UpdateHelper {
 //        list.add(Ohmanhua.getDefaultSource());
         list.add(CopyMH.getDefaultSource());
         list.add(HotManga.getDefaultSource());
-        list.add(WebtoonDongManManHua.getDefaultSource());
+        list.add(DongManManHua.getDefaultSource());
 //        list.add(MH160.getDefaultSource());
 //        list.add(QiMiaoMH.getDefaultSource());
         list.add(YKMH.getDefaultSource());
