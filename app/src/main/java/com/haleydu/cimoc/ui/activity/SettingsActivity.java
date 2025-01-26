@@ -3,6 +3,9 @@ package com.haleydu.cimoc.ui.activity;
 import static com.haleydu.cimoc.Constants.DMZJ_SHARED;
 import static com.haleydu.cimoc.Constants.DMZJ_SHARED_COOKIES;
 import static com.haleydu.cimoc.Constants.DMZJ_SHARED_USERNAME;
+import static com.haleydu.cimoc.Constants.KOMIIC_SHARED;
+import static com.haleydu.cimoc.Constants.KOMIIC_SHARED_COOKIES;
+import static com.haleydu.cimoc.Constants.KOMIIC_SHARED_USERNAME;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -51,6 +54,7 @@ import butterknife.OnClick;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
+import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -76,7 +80,9 @@ public class SettingsActivity extends BackActivity implements SettingsView {
     private final Intent mResultIntent = new Intent();
     @BindView(R.id.settings_dmzj_login)
     Option mDmzjLogin;
-    @BindViews({R.id.settings_reader_title, R.id.settings_download_title, R.id.settings_other_title, R.id.settings_search_title, R.id.settings_dmzj})
+    @BindView(R.id.settings_komiic_login)
+    Option mkomiicLogin;
+    @BindViews({R.id.settings_reader_title, R.id.settings_download_title, R.id.settings_other_title, R.id.settings_search_title, R.id.settings_dmzj, R.id.settings_komiic})
     List<TextView> mTitleList;
     @BindView(R.id.settings_layout)
     View mSettingsLayout;
@@ -139,6 +145,8 @@ public class SettingsActivity extends BackActivity implements SettingsView {
     @BindView(R.id.settings_dmzj_logout)
     ImageButton mDmzjLogout;
 
+    @BindView(R.id.settings_komiic_logout)
+    ImageButton mKomiicLogout;
 
     private SettingsPresenter mPresenter;
     private String mStoragePath;
@@ -158,8 +166,15 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         String dmzjUsername = getSharedPreferences(DMZJ_SHARED, MODE_PRIVATE).getString(DMZJ_SHARED_USERNAME, "");
         if (!dmzjUsername.isEmpty()) {
             mDmzjLogin.setSummary(dmzjUsername);
-            mDmzjLogin.setTitle(getString(R.string.settings_dmzj_logined));
+            mDmzjLogin.setTitle(getString(R.string.logined));
             mDmzjLogout.setVisibility(View.VISIBLE);
+        }
+
+        String komiicUsername = getSharedPreferences(KOMIIC_SHARED, MODE_PRIVATE).getString(KOMIIC_SHARED_USERNAME, "");
+        if (!komiicUsername.isEmpty()) {
+            mkomiicLogin.setSummary(komiicUsername);
+            mkomiicLogin.setTitle(getString(R.string.logined));
+            mKomiicLogout.setVisibility(View.VISIBLE);
         }
 
         mStoragePath = getAppInstance().getDocumentFile().getUri().toString();
@@ -426,7 +441,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
                         editor.apply();
                         runOnUiThread(() -> {
                             mDmzjLogin.setSummary(username);
-                            mDmzjLogin.setTitle(getString(R.string.settings_dmzj_logined));
+                            mDmzjLogin.setTitle(getString(R.string.logined));
                             mDmzjLogout.setVisibility(View.VISIBLE);
                         });
                         loginDialog.dismiss();
@@ -458,11 +473,106 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(DMZJ_SHARED_COOKIES);
         editor.remove(DMZJ_SHARED_USERNAME);
-        mDmzjLogin.setSummary(getString(R.string.settings_dmzj_login_summary));
-        mDmzjLogin.setTitle(getString(R.string.settings_dmzj_login));
+        mDmzjLogin.setSummary(getString(R.string.no_login));
+        mDmzjLogin.setTitle(getString(R.string.login));
         mDmzjLogout.setVisibility(View.GONE);
         editor.apply();
         showSnackbar(getString(R.string.user_login_logout_sucess));
+    }
+
+    @OnClick(R.id.settings_komiic_login)
+    void onKomiicLoginClick() {
+        int theme = mPreference.getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_BLUE);
+        LoginDialog loginDialog = new LoginDialog(this, ThemeUtils.getDialogThemeById(theme));
+        loginDialog.setOnLoginListener((username, password) -> {
+            if (username.isEmpty() || password.isEmpty()) {
+                loginDialog.dismiss();
+                showSnackbar(getString(R.string.user_login_empty));
+                return;
+            }
+
+            MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
+            String json = "{\"email\":\"" + username + "\", \"password\":\"" + password + "\"}";
+            RequestBody body = RequestBody.create(mediaType, json);
+            Request request = new Request.Builder()
+                    .url("https://komiic.com/api/login")
+                    .addHeader("accept", "application/json, text/javascript, */*; q=0.01")
+                    .addHeader("accept-language", "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6")
+                    .addHeader("cache-control", "no-cache")
+                    .addHeader("content-type", "application/x-www-form-urlencoded; charset=UTF-8")
+                    .addHeader("origin", "https://komiic.com")
+                    .addHeader("pragma", "no-cache")
+                    .addHeader("priority", "u=1, i")
+                    .addHeader("referer", "https://komiic.com/login")
+                    .addHeader("sec-ch-ua", "\"Microsoft Edge\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"")
+                    .addHeader("sec-ch-ua-mobile", "?0")
+                    .addHeader("sec-ch-ua-platform", "\"Windows\"")
+                    .addHeader("sec-fetch-dest", "empty")
+                    .addHeader("sec-fetch-mode", "cors")
+                    .addHeader("sec-fetch-site", "same-origin")
+                    .addHeader("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0")
+                    .addHeader("x-requested-with", "XMLHttpRequest")
+                    .post(body)
+                    .build();
+
+            App.getHttpClient().newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    showSnackbar(getString(R.string.user_login_failed));
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    List<String> cookies = response.headers("Set-Cookie");
+                    if (response.isSuccessful() && response.body() != null && !cookies.isEmpty()) {
+                        Set<String> set = new HashSet<>();
+                        for (String s : cookies) {
+                            List<String> tmp = Arrays.asList(s.split("; "));
+                            set.addAll(tmp);
+                        }
+                        String cookieStr = String.join("; ", set);
+                        SharedPreferences sharedPreferences = getSharedPreferences(KOMIIC_SHARED, MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString(KOMIIC_SHARED_COOKIES, cookieStr);
+                        editor.putString(KOMIIC_SHARED_USERNAME, username);
+                        editor.apply();
+                        runOnUiThread(() -> {
+                            mkomiicLogin.setSummary(username);
+                            mkomiicLogin.setTitle(getString(R.string.logined));
+                            mKomiicLogout.setVisibility(View.VISIBLE);
+                        });
+                        loginDialog.dismiss();
+                        showSnackbar(getString(R.string.user_login_sucess));
+                    } else {
+                        loginDialog.dismiss();
+                        showSnackbar(getString(R.string.user_login_failed));
+                    }
+                }
+            });
+
+
+        });
+        loginDialog.setOnRegisterListener(() -> {
+            String url = "https://komiic.com/register";
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(url));
+            startActivity(intent);
+        });
+        loginDialog.show();
+
+
+    }
+
+    @OnClick(R.id.settings_komiic_logout)
+    void onKomiicLogoutClick() {
+        SharedPreferences sharedPreferences = getSharedPreferences(KOMIIC_SHARED, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(KOMIIC_SHARED_COOKIES);
+        editor.remove(KOMIIC_SHARED_USERNAME);
+        editor.apply();
+        mkomiicLogin.setSummary(getString(R.string.no_login));
+        mkomiicLogin.setTitle(getString(R.string.login));
+        mKomiicLogout.setVisibility(View.GONE);
     }
 
     @Override

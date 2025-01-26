@@ -324,15 +324,16 @@
     <string name="the_public">Cimoc微信公衆號</string>
     <string name="the_public_summary">關注公衆號查看最新版本</string>
     <string name="settings_dmzj">動漫之家</string>
-    <string name="settings_dmzj_login_summary">未登錄</string>
-    <string name="settings_dmzj_login">登錄</string>
-    <string name="settings_dmzj_logined">已登錄</string>
+
+    <string name="no_login">未登入</string>
+    <string name="logined">已登入</string>
     <string name="settings_dmzj_signup">註冊</string>
-    <string name="settings_dmzj_logout">退出登錄</string>
-    <string name="login">登錄</string>
+    <string name="settings_dmzj_logout">退出登入</string>
+    <string name="login">登入</string>
     <string name="username_item">賬戶名</string>
     <string name="password">密碼</string>
     <string name="register">註冊</string>
     <string name="user_login_empty">賬戶或密碼為空</string>
     <string name="show_passwd">顯示密碼</string>
+    <string name="settings_komiic_summary">未登入只能24小時內讀取300張漫畫內頁圖</string>
 </resources>

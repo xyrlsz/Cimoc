@@ -1,7 +1,11 @@
 package com.haleydu.cimoc.source;
 
 
+import android.content.Context;
+
 import com.google.common.collect.Lists;
+import com.haleydu.cimoc.App;
+import com.haleydu.cimoc.Constants;
 import com.haleydu.cimoc.model.Chapter;
 import com.haleydu.cimoc.model.Comic;
 import com.haleydu.cimoc.model.ImageUrl;
@@ -40,8 +44,12 @@ public class Komiic extends MangaParser {
     private static final String baseUrl = "https://komiic.com";
 
     private String _cid = "", _path = "";
+    private String _cookies = "";
 
     public Komiic(Source source) {
+        _cookies = App.getAppContext()
+                .getSharedPreferences(Constants.KOMIIC_SHARED, Context.MODE_PRIVATE)
+                .getString(Constants.KOMIIC_SHARED_COOKIES, "");
         init(source, null);
     }
 
@@ -51,7 +59,6 @@ public class Komiic extends MangaParser {
 
     @Override
     public Request getSearchRequest(String keyword, int page) {
-//        if (page != 1) return null;
         String url = StringUtils.format("%s/api/query", baseUrl);
         String jsonBody = "{"
                 + "\"operationName\":\"searchComicAndAuthorQuery\","
@@ -145,7 +152,6 @@ public class Komiic extends MangaParser {
 
     @Override
     public Request getChapterRequest(String html, String cid) {
-//        return super.getChapterRequest(html, cid);
         String jsonBody = "{"
                 + "\"operationName\":\"chapterByComicId\","
                 + "\"variables\":{\"comicId\":\"" + cid + "\"},"
@@ -195,8 +201,6 @@ public class Komiic extends MangaParser {
 
     @Override
     public Request getImagesRequest(String cid, String path) {
-//        String url = StringUtils.format("%s/comic/chapter/%s/0_%s.html", baseUrl, cid, path);
-//        return new Request.Builder().url(url).build();
         String jsonBody = "{"
                 + "\"operationName\":\"imagesByChapterId\","
                 + "\"variables\":{\"chapterId\":\"" + path + "\"},"
@@ -211,8 +215,6 @@ public class Komiic extends MangaParser {
     @Override
     public List<ImageUrl> parseImages(String html, Chapter chapter) throws JSONException {
         List<ImageUrl> list = new ArrayList<>();
-//        Node body = new Node(html);
-//        List<Node> imageNodes = body.list("amp-img > noscript");
         String imgBaseUrl = baseUrl + "/api/image/";
         JSONObject data = new JSONObject(html).getJSONObject("data");
         JSONArray images = data.getJSONArray("imagesByChapterId");
@@ -220,7 +222,7 @@ public class Komiic extends MangaParser {
             Long comicChapter = chapter.getId();
             Long id = Long.parseLong(comicChapter + "0" + (i - 1));
             String imgUrl = imgBaseUrl + images.getJSONObject(i - 1).getString("kid");
-            Headers headers = Headers.of("referer", StringUtils.format("https://komiic.com/comic/%s/chapter/%s", _cid, chapter.getPath()));
+            Headers headers = Headers.of("referer", StringUtils.format("https://komiic.com/comic/%s/chapter/%s", _cid, chapter.getPath()), "cookie", _cookies);
 
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false, headers));
         }
@@ -237,15 +239,5 @@ public class Komiic extends MangaParser {
     public Headers getHeader() {
         return Headers.of("referer", StringUtils.format("https://komiic.com/comic/%s/chapter/%s", _cid, _path));
 
-    }
-
-    @Override
-    public Headers getHeader(String url) {
-        return Headers.of("referer", StringUtils.format("https://komiic.com/comic/%s/chapter/%s", _cid, _path));
-    }
-
-    @Override
-    public Headers getHeader(List<ImageUrl> list) {
-        return Headers.of("referer", StringUtils.format("https://komiic.com/comic/%s/chapter/%s", _cid, _path));
     }
 }

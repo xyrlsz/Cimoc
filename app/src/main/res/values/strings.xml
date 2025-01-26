@@ -348,9 +348,8 @@
 
     <!--动漫之家-->
     <string name="settings_dmzj">动漫之家</string>
-    <string name="settings_dmzj_login_summary">未登录</string>
-    <string name="settings_dmzj_login">登录</string>
-    <string name="settings_dmzj_logined">已登录</string>
+    <string name="no_login">未登录</string>
+    <string name="logined">已登录</string>
     <string name="settings_dmzj_signup">注册</string>
     <string name="settings_dmzj_logout">退出登录</string>
     <string name="message" translatable="false">message</string>
@@ -361,5 +360,7 @@
     <string name="register">注册</string>
     <string name="show_passwd">显示密码</string>
 
+    <string name="settings_komiic" translatable="false">Komiic</string>
+    <string name="settings_komiic_summary">未登录只能24小时内读取300张漫画内页图</string>
 
 </resources>
