@@ -5,6 +5,8 @@ import static com.haleydu.cimoc.Constants.DMZJ_SHARED_COOKIES;
 import static com.haleydu.cimoc.Constants.DMZJ_SHARED_USERNAME;
 import static com.haleydu.cimoc.Constants.KOMIIC_SHARED;
 import static com.haleydu.cimoc.Constants.KOMIIC_SHARED_COOKIES;
+import static com.haleydu.cimoc.Constants.KOMIIC_SHARED_EXPIRED;
+import static com.haleydu.cimoc.Constants.KOMIIC_SHARED_PASSWORD;
 import static com.haleydu.cimoc.Constants.KOMIIC_SHARED_USERNAME;
 
 import android.app.Activity;
@@ -41,12 +43,19 @@ import com.haleydu.cimoc.utils.ServiceUtils;
 import com.haleydu.cimoc.utils.StringUtils;
 import com.haleydu.cimoc.utils.ThemeUtils;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
 
 import butterknife.BindView;
 import butterknife.BindViews;
@@ -530,11 +539,29 @@ public class SettingsActivity extends BackActivity implements SettingsView {
                             List<String> tmp = Arrays.asList(s.split("; "));
                             set.addAll(tmp);
                         }
+                        Long expired = -1L;
+                        try {
+                            JSONObject data = new JSONObject(response.body().string());
+                            String iso8601String = data.getString("expire");
+                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+                            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                            try {
+                                Date date = dateFormat.parse(iso8601String);
+                                long timestamp = date.getTime() / 1000;
+                                expired = timestamp;
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                         String cookieStr = String.join("; ", set);
                         SharedPreferences sharedPreferences = getSharedPreferences(KOMIIC_SHARED, MODE_PRIVATE);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
                         editor.putString(KOMIIC_SHARED_COOKIES, cookieStr);
                         editor.putString(KOMIIC_SHARED_USERNAME, username);
+                        editor.putString(KOMIIC_SHARED_PASSWORD, password);
+                        editor.putLong(KOMIIC_SHARED_EXPIRED, expired);
                         editor.apply();
                         runOnUiThread(() -> {
                             mkomiicLogin.setSummary(username);
@@ -569,6 +596,8 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(KOMIIC_SHARED_COOKIES);
         editor.remove(KOMIIC_SHARED_USERNAME);
+        editor.remove(KOMIIC_SHARED_PASSWORD);
+        editor.remove(KOMIIC_SHARED_EXPIRED);
         editor.apply();
         mkomiicLogin.setSummary(getString(R.string.no_login));
         mkomiicLogin.setTitle(getString(R.string.login));

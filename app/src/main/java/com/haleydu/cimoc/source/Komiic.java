@@ -14,6 +14,7 @@ import com.haleydu.cimoc.parser.JsonIterator;
 import com.haleydu.cimoc.parser.MangaParser;
 import com.haleydu.cimoc.parser.SearchIterator;
 import com.haleydu.cimoc.parser.UrlFilter;
+import com.haleydu.cimoc.utils.KomiicUtils;
 import com.haleydu.cimoc.utils.StringUtils;
 
 import org.json.JSONArray;
@@ -44,13 +45,12 @@ public class Komiic extends MangaParser {
     private static final String baseUrl = "https://komiic.com";
 
     private String _cid = "", _path = "";
-    private String _cookies = "";
 
     public Komiic(Source source) {
-        _cookies = App.getAppContext()
-                .getSharedPreferences(Constants.KOMIIC_SHARED, Context.MODE_PRIVATE)
-                .getString(Constants.KOMIIC_SHARED_COOKIES, "");
         init(source, null);
+        if (KomiicUtils.checkExpired()) {
+            KomiicUtils.refresh();
+        }
     }
 
     public static Source getDefaultSource() {
@@ -130,6 +130,7 @@ public class Komiic extends MangaParser {
 
     @Override
     public Comic parseInfo(String html, Comic comic) throws JSONException {
+
         JSONObject data = new JSONObject(html).getJSONObject("data");
         JSONObject comicObject = data.getJSONObject("comicById");
         String title = comicObject.getString("title");
@@ -214,16 +215,23 @@ public class Komiic extends MangaParser {
 
     @Override
     public List<ImageUrl> parseImages(String html, Chapter chapter) throws JSONException {
+
         List<ImageUrl> list = new ArrayList<>();
         String imgBaseUrl = baseUrl + "/api/image/";
         JSONObject data = new JSONObject(html).getJSONObject("data");
         JSONArray images = data.getJSONArray("imagesByChapterId");
+        String _cookies = App.getAppContext()
+                .getSharedPreferences(Constants.KOMIIC_SHARED, Context.MODE_PRIVATE)
+                .getString(Constants.KOMIIC_SHARED_COOKIES, "");
+        if (KomiicUtils.checkExpired()) {
+//            KomiicUtils.refresh();
+            _cookies = "";
+        }
         for (int i = 1; i <= images.length(); i++) {
             Long comicChapter = chapter.getId();
             Long id = Long.parseLong(comicChapter + "0" + (i - 1));
             String imgUrl = imgBaseUrl + images.getJSONObject(i - 1).getString("kid");
             Headers headers = Headers.of("referer", StringUtils.format("https://komiic.com/comic/%s/chapter/%s", _cid, chapter.getPath()), "cookie", _cookies);
-
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false, headers));
         }
         return list;

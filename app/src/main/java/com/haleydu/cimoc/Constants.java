@@ -18,4 +18,6 @@ public final class Constants {
     public static final String KOMIIC_SHARED = "komiic";
     public static final String KOMIIC_SHARED_COOKIES = "cookies";
     public static final String KOMIIC_SHARED_USERNAME = "username";
+    public static final String KOMIIC_SHARED_PASSWORD = "password";
+    public static final String KOMIIC_SHARED_EXPIRED = "expired";
 }
