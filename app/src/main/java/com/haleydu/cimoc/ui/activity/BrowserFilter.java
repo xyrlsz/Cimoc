@@ -13,7 +13,7 @@ import com.haleydu.cimoc.source.BuKa;
 import com.haleydu.cimoc.source.Cartoonmad;
 
 import com.haleydu.cimoc.source.DM5;
-import com.haleydu.cimoc.source.Dmzjv2;
+//import com.haleydu.cimoc.source.Dmzjv2;
 
 import com.haleydu.cimoc.source.HotManga;
 import com.haleydu.cimoc.source.IKanman;
@@ -55,7 +55,7 @@ public class BrowserFilter extends BaseActivity {
     private List<Integer> registUrlListener() {
         List<Integer> list = new ArrayList<>();
 
-        list.add(Dmzjv2.TYPE);
+//        list.add(Dmzjv2.TYPE);
         list.add(BuKa.TYPE);
 //        list.add(PuFei.TYPE);
         list.add(Cartoonmad.TYPE);

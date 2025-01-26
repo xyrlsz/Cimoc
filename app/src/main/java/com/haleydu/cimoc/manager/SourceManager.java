@@ -14,8 +14,8 @@ import com.haleydu.cimoc.source.Cartoonmad;
 import com.haleydu.cimoc.source.CopyMH;
 import com.haleydu.cimoc.source.DM5;
 import com.haleydu.cimoc.source.Dmzj;
-import com.haleydu.cimoc.source.Dmzjv2;
-import com.haleydu.cimoc.source.Dmzjv3;
+//import com.haleydu.cimoc.source.Dmzjv2;
+//import com.haleydu.cimoc.source.Dmzjv3;
 import com.haleydu.cimoc.source.DuManWu;
 import com.haleydu.cimoc.source.DuManWuOrg;
 import com.haleydu.cimoc.source.GuFeng;
@@ -109,9 +109,9 @@ public class SourceManager {
                 case IKanman.TYPE:
                     parser = new IKanman(source);
                     break;
-                case Dmzjv3.TYPE:
-                    parser = new Dmzjv3(source);
-                    break;
+//                case Dmzjv3.TYPE:
+//                    parser = new Dmzjv3(source);
+//                    break;
 //                case HHAAZZ.TYPE:
 //                    parser = new HHAAZZ(source);
 //                    break;
@@ -136,9 +136,9 @@ public class SourceManager {
 //                case MH50.TYPE:
 //                    parser = new MH50(source);
 //                    break;
-                case Dmzjv2.TYPE:
-                    parser = new Dmzjv2(source);
-                    break;
+//                case Dmzjv2.TYPE:
+//                    parser = new Dmzjv2(source);
+//                    break;
                 case Locality.TYPE:
                     parser = new Locality();
                     break;

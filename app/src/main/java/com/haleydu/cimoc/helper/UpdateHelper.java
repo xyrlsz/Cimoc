@@ -14,8 +14,8 @@ import com.haleydu.cimoc.source.Cartoonmad;
 import com.haleydu.cimoc.source.CopyMH;
 import com.haleydu.cimoc.source.DM5;
 import com.haleydu.cimoc.source.Dmzj;
-import com.haleydu.cimoc.source.Dmzjv2;
-import com.haleydu.cimoc.source.Dmzjv3;
+//import com.haleydu.cimoc.source.Dmzjv2;
+//import com.haleydu.cimoc.source.Dmzjv3;
 import com.haleydu.cimoc.source.DuManWu;
 import com.haleydu.cimoc.source.DuManWuOrg;
 import com.haleydu.cimoc.source.GuFeng;
@@ -59,8 +59,8 @@ public class UpdateHelper {
         ComicSourceHash.put(CopyMH.TYPE,CopyMH.getDefaultSource());
         ComicSourceHash.put(DM5.TYPE, DM5.getDefaultSource());
         ComicSourceHash.put(Dmzj.TYPE, Dmzj.getDefaultSource());
-        ComicSourceHash.put(Dmzjv2.TYPE, Dmzjv2.getDefaultSource());
-        ComicSourceHash.put(Dmzjv3.TYPE, Dmzjv3.getDefaultSource());
+//        ComicSourceHash.put(Dmzjv2.TYPE, Dmzjv2.getDefaultSource());
+//        ComicSourceHash.put(Dmzjv3.TYPE, Dmzjv3.getDefaultSource());
         ComicSourceHash.put(GuFeng.TYPE, GuFeng.getDefaultSource());
 //        ComicSourceHash.put(HHAAZZ.TYPE, HHAAZZ.getDefaultSource());
         ComicSourceHash.put(HotManga.TYPE, HotManga.getDefaultSource());
@@ -117,7 +117,7 @@ public class UpdateHelper {
 
         List<Source> list = new ArrayList<>();
         list.add(IKanman.getDefaultSource());
-        list.add(Dmzjv3.getDefaultSource());
+//        list.add(Dmzjv3.getDefaultSource());
 //        list.add(HHAAZZ.getDefaultSource());
 //        list.add(CCTuku.getDefaultSource());
 //        list.add(U17.getDefaultSource());
@@ -126,7 +126,7 @@ public class UpdateHelper {
         //list.add(HHSSEE.getDefaultSource());
 //        list.add(MH57.getDefaultSource());
 //        list.add(MH50.getDefaultSource());
-        list.add(Dmzjv2.getDefaultSource());
+//        list.add(Dmzjv2.getDefaultSource());
         list.add(MangaNel.getDefaultSource());
         list.add(Mangakakalot.getDefaultSource());
 //        list.add(PuFei.getDefaultSource());
