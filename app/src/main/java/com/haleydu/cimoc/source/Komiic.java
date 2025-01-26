@@ -85,7 +85,8 @@ public class Komiic extends MangaParser {
                     String title = object.getString("title");
                     String cover = object.getString("imageUrl");
 //                    String status = object.getString("status");
-                    String update = object.getString("dateUpdated");
+
+                    String update = KomiicUtils.FormatTime(object.getString("dateUpdated"));
                     String author = "";
                     JSONArray authors = object.getJSONArray("authors");
                     for (int i = 0; i < authors.length(); i++) {
@@ -135,19 +136,20 @@ public class Komiic extends MangaParser {
         JSONObject comicObject = data.getJSONObject("comicById");
         String title = comicObject.getString("title");
         String cover = comicObject.getString("imageUrl");
-        String author = "";
+        StringBuilder author = new StringBuilder();
         JSONArray authors = comicObject.getJSONArray("authors");
         for (int i = 0; i < authors.length(); i++) {
             if (i != authors.length() - 1) {
-                author += authors.getJSONObject(i).getString("name") + ",";
+                author.append(authors.getJSONObject(i).getString("name")).append(",");
             } else {
-                author += authors.getJSONObject(i).getString("name");
+                author.append(authors.getJSONObject(i).getString("name"));
             }
         }
-        String update = comicObject.getString("dateUpdated");
+
+        String update = KomiicUtils.FormatTime(comicObject.getString("dateUpdated"));
         String intro = "";
 
-        comic.setInfo(title, cover, update, intro, author, !comicObject.getString("status").equals("ONGOING"));
+        comic.setInfo(title, cover, update, intro, author.toString(), !comicObject.getString("status").equals("ONGOING"));
         return comic;
     }
 

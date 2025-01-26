@@ -122,4 +122,17 @@ public class KomiicUtils {
         String password = sharedPreferences.getString("KOMIIC_SHARED_PASSWORD", "");
         login(username, password);
     }
+
+    public static String FormatTime(String t) {
+        SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        inputFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            Date date = inputFormat.parse(t);
+            return outputFormat.format(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return t;
+    }
 }
