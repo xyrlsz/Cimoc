@@ -2,10 +2,12 @@ package com.haleydu.cimoc.source;
 
 
 import android.content.Context;
+import android.widget.Toast;
 
 import com.google.common.collect.Lists;
 import com.haleydu.cimoc.App;
 import com.haleydu.cimoc.Constants;
+import com.haleydu.cimoc.R;
 import com.haleydu.cimoc.model.Chapter;
 import com.haleydu.cimoc.model.Comic;
 import com.haleydu.cimoc.model.ImageUrl;
@@ -226,8 +228,16 @@ public class Komiic extends MangaParser {
                 .getSharedPreferences(Constants.KOMIIC_SHARED, Context.MODE_PRIVATE)
                 .getString(Constants.KOMIIC_SHARED_COOKIES, "");
         if (KomiicUtils.checkExpired()) {
-//            KomiicUtils.refresh();
+            KomiicUtils.refresh();
             _cookies = "";
+        }
+        if (KomiicUtils.checkIsOverImgLimit()) {
+            _cookies = "";
+        }
+        if (KomiicUtils.checkEmptyAccountIsOverImgLimit()) {
+           App.getActivity().runOnUiThread(()->{
+               Toast.makeText(App.getAppContext(), R.string.limit_over_tip, Toast.LENGTH_SHORT).show();
+           });
         }
         for (int i = 1; i <= images.length(); i++) {
             Long comicChapter = chapter.getId();

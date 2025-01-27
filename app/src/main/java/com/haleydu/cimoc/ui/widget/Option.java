@@ -57,4 +57,8 @@ public class Option extends FrameLayout {
         mTitleView.setText(text);
     }
 
+    public CharSequence getSummary() {
+        return mSummaryView.getText();
+    }
+
 }

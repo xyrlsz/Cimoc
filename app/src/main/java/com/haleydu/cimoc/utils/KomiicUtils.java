@@ -125,4 +125,127 @@ public class KomiicUtils {
         }
         return t;
     }
+
+    public static void getImageLimit(UpdateImageLimitCallback callback) {
+        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.KOMIIC_SHARED, Context.MODE_PRIVATE);
+        String cookies = sharedPreferences.getString(KOMIIC_SHARED_COOKIES, "");
+
+
+        String json = "{\"operationName\":\"getImageLimit\",\"variables\":{},\"query\":\"query getImageLimit {\\n  getImageLimit {\\n    limit\\n    usage\\n    resetInSeconds\\n    __typename\\n  }\\n}\"}";
+
+        RequestBody body = RequestBody.create(
+                MediaType.parse("application/json; charset=utf-8"), json);
+
+        Request request = new Request.Builder()
+                .url("https://komiic.com/api/query")
+                .addHeader("accept", "application/json, text/javascript, */*; q=0.01")
+                .addHeader("accept-language", "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6")
+                .addHeader("cache-control", "no-cache")
+                .addHeader("content-type", "application/x-www-form-urlencoded; charset=UTF-8")
+                .addHeader("origin", "https://komiic.com")
+                .addHeader("pragma", "no-cache")
+                .addHeader("priority", "u=1, i")
+                .addHeader("referer", "https://komiic.com/login")
+                .addHeader("sec-ch-ua", "\"Microsoft Edge\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"")
+                .addHeader("sec-ch-ua-mobile", "?0")
+                .addHeader("sec-ch-ua-platform", "\"Windows\"")
+                .addHeader("sec-fetch-dest", "empty")
+                .addHeader("sec-fetch-mode", "cors")
+                .addHeader("sec-fetch-site", "same-origin")
+                .addHeader("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0")
+                .addHeader("x-requested-with", "XMLHttpRequest")
+                .addHeader("cookie", cookies)
+                .post(body)
+                .build();
+        try {
+            App.getHttpClient().newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    e.printStackTrace();
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    if (response.isSuccessful() && response.body() != null) {
+                        JSONObject data;
+                        try {
+                            String json = response.body().string();
+                            data = new JSONObject(json).getJSONObject("data");
+                            int limit = data.getJSONObject("getImageLimit").getInt("limit");
+                            int usage = data.getJSONObject("getImageLimit").getInt("usage");
+                            int res = limit - usage;
+                            callback.onSuccess(Math.max(res, 0));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static boolean checkImgLimit(String cookies) {
+        String json = "{\"operationName\":\"getImageLimit\",\"variables\":{},\"query\":\"query getImageLimit {\\n  getImageLimit {\\n    limit\\n    usage\\n    resetInSeconds\\n    __typename\\n  }\\n}\"}";
+
+        RequestBody body = RequestBody.create(
+                MediaType.parse("application/json; charset=utf-8"), json);
+
+        Request request = new Request.Builder()
+                .url("https://komiic.com/api/query")
+                .addHeader("accept", "application/json, text/javascript, */*; q=0.01")
+                .addHeader("accept-language", "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6")
+                .addHeader("cache-control", "no-cache")
+                .addHeader("content-type", "application/x-www-form-urlencoded; charset=UTF-8")
+                .addHeader("origin", "https://komiic.com")
+                .addHeader("pragma", "no-cache")
+                .addHeader("priority", "u=1, i")
+                .addHeader("referer", "https://komiic.com/login")
+                .addHeader("sec-ch-ua", "\"Microsoft Edge\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"")
+                .addHeader("sec-ch-ua-mobile", "?0")
+                .addHeader("sec-ch-ua-platform", "\"Windows\"")
+                .addHeader("sec-fetch-dest", "empty")
+                .addHeader("sec-fetch-mode", "cors")
+                .addHeader("sec-fetch-site", "same-origin")
+                .addHeader("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0")
+                .addHeader("x-requested-with", "XMLHttpRequest")
+                .addHeader("cookie", cookies)
+                .post(body)
+                .build();
+        try {
+            Response response = App.getHttpClient().newCall(request).execute();
+            if (response.isSuccessful() && response.body() != null) {
+                JSONObject data;
+                try {
+                    String respJson = response.body().string();
+                    data = new JSONObject(respJson).getJSONObject("data");
+                    int limit = data.getJSONObject("getImageLimit").getInt("limit");
+                    int usage = data.getJSONObject("getImageLimit").getInt("usage");
+                    return limit - usage <= 0;
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static boolean checkIsOverImgLimit() {
+        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.KOMIIC_SHARED, Context.MODE_PRIVATE);
+        String cookies = sharedPreferences.getString(KOMIIC_SHARED_COOKIES, "");
+        return checkImgLimit(cookies);
+    }
+
+    public static boolean checkEmptyAccountIsOverImgLimit() {
+        return checkImgLimit("");
+    }
+
+    public interface UpdateImageLimitCallback {
+        void onSuccess(int result);
+    }
 }

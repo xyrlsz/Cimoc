@@ -38,6 +38,7 @@ import com.haleydu.cimoc.ui.widget.Option;
 import com.haleydu.cimoc.ui.widget.preference.CheckBoxPreference;
 import com.haleydu.cimoc.ui.widget.preference.ChoicePreference;
 import com.haleydu.cimoc.ui.widget.preference.SliderPreference;
+import com.haleydu.cimoc.utils.KomiicUtils;
 import com.haleydu.cimoc.utils.ServiceUtils;
 import com.haleydu.cimoc.utils.StringUtils;
 import com.haleydu.cimoc.utils.ThemeUtils;
@@ -181,8 +182,16 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         String komiicUsername = getSharedPreferences(KOMIIC_SHARED, MODE_PRIVATE).getString(KOMIIC_SHARED_USERNAME, "");
         if (!komiicUsername.isEmpty()) {
             mkomiicLogin.setSummary(komiicUsername);
+            KomiicUtils.getImageLimit(result -> mKomiicLogout.post(() -> {
+                mkomiicLogin.setSummary(komiicUsername + "\n" + getString(R.string.settings_komiic_img_limit_summary) + result);
+            }));
             mkomiicLogin.setTitle(getString(R.string.logined));
             mKomiicLogout.setVisibility(View.VISIBLE);
+        } else {
+            CharSequence tmp = mkomiicLogin.getSummary();
+            KomiicUtils.getImageLimit(result -> mKomiicLogout.post(() -> {
+                mkomiicLogin.setSummary(tmp + "\n" + getString(R.string.settings_komiic_img_limit_summary) + result);
+            }));
         }
 
         mStoragePath = getAppInstance().getDocumentFile().getUri().toString();
@@ -564,6 +573,9 @@ public class SettingsActivity extends BackActivity implements SettingsView {
                         runOnUiThread(() -> {
                             mkomiicLogin.setSummary(username);
                             mkomiicLogin.setTitle(getString(R.string.logined));
+                            KomiicUtils.getImageLimit(result -> mKomiicLogout.post(() -> {
+                                mkomiicLogin.setSummary(username + "\n" + getString(R.string.settings_komiic_img_limit_summary) + result);
+                            }));
                             mKomiicLogout.setVisibility(View.VISIBLE);
                         });
                         loginDialog.dismiss();
