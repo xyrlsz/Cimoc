@@ -90,13 +90,13 @@ public class GuFeng extends MangaParser {
         String title = body.attr("#Cover > img", "title");
 
         // 获取更新日期
-        String update = body.text(".txtItme .date");
+        String update = body.text(".txtItme > .date");
 
         // 获取作者
-        String author = body.text(".txtItme:eq(0)").replace("まえだくん", "").trim();
+        String author = body.text(".txtItme:eq(0)").trim();
 
         // 连载状态
-        boolean status = body.text(".txtItme:eq(2)").contains("连载中");
+        boolean status = !body.text(".txtItme:eq(2)").contains("连载中");
 
         // 设置漫画信息
         comic.setInfo(title, cover, update, intro, author, status);
