@@ -6,7 +6,6 @@ import static com.haleydu.cimoc.Constants.DMZJ_SHARED_USERNAME;
 import static com.haleydu.cimoc.Constants.KOMIIC_SHARED;
 import static com.haleydu.cimoc.Constants.KOMIIC_SHARED_COOKIES;
 import static com.haleydu.cimoc.Constants.KOMIIC_SHARED_EXPIRED;
-import static com.haleydu.cimoc.Constants.KOMIIC_SHARED_PASSWORD;
 import static com.haleydu.cimoc.Constants.KOMIIC_SHARED_USERNAME;
 
 import android.app.Activity;
@@ -560,7 +559,6 @@ public class SettingsActivity extends BackActivity implements SettingsView {
                         SharedPreferences.Editor editor = sharedPreferences.edit();
                         editor.putString(KOMIIC_SHARED_COOKIES, cookieStr);
                         editor.putString(KOMIIC_SHARED_USERNAME, username);
-                        editor.putString(KOMIIC_SHARED_PASSWORD, password);
                         editor.putLong(KOMIIC_SHARED_EXPIRED, expired);
                         editor.apply();
                         runOnUiThread(() -> {
@@ -596,7 +594,6 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(KOMIIC_SHARED_COOKIES);
         editor.remove(KOMIIC_SHARED_USERNAME);
-        editor.remove(KOMIIC_SHARED_PASSWORD);
         editor.remove(KOMIIC_SHARED_EXPIRED);
         editor.apply();
         mkomiicLogin.setSummary(getString(R.string.no_login));
