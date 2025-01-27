@@ -234,7 +234,7 @@ public class Komiic extends MangaParser {
         if (KomiicUtils.checkIsOverImgLimit()) {
             _cookies = "";
         }
-        if (KomiicUtils.checkEmptyAccountIsOverImgLimit()) {
+        if (KomiicUtils.checkEmptyAccountIsOverImgLimit() && _cookies.isEmpty()) {
            App.getActivity().runOnUiThread(()->{
                Toast.makeText(App.getAppContext(), R.string.limit_over_tip, Toast.LENGTH_SHORT).show();
            });
