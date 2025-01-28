@@ -72,7 +72,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
     }
 
     protected void initTheme() {
-        int theme = mPreference.getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_BLUE);
+        int theme = mPreference.getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_PINK);
         setTheme(ThemeUtils.getThemeById(theme));
         if (isNavTranslation() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);

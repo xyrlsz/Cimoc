@@ -23,11 +23,11 @@
         <item>跟隨系統</item>
     </string-array>
     <string-array name="theme_items">
-        <item>天藍</item>
+        <item>粉色</item>
         <item>藍灰</item>
         <item>青綠</item>
         <item>紫色</item>
-        <item>粉色</item>
+        <item>天藍</item>
         <item>棕色</item>
     </string-array>
     <string-array name="detail_text_st">

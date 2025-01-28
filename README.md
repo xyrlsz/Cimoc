@@ -1,11 +1,9 @@
-<img src="./screenshot/icon.png">
+<img src="./screenshot/xcimoc.png" width="180">
 
 # 应用简介
 
 Android 平台在线漫画阅读器  
 Online manga reader based on Android
-
-
 
 
 # 下载
@@ -60,22 +58,6 @@ Online manga reader based on Android
 - 在 SourceManger 的 getParser() 方法中加入相应分支
 > case 里面无脑添加
 - 在 UpdateHelper 的 initSource() 方法中初始化图源，以及修改UpdateHelper()构造方法
-
-## cimoc设置
-- 阅读模式－翻页模式-卷纸模式
-- 定义点击事件－左上－上一页，右下下一页
-- 自定义长按点击事件-切换阅读模式
-- 启用快速翻页（减少）
-- 自动裁剪百边
-- 禁止双击放大
-- 启用通知栏
-## boox优化配置
-- dpi－424
-- 字体加粗－
-- a2刷新－打开
-- 动画过滤200
-- 全刷触发20
-- 全屏－关闭
 
 # 软件更新方向：
 - 能正常搜索解析网络上大部分免费的漫画
