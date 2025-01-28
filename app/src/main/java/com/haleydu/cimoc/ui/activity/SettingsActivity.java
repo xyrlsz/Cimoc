@@ -184,6 +184,10 @@ public class SettingsActivity extends BackActivity implements SettingsView {
             mkomiicLogin.setSummary(komiicUsername);
             KomiicUtils.getImageLimit(result -> mKomiicLogout.post(() -> {
                 mkomiicLogin.setSummary(komiicUsername + "\n" + getString(R.string.settings_komiic_img_limit_summary) + result);
+                CharSequence tmp = mkomiicLogin.getSummary();
+                KomiicUtils.getImageLimit("", res -> mKomiicLogout.post(() -> {
+                    mkomiicLogin.setSummary(tmp + "\n" + getString(R.string.empty_account_limit) + res);
+                }));
             }));
             mkomiicLogin.setTitle(getString(R.string.logined));
             mKomiicLogout.setVisibility(View.VISIBLE);
@@ -575,6 +579,10 @@ public class SettingsActivity extends BackActivity implements SettingsView {
                             mkomiicLogin.setTitle(getString(R.string.logined));
                             KomiicUtils.getImageLimit(result -> mKomiicLogout.post(() -> {
                                 mkomiicLogin.setSummary(username + "\n" + getString(R.string.settings_komiic_img_limit_summary) + result);
+                                CharSequence tmp = mkomiicLogin.getSummary();
+                                KomiicUtils.getImageLimit("", res -> mKomiicLogout.post(() -> {
+                                    mkomiicLogin.setSummary(tmp + "\n" + getString(R.string.empty_account_limit) + res);
+                                }));
                             }));
                             mKomiicLogout.setVisibility(View.VISIBLE);
                         });

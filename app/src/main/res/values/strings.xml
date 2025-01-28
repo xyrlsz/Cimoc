@@ -364,4 +364,5 @@
     <string name="settings_komiic_summary">未登录只能24小时内读取300张漫画内页图</string>
     <string name="settings_komiic_img_limit_summary">剩余可读取漫画页面数：</string>
     <string name="limit_over_tip">剩余可读取漫画页数不足</string>
+    <string name="empty_account_limit">空账号剩余页数：</string>
 </resources>

@@ -129,8 +129,10 @@ public class KomiicUtils {
     public static void getImageLimit(UpdateImageLimitCallback callback) {
         SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.KOMIIC_SHARED, Context.MODE_PRIVATE);
         String cookies = sharedPreferences.getString(KOMIIC_SHARED_COOKIES, "");
+        getImageLimit(cookies, callback);
+    }
 
-
+    public static void getImageLimit(String cookies, UpdateImageLimitCallback callback) {
         String json = "{\"operationName\":\"getImageLimit\",\"variables\":{},\"query\":\"query getImageLimit {\\n  getImageLimit {\\n    limit\\n    usage\\n    resetInSeconds\\n    __typename\\n  }\\n}\"}";
 
         RequestBody body = RequestBody.create(
