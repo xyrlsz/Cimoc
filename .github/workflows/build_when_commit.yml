@@ -1,6 +1,7 @@
 name: Android CI (commit)
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "main", "dev" ]
   pull_request:
