@@ -10,61 +10,61 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <com.haleydu.cimoc.ui.widget.preference.ChoicePreference
+        <com.xyrlsz.xcimoc.ui.widget.preference.ChoicePreference
             android:id="@+id/settings_reader_turn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:title="@string/settings_reader_turn" />
 
-        <com.haleydu.cimoc.ui.widget.preference.ChoicePreference
+        <com.xyrlsz.xcimoc.ui.widget.preference.ChoicePreference
             android:id="@+id/settings_reader_orientation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:title="@string/settings_reader_orientation" />
 
-        <com.haleydu.cimoc.ui.widget.Option
+        <com.xyrlsz.xcimoc.ui.widget.Option
             android:id="@+id/settings_reader_click_event"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:summary="@string/settings_reader_click_event_summary"
             app:title="@string/settings_reader_click_event" />
 
-        <com.haleydu.cimoc.ui.widget.Option
+        <com.xyrlsz.xcimoc.ui.widget.Option
             android:id="@+id/settings_reader_long_click_event"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:summary="@string/settings_reader_long_click_event_summary"
             app:title="@string/settings_reader_long_click_event" />
 
-        <com.haleydu.cimoc.ui.widget.preference.CheckBoxPreference
+        <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
             android:id="@+id/settings_reader_load_prev"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:summary="@string/settings_reader_load_prev_summary"
             app:title="@string/settings_reader_load_prev" />
 
-        <com.haleydu.cimoc.ui.widget.preference.CheckBoxPreference
+        <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
             android:id="@+id/settings_reader_load_next"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:summary="@string/settings_reader_load_next_summary"
             app:title="@string/settings_reader_load_next" />
 
-        <com.haleydu.cimoc.ui.widget.preference.CheckBoxPreference
+        <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
             android:id="@+id/settings_reader_ban_turn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:summary="@string/settings_reader_ban_turn_summary"
             app:title="@string/settings_reader_ban_turn" />
 
-        <com.haleydu.cimoc.ui.widget.preference.CheckBoxPreference
+        <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
             android:id="@+id/settings_reader_quick_turn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:summary="@string/settings_reader_quick_turn_summary"
             app:title="@string/settings_reader_quick_turn" />
 
-        <com.haleydu.cimoc.ui.widget.preference.SliderPreference
+        <com.xyrlsz.xcimoc.ui.widget.preference.SliderPreference
             android:id="@+id/settings_reader_trigger"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

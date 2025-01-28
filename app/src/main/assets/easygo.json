@@ -1,6 +1,6 @@
 {
   "easyGoVersion": "1.0",
-  "client": "com.haleydu.cimoc",
+  "client": "com.xyrlsz.xcimoc",
   "logicEntities": [
     {
       "head": {
@@ -11,17 +11,17 @@
         "mode": "1",
         "activityPairs": [
           {
-            "from": "com.haleydu.cimoc.ui.activity.MainActivity",
+            "from": "com.xyrlsz.xcimoc.ui.activity.MainActivity",
             "to": "*"
           },
           {
-            "from": "com.haleydu.cimoc.ui.activity.ResultActivity",
-            "to": "com.haleydu.cimoc.ui.activity.DetailActivity"
+            "from": "com.xyrlsz.xcimoc.ui.activity.ResultActivity",
+            "to": "com.xyrlsz.xcimoc.ui.activity.DetailActivity"
           }
         ],
         "Activities": [
           {
-            "name": "com.haleydu.cimoc.ui.activity.PageReaderActivity",
+            "name": "com.xyrlsz.xcimoc.ui.activity.PageReaderActivity",
             "defaultFullScreen": "true"
           }
         ],

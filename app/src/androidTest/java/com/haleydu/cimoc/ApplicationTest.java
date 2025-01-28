@@ -1,4 +1,4 @@
-package com.haleydu.cimoc;
+package com.xyrlsz.xcimoc;
 
 import android.app.Application;
 

@@ -53,7 +53,7 @@ if (System.getenv("CI_BUILD_NUMBER") != null) { // 兼容 CI/CD
 
 android {
     compileSdk 35
-    namespace "com.haleydu.cimoc"
+    namespace "com.xyrlsz.xcimoc"
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
@@ -62,7 +62,7 @@ android {
         jvmTarget = '11'
     }
     defaultConfig {
-        applicationId "com.haleydu.cimoc"
+        applicationId "com.xyrlsz.xcimoc"
         minSdkVersion 21
         //noinspection EditedTargetSdkVersion,ExpiredTargetSdkVersion
         targetSdkVersion 35
@@ -75,16 +75,24 @@ android {
 
     signingConfigs {
         release {
-            storeFile file("../hellovr10.jks")
+            storeFile file("../xcimoc.jks")
             storePassword '123456'
-            keyAlias 'vr'
+            keyAlias 'xc'
             keyPassword '123456'
+            enableV1Signing true
+            enableV2Signing true
+            enableV3Signing true
+            enableV4Signing true
         }
         debug {
-            storeFile file("../hellovr10.jks")
+            storeFile file("../xcimoc.jks")
             storePassword '123456'
-            keyAlias 'vr'
+            keyAlias 'xc'
             keyPassword '123456'
+            enableV1Signing true
+            enableV2Signing true
+            enableV3Signing true
+            enableV4Signing true
         }
     }
     buildFeatures {
@@ -97,6 +105,7 @@ android {
             shrinkResources true
             signingConfig signingConfigs.release
             buildConfigField "boolean", "USE_FINAL_RESOURCE_IDS", "true"
+
         }
         debug {
             minifyEnabled false
@@ -104,6 +113,7 @@ android {
             shrinkResources false
             signingConfig signingConfigs.debug
             buildConfigField "boolean", "USE_FINAL_RESOURCE_IDS", "true"
+
         }
     }
     splits {
