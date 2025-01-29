@@ -403,7 +403,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
 
     @OnClick(R.id.settings_dmzj_login)
     void onDmzjLoginClick() {
-        int theme = mPreference.getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_BLUE);
+        int theme = mPreference.getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_PINK);
         LoginDialog loginDialog = new LoginDialog(this, ThemeUtils.getDialogThemeById(theme));
         loginDialog.setOnLoginListener((username, password) -> {
             if (username.isEmpty() || password.isEmpty()) {
@@ -503,7 +503,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
 
     @OnClick(R.id.settings_komiic_login)
     void onKomiicLoginClick() {
-        int theme = mPreference.getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_BLUE);
+        int theme = mPreference.getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_PINK);
         LoginDialog loginDialog = new LoginDialog(this, ThemeUtils.getDialogThemeById(theme));
         loginDialog.setOnLoginListener((username, password) -> {
             if (username.isEmpty() || password.isEmpty()) {
