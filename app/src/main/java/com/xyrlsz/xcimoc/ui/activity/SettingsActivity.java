@@ -554,16 +554,10 @@ public class SettingsActivity extends BackActivity implements SettingsView {
                         Long expired = -1L;
                         try {
                             JSONObject data = new JSONObject(response.body().string());
-                            String iso8601String = data.getString("expire");
+                            String date = data.getString("expire");
                             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
                             dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-                            try {
-                                Date date = dateFormat.parse(iso8601String);
-                                long timestamp = date.getTime() / 1000;
-                                expired = timestamp;
-                            } catch (ParseException e) {
-                                e.printStackTrace();
-                            }
+                            expired = KomiicUtils.toTimestamp(date);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }

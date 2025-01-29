@@ -85,17 +85,8 @@ public class KomiicUtils {
                         Long expired = -1L;
                         try {
                             JSONObject data = new JSONObject(response.body().string());
-                            String iso8601String = data.getString("expire");
-                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault());
-                            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-                            try {
-                                Date date = dateFormat.parse(iso8601String);
-                                if (date != null) {
-                                    expired = date.getTime() / 1000;
-                                }
-                            } catch (ParseException e) {
-                                e.printStackTrace();
-                            }
+                            String date = data.getString("expire");
+                            expired = KomiicUtils.toTimestamp(date);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -175,6 +166,7 @@ public class KomiicUtils {
                             data = new JSONObject(json).getJSONObject("data");
                             int limit = data.getJSONObject("getImageLimit").getInt("limit");
                             int usage = data.getJSONObject("getImageLimit").getInt("usage");
+                            usage = Math.max(usage - 1, 0);
                             int res = limit - usage;
                             callback.onSuccess(Math.max(res, 0));
                         } catch (JSONException e) {
@@ -245,6 +237,20 @@ public class KomiicUtils {
 
     public static boolean checkEmptyAccountIsOverImgLimit() {
         return checkImgLimit("");
+    }
+
+    public static Long toTimestamp(String t) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault());
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        long timestamp = 0;
+        try {
+            Date date = dateFormat.parse(t);
+            timestamp = date.getTime() / 1000;
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return timestamp;
     }
 
     public interface UpdateImageLimitCallback {
