@@ -25,7 +25,7 @@ import com.xyrlsz.xcimoc.source.IKanman;
 import com.xyrlsz.xcimoc.source.Komiic;
 import com.xyrlsz.xcimoc.source.MYCOMIC;
 import com.xyrlsz.xcimoc.source.MangaBZ;
-import com.xyrlsz.xcimoc.source.MangaNel;
+//import com.xyrlsz.xcimoc.source.MangaNel;
 import com.xyrlsz.xcimoc.source.Mangakakalot;
 import com.xyrlsz.xcimoc.source.Manhuatai;
 import com.xyrlsz.xcimoc.source.MiGu;
@@ -68,7 +68,7 @@ public class UpdateHelper {
 //        ComicSourceHash.put(JMTT.TYPE, JMTT.getDefaultSource());
         ComicSourceHash.put(Mangakakalot.TYPE, Mangakakalot.getDefaultSource());
         ComicSourceHash.put(MangaBZ.TYPE, MangaBZ.getDefaultSource());
-        ComicSourceHash.put(MangaNel.TYPE, MangaNel.getDefaultSource());
+//        ComicSourceHash.put(MangaNel.TYPE, MangaNel.getDefaultSource());
         ComicSourceHash.put(Manhuatai.TYPE, Manhuatai.getDefaultSource());
         ComicSourceHash.put(MiGu.TYPE, MiGu.getDefaultSource());
         ComicSourceHash.put(MYCOMIC.TYPE, MYCOMIC.getDefaultSource());
@@ -127,7 +127,7 @@ public class UpdateHelper {
 //        list.add(MH57.getDefaultSource());
 //        list.add(MH50.getDefaultSource());
 //        list.add(Dmzjv2.getDefaultSource());
-        list.add(MangaNel.getDefaultSource());
+//        list.add(MangaNel.getDefaultSource());
         list.add(Mangakakalot.getDefaultSource());
 //        list.add(PuFei.getDefaultSource());
         list.add(Cartoonmad.getDefaultSource());

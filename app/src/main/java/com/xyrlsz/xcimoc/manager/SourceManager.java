@@ -25,7 +25,7 @@ import com.xyrlsz.xcimoc.source.Komiic;
 import com.xyrlsz.xcimoc.source.Locality;
 import com.xyrlsz.xcimoc.source.MYCOMIC;
 import com.xyrlsz.xcimoc.source.MangaBZ;
-import com.xyrlsz.xcimoc.source.MangaNel;
+//import com.xyrlsz.xcimoc.source.MangaNel;
 import com.xyrlsz.xcimoc.source.Mangakakalot;
 import com.xyrlsz.xcimoc.source.Manhuatai;
 import com.xyrlsz.xcimoc.source.MiGu;
@@ -142,9 +142,9 @@ public class SourceManager {
                 case Locality.TYPE:
                     parser = new Locality();
                     break;
-                case MangaNel.TYPE:
-                    parser = new MangaNel(source);
-                    break;
+//                case MangaNel.TYPE:
+//                    parser = new MangaNel(source);
+//                    break;
 
                 //feilong
 //                case PuFei.TYPE:
