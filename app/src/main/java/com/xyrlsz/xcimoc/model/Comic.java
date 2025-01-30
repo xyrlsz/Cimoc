@@ -12,6 +12,8 @@ import org.greenrobot.greendao.annotation.Transient;
 @Entity
 public class Comic {
 
+    @Transient
+    public Object note;
     @Id(autoincrement = true)
     private Long id;
     @NotNull
@@ -35,17 +37,14 @@ public class Comic {
     private Integer page;
     private String chapter;
     private String url;
-    @Transient
-    public Object note;
-
-
+    private Integer chapterCount;
     private String intro;
 
     private String author;
 
     public Comic(int source, String cid, String title, String cover, String update, String author) {
         this(null, source, cid, title, cover == null ? "" : cover, false, false, update,
-                null, null, null, null, null, null, null, null, null, null);
+                null, null, null, null, null, null, null, null, 0, null,null);
         this.author = author;
     }
 
@@ -56,13 +55,13 @@ public class Comic {
 
     public Comic(int source, String cid, String title, String cover, long download) {
         this(null, source, cid, title, cover == null ? "" : cover, false, false, null,
-                null, null, null, download, null, null, null, null,null,null);
+                null, null, null, download, null, null, null, null, 0, null,null);
     }
 
-    @Generated(hash = 705801731)
+    @Generated(hash = 1294342162)
     public Comic(Long id, int source, @NotNull String cid, @NotNull String title, @NotNull String cover, boolean highlight,
             boolean local, String update, Boolean finish, Long favorite, Long history, Long download, String last, Integer page,
-            String chapter, String url, String intro, String author) {
+            String chapter, String url, Integer chapterCount, String intro, String author) {
         this.id = id;
         this.source = source;
         this.cid = cid;
@@ -79,6 +78,7 @@ public class Comic {
         this.page = page;
         this.chapter = chapter;
         this.url = url;
+        this.chapterCount = chapterCount;
         this.intro = intro;
         this.author = author;
     }
@@ -253,4 +253,13 @@ public class Comic {
     public void setUrl(String url) {
         this.url = url;
     }
+
+    public Integer getChapterCount() {
+        return chapterCount;
+    }
+
+    public void setChapterCount(Integer count) {
+        this.chapterCount = count;
+    }
+
 }

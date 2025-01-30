@@ -1,7 +1,5 @@
 package com.xyrlsz.xcimoc.presenter;
 
-import android.util.Log;
-
 import com.xyrlsz.xcimoc.core.Backup;
 import com.xyrlsz.xcimoc.core.Download;
 import com.xyrlsz.xcimoc.core.Manga;
@@ -103,17 +101,19 @@ public class DetailPresenter extends BasePresenter<DetailView> {
                 }
             }
         }
+        mComic.setChapterCount(list.size());
+        mComicManager.update(mComic);
     }
 
     public void preLoad() {
-        if(mComic.getId()==null) {
+        if (mComic.getId() == null) {
             return;
         }
-        mCompositeSubscription.add(mChapterManager.getListChapter(Long.parseLong(mComic.getSource()+"0"+mComic.getId()))
+        mCompositeSubscription.add(mChapterManager.getListChapter(Long.parseLong(mComic.getSource() + "0" + mComic.getId()))
                 .doOnNext(new Action1<List<Chapter>>() {
                     @Override
                     public void call(List<Chapter> list) {
-                        if (mComic.getId() != null && list.size()!=0) {
+                        if (mComic.getId() != null && list.size() != 0) {
                             updateChapterList(list);
                         }
                     }
@@ -122,8 +122,8 @@ public class DetailPresenter extends BasePresenter<DetailView> {
                 .subscribe(new Action1<List<Chapter>>() {
                     @Override
                     public void call(List<Chapter> list) {
-                        if (list != null && list.size()!=0){
-                            mBaseView.onPreLoadSuccess(list,mComic);
+                        if (list != null && list.size() != 0) {
+                            mBaseView.onPreLoadSuccess(list, mComic);
                         }
                     }
                 }, new Action1<Throwable>() {
@@ -241,26 +241,26 @@ public class DetailPresenter extends BasePresenter<DetailView> {
      */
     public void addTask(final List<Chapter> cList, final List<Chapter> dList) {
         mCompositeSubscription.add(Observable.create(new Observable.OnSubscribe<ArrayList<Task>>() {
-            @Override
-            public void call(Subscriber<? super ArrayList<Task>> subscriber) {
-                final ArrayList<Task> result = getTaskList(dList);
-                mComic.setDownload(System.currentTimeMillis());
-                mComicManager.runInTx(new Runnable() {
                     @Override
-                    public void run() {
-                        mComicManager.updateOrInsert(mComic);
-                        for (Task task : result) {
-                            task.setKey(mComic.getId());
-                            mTaskManager.insert(task);
-                        }
+                    public void call(Subscriber<? super ArrayList<Task>> subscriber) {
+                        final ArrayList<Task> result = getTaskList(dList);
+                        mComic.setDownload(System.currentTimeMillis());
+                        mComicManager.runInTx(new Runnable() {
+                            @Override
+                            public void run() {
+                                mComicManager.updateOrInsert(mComic);
+                                for (Task task : result) {
+                                    task.setKey(mComic.getId());
+                                    mTaskManager.insert(task);
+                                }
+                            }
+                        });
+                        Download.updateComicIndex(mBaseView.getAppInstance().getContentResolver(),
+                                mBaseView.getAppInstance().getDocumentFile(), cList, mComic);
+                        subscriber.onNext(result);
+                        subscriber.onCompleted();
                     }
-                });
-                Download.updateComicIndex(mBaseView.getAppInstance().getContentResolver(),
-                        mBaseView.getAppInstance().getDocumentFile(), cList, mComic);
-                subscriber.onNext(result);
-                subscriber.onCompleted();
-            }
-        }).subscribeOn(Schedulers.io())
+                }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<ArrayList<Task>>() {
                     @Override

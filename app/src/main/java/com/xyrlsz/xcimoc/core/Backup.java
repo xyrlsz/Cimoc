@@ -69,6 +69,7 @@ public class Backup {
     private static final String JSON_KEY_COMIC_CHAPTER = "chapter";
     private static final String JSON_KEY_COMIC_FAVORITE = "favorite";
     private static final String JSON_KEY_COMIC_HISTORY = "history";
+    private static final String JSON_KEY_COMIC_CHAPTER_COUNT = "chapter_count";
 
     public static Observable<String[]> loadFavorite(DocumentFile root) {
         return load(root, SUFFIX_CIMOC, SUFFIX_CFBF);
@@ -166,7 +167,7 @@ public class Backup {
 
                 String filename = StringUtils.getDateStringWithSuffix(SUFFIX_CSBF);
                 DocumentFile file = DocumentUtils.getOrCreateFile(dir, filename);
-                DocumentUtils.writeStringToFile(resolver, file, result.toString());
+                DocumentUtils.writeStringToFile(resolver, file, result);
                 return settingMap.size();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -211,6 +212,7 @@ public class Backup {
         object.put(JSON_KEY_COMIC_LAST, comic.getLast());
         object.put(JSON_KEY_COMIC_PAGE, comic.getPage());
         object.put(JSON_KEY_COMIC_CHAPTER, comic.getChapter());
+        object.put(JSON_KEY_COMIC_CHAPTER_COUNT, comic.getChapterCount());
         return object;
     }
 
@@ -332,8 +334,10 @@ public class Backup {
                     String last = object.optString(JSON_CIMOC_KEY_COMIC_LAST, null);
                     Integer page = object.has(JSON_CIMOC_KEY_COMIC_PAGE) ?
                             object.getInt(JSON_CIMOC_KEY_COMIC_PAGE) : null;
+                    Integer chapterCount = object.has(JSON_KEY_COMIC_CHAPTER_COUNT) ?
+                            object.getInt(JSON_KEY_COMIC_CHAPTER_COUNT) : 0;
                     list.add(new Comic(null, source, cid, title, cover, false, false, update,
-                            finish, null, null, null, last, page, null, null,null,null));
+                            finish, null, null, null, last, page, null, null, chapterCount, null, null));
                 }
                 break;
             case SUFFIX_CFBF:
@@ -351,6 +355,8 @@ public class Backup {
                     Integer page = object.has(JSON_KEY_COMIC_PAGE) ?
                             object.getInt(JSON_KEY_COMIC_PAGE) : null;
                     String chapter = object.optString(JSON_KEY_COMIC_CHAPTER, null);
+                    Integer chapterCount = object.has(JSON_KEY_COMIC_CHAPTER_COUNT) ?
+                            object.getInt(JSON_KEY_COMIC_CHAPTER_COUNT) : 0;
                     Long favorite = object.has(JSON_KEY_COMIC_FAVORITE) ?
                             object.getLong(JSON_KEY_COMIC_FAVORITE) : null;
                     Long history = object.has(JSON_KEY_COMIC_HISTORY) ?
@@ -360,7 +366,7 @@ public class Backup {
                         favorite = System.currentTimeMillis();
                     }
                     list.add(new Comic(null, source, cid, title, cover, false, false, update,
-                            finish, favorite, history, null, last, page, chapter, null, null, null));
+                            finish, favorite, history, null, last, page, chapter, null, chapterCount, null, null));
                 }
                 break;
         }

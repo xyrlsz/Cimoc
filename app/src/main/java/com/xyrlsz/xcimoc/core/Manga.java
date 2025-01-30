@@ -64,10 +64,10 @@ public class Manga {
                     Request request = parser.getSearchRequest(keyword, page);
                     Random random = new Random();
                     String html;
-                    if(parser.isGetSearchUseWebParser()){
+                    if (parser.isGetSearchUseWebParser()) {
                         WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
                         html = webParser.getHtmlStrSync();
-                    }else{
+                    } else {
                         html = getResponseBody(App.getHttpClient(), request);
                     }
                     SearchIterator iterator = parser.getSearchIterator(html, page);
@@ -143,21 +143,21 @@ public class Manga {
                     if (list.isEmpty()) {
                         comic.setUrl(parser.getUrl(comic.getCid()));
                         Request request = parser.getInfoRequest(comic.getCid());
-                        String html ;
-                        if(parser.isParseInfoUseWebParser()){
+                        String html;
+                        if (parser.isParseInfoUseWebParser()) {
                             WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
                             html = webParser.getHtmlStrSync();
-                        }else{
-                            html =  getResponseBody(App.getHttpClient(), request);
+                        } else {
+                            html = getResponseBody(App.getHttpClient(), request);
                         }
                         Comic newComic = parser.parseInfo(html, comic);
                         RxBus.getInstance().post(new RxEvent(RxEvent.EVENT_COMIC_UPDATE_INFO, newComic));
                         request = parser.getChapterRequest(html, comic.getCid());
                         if (request != null) {
-                            if(parser.isParseChapterUseWebParser()){
+                            if (parser.isParseChapterUseWebParser()) {
                                 WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
                                 html = webParser.getHtmlStrSync();
-                            }else{
+                            } else {
                                 html = getResponseBody(App.getHttpClient(), request);
                             }
                         }
@@ -388,8 +388,12 @@ public class Manga {
                     try {
                         Parser parser = manager.getParser(comic.getSource());
                         Request request = parser.getCheckRequest(comic.getCid());
+                        if (request == null) {
+                            request = parser.getInfoRequest(comic.getCid());
+                        }
                         String update = parser.parseCheck(getResponseBody(client, request));
-                        if (comic.getUpdate() != null && update != null && !comic.getUpdate().equals(update)) {
+                        if ((comic.getUpdate() != null && update != null && !comic.getUpdate().equals(update))
+                                || (update == null && parser.checkUpdateByChapterCount(getResponseBody(client, request), comic))) {
                             comic.setFavorite(System.currentTimeMillis());
                             comic.setUpdate(update);
                             comic.setHighlight(true);

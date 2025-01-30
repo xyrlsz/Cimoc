@@ -3,10 +3,12 @@ package com.xyrlsz.xcimoc.parser;
 import android.net.Uri;
 
 import com.xyrlsz.xcimoc.core.Manga;
+import com.xyrlsz.xcimoc.manager.ComicManager;
 import com.xyrlsz.xcimoc.model.Chapter;
 import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.ImageUrl;
 import com.xyrlsz.xcimoc.model.Source;
+import com.xyrlsz.xcimoc.ui.activity.BackActivity;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import org.json.JSONException;
@@ -29,6 +31,7 @@ public abstract class MangaParser implements Parser {
     private boolean parseInfoUseWebParser = false;
     private boolean parseChapterUseWebParser = false;
     private boolean parseImagesUseWebParser = false;
+
     protected void init(Source source, Category category) {
         mTitle = source.getTitle();
         mCategory = category;
@@ -73,6 +76,21 @@ public abstract class MangaParser implements Parser {
     @Override
     public String parseCheck(String html) {
         return null;
+    }
+
+    @Override
+    public boolean checkUpdateByChapterCount(String html, Comic comic) {
+        try {
+            Long sourceComic = Long.parseLong(comic.getSource() + "0" + (comic.getId() == null ? "00" : comic.getId()));
+            List<Chapter> list = parseChapter(html, comic, sourceComic);
+            if (list == null) {
+                list = parseChapter(html);
+            }
+            return comic.getChapterCount() < list.size();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     @Override

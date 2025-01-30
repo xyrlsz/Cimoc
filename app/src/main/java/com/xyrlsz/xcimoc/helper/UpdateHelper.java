@@ -14,25 +14,22 @@ import com.xyrlsz.xcimoc.source.Cartoonmad;
 import com.xyrlsz.xcimoc.source.CopyMH;
 import com.xyrlsz.xcimoc.source.DM5;
 import com.xyrlsz.xcimoc.source.Dmzj;
-//import com.xyrlsz.xcimoc.source.Dmzjv2;
-//import com.xyrlsz.xcimoc.source.Dmzjv3;
+import com.xyrlsz.xcimoc.source.DongManManHua;
 import com.xyrlsz.xcimoc.source.DuManWu;
 import com.xyrlsz.xcimoc.source.DuManWuOrg;
 import com.xyrlsz.xcimoc.source.GuFeng;
-//import com.xyrlsz.xcimoc.source.HHAAZZ;
 import com.xyrlsz.xcimoc.source.HotManga;
 import com.xyrlsz.xcimoc.source.IKanman;
 import com.xyrlsz.xcimoc.source.Komiic;
 import com.xyrlsz.xcimoc.source.MYCOMIC;
 import com.xyrlsz.xcimoc.source.MangaBZ;
-//import com.xyrlsz.xcimoc.source.MangaNel;
 import com.xyrlsz.xcimoc.source.Mangakakalot;
 import com.xyrlsz.xcimoc.source.Manhuatai;
 import com.xyrlsz.xcimoc.source.MiGu;
 import com.xyrlsz.xcimoc.source.Tencent;
-//import com.xyrlsz.xcimoc.source.Webtoon;
-import com.xyrlsz.xcimoc.source.DongManManHua;
 import com.xyrlsz.xcimoc.source.YKMH;
+
+import org.greenrobot.greendao.database.Database;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,7 +53,7 @@ public class UpdateHelper {
         ComicSourceHash.put(Baozi.TYPE, DuManWu.getDefaultSource());
         ComicSourceHash.put(BuKa.TYPE, BuKa.getDefaultSource());
         ComicSourceHash.put(Cartoonmad.TYPE, Cartoonmad.getDefaultSource());
-        ComicSourceHash.put(CopyMH.TYPE,CopyMH.getDefaultSource());
+        ComicSourceHash.put(CopyMH.TYPE, CopyMH.getDefaultSource());
         ComicSourceHash.put(DM5.TYPE, DM5.getDefaultSource());
         ComicSourceHash.put(Dmzj.TYPE, Dmzj.getDefaultSource());
 //        ComicSourceHash.put(Dmzjv2.TYPE, Dmzjv2.getDefaultSource());
@@ -86,8 +83,19 @@ public class UpdateHelper {
         if (version != VERSION) {
             initSource(session);
             manager.putInt(PreferenceManager.PREF_APP_VERSION, VERSION);
+            new UpdateHelper().updateComicSource(session);
+            if (version < 963) {
+                updateChapterTable(session);
+            }
         }
-        new UpdateHelper().updateComicSource(session);
+
+    }
+
+    private static void addChapterCountColumn(Database db) {
+        db.beginTransaction();
+        db.execSQL("ALTER TABLE COMIC ADD COLUMN CHAPTER_COUNT INTEGER DEFAULT 0");
+        db.setTransactionSuccessful();
+        db.endTransaction();
     }
 
     /**
@@ -169,6 +177,10 @@ public class UpdateHelper {
         list.add(DuManWuOrg.getDefaultSource());
         list.add(Komiic.getDefaultSource());
         session.getSourceDao().insertOrReplaceInTx(list);
+    }
+
+    private static void updateChapterTable(final DaoSession session) {
+        addChapterCountColumn(session.getDatabase());
     }
 
     public void updateComicSource(DaoSession session) {

@@ -130,6 +130,8 @@ public interface Parser {
     /// @param html 页面源代码
     String parseCheck(String html);
 
+    boolean checkUpdateByChapterCount(String html,Comic comic);
+
     /**
      * 获取漫画分类
      *
