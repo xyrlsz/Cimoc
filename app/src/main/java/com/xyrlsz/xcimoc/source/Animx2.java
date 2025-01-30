@@ -29,6 +29,7 @@ public class Animx2 extends MangaParser {
 
     public static final int TYPE = 55;
     public static final String DEFAULT_TITLE = "2animx";
+    private String _cid, _path;
 
     public Animx2(Source source) {
         init(source, null);
@@ -62,7 +63,7 @@ public class Animx2 extends MangaParser {
 
     @Override
     public String getUrl(String cid) {
-        return cid;
+        return "https://www.2animx.com/" + cid;
     }
 
     @Override
@@ -94,7 +95,7 @@ public class Animx2 extends MangaParser {
     @Override
     public List<Chapter> parseChapter(String html, Comic comic, Long sourceComic) {
         List<Chapter> list = new LinkedList<>();
-        int i=0;
+        int i = 0;
         for (Node node : new Node(html).list("div#oneCon2 > ul > li")) {
             String title = node.attr("a", "title");
             Matcher mTitle = Pattern.compile("\\d+").matcher(title);
@@ -105,8 +106,6 @@ public class Animx2 extends MangaParser {
         }
         return list;
     }
-
-    private String _cid, _path;
 
     @Override
     public Request getImagesRequest(String cid, String path) {
