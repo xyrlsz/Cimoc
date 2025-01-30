@@ -1,5 +1,7 @@
 package com.xyrlsz.xcimoc.source;
 
+import android.os.Build;
+
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.model.Chapter;
 import com.xyrlsz.xcimoc.model.Comic;
@@ -18,6 +20,7 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -98,10 +101,22 @@ public class DuManWu extends MangaParser {
         Node body = new Node(html);
         String title = body.text(".banner-title");
         String cover = body.attr(".banner-pic", "data-src");
-        String author = body.text(".author").split(" ")[0].replace("作者：", "");
-        String update = body.text(".author").split(" ")[1];
+        String[] tmp = body.text(".author").split(" ");
+        StringBuilder author = new StringBuilder();
+        String update = "";
+
+        for (String data : tmp) {
+            if (data.contains("作者")) {
+                author = new StringBuilder(data.replace("作者：", ""));
+            } else if (data.contains("月") && data.contains("日")) {
+                    update = data;
+            }else{
+                author.append(data);
+            }
+
+        }
         String intro = body.text(".introduction");
-        comic.setInfo(title, cover, update, intro, author, false);
+        comic.setInfo(title, cover, update, intro, author.toString(), false);
         return comic;
     }
 
