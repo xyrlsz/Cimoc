@@ -60,7 +60,7 @@
             android:layout_height="48dp"
             android:layout_alignParentEnd="true"
             android:layout_marginBottom="6dp"
-            android:background="@color/transparent"
+            android:background="?attr/selectableItemBackground"
             android:contentDescription="@string/show_passwd"
             android:src="@drawable/eye_close" />
 
