@@ -116,7 +116,7 @@ public class MiGu extends MangaParser {
         while (m.find()) {
             list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, m.group(2), m.group(1)));
         }
-        return Lists.reverse(list);
+        return list;
     }
 
     public String httpGet(String url) {
