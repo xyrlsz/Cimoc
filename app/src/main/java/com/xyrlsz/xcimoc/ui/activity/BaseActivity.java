@@ -36,6 +36,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
     @BindView(R.id.custom_toolbar)
     Toolbar mToolbar;
     @BindView(R.id.toolbar_title)
+    @Nullable
     TextView mToolbarTitle;
     private ProgressDialogFragment mProgressDialog;
     private BasePresenter mBasePresenter;
