@@ -5,6 +5,8 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -65,8 +67,15 @@ public class GridAdapter extends BaseAdapter<Object> {
             default:
                 MiniComic comic = (MiniComic) mDataSet.get(position);
                 GridHolder gridHolder = (GridHolder) holder;
-
-
+                gridHolder.rlItemGrid.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        int width = gridHolder.rlItemGrid.getWidth();
+                        ViewGroup.LayoutParams params = gridHolder.rlItemGrid.getLayoutParams();
+                        params.height = (int) (width * (4 / 3.0));
+                        gridHolder.rlItemGrid.setLayoutParams(params);
+                    }
+                });
                 gridHolder.comicTitle.setText(STConvertUtils.convert(comic.getTitle()));
                 gridHolder.comicSource.setText(mTitleGetter.getTitle(comic.getSource()));
                 if (mProvider != null) {
@@ -194,6 +203,8 @@ public class GridAdapter extends BaseAdapter<Object> {
         TextView comicSource;
         @BindView(R.id.item_grid_symbol)
         View comicHighlight;
+        @BindView(R.id.rl_item_grid)
+        RelativeLayout rlItemGrid;
 
         GridHolder(View view) {
             super(view);
