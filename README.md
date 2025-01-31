@@ -2,7 +2,7 @@
 
 # 应用简介
 
-Android 平台在线漫画阅读器  
+Android 平台在线漫画阅读器\
 Online manga reader based on Android
 
 
