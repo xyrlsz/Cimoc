@@ -1,16 +1,16 @@
 package com.xyrlsz.xcimoc.ui.fragment;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.ColorRes;
-import com.google.android.material.tabs.TabLayout;
-import androidx.core.content.ContextCompat;
-import androidx.viewpager.widget.ViewPager;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import androidx.annotation.ColorRes;
+import androidx.viewpager.widget.ViewPager;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.component.ThemeResponsive;
 import com.xyrlsz.xcimoc.manager.PreferenceManager;
@@ -32,7 +32,6 @@ import com.xyrlsz.xcimoc.utils.HintUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import butterknife.BindView;
 
@@ -44,15 +43,15 @@ public class ComicFragment extends BaseFragment implements ComicView {
 
     private static final int DIALOG_REQUEST_FILTER = 0;
 
-    @BindView(R.id.comic_tab_layout)
-    TabLayout mTabLayout;
+    @BindView(R.id.bottom_navigation)
+    BottomNavigationView mBottomNavigationView;
     @BindView(R.id.comic_view_pager)
     ViewPager mViewPager;
 
     private ComicPresenter mPresenter;
     private TabPagerAdapter mTabAdapter;
     private List<Tag> mTagList;
-
+    private String currTitle;
     @Override
     protected BasePresenter initPresenter() {
         mPresenter = new ComicPresenter();
@@ -63,32 +62,81 @@ public class ComicFragment extends BaseFragment implements ComicView {
     @Override
     protected void initView() {
         setHasOptionsMenu(true);
-        mTabLayout.addTab(mTabLayout.newTab().setText(R.string.comic_tab_history));
-        mTabLayout.addTab(mTabLayout.newTab().setText(R.string.comic_tab_favorite));
-        mTabLayout.addTab(mTabLayout.newTab().setText(R.string.comic_tab_download));
-        mTabLayout.addTab(mTabLayout.newTab().setText(R.string.comic_tab_local));
         mTabAdapter = new TabPagerAdapter(requireActivity().getSupportFragmentManager(),
                 new GridFragment[]{new HistoryFragment(), new FavoriteFragment(), new DownloadFragment(), new LocalFragment()},
                 new String[]{getString(R.string.comic_tab_history), getString(R.string.comic_tab_favorite), getString(R.string.comic_tab_download), getString(R.string.comic_tab_local)});
         mViewPager.setOffscreenPageLimit(4);
         mViewPager.setAdapter(mTabAdapter);
+        mBottomNavigationView.setOnNavigationItemSelectedListener(item -> {
+            switch (item.getItemId()) {
+                case R.id.navigation_history:
+                    mViewPager.setCurrentItem(0);
+                    return true;
+                case R.id.navigation_favorite:
+                    mViewPager.setCurrentItem(1);
+                    return true;
+                case R.id.navigation_download:
+                    mViewPager.setCurrentItem(2);
+                    return true;
+                case R.id.navigation_local:
+                    mViewPager.setCurrentItem(3);
+                    return true;
+            }
+            return false;
+        });
         int home = mPreference.getInt(PreferenceManager.PREF_OTHER_LAUNCH, PreferenceManager.HOME_FAVORITE);
         switch (home) {
             default:
             case PreferenceManager.HOME_FAVORITE:
-                mViewPager.setCurrentItem(1);
+//                mViewPager.setCurrentItem(1);
+                currTitle = getString(R.string.comic_tab_favorite);
+                mBottomNavigationView.setSelectedItemId(R.id.navigation_favorite);
                 break;
             case PreferenceManager.HOME_HISTORY:
-                mViewPager.setCurrentItem(0);
+//                mViewPager.setCurrentItem(0);
+                currTitle = getString(R.string.comic_tab_history);
+                mBottomNavigationView.setSelectedItemId(R.id.navigation_history);
                 break;
             case PreferenceManager.HOME_DOWNLOAD:
-                mViewPager.setCurrentItem(2);
+//                mViewPager.setCurrentItem(2);
+                currTitle = getString(R.string.comic_tab_download);
+                mBottomNavigationView.setSelectedItemId(R.id.navigation_download);
                 break;
             case PreferenceManager.HOME_LOCAL:
-                mViewPager.setCurrentItem(3);
+//                mViewPager.setCurrentItem(3);
+                currTitle = getString(R.string.comic_tab_local);
+                mBottomNavigationView.setSelectedItemId(R.id.navigation_local);
                 break;
         }
-        mTabLayout.setupWithViewPager(mViewPager);
+
+        mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+            @Override
+            public void onPageSelected(int position) {
+                switch (position) {
+                    case 0:
+                        mBottomNavigationView.setSelectedItemId(R.id.navigation_history);
+                        currTitle = getString(R.string.comic_tab_history);
+                        App.getBActivity().setToolbarTitle(currTitle);
+                        break;
+                    case 1:
+                        mBottomNavigationView.setSelectedItemId(R.id.navigation_favorite);
+                        currTitle = getString(R.string.comic_tab_favorite);
+                        App.getBActivity().setToolbarTitle(currTitle);
+                        break;
+                    case 2:
+                        mBottomNavigationView.setSelectedItemId(R.id.navigation_download);
+                        currTitle = getString(R.string.comic_tab_download);
+                        App.getBActivity().setToolbarTitle(currTitle);
+                        break;
+                    case 3:
+                        mBottomNavigationView.setSelectedItemId(R.id.navigation_local);
+                        currTitle = getString(R.string.comic_tab_local);
+                        App.getBActivity().setToolbarTitle(currTitle);
+                        break;
+                }
+            }
+        });
+
         mTagList = new ArrayList<>();
         hideProgressBar();
     }
@@ -168,7 +216,6 @@ public class ComicFragment extends BaseFragment implements ComicView {
 
     @Override
     public void onThemeChange(@ColorRes int primary, @ColorRes int accent) {
-        mTabLayout.setBackgroundColor(ContextCompat.getColor(getActivity(), primary));
         for (int i = 0; i < mTabAdapter.getCount(); ++i) {
             ((ThemeResponsive) mTabAdapter.getItem(i)).onThemeChange(primary, accent);
         }
@@ -179,4 +226,7 @@ public class ComicFragment extends BaseFragment implements ComicView {
         return R.layout.fragment_comic;
     }
 
+    public String getCurrTitle() {
+        return currTitle;
+    }
 }

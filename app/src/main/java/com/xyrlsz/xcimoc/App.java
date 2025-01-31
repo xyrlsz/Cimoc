@@ -6,13 +6,12 @@ import android.content.res.Resources;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
-
-import androidx.multidex.MultiDex;
-import androidx.recyclerview.widget.RecyclerView;
-
-import android.os.Environment;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
+
+import androidx.multidex.MultiDex;
+import androidx.multidex.MultiDexApplication;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.xyrlsz.xcimoc.component.AppGetter;
@@ -26,6 +25,7 @@ import com.xyrlsz.xcimoc.misc.ActivityLifecycle;
 import com.xyrlsz.xcimoc.model.DaoMaster;
 import com.xyrlsz.xcimoc.model.DaoSession;
 import com.xyrlsz.xcimoc.saf.DocumentFile;
+import com.xyrlsz.xcimoc.ui.activity.BaseActivity;
 import com.xyrlsz.xcimoc.ui.adapter.GridAdapter;
 import com.xyrlsz.xcimoc.utils.DocumentUtils;
 import com.xyrlsz.xcimoc.utils.StringUtils;
@@ -44,39 +44,99 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import okhttp3.OkHttpClient;
-//import xcrash.XCrash;
-
-import androidx.multidex.MultiDexApplication;
 
 /**
  * Created by Hiroshi on 2016/7/5.
  */
 public class App extends MultiDexApplication implements AppGetter, Thread.UncaughtExceptionHandler {
 
+    private static final String CRASH_FILE_PATH = "/Cimoc/Log/crash";
     public static int mWidthPixels;
     public static int mHeightPixels;
     public static int mCoverWidthPixels;
     public static int mCoverHeightPixels;
     public static int mLargePixels;
-
     private static OkHttpClient mHttpClient;
-
-    private DocumentFile mDocumentFile;
     private static PreferenceManager mPreferenceManager;
+    private static WifiManager manager_wifi;
+    private static App mApp;
+    private static Activity sActivity;
+    private static BaseActivity bActivity;
+    // 默认Github源
+    private static String UPDATE_CURRENT_URL = "https://api.github.com/repos/xyrlsz/Cimoc/releases/latest";
+    private DocumentFile mDocumentFile;
     private ControllerBuilderProvider mBuilderProvider;
-    
     private RecyclerView.RecycledViewPool mRecycledPool;
     private DaoSession mDaoSession;
     private ActivityLifecycle mActivityLifecycle;
 
+    public static Context getAppContext() {
+        return mApp;
+    }
 
-    private static WifiManager manager_wifi;
-    private static App mApp;
-    private static Activity sActivity;
+    public static Resources getAppResources() {
+        return mApp.getResources();
+    }
 
-    // 默认Github源
-    private static String UPDATE_CURRENT_URL = "https://api.github.com/repos/xyrlsz/Cimoc/releases/latest";
-    private static final String CRASH_FILE_PATH = "/Cimoc/Log/crash";
+    public static Activity getActivity() {
+        return sActivity;
+    }
+
+    public static BaseActivity getBActivity() {
+        return bActivity;
+    }
+
+    public static WifiManager getManager_wifi() {
+        return manager_wifi;
+    }
+
+    public static PreferenceManager getPreferenceManager() {
+        return mPreferenceManager;
+    }
+
+    public static String getUpdateCurrentUrl() {
+        return UPDATE_CURRENT_URL;
+    }
+
+    public static void setUpdateCurrentUrl(String updateCurrentUrl) {
+        UPDATE_CURRENT_URL = updateCurrentUrl;
+    }
+
+    public static OkHttpClient getHttpClient() {
+
+        //OkHttpClient返回null实现"仅WiFi联网"，后面要注意空指针处理
+        if (!manager_wifi.isWifiEnabled() && mPreferenceManager.getBoolean(PreferenceManager.PREF_OTHER_CONNECT_ONLY_WIFI, false)) {
+            return null;
+        }
+
+        if (mHttpClient == null) {
+
+            // 3.OkHttp访问https的Client实例
+            mHttpClient = new OkHttpClient().newBuilder()
+                    .sslSocketFactory(createSSLSocketFactory())
+                    .hostnameVerifier(new TrustAllHostnameVerifier())
+                    .followRedirects(true)
+                    .followSslRedirects(true)
+                    .retryOnConnectionFailure(true)
+                    .build();
+        }
+
+        return mHttpClient;
+    }
+
+    private static SSLSocketFactory createSSLSocketFactory() {
+        SSLSocketFactory ssfFactory = null;
+
+        try {
+            SSLContext sc = SSLContext.getInstance("TLS");
+            sc.init(null, new TrustManager[]{new TrustAllCerts()}, new SecureRandom());
+
+            ssfFactory = sc.getSocketFactory();
+        } catch (Exception e) {
+        }
+
+        return ssfFactory;
+    }
 
     @Override
     public void onCreate() {
@@ -105,7 +165,7 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
             public void onActivityStarted(Activity activity) {
 //                Log.d("ActivityLifecycle:",activity+"onActivityStarted");
                 sActivity = activity;
-
+                bActivity = (BaseActivity) activity;
             }
 
             @Override
@@ -162,22 +222,6 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         return this;
     }
 
-    public static Context getAppContext() {
-        return mApp;
-    }
-
-    public static Resources getAppResources() {
-        return mApp.getResources();
-    }
-
-    public static Activity getActivity() {
-        return sActivity;
-    }
-
-    public static WifiManager getManager_wifi() {
-        return manager_wifi;
-    }
-
     private void initPixels() {
         DisplayMetrics metrics = new DisplayMetrics();
         ((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay().getMetrics(metrics);
@@ -204,10 +248,6 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         return mDaoSession;
     }
 
-    public static PreferenceManager getPreferenceManager() {
-        return mPreferenceManager;
-    }
-
     public RecyclerView.RecycledViewPool getGridRecycledPool() {
         if (mRecycledPool == null) {
             mRecycledPool = new RecyclerView.RecycledViewPool();
@@ -228,36 +268,6 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
         MultiDex.install(this);
-    }
-
-    public static void setUpdateCurrentUrl(String updateCurrentUrl) {
-        UPDATE_CURRENT_URL = updateCurrentUrl;
-    }
-
-    public static String getUpdateCurrentUrl() {
-        return UPDATE_CURRENT_URL;
-    }
-
-    public static OkHttpClient getHttpClient() {
-
-        //OkHttpClient返回null实现"仅WiFi联网"，后面要注意空指针处理
-        if (!manager_wifi.isWifiEnabled() && mPreferenceManager.getBoolean(PreferenceManager.PREF_OTHER_CONNECT_ONLY_WIFI, false)) {
-            return null;
-        }
-
-        if (mHttpClient == null) {
-
-            // 3.OkHttp访问https的Client实例
-            mHttpClient = new OkHttpClient().newBuilder()
-                    .sslSocketFactory(createSSLSocketFactory())
-                    .hostnameVerifier(new TrustAllHostnameVerifier())
-                    .followRedirects(true)
-                    .followSslRedirects(true)
-                    .retryOnConnectionFailure(true)
-                    .build();
-        }
-
-        return mHttpClient;
     }
 
     // 1.实现X509TrustManager接口
@@ -282,20 +292,6 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         public boolean verify(String hostname, SSLSession session) {
             return true;
         }
-    }
-
-    private static SSLSocketFactory createSSLSocketFactory() {
-        SSLSocketFactory ssfFactory = null;
-
-        try {
-            SSLContext sc = SSLContext.getInstance("TLS");
-            sc.init(null, new TrustManager[]{new TrustAllCerts()}, new SecureRandom());
-
-            ssfFactory = sc.getSocketFactory();
-        } catch (Exception e) {
-        }
-
-        return ssfFactory;
     }
 //
 //    private void initXCrash(){

@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
@@ -24,12 +24,11 @@
 
         <com.google.android.material.navigation.NavigationView
             android:id="@+id/main_navigation_view"
-            android:layout_width="280dp"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="start"
             app:headerLayout="@layout/custom_drawer_header"
-            app:menu="@menu/menu_main">
-        </com.google.android.material.navigation.NavigationView>
+            app:menu="@menu/menu_main" />
     </androidx.drawerlayout.widget.DrawerLayout>
 
     <include layout="@layout/custom_night_mask" />

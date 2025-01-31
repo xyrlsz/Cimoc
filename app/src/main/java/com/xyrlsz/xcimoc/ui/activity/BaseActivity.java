@@ -2,11 +2,13 @@ package com.xyrlsz.xcimoc.ui.activity;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.TextView;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import android.view.View;
-import android.view.WindowManager;
 
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.R;
@@ -33,6 +35,8 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
     @Nullable
     @BindView(R.id.custom_toolbar)
     Toolbar mToolbar;
+    @BindView(R.id.toolbar_title)
+    TextView mToolbarTitle;
     private ProgressDialogFragment mProgressDialog;
     private BasePresenter mBasePresenter;
 
@@ -90,7 +94,10 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
 
     protected void initToolbar() {
         if (mToolbar != null) {
-            mToolbar.setTitle(getDefaultTitle());
+            mToolbar.setTitle("");
+            if (mToolbarTitle != null) {
+                mToolbarTitle.setText(getDefaultTitle());
+            }
             setSupportActionBar(mToolbar);
             if (getSupportActionBar() != null) {
                 getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -108,6 +115,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
     protected String getDefaultTitle() {
         return null;
     }
+
 
     protected BasePresenter initPresenter() {
         return null;
@@ -148,4 +156,9 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
         mProgressDialog.dismissAllowingStateLoss();
     }
 
+    public void setToolbarTitle(CharSequence title) {
+        if (mToolbarTitle != null) {
+            mToolbarTitle.setText(title);
+        }
+    }
 }

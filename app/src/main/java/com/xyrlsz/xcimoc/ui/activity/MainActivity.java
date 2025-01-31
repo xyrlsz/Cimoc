@@ -36,6 +36,7 @@ import com.facebook.imagepipeline.common.ResizeOptions;
 import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.google.android.material.navigation.NavigationView;
+import com.king.app.updater.constant.Constants;
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.component.ThemeResponsive;
@@ -54,7 +55,6 @@ import com.xyrlsz.xcimoc.ui.view.MainView;
 import com.xyrlsz.xcimoc.utils.HintUtils;
 import com.xyrlsz.xcimoc.utils.PermissionUtils;
 import com.xyrlsz.xcimoc.utils.STConvertUtils;
-import com.king.app.updater.constant.Constants;
 
 import java.io.IOException;
 
@@ -95,12 +95,12 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
     private int mCheckItem;
     private SparseArray<BaseFragment> mFragmentArray;
     private BaseFragment mCurrentFragment;
+    private ComicFragment mComicFragment;
     private boolean night;
     private String versionName, content, mUrl, md5;
     private int versionCode;
     //auth0
 //    private Auth0 auth0;
-
     @Override
     protected BasePresenter initPresenter() {
         mPresenter = new MainPresenter();
@@ -299,7 +299,8 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
         if (mCurrentFragment == null) {
             switch (mCheckItem) {
                 case R.id.drawer_comic:
-                    mCurrentFragment = new ComicFragment();
+                    mComicFragment = new ComicFragment();
+                    mCurrentFragment = mComicFragment;
                     break;
                 case R.id.drawer_source:
                     mCurrentFragment = new SourceFragment();
@@ -352,12 +353,13 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
         if (itemId != mCheckItem) {
             switch (itemId) {
                 case R.id.drawer_comic:
+                    mToolbarTitle.setText(mComicFragment.getCurrTitle());
                 case R.id.drawer_source:
 //                case R.id.drawer_tag:
                     mCheckItem = itemId;
                     getSupportFragmentManager().beginTransaction().hide(mCurrentFragment).commit();
-                    if (mToolbar != null) {
-                        mToolbar.setTitle(item.getTitle().toString());
+                    if(itemId == R.id.drawer_source){
+                        mToolbarTitle.setText(item.getTitle().toString());
                     }
                     mDrawerLayout.closeDrawer(GravityCompat.START);
                     break;
@@ -371,7 +373,7 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
                     break;
                 case R.id.drawer_comicUpdate:
 //                    update.startUpdate(versionName, content, mUrl, versionCode, md5);
-                    new Thread(()->{
+                    new Thread(() -> {
                         boolean checkGithubOk = false;
                         try {
                             Request request = new Request.Builder().url(GITHUB_RELEASE_URL).build();
@@ -668,10 +670,14 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
         switch (home) {
             default:
             case PreferenceManager.HOME_FAVORITE:
+                return getString(R.string.comic_tab_favorite);
             case PreferenceManager.HOME_HISTORY:
+                return getString(R.string.comic_tab_history);
             case PreferenceManager.HOME_DOWNLOAD:
+                return getString(R.string.comic_tab_download);
             case PreferenceManager.HOME_LOCAL:
-                return getString(R.string.drawer_comic);
+//                return getString(R.string.drawer_comic);
+                return getString(R.string.comic_tab_local);
             case PreferenceManager.HOME_SOURCE:
                 return getString(R.string.drawer_source);
 //            case PreferenceManager.HOME_TAG:
