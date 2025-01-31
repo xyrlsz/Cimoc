@@ -1,12 +1,14 @@
 package com.xyrlsz.xcimoc.ui.fragment;
 
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import androidx.annotation.ColorRes;
+import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -88,22 +90,22 @@ public class ComicFragment extends BaseFragment implements ComicView {
         switch (home) {
             default:
             case PreferenceManager.HOME_FAVORITE:
-//                mViewPager.setCurrentItem(1);
+                mViewPager.setCurrentItem(1);
                 currTitle = getString(R.string.comic_tab_favorite);
                 mBottomNavigationView.setSelectedItemId(R.id.navigation_favorite);
                 break;
             case PreferenceManager.HOME_HISTORY:
-//                mViewPager.setCurrentItem(0);
+                mViewPager.setCurrentItem(0);
                 currTitle = getString(R.string.comic_tab_history);
                 mBottomNavigationView.setSelectedItemId(R.id.navigation_history);
                 break;
             case PreferenceManager.HOME_DOWNLOAD:
-//                mViewPager.setCurrentItem(2);
+                mViewPager.setCurrentItem(2);
                 currTitle = getString(R.string.comic_tab_download);
                 mBottomNavigationView.setSelectedItemId(R.id.navigation_download);
                 break;
             case PreferenceManager.HOME_LOCAL:
-//                mViewPager.setCurrentItem(3);
+                mViewPager.setCurrentItem(3);
                 currTitle = getString(R.string.comic_tab_local);
                 mBottomNavigationView.setSelectedItemId(R.id.navigation_local);
                 break;
@@ -219,6 +221,10 @@ public class ComicFragment extends BaseFragment implements ComicView {
         for (int i = 0; i < mTabAdapter.getCount(); ++i) {
             ((ThemeResponsive) mTabAdapter.getItem(i)).onThemeChange(primary, accent);
         }
+        ColorStateList stateList = new ColorStateList(new int[][]{{-android.R.attr.state_checked}, {android.R.attr.state_checked}},
+                new int[]{0x8A000000, ContextCompat.getColor(App.getAppContext(), accent)});
+        mBottomNavigationView.setItemTextColor(stateList);
+        mBottomNavigationView.setItemIconTintList(stateList);
     }
 
     @Override

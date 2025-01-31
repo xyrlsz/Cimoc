@@ -67,14 +67,11 @@ public class GridAdapter extends BaseAdapter<Object> {
             default:
                 MiniComic comic = (MiniComic) mDataSet.get(position);
                 GridHolder gridHolder = (GridHolder) holder;
-                gridHolder.rlItemGrid.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        int width = gridHolder.rlItemGrid.getWidth();
-                        ViewGroup.LayoutParams params = gridHolder.rlItemGrid.getLayoutParams();
-                        params.height = (int) (width * (4 / 3.0));
-                        gridHolder.rlItemGrid.setLayoutParams(params);
-                    }
+                gridHolder.rlItemGrid.getViewTreeObserver().addOnDrawListener(() -> {
+                    int width = gridHolder.rlItemGrid.getWidth();
+                    ViewGroup.LayoutParams params = gridHolder.rlItemGrid.getLayoutParams();
+                    params.height = (int) (width * (4 / 3.0));
+                    gridHolder.rlItemGrid.setLayoutParams(params);
                 });
                 gridHolder.comicTitle.setText(STConvertUtils.convert(comic.getTitle()));
                 gridHolder.comicSource.setText(mTitleGetter.getTitle(comic.getSource()));

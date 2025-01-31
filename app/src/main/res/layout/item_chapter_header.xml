@@ -17,7 +17,7 @@
             android:layout_width="100dp"
             android:layout_height="match_parent"
             android:layout_marginEnd="10dp"
-            fresco:actualImageScaleType="centerCrop" />
+            fresco:actualImageScaleType="fitCenter" />
 
         <TextView
             android:id="@+id/item_header_comic_title"
