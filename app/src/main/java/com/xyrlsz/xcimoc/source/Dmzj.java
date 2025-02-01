@@ -154,7 +154,7 @@ public class Dmzj extends MangaParser {
         String url = StringUtils.format("http://m.dmzj.com/view/%s.html", path);
         SharedPreferences sharedPreferences = App.getActivity().getSharedPreferences(Constants.DMZJ_SHARED, MODE_PRIVATE);
         String cookieStr = sharedPreferences.getString(DMZJ_SHARED_COOKIES, "");
-        if (cookieStr == "") {
+        if (cookieStr.isEmpty()) {
             App.getActivity().startActivity(new Intent(App.getAppContext(), SettingsActivity.class));
             App.getActivity().runOnUiThread(() -> {
                 Toast toast = Toast.makeText(App.getAppContext(), "请先登录动漫之家", Toast.LENGTH_SHORT);
