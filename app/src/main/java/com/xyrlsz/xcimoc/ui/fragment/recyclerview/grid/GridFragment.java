@@ -1,13 +1,15 @@
 package com.xyrlsz.xcimoc.ui.fragment.recyclerview.grid;
 
 import android.content.Intent;
+import android.view.View;
+
 import androidx.annotation.ColorRes;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import android.view.View;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.manager.SourceManager;
 import com.xyrlsz.xcimoc.model.Comic;
@@ -25,7 +27,6 @@ import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -69,7 +70,16 @@ public abstract class GridFragment extends RecyclerViewFragment implements GridV
 
     @Override
     protected RecyclerView.LayoutManager initLayoutManager() {
-        GridLayoutManager manager = new GridLayoutManager(getActivity(), 3);
+//        double rate = (double) App.mWidthPixels / App.mHeightPixels;
+//        int spanCount = 3;
+//        if (rate > 9.0 / 16) {
+//            spanCount = 4;
+//        }
+        int spanCount = 3;
+        if (App.mHeightPixels * 9 < App.mWidthPixels * 16) {
+            spanCount = 4;
+        }
+        GridLayoutManager manager = new GridLayoutManager(getActivity(), spanCount);
         manager.setRecycleChildrenOnDetach(true);
         return manager;
     }
@@ -89,7 +99,7 @@ public abstract class GridFragment extends RecyclerViewFragment implements GridV
 
     @Override
     public boolean onItemLongClick(View view, int position) {
-        mSavedId = ((MiniComic)mGridAdapter.getItem(position)).getId();
+        mSavedId = ((MiniComic) mGridAdapter.getItem(position)).getId();
         ItemDialogFragment fragment = ItemDialogFragment.newInstance(R.string.common_operation_select,
                 getOperationItems(), DIALOG_REQUEST_OPERATION);
         fragment.setTargetFragment(this, 0);
