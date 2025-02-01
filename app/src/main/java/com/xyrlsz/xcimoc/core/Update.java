@@ -208,6 +208,6 @@ public class Update {
     }
 
     public Context getContext() {
-        return App.getActivity();
+        return App.getAppContext();
     }
 }

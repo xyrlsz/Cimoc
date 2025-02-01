@@ -6,8 +6,10 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import androidx.annotation.ColorRes;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.ViewPager;
 
@@ -34,6 +36,7 @@ import com.xyrlsz.xcimoc.utils.HintUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.BindView;
 
@@ -49,7 +52,7 @@ public class ComicFragment extends BaseFragment implements ComicView {
     BottomNavigationView mBottomNavigationView;
     @BindView(R.id.comic_view_pager)
     ViewPager mViewPager;
-
+    TextView mToolbarTitle;
     private ComicPresenter mPresenter;
     private TabPagerAdapter mTabAdapter;
     private List<Tag> mTagList;
@@ -64,6 +67,7 @@ public class ComicFragment extends BaseFragment implements ComicView {
     @Override
     protected void initView() {
         setHasOptionsMenu(true);
+        mToolbarTitle = requireActivity().findViewById(R.id.toolbar_title);
         mTabAdapter = new TabPagerAdapter(requireActivity().getSupportFragmentManager(),
                 new GridFragment[]{new HistoryFragment(), new FavoriteFragment(), new DownloadFragment(), new LocalFragment()},
                 new String[]{getString(R.string.comic_tab_history), getString(R.string.comic_tab_favorite), getString(R.string.comic_tab_download), getString(R.string.comic_tab_local)});
@@ -118,22 +122,22 @@ public class ComicFragment extends BaseFragment implements ComicView {
                     case 0:
                         mBottomNavigationView.setSelectedItemId(R.id.navigation_history);
                         currTitle = getString(R.string.comic_tab_history);
-                        App.getBActivity().setToolbarTitle(currTitle);
+                        setToolbarTitle(currTitle);
                         break;
                     case 1:
                         mBottomNavigationView.setSelectedItemId(R.id.navigation_favorite);
                         currTitle = getString(R.string.comic_tab_favorite);
-                        App.getBActivity().setToolbarTitle(currTitle);
+                        setToolbarTitle(currTitle);
                         break;
                     case 2:
                         mBottomNavigationView.setSelectedItemId(R.id.navigation_download);
                         currTitle = getString(R.string.comic_tab_download);
-                        App.getBActivity().setToolbarTitle(currTitle);
+                        setToolbarTitle(currTitle);
                         break;
                     case 3:
                         mBottomNavigationView.setSelectedItemId(R.id.navigation_local);
                         currTitle = getString(R.string.comic_tab_local);
-                        App.getBActivity().setToolbarTitle(currTitle);
+                        setToolbarTitle(currTitle);
                         break;
                 }
             }
@@ -234,5 +238,11 @@ public class ComicFragment extends BaseFragment implements ComicView {
 
     public String getCurrTitle() {
         return currTitle;
+    }
+
+    private void setToolbarTitle(CharSequence title){
+        if(mToolbarTitle!=null){
+            mToolbarTitle.setText(title);
+        }
     }
 }

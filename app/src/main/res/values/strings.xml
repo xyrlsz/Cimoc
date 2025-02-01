@@ -359,6 +359,7 @@
     <string name="password">密码</string>
     <string name="register">注册</string>
     <string name="show_passwd">显示密码</string>
+    <string name="dmzj_should_login">请先登录动漫之家</string>
 
     <string name="settings_komiic" translatable="false">Komiic</string>
     <string name="settings_komiic_summary">未登录只能24小时内读取300张漫画内页图</string>

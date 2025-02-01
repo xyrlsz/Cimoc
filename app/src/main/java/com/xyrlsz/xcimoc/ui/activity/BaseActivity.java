@@ -157,9 +157,4 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
         mProgressDialog.dismissAllowingStateLoss();
     }
 
-    public void setToolbarTitle(CharSequence title) {
-        if (mToolbarTitle != null) {
-            mToolbarTitle.setText(title);
-        }
-    }
 }

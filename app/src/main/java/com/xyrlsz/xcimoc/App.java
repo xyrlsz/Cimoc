@@ -1,11 +1,12 @@
 package com.xyrlsz.xcimoc;
 
-import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.net.wifi.WifiManager;
 import android.os.Build;
-import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
@@ -25,7 +26,6 @@ import com.xyrlsz.xcimoc.misc.ActivityLifecycle;
 import com.xyrlsz.xcimoc.model.DaoMaster;
 import com.xyrlsz.xcimoc.model.DaoSession;
 import com.xyrlsz.xcimoc.saf.DocumentFile;
-import com.xyrlsz.xcimoc.ui.activity.BaseActivity;
 import com.xyrlsz.xcimoc.ui.adapter.GridAdapter;
 import com.xyrlsz.xcimoc.utils.DocumentUtils;
 import com.xyrlsz.xcimoc.utils.StringUtils;
@@ -60,8 +60,6 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
     private static PreferenceManager mPreferenceManager;
     private static WifiManager manager_wifi;
     private static App mApp;
-    private static Activity sActivity;
-    private static BaseActivity bActivity;
     // 默认Github源
     private static String UPDATE_CURRENT_URL = "https://api.github.com/repos/xyrlsz/Cimoc/releases/latest";
     private DocumentFile mDocumentFile;
@@ -71,6 +69,10 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
     private ActivityLifecycle mActivityLifecycle;
 
     public static Context getAppContext() {
+        return mApp.getApplicationContext();
+    }
+
+    public static App getApp() {
         return mApp;
     }
 
@@ -78,13 +80,6 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         return mApp.getResources();
     }
 
-    public static Activity getActivity() {
-        return sActivity;
-    }
-
-    public static BaseActivity getBActivity() {
-        return bActivity;
-    }
 
     public static WifiManager getManager_wifi() {
         return manager_wifi;
@@ -138,6 +133,16 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         return ssfFactory;
     }
 
+    public static void runOnMainThread(Runnable runnable) {
+        new Handler(Looper.getMainLooper()).post(runnable);
+    }
+
+    public static void goActivity(Class<?> cls) {
+        Intent intent = new Intent(mApp.getApplicationContext(), cls);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        mApp.startActivity(intent);
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -155,44 +160,43 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         manager_wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         //获取栈顶Activity以及当前App上下文
         mApp = this;
-        this.registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
-            @Override
-            public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-//                Log.d("ActivityLifecycle:",activity+"onActivityCreated");
-            }
-
-            @Override
-            public void onActivityStarted(Activity activity) {
-//                Log.d("ActivityLifecycle:",activity+"onActivityStarted");
-                sActivity = activity;
-                bActivity = (BaseActivity) activity;
-            }
-
-            @Override
-            public void onActivityResumed(Activity activity) {
-
-            }
-
-            @Override
-            public void onActivityPaused(Activity activity) {
-
-            }
-
-            @Override
-            public void onActivityStopped(Activity activity) {
-
-            }
-
-            @Override
-            public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-
-            }
-
-            @Override
-            public void onActivityDestroyed(Activity activity) {
-
-            }
-        });
+//        this.registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
+//            @Override
+//            public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+////                Log.d("ActivityLifecycle:",activity+"onActivityCreated");
+//            }
+//
+//            @Override
+//            public void onActivityStarted(Activity activity) {
+////                Log.d("ActivityLifecycle:",activity+"onActivityStarted");
+////
+//            }
+//
+//            @Override
+//            public void onActivityResumed(Activity activity) {
+//
+//            }
+//
+//            @Override
+//            public void onActivityPaused(Activity activity) {
+//
+//            }
+//
+//            @Override
+//            public void onActivityStopped(Activity activity) {
+//
+//            }
+//
+//            @Override
+//            public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
+//
+//            }
+//
+//            @Override
+//            public void onActivityDestroyed(Activity activity) {
+//
+//            }
+//        });
     }
 
     @Override

@@ -61,7 +61,7 @@ public class OkHttpNetworkFetcher extends
         try {
             mCancellationExecutor = okHttpClient.dispatcher().executorService();
         } catch (NullPointerException e) {
-            CustomToast.showToast(App.getActivity(), "网络连接失败，请检查网络！！", 2000);
+            CustomToast.showToast(App.getAppContext(), "网络连接失败，请检查网络！！", 2000);
         }
 
         mHeaders = headers;

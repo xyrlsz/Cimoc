@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.Constants;
+import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.model.Chapter;
 import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.ImageUrl;
@@ -152,14 +153,11 @@ public class Dmzj extends MangaParser {
     @Override
     public Request getImagesRequest(String cid, String path) {
         String url = StringUtils.format("http://m.dmzj.com/view/%s.html", path);
-        SharedPreferences sharedPreferences = App.getActivity().getSharedPreferences(Constants.DMZJ_SHARED, MODE_PRIVATE);
+        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.DMZJ_SHARED, MODE_PRIVATE);
         String cookieStr = sharedPreferences.getString(DMZJ_SHARED_COOKIES, "");
         if (cookieStr.isEmpty()) {
-            App.getActivity().startActivity(new Intent(App.getAppContext(), SettingsActivity.class));
-            App.getActivity().runOnUiThread(() -> {
-                Toast toast = Toast.makeText(App.getAppContext(), "请先登录动漫之家", Toast.LENGTH_SHORT);
-                toast.show();
-            });
+            App.goActivity(SettingsActivity.class);
+            App.runOnMainThread(() -> Toast.makeText(App.getAppContext(), App.getAppResources().getString(R.string.dmzj_should_login), Toast.LENGTH_SHORT).show());
         }
         return new Request.Builder().url(url).addHeader("Cookie", cookieStr).build();
     }
