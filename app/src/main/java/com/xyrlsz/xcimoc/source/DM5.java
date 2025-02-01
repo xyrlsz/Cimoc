@@ -180,7 +180,7 @@ public class DM5 extends MangaParser {
                 for (int i = 0; i != array.length; ++i) {
                     Long comicChapter = chapter.getId();
                     Long id = Long.parseLong(comicChapter + "0" + i);
-                    list.add(new ImageUrl(id, comicChapter, i + 1, array[i], false));
+                    list.add(new ImageUrl(id, comicChapter, i + 1, array[i], false, Headers.of("Referer", StringUtils.format("https://m.dm5.com/%s", chapter.getPath()))));
                 }
             } catch (Exception e) {
                 e.printStackTrace();
