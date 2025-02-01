@@ -1,7 +1,5 @@
 package com.xyrlsz.xcimoc.source;
 
-import android.os.Build;
-
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.model.Chapter;
 import com.xyrlsz.xcimoc.model.Comic;
@@ -109,9 +107,9 @@ public class DuManWu extends MangaParser {
             if (data.contains("作者")) {
                 author = new StringBuilder(data.replace("作者：", ""));
             } else if (data.contains("月") && data.contains("日")) {
-                    update = data;
-            }else{
-                author.append(data);
+                update = data;
+            } else if(!data.contains("同步")){
+                author.append(",").append(data);
             }
 
         }
