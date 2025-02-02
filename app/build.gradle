@@ -137,7 +137,7 @@ greendao {
 dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    // implementation fileTree("libs")
+    implementation fileTree("libs")
     implementation 'androidx.legacy:legacy-support-v13:1.0.0'
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
