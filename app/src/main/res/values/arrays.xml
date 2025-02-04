@@ -34,7 +34,7 @@
         <item>默认</item>
         <item>简体</item>
         <item>繁体</item>
-        <item>繁体（台湾词汇）</item>
+<!--        <item>繁体（台湾词汇）</item>-->
     </string-array>
     <string-array name="st_engine_items">
         <item>JCC</item>

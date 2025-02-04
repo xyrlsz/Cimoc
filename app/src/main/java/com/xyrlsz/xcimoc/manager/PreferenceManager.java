@@ -31,7 +31,7 @@ public class PreferenceManager {
     public static final int DETAIL_TEXT_DEFAULT = 0;
     public static final int DETAIL_TEXT_SIMPLE = 1;
     public static final int DETAIL_TEXT_TRADITIONAL = 2;
-    public static final int DETAIL_TEXT_TRADITIONAL_TW = 3;
+//    public static final int DETAIL_TEXT_TRADITIONAL_TW = 3;
 
     public static final int ST_JCC = 0;
     public static final int ST_OPENCC4J = 1;

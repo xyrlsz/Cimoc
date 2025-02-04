@@ -43,20 +43,20 @@ public class STConvertUtils {
                     e.printStackTrace();
                 }
                 break;
-            case PreferenceManager.DETAIL_TEXT_TRADITIONAL_TW:
-                try {
-                    switch (preferenceManager.getInt(PreferenceManager.PREF_ST_ENGINE, PreferenceManager.ST_JCC)) {
-                        case PreferenceManager.ST_JCC:
-                            return JChineseConvertor.getInstance().s2t(s);
-                        case PreferenceManager.ST_OPENCC4J:
-                            return ZhTwConverterUtil.toTraditional(s);
-                        case PreferenceManager.ST_OPENCCGO:
-                            return Xyropencc.s2TWP(s);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                break;
+//            case PreferenceManager.DETAIL_TEXT_TRADITIONAL_TW:
+//                try {
+//                    switch (preferenceManager.getInt(PreferenceManager.PREF_ST_ENGINE, PreferenceManager.ST_JCC)) {
+//                        case PreferenceManager.ST_JCC:
+//                            return JChineseConvertor.getInstance().s2t(s);
+//                        case PreferenceManager.ST_OPENCC4J:
+//                            return ZhTwConverterUtil.toTraditional(s);
+//                        case PreferenceManager.ST_OPENCCGO:
+//                            return Xyropencc.s2TWP(s);
+//                    }
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//                break;
             default:
                 break;
 
