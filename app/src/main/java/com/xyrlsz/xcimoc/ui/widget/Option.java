@@ -9,8 +9,6 @@ import android.widget.TextView;
 
 import com.xyrlsz.xcimoc.R;
 
-import butterknife.ButterKnife;
-
 /**
  * Created by Hiroshi on 2017/1/11.
  */

@@ -1,7 +1,6 @@
 package com.xyrlsz.xcimoc.utils;
 
 import com.github.houbb.opencc4j.util.ZhConverterUtil;
-import com.github.houbb.opencc4j.util.ZhTwConverterUtil;
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.manager.PreferenceManager;
 

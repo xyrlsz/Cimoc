@@ -15,8 +15,6 @@ import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.manager.PreferenceManager;
 
-import butterknife.ButterKnife;
-
 /**
  * Created by Hiroshi on 2017/1/10.
  */

@@ -11,11 +11,9 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.xyrlsz.xcimoc.R;
-import com.xyrlsz.xcimoc.manager.SourceManager;
 import com.xyrlsz.xcimoc.model.Source;
 import com.xyrlsz.xcimoc.presenter.BasePresenter;
 import com.xyrlsz.xcimoc.presenter.SourcePresenter;
-import com.xyrlsz.xcimoc.ui.activity.CategoryActivity;
 import com.xyrlsz.xcimoc.ui.activity.SearchActivity;
 import com.xyrlsz.xcimoc.ui.activity.SourceDetailActivity;
 import com.xyrlsz.xcimoc.ui.adapter.BaseAdapter;

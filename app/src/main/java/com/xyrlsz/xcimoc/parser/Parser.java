@@ -6,9 +6,7 @@ import com.xyrlsz.xcimoc.core.Manga;
 import com.xyrlsz.xcimoc.model.Chapter;
 import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.ImageUrl;
-import com.xyrlsz.xcimoc.source.DM5;
 //import com.xyrlsz.xcimoc.source.HHSSEE;
-import com.xyrlsz.xcimoc.source.IKanman;
 
 import org.json.JSONException;
 

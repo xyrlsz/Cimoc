@@ -3,12 +3,10 @@ package com.xyrlsz.xcimoc.parser;
 import android.net.Uri;
 
 import com.xyrlsz.xcimoc.core.Manga;
-import com.xyrlsz.xcimoc.manager.ComicManager;
 import com.xyrlsz.xcimoc.model.Chapter;
 import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.ImageUrl;
 import com.xyrlsz.xcimoc.model.Source;
-import com.xyrlsz.xcimoc.ui.activity.BackActivity;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import org.json.JSONException;

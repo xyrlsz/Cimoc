@@ -7,7 +7,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,7 +16,6 @@ import android.widget.TextView;
 import com.facebook.imagepipeline.core.ImagePipelineFactory;
 import com.google.common.collect.Lists;
 //import com.google.firebase.analytics.FirebaseAnalytics;
-import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.fresco.ControllerBuilderSupplierFactory;
 import com.xyrlsz.xcimoc.fresco.ImagePipelineFactoryBuilder;

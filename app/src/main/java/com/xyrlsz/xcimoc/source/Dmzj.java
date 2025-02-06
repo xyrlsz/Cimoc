@@ -3,7 +3,6 @@ package com.xyrlsz.xcimoc.source;
 import static android.content.Context.MODE_PRIVATE;
 import static com.xyrlsz.xcimoc.Constants.DMZJ_SHARED_COOKIES;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Pair;
 import android.widget.Toast;

@@ -1,20 +1,15 @@
 package com.xyrlsz.xcimoc.utils;
 
 import android.util.Base64;
-import android.util.Log;
 
 import org.mozilla.javascript.ClassShutter;
 import org.mozilla.javascript.Context;
-import org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.Scriptable;
 
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Array;
 import java.net.URLDecoder;
 import java.security.Key;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKeyFactory;

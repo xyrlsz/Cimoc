@@ -1,15 +1,8 @@
 package com.xyrlsz.xcimoc.presenter;
 
-import android.content.Context;
-import android.os.Bundle;
-
 //import com.google.firebase.analytics.FirebaseAnalytics;
-import com.xyrlsz.xcimoc.App;
-import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.core.Manga;
-import com.xyrlsz.xcimoc.global.Extra;
 import com.xyrlsz.xcimoc.manager.ComicManager;
-import com.xyrlsz.xcimoc.manager.PreferenceManager;
 import com.xyrlsz.xcimoc.manager.SourceManager;
 import com.xyrlsz.xcimoc.manager.TagRefManager;
 import com.xyrlsz.xcimoc.model.Comic;

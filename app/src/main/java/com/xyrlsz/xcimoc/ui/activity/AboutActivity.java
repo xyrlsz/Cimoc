@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.net.Uri;
 import androidx.appcompat.widget.AppCompatSpinner;
-import androidx.appcompat.widget.SwitchCompat;
+
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.TextView;

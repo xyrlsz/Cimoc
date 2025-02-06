@@ -4,12 +4,10 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import androidx.annotation.DrawableRes;
 import androidx.core.app.NotificationCompat;
 
-import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.R;
 
 /**

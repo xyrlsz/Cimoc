@@ -1,13 +1,9 @@
 package com.xyrlsz.xcimoc.manager;
 
-import android.util.Log;
-
 import com.xyrlsz.xcimoc.component.AppGetter;
 import com.xyrlsz.xcimoc.model.Chapter;
 import com.xyrlsz.xcimoc.model.ChapterDao;
 import com.xyrlsz.xcimoc.model.ChapterDao.Properties;
-import com.xyrlsz.xcimoc.model.Comic;
-import com.xyrlsz.xcimoc.model.ComicDao;
 
 import java.util.List;
 import java.util.concurrent.Callable;

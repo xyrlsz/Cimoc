@@ -5,7 +5,6 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 

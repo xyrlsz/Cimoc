@@ -1,10 +1,6 @@
 package com.xyrlsz.xcimoc.fresco.processor;
 
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Rect;
-import android.graphics.RectF;
-import android.util.Log;
 
 import com.facebook.cache.common.CacheKey;
 import com.facebook.cache.common.SimpleCacheKey;
@@ -15,8 +11,6 @@ import com.xyrlsz.xcimoc.model.ImageUrl;
 import com.xyrlsz.xcimoc.rx.RxBus;
 import com.xyrlsz.xcimoc.rx.RxEvent;
 import com.xyrlsz.xcimoc.utils.StringUtils;
-
-import java.util.Objects;
 
 /**
  * Created by Hiroshi on 2017/3/3.

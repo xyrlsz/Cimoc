@@ -2,7 +2,6 @@ package com.xyrlsz.xcimoc.presenter;
 
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.core.Update;
-import com.xyrlsz.xcimoc.core.UpdateJson;
 import com.xyrlsz.xcimoc.manager.ComicManager;
 import com.xyrlsz.xcimoc.manager.PreferenceManager;
 import com.xyrlsz.xcimoc.model.Comic;

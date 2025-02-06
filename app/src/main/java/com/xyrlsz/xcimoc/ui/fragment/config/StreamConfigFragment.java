@@ -12,7 +12,6 @@ import com.xyrlsz.xcimoc.manager.PreferenceManager;
 import com.xyrlsz.xcimoc.ui.activity.settings.EventSettingsActivity;
 import com.xyrlsz.xcimoc.ui.fragment.BaseFragment;
 import com.xyrlsz.xcimoc.ui.fragment.dialog.ChoiceDialogFragment;
-import com.xyrlsz.xcimoc.ui.fragment.dialog.ItemDialogFragment;
 import com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference;
 import com.xyrlsz.xcimoc.ui.widget.preference.ChoicePreference;
 

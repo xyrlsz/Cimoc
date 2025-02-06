@@ -2,7 +2,6 @@ package com.xyrlsz.xcimoc.source;
 
 import android.util.Base64;
 
-import com.google.common.collect.Lists;
 import com.xyrlsz.xcimoc.model.Chapter;
 import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.ImageUrl;

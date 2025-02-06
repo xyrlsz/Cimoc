@@ -25,7 +25,6 @@ import com.xyrlsz.xcimoc.ui.fragment.dialog.MultiDialogFragment;
 import com.xyrlsz.xcimoc.ui.view.PartFavoriteView;
 import com.xyrlsz.xcimoc.utils.HintUtils;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 

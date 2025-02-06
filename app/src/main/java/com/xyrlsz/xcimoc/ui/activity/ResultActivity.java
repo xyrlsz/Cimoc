@@ -5,17 +5,14 @@ import android.content.Intent;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.os.Bundle;
 import android.util.SparseArray;
 import android.view.View;
 import android.widget.FrameLayout;
 
 //import com.google.firebase.analytics.FirebaseAnalytics;
-import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.fresco.ControllerBuilderProvider;
 import com.xyrlsz.xcimoc.global.Extra;
-import com.xyrlsz.xcimoc.manager.PreferenceManager;
 import com.xyrlsz.xcimoc.manager.SourceManager;
 import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.presenter.BasePresenter;

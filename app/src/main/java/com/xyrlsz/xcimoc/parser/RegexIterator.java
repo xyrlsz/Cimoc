@@ -1,10 +1,7 @@
 package com.xyrlsz.xcimoc.parser;
 
 import com.xyrlsz.xcimoc.model.Comic;
-import com.xyrlsz.xcimoc.soup.Node;
 
-import java.util.List;
-import java.util.ListIterator;
 import java.util.regex.Matcher;
 
 /**
