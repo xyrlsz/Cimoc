@@ -26,6 +26,7 @@ import com.xyrlsz.xcimoc.misc.ActivityLifecycle;
 import com.xyrlsz.xcimoc.model.DaoMaster;
 import com.xyrlsz.xcimoc.model.DaoSession;
 import com.xyrlsz.xcimoc.saf.DocumentFile;
+import com.xyrlsz.xcimoc.ui.activity.MainActivity;
 import com.xyrlsz.xcimoc.ui.adapter.GridAdapter;
 import com.xyrlsz.xcimoc.utils.DocumentUtils;
 import com.xyrlsz.xcimoc.utils.StringUtils;
@@ -141,6 +142,14 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         Intent intent = new Intent(mApp.getApplicationContext(), cls);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         mApp.startActivity(intent);
+    }
+
+    public static void restartApp() {
+        Context context = getAppContext();
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        context.startActivity(intent);
+        System.exit(0);
     }
 
     @Override
@@ -289,14 +298,6 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
             return new X509Certificate[0];
         }
     }
-
-    // 2.实现HostnameVerifier接口
-    private static class TrustAllHostnameVerifier implements HostnameVerifier {
-        @Override
-        public boolean verify(String hostname, SSLSession session) {
-            return true;
-        }
-    }
 //
 //    private void initXCrash(){
 //        //异常捕捉框架,xcrash的native捕捉会导致系统死机，将之去掉不使用20200817
@@ -309,4 +310,12 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
 //        initParameters.setJavaDumpAllThreadsCountMax(25);
 //        XCrash.init(this, initParameters);
 //    }
+
+    // 2.实现HostnameVerifier接口
+    private static class TrustAllHostnameVerifier implements HostnameVerifier {
+        @Override
+        public boolean verify(String hostname, SSLSession session) {
+            return true;
+        }
+    }
 }

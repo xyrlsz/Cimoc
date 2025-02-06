@@ -2,15 +2,15 @@ package com.xyrlsz.xcimoc.ui.fragment;
 
 import android.graphics.PorterDuff;
 import android.os.Bundle;
-import androidx.annotation.LayoutRes;
-import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+
+import androidx.annotation.LayoutRes;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.R;
@@ -18,6 +18,7 @@ import com.xyrlsz.xcimoc.manager.PreferenceManager;
 import com.xyrlsz.xcimoc.presenter.BasePresenter;
 import com.xyrlsz.xcimoc.ui.activity.BaseActivity;
 import com.xyrlsz.xcimoc.ui.view.BaseView;
+import com.xyrlsz.xcimoc.utils.HintUtils;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
 
 import butterknife.BindView;
@@ -55,6 +56,8 @@ public abstract class BaseFragment extends Fragment implements BaseView {
         }
         super.onDestroyView();
         unbinder.unbind();
+        HintUtils.showToast(getContext(), R.string.fragment_destroy_tip);
+        App.restartApp();
     }
 
     @Override

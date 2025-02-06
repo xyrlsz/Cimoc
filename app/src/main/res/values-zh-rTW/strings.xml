@@ -340,4 +340,5 @@
     <string name="limit_over_tip">剩餘可讀取漫畫頁數不足</string>
     <string name="empty_account_limit">空賬號剩餘頁數</string>
     <string name="dmzj_should_login">請先登入動漫之家</string>
+    <string name="fragment_destroy_tip">當前介面已被銷燬</string>
 </resources>
