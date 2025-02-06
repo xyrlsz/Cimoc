@@ -2,8 +2,8 @@ name: Android CI (tag)
 
 on:
   push:
-    tags: [ "v*" ]  
-    branches: [ "main" ]
+    tags: ["v*"]
+    branches: ["main"]
 
 jobs:
   build:
@@ -17,8 +17,8 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: "17"
+          distribution: "zulu"
           cache: gradle
 
       - name: Get Git commit hash
@@ -35,7 +35,7 @@ jobs:
       - name: Set up Go environment
         uses: actions/setup-go@v5
         with:
-          go-version: '>=1.22'
+          go-version: ">=1.22"
 
       - name: Install gomobile
         run: |
@@ -63,13 +63,13 @@ jobs:
 
       - name: Create GitHub Release and Upload APK
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/v')  # Ensure this step runs only for tags
+        if: startsWith(github.ref, 'refs/tags/v') # Ensure this step runs only for tags
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
-        with: 
-          name: Release ${{ github.ref_name }}   
-          # body: "Release ${{ github.ref_name }}. Built from commit ${{ env.GIT_COMMIT_HASH }}."   
-          prerelease: false   
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: Release ${{ github.ref_name }}
+          # body: "Release ${{ github.ref_name }}. Built from commit ${{ env.GIT_COMMIT_HASH }}."
+          prerelease: false
           body_path: CHANGELOG.txt
           files: |
             app/build/outputs/apk/release/app-arm64-v8a-release.apk 
@@ -77,7 +77,7 @@ jobs:
             app/build/outputs/apk/release/app-universal-release.apk
             app/build/outputs/apk/release/app-x86_64-release.apk
             app/build/outputs/apk/release/app-x86-release.apk
-      
+
       - name: Create Gitee release
         run: |
           RELEASE_ID=$(curl -X POST --header 'Content-Type: application/json;charset=UTF-8' 'https://gitee.com/api/v5/repos/${{ env.GIT_REPO_OWNER }}/${{ env.GIT_REPO_NAME }}/releases' -d '{"access_token":"${{ secrets.GITEE_TOKEN }}","tag_name":"${{ github.ref_name }}","name":"Release ${{ github.ref_name }} ","body":"${{ github.ref_name }}. Built from commit ${{ env.GIT_COMMIT_HASH }}. \n https://github.com/${{ env.GIT_REPO_OWNER }}/${{ env.GIT_REPO_NAME }}/releases/tag/${{ github.ref_name }}","target_commitish":"main"}' | jq '.id')
@@ -89,4 +89,4 @@ jobs:
           echo "Release ID: ${{ env.GITEE_RELEASE_ID }}"
           curl -X POST "https://gitee.com/api/v5/repos/${{ env.GIT_REPO_OWNER }}/${{ env.GIT_REPO_NAME }}/releases/${{ env.GITEE_RELEASE_ID }}/attach_files" \
           -H "Authorization: Bearer ${{ secrets.GITEE_TOKEN }}" \
-          -F "file=@app/build/outputs/apk/release/app-universal-release.apk" 
+          -F "file=@app/build/outputs/apk/release/app-universal-release.apk"
