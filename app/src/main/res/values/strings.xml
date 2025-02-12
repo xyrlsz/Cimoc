@@ -212,7 +212,9 @@
     <string name="backup_save_tag">备份标签</string>
     <string name="backup_save_tag_summary">备份标签及相应漫画</string>
     <string name="backup_save_settings">备份设置</string>
+    <string name="backup_save_settings_cloud">备份设置到云端</string>
     <string name="backup_save_settings_summary">备份所有个人配置</string>
+    <string name="backup_save_settings_cloud_summary">备份所有个人配置</string>
     <string name="backup_save_success">备份成功 共 %d 条记录</string>
     <string name="backup_restore">恢复</string>
     <string name="backup_restore_not_found">没有找到备份文件</string>
@@ -221,16 +223,22 @@
     <string name="backup_restore_tag">恢复标签</string>
     <string name="backup_restore_tag_summary">恢复标签及相应漫画</string>
     <string name="backup_restore_settings">恢复设置</string>
+    <string name="backup_restore_settings_cloud">从云端恢复设置</string>
     <string name="backup_restore_settings_summary">恢复所有个人配置</string>
+    <string name="backup_restore_settings_cloud_summary">从云端恢复所有个人配置</string>
     <string name="backup_cloud">云端</string>
+    <string name="backup_cloud_webdav_tag">WebDav配置</string>
+    <string name="backup_cloud_webdav_tag_summary">点击配置WebDav</string>
     <string name="backup_cloud_restore_tag">从云端恢复</string>
-    <string name="backup_cloud_restore_tag_summary">从云端恢复收藏的漫画</string>
+    <string name="backup_cloud_restore_tag_summary">从云端恢复收藏与历史的漫画</string>
     <string name="backup_cloud_clear_tag">清除云端数据</string>
-    <string name="backup_cloud_clear_tag_summary">清除云端同步的漫画数据</string>
+    <string name="backup_cloud_clear_tag_summary">清除云端同步的数据</string>
     <string name="backup_cloud_backup_tag">备份到云端</string>
-    <string name="backup_cloud_backup_tag_summary">备份收藏漫画到云端</string>
+    <string name="backup_cloud_backup_tag_summary">备份收藏与历史漫画到云端</string>
     <string name="backup_cloud_sync_tag">自动同步</string>
     <string name="backup_cloud_sync_tag_summary">自动同步收藏到云</string>
+    <string name="backup_cloud_upload_tag">本地备份上传</string>
+    <string name="backup_cloud_upload_tag_summary">本地漫画备份文件上传到云端</string>
     <string name="backup_clear">清除</string>
     <string name="backup_clear_record">清除备份记录</string>
     <string name="backup_clear_record_summary">清除收藏、历史、个人配置的所有备份记录</string>
@@ -265,6 +273,7 @@
     <string name="dialog_confirm">操作确认</string>
     <string name="dialog_positive">确定</string>
     <string name="dialog_negative">取消</string>
+    <string name="dialog_delete">删除</string>
     <string name="dialog_close">关闭</string>
     <string name="dialog_doing">正在执行中</string>
     <string name="app_dialog_update">升级</string>
@@ -319,6 +328,9 @@
     <string name="common_execute_fail">操作失败</string>
     <string name="common_operation_select">操作选择</string>
     <string name="common_null">null</string>
+    <string name="common_uploud_success">上传成功</string>
+    <string name="common_uploud_fail">上传失败</string>
+
     <string name="about_version">作者 xyrlsz</string>
     <string name="detail_disqus">评论</string>
 
@@ -368,4 +380,8 @@
     <string name="empty_account_limit">空账号剩余页数：</string>
 
     <string name="fragment_destroy_tip">当前界面已被销毁</string>
+
+    <string name="webdav_url" translatable="false">WebDav Url</string>
+    <string name="webdav" translatable="false">WebDav</string>
+    <string name="commit">确定</string>
 </resources>

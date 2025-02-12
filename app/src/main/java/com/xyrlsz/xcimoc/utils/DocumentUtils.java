@@ -1,14 +1,17 @@
 package com.xyrlsz.xcimoc.utils;
 
 import android.content.ContentResolver;
+import android.net.Uri;
 
 import com.xyrlsz.xcimoc.saf.DocumentFile;
+import com.xyrlsz.xcimoc.saf.WebDavDocumentFile;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.Closeable;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -92,7 +95,13 @@ public class DocumentUtils {
         InputStream input = null;
         BufferedReader reader = null;
         try {
-            input = resolver.openInputStream(file.getUri());
+            Uri fileData = file.getUri();
+            if (UriUtils.isHttpOrHttps(fileData)) {
+                input = new WebDavDocumentFile(null).getInputStream(fileData.toString());
+            } else {
+                input = resolver.openInputStream(fileData);
+            }
+
             if (input != null) {
                 reader = new BufferedReader(new InputStreamReader(input));
                 return reader.readLine();
@@ -109,7 +118,13 @@ public class DocumentUtils {
         InputStream input = null;
         BufferedReader reader = null;
         try {
-            input = resolver.openInputStream(file.getUri());
+            Uri fileData = file.getUri();
+            if (UriUtils.isHttpOrHttps(fileData)) {
+                input = new WebDavDocumentFile(null).getInputStream(fileData.toString());
+            } else {
+                input = resolver.openInputStream(fileData);
+            }
+
             if (input != null) {
                 reader = new BufferedReader(new InputStreamReader(input));
                 char[] buffer = new char[count];
@@ -128,12 +143,21 @@ public class DocumentUtils {
     public static void writeStringToFile(ContentResolver resolver, DocumentFile file, String data) throws IOException {
         OutputStream output = null;
         BufferedWriter writer = null;
+        File tmp = null;
         try {
-            output = resolver.openOutputStream(file.getUri());
+            Uri fileData = file.getUri();
+            if (UriUtils.isHttpOrHttps(fileData)) {
+                tmp = File.createTempFile(System.currentTimeMillis() + "", "tmp");
+                fileData = Uri.fromFile(tmp);
+            }
+            output = resolver.openOutputStream(fileData);
             if (output != null) {
                 writer = new BufferedWriter(new OutputStreamWriter(output));
                 writer.write(data);
                 writer.flush();
+                if (tmp != null) {
+                    new WebDavDocumentFile(null).UploadFile(tmp, file.getUri().toString());
+                }
             } else {
                 throw new IOException();
             }
@@ -145,10 +169,14 @@ public class DocumentUtils {
     public static void writeBinaryToFile(ContentResolver resolver, DocumentFile file, InputStream input) throws IOException {
         BufferedInputStream inputStream = null;
         BufferedOutputStream outputStream = null;
-
+        boolean isHttp = UriUtils.isHttpOrHttps(file.getUri());
+        if (isHttp) {
+            new WebDavDocumentFile(null).UploadStreamFile(input, file.getUri().toString());
+            return;
+        }
         try {
-            OutputStream output = resolver.openOutputStream(file.getUri());
-
+            Uri fileData = file.getUri();
+            OutputStream output = resolver.openOutputStream(fileData);
             if (output != null) {
                 inputStream = new BufferedInputStream(input, 8192);
                 outputStream = new BufferedOutputStream(output, 8192);
@@ -159,6 +187,7 @@ public class DocumentUtils {
                     outputStream.write(buffer, 0, length);
                 }
                 output.flush();
+
             } else {
                 closeStream(input);
                 throw new FileNotFoundException();

@@ -136,6 +136,7 @@ public class PreferenceManager {
     public static final String PREF_DOWNLOAD_THREAD = "pref_download_thread";
 
     public static final String PREF_BACKUP_SAVE_COMIC = "pref_backup_save_favorite";
+    public static final String PREF_BACKUP_SAVE_COMIC_CLOUD = "pref_backup_save_favorite_cloud";
     public static final String PREF_BACKUP_SAVE_COMIC_COUNT = "pref_backup_save_favorite_count";
 
     public static final String PREF_SEARCH_AUTO_COMPLETE = "pref_search_auto_complete";
@@ -146,17 +147,14 @@ public class PreferenceManager {
     public static final String PREFERENCES_USER_NAME = "user_name";
     public static final String PREFERENCES_USER_EMAIL = "user_email";
     public static final String PREFERENCES_USER_ID = "user_id";
-    private static final String PREFERENCES_NAME = "cimoc_preferences";
-
     public static final String PREFERENCES_MH50_KEY_MSG = "preferences_mh50_key_msg";
     public static final String PREFERENCES_MH50_IV_MSG = "preferences_mh50_iv_msg";
-
     public static final String PREF_HHAAZZ_BASEURL = "pref_hhaazz_baseurl";
     public static final String PREF_HHAAZZ_SW = "pref_hhaazz_sw";
-
     public static final String PREF_DETAIL_TEXT_ST = "pref_detail_text_st";
-    public static final String PREF_ST_ENGINE= "pref_st_engine";
-    private SharedPreferences mSharedPreferences;
+    public static final String PREF_ST_ENGINE = "pref_st_engine";
+    private static final String PREFERENCES_NAME = "cimoc_preferences";
+    private final SharedPreferences mSharedPreferences;
 
     public PreferenceManager(Context context) {
         mSharedPreferences = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
@@ -203,10 +201,15 @@ public class PreferenceManager {
     }
 
     public void putObject(String key, Object value) {
-        if (value instanceof Boolean) mSharedPreferences.edit().putBoolean(key, (Boolean) value).apply();
-        else if (value instanceof Float)  mSharedPreferences.edit().putFloat(key, (Float) value).apply();
-        else if (value instanceof Integer) mSharedPreferences.edit().putInt(key, (Integer) value).apply();
-        else if (value instanceof Long)  mSharedPreferences.edit().putLong(key, (Long) value).apply();
-        else if (value instanceof String)  mSharedPreferences.edit().putString(key, ((String) value)).apply();
+        if (value instanceof Boolean)
+            mSharedPreferences.edit().putBoolean(key, (Boolean) value).apply();
+        else if (value instanceof Float)
+            mSharedPreferences.edit().putFloat(key, (Float) value).apply();
+        else if (value instanceof Integer)
+            mSharedPreferences.edit().putInt(key, (Integer) value).apply();
+        else if (value instanceof Long)
+            mSharedPreferences.edit().putLong(key, (Long) value).apply();
+        else if (value instanceof String)
+            mSharedPreferences.edit().putString(key, ((String) value)).apply();
     }
 }

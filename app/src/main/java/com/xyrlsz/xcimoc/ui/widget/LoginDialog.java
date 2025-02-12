@@ -49,6 +49,7 @@ public class LoginDialog extends Dialog {
                     if (loginListener != null) {
                         loginListener.onLogin(usernameEditText.getText().toString(), passwordEditText.getText().toString());
                     }
+                    dismiss();
                 }
         );
 
@@ -58,6 +59,7 @@ public class LoginDialog extends Dialog {
             if (registerListener != null) {
                 registerListener.onRegister();
             }
+            dismiss();
 
         });
     }

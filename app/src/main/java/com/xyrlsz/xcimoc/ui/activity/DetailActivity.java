@@ -1,21 +1,22 @@
 package com.xyrlsz.xcimoc.ui.activity;
 
+import static com.xyrlsz.xcimoc.utils.interpretationUtils.isReverseOrder;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import androidx.appcompat.app.AlertDialog;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.facebook.imagepipeline.core.ImagePipelineFactory;
 import com.google.common.collect.Lists;
-//import com.google.firebase.analytics.FirebaseAnalytics;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.fresco.ControllerBuilderSupplierFactory;
 import com.xyrlsz.xcimoc.fresco.ImagePipelineFactoryBuilder;
@@ -27,6 +28,7 @@ import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.Task;
 import com.xyrlsz.xcimoc.presenter.BasePresenter;
 import com.xyrlsz.xcimoc.presenter.DetailPresenter;
+import com.xyrlsz.xcimoc.saf.DocumentFile;
 import com.xyrlsz.xcimoc.service.DownloadService;
 import com.xyrlsz.xcimoc.ui.adapter.BaseAdapter;
 import com.xyrlsz.xcimoc.ui.adapter.DetailAdapter;
@@ -41,8 +43,6 @@ import java.util.Set;
 
 import butterknife.OnClick;
 
-import static com.xyrlsz.xcimoc.utils.interpretationUtils.isReverseOrder;
-
 /**
  * Created by Hiroshi on 2016/7/2.
  */
@@ -55,6 +55,7 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
     private ImagePipelineFactory mImagePipelineFactory;
 
     private boolean mAutoBackup;
+    private boolean mAutoBackupCloud;
     private int mBackupCount;
 
     public static Intent createIntent(Context context, Long id, int source, String cid) {
@@ -88,6 +89,7 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
     @Override
     protected void initData() {
         mAutoBackup = mPreference.getBoolean(PreferenceManager.PREF_BACKUP_SAVE_COMIC, true);
+        mAutoBackupCloud = mPreference.getBoolean(PreferenceManager.PREF_BACKUP_SAVE_COMIC_CLOUD, true);
         mBackupCount = mPreference.getInt(PreferenceManager.PREF_BACKUP_SAVE_COMIC_COUNT, 0);
         long id = getIntent().getLongExtra(Extra.EXTRA_ID, -1);
         int source = getIntent().getIntExtra(Extra.EXTRA_SOURCE, -1);
@@ -101,6 +103,9 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
     protected void onPause() {
         super.onPause();
         if (mAutoBackup) {
+            mPreference.putInt(PreferenceManager.PREF_BACKUP_SAVE_COMIC_COUNT, mBackupCount);
+        }
+        if (mAutoBackupCloud) {
             mPreference.putInt(PreferenceManager.PREF_BACKUP_SAVE_COMIC_COUNT, mBackupCount);
         }
     }
@@ -361,9 +366,9 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
     @Override
     public void onPreLoadSuccess(List<Chapter> list, Comic comic) {
         hideProgressBar();
-        if (isReverseOrder(comic)){
+        if (isReverseOrder(comic)) {
             mDetailAdapter.addAll(Lists.reverse(list));
-        }else {
+        } else {
             mDetailAdapter.addAll(list);
         }
         mDetailAdapter.setInfo(comic.getCover(), comic.getTitle(), comic.getAuthor(),
@@ -402,7 +407,12 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
         if (mAutoBackup && ++mBackupCount == 10) {
             mBackupCount = 0;
             mPreference.putInt(PreferenceManager.PREF_BACKUP_SAVE_COMIC_COUNT, 0);
-            mPresenter.backup();
+            mPresenter.backup(getAppInstance().getDocumentFile());
+        }
+        if (mAutoBackupCloud && ++mBackupCount == 10) {
+            mBackupCount = 0;
+            mPreference.putInt(PreferenceManager.PREF_BACKUP_SAVE_COMIC_COUNT, 0);
+            mPresenter.backup(DocumentFile.fromWebDav());
         }
     }
 

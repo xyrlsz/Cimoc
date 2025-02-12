@@ -1,5 +1,7 @@
 package com.xyrlsz.xcimoc.ui.fragment.dialog;
 
+import static com.xyrlsz.xcimoc.ui.activity.BackupActivity.DIALOG_REQUEST_RESTORE_DELETE;
+
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -35,6 +37,15 @@ public class ChoiceDialogFragment extends DialogFragment implements DialogInterf
         int choice = getArguments().getInt(DialogCaller.EXTRA_DIALOG_CHOICE_ITEMS);
         builder.setTitle(getArguments().getInt(DialogCaller.EXTRA_DIALOG_TITLE))
                 .setSingleChoiceItems(mItems, choice, null)
+                .setNegativeButton(R.string.dialog_delete, (dialogInterface, which) -> {
+                    int index = ((AlertDialog) dialogInterface).getListView().getCheckedItemPosition();
+                    String value = index == -1 ? null : mItems[index];
+                    Bundle bundle = new Bundle();
+                    bundle.putInt(DialogCaller.EXTRA_DIALOG_RESULT_INDEX, index);
+                    bundle.putString(DialogCaller.EXTRA_DIALOG_RESULT_VALUE, value);
+                    DialogCaller target = (DialogCaller) (getTargetFragment() != null ? getTargetFragment() : getActivity());
+                    target.onDialogResult(DIALOG_REQUEST_RESTORE_DELETE, bundle);
+                })
                 .setPositiveButton(R.string.dialog_positive, this);
         return builder.create();
     }

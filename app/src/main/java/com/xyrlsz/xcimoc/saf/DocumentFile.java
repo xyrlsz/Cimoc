@@ -28,6 +28,10 @@ public abstract class DocumentFile {
         return new RawDocumentFile(null, file);
     }
 
+    public static DocumentFile fromWebDav() {
+        return new WebDavDocumentFile(null);
+    }
+
     public static DocumentFile fromTreeUri(Context context, Uri treeUri) {
         if (Build.VERSION.SDK_INT >= 21) {
             Uri documentUri = DocumentsContract.buildDocumentUriUsingTree(treeUri,

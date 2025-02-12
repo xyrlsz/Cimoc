@@ -19,4 +19,10 @@ public final class Constants {
     public static final String KOMIIC_SHARED_COOKIES = "cookies";
     public static final String KOMIIC_SHARED_USERNAME = "username";
     public static final String KOMIIC_SHARED_EXPIRED = "expired";
+
+    public static final String WEBDAV_SHARED = "webdav";
+    public static final String WEBDAV_SHARED_URL = "url";
+    public static final String WEBDAV_SHARED_USERNAME = "username";
+    public static final String WEBDAV_SHARED_PASSWORD = "password";
+
 }

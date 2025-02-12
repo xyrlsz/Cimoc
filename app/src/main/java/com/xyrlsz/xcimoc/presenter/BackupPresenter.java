@@ -1,5 +1,7 @@
 package com.xyrlsz.xcimoc.presenter;
 
+import static com.xyrlsz.xcimoc.utils.WebDavUtils.upload2WebDav;
+
 import android.content.ContentResolver;
 import android.util.Pair;
 
@@ -14,6 +16,8 @@ import com.xyrlsz.xcimoc.model.Tag;
 import com.xyrlsz.xcimoc.model.TagRef;
 import com.xyrlsz.xcimoc.rx.RxBus;
 import com.xyrlsz.xcimoc.rx.RxEvent;
+import com.xyrlsz.xcimoc.saf.DocumentFile;
+import com.xyrlsz.xcimoc.saf.WebDavDocumentFile;
 import com.xyrlsz.xcimoc.ui.view.BackupView;
 
 import java.util.ArrayList;
@@ -47,8 +51,8 @@ public class BackupPresenter extends BasePresenter<BackupView> {
         mContentResolver = mBaseView.getAppInstance().getContentResolver();
     }
 
-    public void loadComicFile() {
-        mCompositeSubscription.add(Backup.loadFavorite(mBaseView.getAppInstance().getDocumentFile())
+    public void loadComicFile(DocumentFile root) {
+        mCompositeSubscription.add(Backup.loadFavorite(root)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<String[]>() {
                     @Override
@@ -63,8 +67,8 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                 }));
     }
 
-    public void loadTagFile() {
-        mCompositeSubscription.add(Backup.loadTag(mBaseView.getAppInstance().getDocumentFile())
+    public void loadTagFile(DocumentFile root) {
+        mCompositeSubscription.add(Backup.loadTag(root)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<String[]>() {
                     @Override
@@ -79,8 +83,8 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                 }));
     }
 
-    public void loadSettingsFile() {
-        mCompositeSubscription.add(Backup.loadSettings(mBaseView.getAppInstance().getDocumentFile())
+    public void loadSettingsFile(DocumentFile root) {
+        mCompositeSubscription.add(Backup.loadSettings(root)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<String[]>() {
                     @Override
@@ -95,8 +99,8 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                 }));
     }
 
-    public void loadClearBackupFile() {
-        mCompositeSubscription.add(Backup.loadClearBackup(mBaseView.getAppInstance().getDocumentFile())
+    public void loadClearBackupFile(DocumentFile root) {
+        mCompositeSubscription.add(Backup.loadClearBackup(root)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<String[]>() {
                     @Override
@@ -111,12 +115,12 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                 }));
     }
 
-    public void saveComic() {
+    public void saveComic(DocumentFile root) {
         mCompositeSubscription.add(mComicManager.listFavoriteOrHistoryInRx()
                 .map(new Func1<List<Comic>, Integer>() {
                     @Override
                     public Integer call(List<Comic> list) {
-                        return Backup.saveComic(mContentResolver, mBaseView.getAppInstance().getDocumentFile(), list);
+                        return Backup.saveComic(mContentResolver, root, list);
                     }
                 })
                 .observeOn(AndroidSchedulers.mainThread())
@@ -137,15 +141,15 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                 }));
     }
 
-    public void saveTag() {
+    public void saveTag(DocumentFile root) {
         mCompositeSubscription.add(Observable.create(new Observable.OnSubscribe<Integer>() {
-            @Override
-            public void call(Subscriber<? super Integer> subscriber) {
-                int size = groupAndSaveComicByTag();
-                subscriber.onNext(size);
-                subscriber.onCompleted();
-            }
-        }).subscribeOn(Schedulers.io())
+                    @Override
+                    public void call(Subscriber<? super Integer> subscriber) {
+                        int size = groupAndSaveComicByTag(root);
+                        subscriber.onNext(size);
+                        subscriber.onCompleted();
+                    }
+                }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Integer>() {
                     @Override
@@ -164,16 +168,16 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                 }));
     }
 
-    public void saveSettings() {
+    public void saveSettings(DocumentFile root) {
         mCompositeSubscription.add(Observable.create(new Observable.OnSubscribe<Integer>() {
-            @Override
-            public void call(Subscriber<? super Integer> subscriber) {
+                    @Override
+                    public void call(Subscriber<? super Integer> subscriber) {
 //                boolean isBackuped = SharePrefUtils.copyFiles(context.getFilesDir().getPath() + context.getPackageName() + "/shared_prefs", );
-                int size = Backup.saveSetting(mContentResolver, mBaseView.getAppInstance().getDocumentFile(), App.getPreferenceManager().getAll());
-                subscriber.onNext(size);
-                subscriber.onCompleted();
-            }
-        }).subscribeOn(Schedulers.io())
+                        int size = Backup.saveSetting(mContentResolver, root, App.getPreferenceManager().getAll());
+                        subscriber.onNext(size);
+                        subscriber.onCompleted();
+                    }
+                }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Integer>() {
                     @Override
@@ -192,8 +196,8 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                 }));
     }
 
-    public void restoreComic(String filename) {
-        mCompositeSubscription.add(Backup.restoreComic(mContentResolver, mBaseView.getAppInstance().getDocumentFile(), filename)
+    public void restoreComic(String filename, DocumentFile root) {
+        mCompositeSubscription.add(Backup.restoreComic(mContentResolver, root, filename)
                 .doOnNext(new Action1<List<Comic>>() {
                     @Override
                     public void call(List<Comic> list) {
@@ -215,8 +219,8 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                 }));
     }
 
-    public void restoreTag(String filename) {
-        mCompositeSubscription.add(Backup.restoreTag(mContentResolver, mBaseView.getAppInstance().getDocumentFile(), filename)
+    public void restoreTag(String filename, DocumentFile root) {
+        mCompositeSubscription.add(Backup.restoreTag(mContentResolver, root, filename)
                 .doOnNext(new Action1<List<Pair<Tag, List<Comic>>>>() {
                     @Override
                     public void call(List<Pair<Tag, List<Comic>>> list) {
@@ -237,8 +241,8 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                 }));
     }
 
-    public void restoreSetting(String filename) {
-        mCompositeSubscription.add(Backup.restoreSetting(mContentResolver, mBaseView.getAppInstance().getDocumentFile(), filename)
+    public void restoreSetting(String filename, DocumentFile root) {
+        mCompositeSubscription.add(Backup.restoreSetting(mContentResolver, root, filename)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Map<String, ?>>() {
                     @Override
@@ -253,8 +257,8 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                 }));
     }
 
-    public void clearBackup() {
-        mCompositeSubscription.add(Backup.clearBackup(mBaseView.getAppInstance().getDocumentFile())
+    public void clearBackup(DocumentFile root) {
+        mCompositeSubscription.add(Backup.clearBackup(root)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Integer>() {
                     @Override
@@ -265,6 +269,38 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                     @Override
                     public void call(Throwable throwable) {
                         mBaseView.onClearBackupFail();
+                    }
+                }));
+    }
+
+    public void deleteBackup(String filename, DocumentFile root) {
+        mCompositeSubscription.add(Backup.deleteBackup(root, filename)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Integer>() {
+                    @Override
+                    public void call(Integer pair) {
+                        mBaseView.onClearBackupSuccess();
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        mBaseView.onClearBackupFail();
+                    }
+                }));
+    }
+
+    public void uploadBackup2Cloud(DocumentFile src, WebDavDocumentFile dst) {
+        mCompositeSubscription.add(upload2WebDav(src, dst, true)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Integer>() {
+                    @Override
+                    public void call(Integer pair) {
+                        mBaseView.onUploadSuccess();
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        mBaseView.onUploadFail();
                     }
                 }));
     }
@@ -310,7 +346,7 @@ public class BackupPresenter extends BasePresenter<BackupView> {
         RxBus.getInstance().post(new RxEvent(RxEvent.EVENT_TAG_RESTORE, tags));
     }
 
-    private int groupAndSaveComicByTag() {
+    private int groupAndSaveComicByTag(DocumentFile file) {
         final List<Pair<Tag, List<Comic>>> list = new LinkedList<>();
         mComicManager.runInTx(new Runnable() {
             @Override
@@ -325,7 +361,7 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                 }
             }
         });
-        return Backup.saveTag(mContentResolver, mBaseView.getAppInstance().getDocumentFile(), list);
+        return Backup.saveTag(mContentResolver, file, list);
     }
 
     private void filterAndPostComic(final List<Comic> list) {
@@ -359,10 +395,11 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                                 }
                                 history.add(comic);
                             }
-                            mComicManager.update(temp);
+//                            mComicManager.update(temp);
                         }
                         // TODO 可能要设置其他域
                         comic.setId(temp.getId());
+                        mComicManager.update(comic);
                     }
                 }
             }

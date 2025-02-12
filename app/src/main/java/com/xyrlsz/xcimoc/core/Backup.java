@@ -10,6 +10,7 @@ import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.Tag;
 import com.xyrlsz.xcimoc.saf.DocumentFile;
+import com.xyrlsz.xcimoc.saf.WebDavDocumentFile;
 import com.xyrlsz.xcimoc.utils.DocumentUtils;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
@@ -17,6 +18,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,7 +33,7 @@ import rx.schedulers.Schedulers;
  */
 public class Backup {
 
-    private static final String BACKUP = "backup";
+    public static final String BACKUP = "backup";
 
     // before 1.4.3
     private static final String SUFFIX_CIMOC = "cimoc";
@@ -273,7 +275,20 @@ public class Backup {
             }
         }).subscribeOn(Schedulers.io());
     }
-
+    public static Observable<Integer> deleteBackup(final DocumentFile root, final String filename) {
+        return Observable.create(new Observable.OnSubscribe<Integer>() {
+            @Override
+            public void call(Subscriber<? super Integer> subscriber) {
+                DocumentFile dir = DocumentUtils.getOrCreateSubDirectory(root, BACKUP);
+                if(dir!=null){
+                    DocumentFile file = dir.findFile(filename);
+                    if(file!=null) file.delete();
+                }
+                subscriber.onNext(1);
+                subscriber.onCompleted();
+            }
+        }).subscribeOn(Schedulers.io());
+    }
     public static Observable<Integer> clearBackup(final DocumentFile root) {
         return Observable.create(new Observable.OnSubscribe<Integer>() {
             @Override

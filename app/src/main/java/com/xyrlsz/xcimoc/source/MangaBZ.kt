@@ -162,7 +162,10 @@ class MangaBZ(source: Source?) : MangaParser() {
     }
 
     override fun getHeader(): Headers {
-        return Headers.of("Referer", "http://www.mangabz.com/")
+//        return Headers.of("Referer", "http://www.mangabz.com/")
+        return Headers.Builder()
+            .add("Referer", "http://www.mangabz.com/")
+            .build()
     }
 
     companion object {

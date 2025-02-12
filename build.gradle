@@ -29,6 +29,7 @@ allprojects {
         google()
         maven { url "https://mirrors.huaweicloud.com/repository/maven/" }
         maven { url 'https://developer.huawei.com/repo/' }
+        maven { url 'https://jitpack.io' }
     }
 }
 

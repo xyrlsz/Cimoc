@@ -30,4 +30,7 @@ public interface BackupView extends BaseView, DialogCaller {
 
     void onClearBackupFail();
 
+    void onUploadSuccess();
+
+    void onUploadFail();
 }
