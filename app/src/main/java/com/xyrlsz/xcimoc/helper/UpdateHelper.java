@@ -84,7 +84,7 @@ public class UpdateHelper {
             initSource(session);
             manager.putInt(PreferenceManager.PREF_APP_VERSION, VERSION);
             new UpdateHelper().updateComicSource(session);
-            if (version < 963) {
+            if (version < 963 && version != 0) {
                 updateChapterTable(session);
             }
         }
