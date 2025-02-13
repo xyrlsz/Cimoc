@@ -28,6 +28,7 @@
                 android:textSize="54sp" />
 
             <TextView
+                android:visibility="gone"
                 android:id="@+id/about_version_byname"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -61,7 +62,6 @@
 
                 <LinearLayout
 	                android:focusable="true"
-	                android:visibility="gone"
                     android:id="@+id/home_page_btn"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -115,7 +115,7 @@
 
                 <LinearLayout
 	                android:focusable="true"
-	                android:visibility="gone"
+                    android:visibility="gone"
                     android:id="@+id/about_resource_btn"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -160,14 +160,15 @@
 
                     <TextView
                         android:id="@+id/tv_resource_ori_url"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:paddingTop="2dp"
                         android:text="@string/about_resource_ori_url"
                         android:textSize="14sp" />
+
                     <TextView
                         android:id="@+id/tv_resource_ori_url_1"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:paddingTop="2dp"
                         android:text="@string/about_resource_ori_url_1"
