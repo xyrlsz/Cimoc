@@ -381,7 +381,7 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                             favorite.add(comic);
                         }
                     } else {
-                        if (temp.getFavorite() == null || temp.getHistory() == null) {
+                       // if (temp.getFavorite() == null || temp.getHistory() == null) {
                             if (temp.getFavorite() == null && comic.getFavorite() != null) {
                                 temp.setFavorite(comic.getFavorite());
                                 favorite.add(comic);
@@ -396,10 +396,9 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                                 history.add(comic);
                             }
                             mComicManager.update(temp);
-                        }
+                      //  }
                         // TODO 可能要设置其他域
                         comic.setId(temp.getId());
-                        mComicManager.update(temp);
                     }
                 }
             }
