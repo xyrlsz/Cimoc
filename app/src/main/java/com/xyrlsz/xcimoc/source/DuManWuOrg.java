@@ -43,11 +43,15 @@ public class DuManWuOrg extends MangaParser {
     @Override
     public Request getSearchRequest(String keyword, int page) throws UnsupportedEncodingException {
         String url;
-        if (page <= 1) {
-            url = baseUrl + "/index.php/search?key=" + keyword;
-        } else {
-            url = StringUtils.format("%s/search/%s/%d", baseUrl, keyword, page);
+//        if (page <= 1) {
+//            url = baseUrl + "/index.php/search?key=" + keyword;
+//        } else {
+//            url = StringUtils.format("%s/search/%s/%d", baseUrl, keyword, page);
+//        }
+        if(page != 1){
+            return  null;
         }
+        url = baseUrl + "/index.php/search?key=" + keyword;
         return new Request.Builder().url(url).build();
     }
 

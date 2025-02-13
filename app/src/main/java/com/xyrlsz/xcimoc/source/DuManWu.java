@@ -49,10 +49,13 @@ public class DuManWu extends MangaParser {
 
     @Override
     public Request getSearchRequest(String keyword, int page) throws UnsupportedEncodingException {
-        String url = baseUrl + "/s";
-        int index = Math.min(keyword.length(), 12);
-        RequestBody body = RequestBody.create(MediaType.parse("application/x-www-form-urlencoded; charset=UTF-8"), "k=" + URLEncoder.encode(keyword.substring(0, index), "utf-8"));
-        return new Request.Builder().url(url).post(body).build();
+        if(page == 1){
+            String url = baseUrl + "/s";
+            int index = Math.min(keyword.length(), 12);
+            RequestBody body = RequestBody.create(MediaType.parse("application/x-www-form-urlencoded; charset=UTF-8"), "k=" + URLEncoder.encode(keyword.substring(0, index), "utf-8"));
+            return new Request.Builder().url(url).post(body).build();
+        }
+        return null;
     }
 
     @Override

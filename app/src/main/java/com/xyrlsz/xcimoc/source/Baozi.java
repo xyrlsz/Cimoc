@@ -43,7 +43,7 @@ public class Baozi extends MangaParser {
 
     @Override
     public Request getSearchRequest(String keyword, int page) throws UnsupportedEncodingException {
-//        if (page != 1) return null;
+        if (page != 1) return null;
         String url = baseUrl + "/search?q=" + keyword;
         return new Request.Builder().url(url).build();
     }

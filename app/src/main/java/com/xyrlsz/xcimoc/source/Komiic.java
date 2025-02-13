@@ -61,17 +61,20 @@ public class Komiic extends MangaParser {
 
     @Override
     public Request getSearchRequest(String keyword, int page) {
-        String url = StringUtils.format("%s/api/query", baseUrl);
-        String jsonBody = "{"
-                + "\"operationName\":\"searchComicAndAuthorQuery\","
-                + "\"variables\":{\"keyword\":\""
-                + keyword
-                + "\"},"
-                + "\"query\":\"query searchComicAndAuthorQuery($keyword: String!) {\\n  searchComicsAndAuthors(keyword: $keyword) {\\n    comics {\\n      id\\n      title\\n      status\\n      year\\n      imageUrl\\n      authors {\\n        id\\n        name\\n        __typename\\n      }\\n      categories {\\n        id\\n        name\\n        __typename\\n      }\\n      dateUpdated\\n      monthViews\\n      views\\n      favoriteCount\\n      lastBookUpdate\\n      lastChapterUpdate\\n      __typename\\n    }\\n    authors {\\n      id\\n      name\\n      chName\\n      enName\\n      wikiLink\\n      comicCount\\n      views\\n      __typename\\n    }\\n    __typename\\n  }\\n}\""
-                + "}";
-        RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonBody);
+        if (page == 1) {
+            String url = StringUtils.format("%s/api/query", baseUrl);
+            String jsonBody = "{"
+                    + "\"operationName\":\"searchComicAndAuthorQuery\","
+                    + "\"variables\":{\"keyword\":\""
+                    + keyword
+                    + "\"},"
+                    + "\"query\":\"query searchComicAndAuthorQuery($keyword: String!) {\\n  searchComicsAndAuthors(keyword: $keyword) {\\n    comics {\\n      id\\n      title\\n      status\\n      year\\n      imageUrl\\n      authors {\\n        id\\n        name\\n        __typename\\n      }\\n      categories {\\n        id\\n        name\\n        __typename\\n      }\\n      dateUpdated\\n      monthViews\\n      views\\n      favoriteCount\\n      lastBookUpdate\\n      lastChapterUpdate\\n      __typename\\n    }\\n    authors {\\n      id\\n      name\\n      chName\\n      enName\\n      wikiLink\\n      comicCount\\n      views\\n      __typename\\n    }\\n    __typename\\n  }\\n}\""
+                    + "}";
+            RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonBody);
 
-        return new Request.Builder().url(url).post(requestBody).build();
+            return new Request.Builder().url(url).post(requestBody).build();
+        }
+        return null;
     }
 
     @Override
@@ -235,7 +238,7 @@ public class Komiic extends MangaParser {
             _cookies = "";
         }
         if (KomiicUtils.checkEmptyAccountIsOverImgLimit() && _cookies.isEmpty()) {
-           App.runOnMainThread(()-> Toast.makeText(App.getAppContext(), R.string.limit_over_tip, Toast.LENGTH_SHORT).show());
+            App.runOnMainThread(() -> Toast.makeText(App.getAppContext(), R.string.limit_over_tip, Toast.LENGTH_SHORT).show());
         }
         for (int i = 1; i <= images.length(); i++) {
             Long comicChapter = chapter.getId();
