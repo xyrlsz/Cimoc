@@ -381,22 +381,22 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                             favorite.add(comic);
                         }
                     } else {
-                       // if (temp.getFavorite() == null || temp.getHistory() == null) {
+                       if (temp.getFavorite() == null || temp.getHistory() == null) {
                             if (temp.getFavorite() == null && comic.getFavorite() != null) {
                                 temp.setFavorite(comic.getFavorite());
                                 favorite.add(comic);
                             }
                             if (temp.getHistory() == null && comic.getHistory() != null) {
                                 temp.setHistory(comic.getHistory());
-                                // if (temp.getLast() != comic.getLast()) {
+                                if (temp.getLast() != comic.getLast()) {
                                     temp.setLast(comic.getLast());
                                     temp.setPage(comic.getPage());
                                     temp.setChapter(comic.getChapter());
-                               //  }
+                                 }
                                 history.add(comic);
                             }
                             mComicManager.update(temp);
-                      //  }
+                        }
                         // TODO 可能要设置其他域
                         comic.setId(temp.getId());
                     }
