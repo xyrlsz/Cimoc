@@ -388,11 +388,11 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                             }
                             if (temp.getHistory() == null && comic.getHistory() != null) {
                                 temp.setHistory(comic.getHistory());
-                                if (temp.getLast() != comic.getLast()) {
+                                // if (temp.getLast() != comic.getLast()) {
                                     temp.setLast(comic.getLast());
                                     temp.setPage(comic.getPage());
                                     temp.setChapter(comic.getChapter());
-                               }
+                               //  }
                                 history.add(comic);
                             }
                             mComicManager.update(temp);
