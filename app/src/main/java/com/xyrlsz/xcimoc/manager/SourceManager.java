@@ -14,8 +14,7 @@ import com.xyrlsz.xcimoc.source.Cartoonmad;
 import com.xyrlsz.xcimoc.source.CopyMH;
 import com.xyrlsz.xcimoc.source.DM5;
 import com.xyrlsz.xcimoc.source.Dmzj;
-//import com.xyrlsz.xcimoc.source.Dmzjv2;
-//import com.xyrlsz.xcimoc.source.Dmzjv3;
+import com.xyrlsz.xcimoc.source.DongManManHua;
 import com.xyrlsz.xcimoc.source.DuManWu;
 import com.xyrlsz.xcimoc.source.DuManWuOrg;
 import com.xyrlsz.xcimoc.source.GuFeng;
@@ -25,14 +24,12 @@ import com.xyrlsz.xcimoc.source.Komiic;
 import com.xyrlsz.xcimoc.source.Locality;
 import com.xyrlsz.xcimoc.source.MYCOMIC;
 import com.xyrlsz.xcimoc.source.MangaBZ;
-//import com.xyrlsz.xcimoc.source.MangaNel;
 import com.xyrlsz.xcimoc.source.Mangakakalot;
 import com.xyrlsz.xcimoc.source.Manhuatai;
+import com.xyrlsz.xcimoc.source.Manhuayu;
 import com.xyrlsz.xcimoc.source.MiGu;
 import com.xyrlsz.xcimoc.source.Null;
 import com.xyrlsz.xcimoc.source.Tencent;
-//import com.xyrlsz.xcimoc.source.Webtoon;
-import com.xyrlsz.xcimoc.source.DongManManHua;
 import com.xyrlsz.xcimoc.source.YKMH;
 
 import java.util.List;
@@ -261,6 +258,9 @@ public class SourceManager {
                     break;
                 case Komiic.TYPE:
                     parser = new Komiic(source);
+                    break;
+                case Manhuayu.TYPE:
+                    parser = new Manhuayu(source);
                     break;
                 default:
                     parser = new Null();
