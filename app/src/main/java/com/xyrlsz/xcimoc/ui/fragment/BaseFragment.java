@@ -18,7 +18,6 @@ import com.xyrlsz.xcimoc.manager.PreferenceManager;
 import com.xyrlsz.xcimoc.presenter.BasePresenter;
 import com.xyrlsz.xcimoc.ui.activity.BaseActivity;
 import com.xyrlsz.xcimoc.ui.view.BaseView;
-import com.xyrlsz.xcimoc.utils.HintUtils;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
 
 import butterknife.BindView;
@@ -56,8 +55,6 @@ public abstract class BaseFragment extends Fragment implements BaseView {
         }
         super.onDestroyView();
         unbinder.unbind();
-        HintUtils.showToast(getContext(), R.string.fragment_destroy_tip);
-        App.restartApp();
     }
 
     @Override

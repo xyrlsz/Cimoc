@@ -166,4 +166,11 @@ public abstract class GridFragment extends RecyclerViewFragment implements GridV
     protected int getLayoutRes() {
         return R.layout.fragment_grid;
     }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        HintUtils.showToast(getContext(), R.string.fragment_destroy_tip);
+        App.restartApp();
+    }
 }
