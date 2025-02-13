@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import okhttp3.Headers;
 import okhttp3.Request;
 
 /**
@@ -51,7 +52,7 @@ public class Manhuayu extends MangaParser {
     @Override
     public SearchIterator getSearchIterator(String html, int page) throws JSONException {
         Node body = new Node(html);
-        List<Node> resList = body.list(".main-content > .media");
+        List<Node> resList = body.list("div.media");
         if (resList.isEmpty()) {
             return null;
         }
@@ -131,5 +132,13 @@ public class Manhuayu extends MangaParser {
     @Override
     public String getUrl(String cid) {
         return baseUrl + "/" + cid;
+    }
+
+    @Override
+    public Headers getHeader() {
+        return new Headers.Builder()
+                .add("referer", baseUrl + "/")
+                .add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0")
+                .build();
     }
 }
