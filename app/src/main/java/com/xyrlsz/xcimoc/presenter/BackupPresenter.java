@@ -395,11 +395,11 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                                 }
                                 history.add(comic);
                             }
-//                            mComicManager.update(temp);
+                            mComicManager.update(temp);
                         }
                         // TODO 可能要设置其他域
                         comic.setId(temp.getId());
-                        mComicManager.update(comic);
+                        // mComicManager.update(temp);
                     }
                 }
             }
