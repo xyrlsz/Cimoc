@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import rx.Observable;
 import rx.Subscriber;
@@ -395,6 +396,13 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                                 }
                                 history.add(comic);
                             }
+                            mComicManager.update(temp);
+                        } else if (!Objects.equals(temp.getHistory(), comic.getHistory())) {
+                            temp.setHistory(comic.getHistory());
+                            temp.setLast(comic.getLast());
+                            temp.setPage(comic.getPage());
+                            temp.setChapter(comic.getChapter());
+
                             mComicManager.update(temp);
                         }
                         // TODO 可能要设置其他域
