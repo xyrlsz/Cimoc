@@ -43,7 +43,9 @@ public class YKMH extends MangaParser {
     @Override
     public Request getSearchRequest(String keyword, int page) throws UnsupportedEncodingException {
         Log.d("SourceSearch:", String.valueOf(keyword));
-
+        if (page != 1) {
+            return null;
+        }
         return new Request.Builder().url(mHost + "search/?keywords=" + keyword + "&page=" + page).addHeader("referer", "https://m.ykmh.com/search").addHeader("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36")
                 .build();
     }
@@ -100,8 +102,7 @@ public class YKMH extends MangaParser {
         String author = info.getParent("p.txtItme > span.icon01").text();
         String intro = body.getParent("p#full-des #showmore-des").text();
         String isFinish = info.getParent("p.txtItme > span.icon01").text();
-        boolean finish = false;
-        if (isFinish.contains("完结")) finish = true;
+        boolean finish = isFinish.contains("完结");
         comic.setInfo(title, cover, update, intro, author, finish);
 
 
@@ -139,7 +140,7 @@ public class YKMH extends MangaParser {
     public Request getImagesRequest(String cid, String path) {
         Log.d("SourceImage:", String.valueOf(path));
 
-        return new Request.Builder().url(mHost+path).addHeader("referer", "https://m.ykmh.com/search").addHeader("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36")
+        return new Request.Builder().url(mHost + path).addHeader("referer", "https://m.ykmh.com/search").addHeader("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36")
                 .build();
     }
 
