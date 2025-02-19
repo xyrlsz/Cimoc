@@ -1,15 +1,12 @@
 package com.xyrlsz.xcimoc.saf;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.webkit.MimeTypeMap;
 
 import com.thegrizzlylabs.sardineandroid.DavResource;
 import com.thegrizzlylabs.sardineandroid.Sardine;
 import com.thegrizzlylabs.sardineandroid.impl.OkHttpSardine;
-import com.xyrlsz.xcimoc.App;
-import com.xyrlsz.xcimoc.Constants;
+import com.xyrlsz.xcimoc.core.WebDavConf;
 import com.xyrlsz.xcimoc.utils.BinStreamUtils;
 
 import java.io.BufferedInputStream;
@@ -25,18 +22,15 @@ import java.util.List;
 
 public class WebDavDocumentFile extends DocumentFile {
     private final Sardine mSardine;
-    private final String mUsername;
-    private final String mPassword;
-    private final String mWebDavUrl;
+    private final String mUsername = WebDavConf.username;
+    private final String mPassword = WebDavConf.password;
+    private final String mWebDavUrl = WebDavConf.url + "/cimoc";
     private final String mCurrentPath;
     private DavResource mDavResource;
 
     public WebDavDocumentFile(DocumentFile parent) {
         super(parent);
-        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.WEBDAV_SHARED, Context.MODE_PRIVATE);
-        mUsername = sharedPreferences.getString(Constants.WEBDAV_SHARED_USERNAME, "");
-        mPassword = sharedPreferences.getString(Constants.WEBDAV_SHARED_PASSWORD, "");
-        mWebDavUrl = sharedPreferences.getString(Constants.WEBDAV_SHARED_URL, "") + "/cimoc";
+
         mSardine = new OkHttpSardine();
         mSardine.setCredentials(mUsername, mPassword);
         mCurrentPath = mWebDavUrl;
@@ -58,10 +52,7 @@ public class WebDavDocumentFile extends DocumentFile {
 
     WebDavDocumentFile(DocumentFile parent, String path, DavResource resource) {
         super(parent);
-        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.WEBDAV_SHARED, Context.MODE_PRIVATE);
-        mUsername = sharedPreferences.getString(Constants.WEBDAV_SHARED_USERNAME, "");
-        mPassword = sharedPreferences.getString(Constants.WEBDAV_SHARED_PASSWORD, "");
-        mWebDavUrl = sharedPreferences.getString(Constants.WEBDAV_SHARED_URL, "") + "/cimoc";
+
         mSardine = new OkHttpSardine();
         mSardine.setCredentials(mUsername, mPassword);
         new Thread(() -> {
@@ -80,10 +71,7 @@ public class WebDavDocumentFile extends DocumentFile {
 
     public WebDavDocumentFile(WebDavDocumentFile parent, String path) {
         super(parent);
-        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.WEBDAV_SHARED, Context.MODE_PRIVATE);
-        mUsername = sharedPreferences.getString(Constants.WEBDAV_SHARED_USERNAME, "");
-        mPassword = sharedPreferences.getString(Constants.WEBDAV_SHARED_PASSWORD, "");
-        mWebDavUrl = sharedPreferences.getString(Constants.WEBDAV_SHARED_URL, "") + "/cimoc";
+
         mSardine = new OkHttpSardine();
         mSardine.setCredentials(mUsername, mPassword);
         if (path.startsWith("/")) {

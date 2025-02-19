@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.xyrlsz.xcimoc.component.AppGetter;
 import com.xyrlsz.xcimoc.core.Storage;
+import com.xyrlsz.xcimoc.core.WebDavConf;
 import com.xyrlsz.xcimoc.fresco.ControllerBuilderProvider;
 import com.xyrlsz.xcimoc.helper.DBOpenHelper;
 import com.xyrlsz.xcimoc.helper.UpdateHelper;
@@ -169,6 +170,7 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         manager_wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         //获取栈顶Activity以及当前App上下文
         mApp = this;
+        WebDavConf.init(getAppContext());
 //        this.registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
 //            @Override
 //            public void onActivityCreated(Activity activity, Bundle savedInstanceState) {

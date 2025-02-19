@@ -13,6 +13,7 @@ import android.widget.ImageButton;
 
 import com.xyrlsz.xcimoc.Constants;
 import com.xyrlsz.xcimoc.R;
+import com.xyrlsz.xcimoc.core.WebDavConf;
 
 public class WebDavConfDialog extends Dialog {
     private EditText urlEditText;
@@ -63,6 +64,7 @@ public class WebDavConfDialog extends Dialog {
                     } else {
                         callBack.onSuccess();
                     }
+                    WebDavConf.update(context);
                     dismiss();
                 }
         );
