@@ -25,17 +25,13 @@ public class WebDavConfDialog extends Dialog {
 
     private SharedPreferences sharedPreferences;
 
-    public WebDavConfDialog(Context context) {
-        super(context);
-        init(context);
-    }
 
-    public WebDavConfDialog(Context context, int themeResId) {
+    public WebDavConfDialog(Context context, int themeResId, SubmitCallBack callBack) {
         super(context, themeResId);
-        init(context);
+        init(context, callBack);
     }
 
-    private void init(Context context) {
+    private void init(Context context, SubmitCallBack callBack) {
         sharedPreferences = context.getSharedPreferences(Constants.WEBDAV_SHARED, MODE_PRIVATE);
         this.setContentView(R.layout.webdav_config_layout);
         // Find views by ID
@@ -55,10 +51,18 @@ public class WebDavConfDialog extends Dialog {
                     if (webDavUrl.endsWith("/")) {
                         webDavUrl = webDavUrl.substring(0, webDavUrl.length() - 1);
                     }
+                    String username = usernameEditText.getText().toString();
+                    String password = passwordEditText.getText().toString();
+
                     editor.putString(Constants.WEBDAV_SHARED_URL, webDavUrl);
-                    editor.putString(Constants.WEBDAV_SHARED_USERNAME, usernameEditText.getText().toString());
-                    editor.putString(Constants.WEBDAV_SHARED_PASSWORD, passwordEditText.getText().toString());
+                    editor.putString(Constants.WEBDAV_SHARED_USERNAME, username);
+                    editor.putString(Constants.WEBDAV_SHARED_PASSWORD, password);
                     editor.apply();
+                    if (webDavUrl.isEmpty() || username.isEmpty() || password.isEmpty()) {
+                        callBack.onFailed();
+                    } else {
+                        callBack.onSuccess();
+                    }
                     dismiss();
                 }
         );
@@ -81,5 +85,10 @@ public class WebDavConfDialog extends Dialog {
         passwordEditText.setSelection(passwordEditText.getText().length());
     }
 
+    public interface SubmitCallBack {
+        void onSuccess();
+
+        void onFailed();
+    }
 
 }

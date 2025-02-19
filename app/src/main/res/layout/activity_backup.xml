@@ -45,54 +45,62 @@
                         app:title="@string/backup_cloud_webdav_tag"
                         app:summary="@string/backup_cloud_webdav_tag_summary"/>
 
-                    <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
-                        android:id="@+id/backup_cloud_sync"
+                    <LinearLayout
+                        android:id="@+id/webdav_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:summary="@string/backup_cloud_sync_tag_summary"
-                        app:title="@string/backup_cloud_sync_tag" />
+                        android:orientation="vertical"
+                        android:visibility="gone">
+                        <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
+                            android:id="@+id/backup_cloud_sync"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:summary="@string/backup_cloud_sync_tag_summary"
+                            app:title="@string/backup_cloud_sync_tag" />
 
-                    <com.xyrlsz.xcimoc.ui.widget.Option
-                        android:id="@+id/backup_cloud_backup"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:summary="@string/backup_cloud_backup_tag_summary"
-                        app:title="@string/backup_cloud_backup_tag" />
+                        <com.xyrlsz.xcimoc.ui.widget.Option
+                            android:id="@+id/backup_cloud_backup"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:summary="@string/backup_cloud_backup_tag_summary"
+                            app:title="@string/backup_cloud_backup_tag" />
 
-                    <com.xyrlsz.xcimoc.ui.widget.Option
-                        android:id="@+id/backup_cloud_restore"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:summary="@string/backup_cloud_restore_tag_summary"
-                        app:title="@string/backup_cloud_restore_tag" />
+                        <com.xyrlsz.xcimoc.ui.widget.Option
+                            android:id="@+id/backup_cloud_restore"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:summary="@string/backup_cloud_restore_tag_summary"
+                            app:title="@string/backup_cloud_restore_tag" />
 
-                    <com.xyrlsz.xcimoc.ui.widget.Option
-                        android:id="@+id/backup_save_settings_cloud"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:title="@string/backup_save_settings_cloud"
-                        app:summary="@string/backup_save_settings_cloud_summary"/>
+                        <com.xyrlsz.xcimoc.ui.widget.Option
+                            android:id="@+id/backup_save_settings_cloud"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:title="@string/backup_save_settings_cloud"
+                            app:summary="@string/backup_save_settings_cloud_summary"/>
 
-                    <com.xyrlsz.xcimoc.ui.widget.Option
-                        android:id="@+id/backup_restore_settings_cloud"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:title="@string/backup_restore_settings_cloud"
-                        app:summary="@string/backup_restore_settings_cloud_summary"/>
+                        <com.xyrlsz.xcimoc.ui.widget.Option
+                            android:id="@+id/backup_restore_settings_cloud"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:title="@string/backup_restore_settings_cloud"
+                            app:summary="@string/backup_restore_settings_cloud_summary"/>
 
-                    <com.xyrlsz.xcimoc.ui.widget.Option
-                        android:id="@+id/backup_cloud_upload"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:summary="@string/backup_cloud_upload_tag_summary"
-                        app:title="@string/backup_cloud_upload_tag" />
+                        <com.xyrlsz.xcimoc.ui.widget.Option
+                            android:id="@+id/backup_cloud_upload"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:summary="@string/backup_cloud_upload_tag_summary"
+                            app:title="@string/backup_cloud_upload_tag" />
 
-                    <com.xyrlsz.xcimoc.ui.widget.Option
-                        android:id="@+id/backup_cloud_clear"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:summary="@string/backup_cloud_clear_tag_summary"
-                        app:title="@string/backup_cloud_clear_tag" />
+                        <com.xyrlsz.xcimoc.ui.widget.Option
+                            android:id="@+id/backup_cloud_clear"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:summary="@string/backup_cloud_clear_tag_summary"
+                            app:title="@string/backup_cloud_clear_tag" />
+
+                    </LinearLayout>
 
                     <TextView
                         android:layout_width="match_parent"

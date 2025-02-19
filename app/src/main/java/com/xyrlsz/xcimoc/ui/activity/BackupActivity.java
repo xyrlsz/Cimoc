@@ -2,9 +2,12 @@ package com.xyrlsz.xcimoc.ui.activity;
 
 import static com.xyrlsz.xcimoc.core.Backup.BACKUP;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.LinearLayout;
 
+import com.xyrlsz.xcimoc.Constants;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.manager.PreferenceManager;
 import com.xyrlsz.xcimoc.presenter.BackupPresenter;
@@ -43,6 +46,8 @@ public class BackupActivity extends BackActivity implements BackupView {
     CheckBoxPreference mSaveComicAuto;
     @BindView(R.id.backup_cloud_sync)
     CheckBoxPreference mSaveComicCloudAuto;
+    @BindView(R.id.webdav_layout)
+    LinearLayout mWebDavLayout;
     private BackupPresenter mPresenter;
 
     @Override
@@ -57,6 +62,16 @@ public class BackupActivity extends BackActivity implements BackupView {
         super.initView();
         mSaveComicAuto.bindPreference(PreferenceManager.PREF_BACKUP_SAVE_COMIC, true);
         mSaveComicCloudAuto.bindPreference(PreferenceManager.PREF_BACKUP_SAVE_COMIC_CLOUD, true);
+        SharedPreferences sharedPreferences = getSharedPreferences(Constants.WEBDAV_SHARED, MODE_PRIVATE);
+        String webdavUrl = sharedPreferences.getString(Constants.WEBDAV_SHARED_URL, "");
+        String webdavUsername = sharedPreferences.getString(Constants.WEBDAV_SHARED_USERNAME, "");
+        String webdavPassword = sharedPreferences.getString(Constants.WEBDAV_SHARED_PASSWORD, "");
+        if (webdavUrl.isEmpty() || webdavUsername.isEmpty() || webdavPassword.isEmpty()) {
+            mWebDavLayout.setVisibility(View.GONE);
+        } else {
+            mWebDavLayout.setVisibility(View.VISIBLE);
+        }
+
     }
 
     @OnClick(R.id.backup_save_comic)
@@ -137,7 +152,17 @@ public class BackupActivity extends BackActivity implements BackupView {
     @OnClick(R.id.backup_cloud_config)
     void onWebDavConfClick() {
         int theme = mPreference.getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_PINK);
-        WebDavConfDialog dialog = new WebDavConfDialog(this, ThemeUtils.getDialogThemeById(theme));
+        WebDavConfDialog dialog = new WebDavConfDialog(this, ThemeUtils.getDialogThemeById(theme), new WebDavConfDialog.SubmitCallBack() {
+            @Override
+            public void onSuccess() {
+                mWebDavLayout.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onFailed() {
+                mWebDavLayout.setVisibility(View.GONE);
+            }
+        });
         dialog.show();
     }
 
