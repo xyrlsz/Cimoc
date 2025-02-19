@@ -30,11 +30,11 @@ import butterknife.OnClick;
 
 public class BackupActivity extends BackActivity implements BackupView {
 
+    public static final int DIALOG_REQUEST_RESTORE_DELETE = 4;
     private static final int DIALOG_REQUEST_RESTORE_COMIC = 0;
     private static final int DIALOG_REQUEST_RESTORE_TAG = 1;
     private static final int DIALOG_REQUEST_RESTORE_SETTINGS = 2;
     private static final int DIALOG_REQUEST_RESTORE_CLEAR = 3;
-    public static final int DIALOG_REQUEST_RESTORE_DELETE = 4;
     DocumentFile mDocumentFile;
 
     @BindView(R.id.backup_layout)
@@ -168,7 +168,7 @@ public class BackupActivity extends BackActivity implements BackupView {
         showProgressDialog();
         mDocumentFile = DocumentFile.fromWebDav();
         DocumentFile localDocumentFiles = DocumentUtils.getOrCreateSubDirectory(getAppInstance().getDocumentFile(), BACKUP);
-        mPresenter.uploadBackup2Cloud(localDocumentFiles, new WebDavDocumentFile((WebDavDocumentFile) mDocumentFile,BACKUP));
+        mPresenter.uploadBackup2Cloud(localDocumentFiles, new WebDavDocumentFile((WebDavDocumentFile) mDocumentFile, BACKUP));
     }
 
     @OnClick(R.id.backup_save_settings_cloud)
@@ -229,7 +229,7 @@ public class BackupActivity extends BackActivity implements BackupView {
 
     private void showChoiceDialog(int title, String[] item, int request) {
         hideProgressDialog();
-        ChoiceDialogFragment fragment = ChoiceDialogFragment.newInstance(title, item, -1, request);
+        ChoiceDialogFragment fragment = ChoiceDialogFragment.newInstanceWithDelete(title, item, -1, request);
         fragment.show(getSupportFragmentManager(), null);
     }
 
