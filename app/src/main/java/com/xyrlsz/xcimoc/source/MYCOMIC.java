@@ -47,6 +47,9 @@ public class MYCOMIC extends MangaParser {
 
     @Override
     public Request getSearchRequest(String keyword, int page) throws UnsupportedEncodingException {
+        if (page != 1) {
+            return null;
+        }
         String url = baseUrl + "/comics?q=" + keyword + "&page=" + page;
         return new Request.Builder().url(url).build();
     }
