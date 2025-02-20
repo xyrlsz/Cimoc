@@ -175,7 +175,7 @@ public class Komiic extends MangaParser {
 
         JSONObject data = new JSONObject(html).getJSONObject("data");
         JSONArray chapters = data.getJSONArray("chaptersByComicId");
-        Map<String, Integer> hash = new HashMap<>();
+
         List<JSONObject> jsonList = new ArrayList<>();
         for (int i = 0; i < chapters.length(); i++) {
             jsonList.add(chapters.getJSONObject(i));
@@ -195,11 +195,7 @@ public class Komiic extends MangaParser {
             String title = jsonList.get(i).getString("serial");
             String path = jsonList.get(i).getString("id");
             String type = jsonList.get(i).getString("type");
-            if (hash.containsKey(title)) {
-                hash.put(title, hash.get(title) + 1);
-            } else {
-                hash.put(title, 1);
-            }
+
             list.add(new Chapter(Long.parseLong(sourceComic + "0" + i + 1), sourceComic, title, path, type));
         }
 
