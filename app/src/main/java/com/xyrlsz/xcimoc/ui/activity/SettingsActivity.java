@@ -229,6 +229,10 @@ public class SettingsActivity extends BackActivity implements SettingsView {
                 R.string.settings_other_night_alpha, DIALOG_REQUEST_OTHER_NIGHT_ALPHA);
         mDownloadThread.bindPreference(getSupportFragmentManager(), PreferenceManager.PREF_DOWNLOAD_THREAD, 2,
                 R.string.settings_download_thread, DIALOG_REQUEST_DOWNLOAD_THREAD);
+        if (mDownloadThread.getValue() <= 0) {
+            mDownloadThread.setValue(1);
+        }
+
         mDetailTextSt.bindPreference(getSupportFragmentManager(), PreferenceManager.PREF_DETAIL_TEXT_ST,
                 PreferenceManager.DETAIL_TEXT_DEFAULT, R.array.detail_text_st, DIALOG_REQUEST_DETAIL_TEXT_ST);
         mStEngine.bindPreference(getSupportFragmentManager(), PreferenceManager.PREF_ST_ENGINE,
@@ -314,7 +318,11 @@ public class SettingsActivity extends BackActivity implements SettingsView {
                 showSnackbar(R.string.settings_other_storage_not_found);
                 break;
             case DIALOG_REQUEST_DOWNLOAD_THREAD:
-                mDownloadThread.setValue(bundle.getInt(EXTRA_DIALOG_RESULT_VALUE));
+                int num = bundle.getInt(EXTRA_DIALOG_RESULT_VALUE);
+                if (num <= 0) {
+                    num = 1;
+                }
+                mDownloadThread.setValue(num);
                 break;
             case DIALOG_REQUEST_DOWNLOAD_SCAN:
                 showProgressDialog();
