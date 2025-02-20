@@ -3,26 +3,19 @@ package com.xyrlsz.xcimoc.ui.activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.widget.Toast;
 
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.manager.SourceManager;
 import com.xyrlsz.xcimoc.source.Animx2;
-
 import com.xyrlsz.xcimoc.source.BuKa;
 import com.xyrlsz.xcimoc.source.Cartoonmad;
-
 import com.xyrlsz.xcimoc.source.DM5;
-//import com.xyrlsz.xcimoc.source.Dmzjv2;
-
 import com.xyrlsz.xcimoc.source.HotManga;
 import com.xyrlsz.xcimoc.source.IKanman;
-
 import com.xyrlsz.xcimoc.source.MiGu;
-
 import com.xyrlsz.xcimoc.source.Tencent;
-
 import com.xyrlsz.xcimoc.source.YKMH;
+import com.xyrlsz.xcimoc.utils.HintUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -107,7 +100,8 @@ public class BrowserFilter extends BaseActivity {
             if (uri != null) {
                 openReader(uri);
             } else {
-                Toast.makeText(this, "url不合法", Toast.LENGTH_SHORT);
+//                Toast.makeText(this, "url不合法", Toast.LENGTH_SHORT);
+                HintUtils.showToast(this, "url不合法");
             }
         }
 
@@ -116,7 +110,8 @@ public class BrowserFilter extends BaseActivity {
             try {
                 openReader(Uri.parse(intent.getStringExtra(Intent.EXTRA_TEXT).replace("https://m.ykmh.commanhua", "https://m.ykmh.com/manhua")));
             } catch (Exception ex) {
-                Toast.makeText(this, "url不合法", Toast.LENGTH_SHORT);
+//                Toast.makeText(this, "url不合法", Toast.LENGTH_SHORT);
+                HintUtils.showToast(this, "url不合法");
             }
         }
     }

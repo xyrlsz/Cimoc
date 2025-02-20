@@ -5,7 +5,6 @@ import static com.xyrlsz.xcimoc.Constants.DMZJ_SHARED_COOKIES;
 
 import android.content.SharedPreferences;
 import android.util.Pair;
-import android.widget.Toast;
 
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.Constants;
@@ -21,6 +20,7 @@ import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
 import com.xyrlsz.xcimoc.ui.activity.SettingsActivity;
+import com.xyrlsz.xcimoc.utils.HintUtils;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 import com.xyrlsz.xcimoc.utils.UicodeBackslashU;
 
@@ -156,7 +156,10 @@ public class Dmzj extends MangaParser {
         String cookieStr = sharedPreferences.getString(DMZJ_SHARED_COOKIES, "");
         if (cookieStr.isEmpty()) {
             App.goActivity(SettingsActivity.class);
-            App.runOnMainThread(() -> Toast.makeText(App.getAppContext(), App.getAppResources().getString(R.string.dmzj_should_login), Toast.LENGTH_SHORT).show());
+            App.runOnMainThread(() ->
+//                    Toast.makeText(App.getAppContext(), App.getAppResources().getString(R.string.dmzj_should_login), Toast.LENGTH_SHORT).show()
+                            HintUtils.showToast(App.getAppContext(), App.getAppResources().getString(R.string.dmzj_should_login))
+            );
         }
         return new Request.Builder().url(url).addHeader("Cookie", cookieStr).build();
     }

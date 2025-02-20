@@ -2,7 +2,6 @@ package com.xyrlsz.xcimoc.source;
 
 
 import android.content.Context;
-import android.widget.Toast;
 
 import com.google.common.collect.Lists;
 import com.xyrlsz.xcimoc.App;
@@ -16,6 +15,7 @@ import com.xyrlsz.xcimoc.parser.JsonIterator;
 import com.xyrlsz.xcimoc.parser.MangaParser;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
+import com.xyrlsz.xcimoc.utils.HintUtils;
 import com.xyrlsz.xcimoc.utils.KomiicUtils;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
@@ -25,10 +25,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import okhttp3.Headers;
 import okhttp3.MediaType;
@@ -234,7 +232,10 @@ public class Komiic extends MangaParser {
             _cookies = "";
         }
         if (KomiicUtils.checkEmptyAccountIsOverImgLimit() && _cookies.isEmpty()) {
-            App.runOnMainThread(() -> Toast.makeText(App.getAppContext(), R.string.limit_over_tip, Toast.LENGTH_SHORT).show());
+            App.runOnMainThread(() ->
+//                    Toast.makeText(App.getAppContext(), R.string.limit_over_tip, Toast.LENGTH_SHORT).show()
+                            HintUtils.showToast(App.getAppContext(), R.string.limit_over_tip)
+            );
         }
         for (int i = 1; i <= images.length(); i++) {
             Long comicChapter = chapter.getId();
