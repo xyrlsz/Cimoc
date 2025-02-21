@@ -22,7 +22,7 @@ Online manga reader based on Android
 - 下载漫画（Download Manga）
 - 本地漫画（Local Reader）
 - 本地备份恢复（Local Backup）
-<!-- - webdav云备份功能(WebDav Backup) -->
+- webdav云备份功能(WebDav Backup)
 
 # 软件使用说明
 - 安装完成后，直接点击右上角的搜索，即可搜索到漫画
@@ -45,6 +45,7 @@ Online manga reader based on Android
 - [AppUpdater](https://gitee.com/jenly1314/AppUpdater)
 - [OpenCC for Go](https://github.com/longbridge/opencc)
 - [Opencc4j](https://github.com/houbb/opencc4j)
+- [sardine-android](https://github.com/thegrizzlylabs/sardine-android)
 
 # 应用截图
 <img src="./screenshot/02.png" width="250">
