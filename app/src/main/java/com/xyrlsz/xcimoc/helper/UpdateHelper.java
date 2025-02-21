@@ -17,6 +17,7 @@ import com.xyrlsz.xcimoc.source.Dmzj;
 import com.xyrlsz.xcimoc.source.DongManManHua;
 import com.xyrlsz.xcimoc.source.DuManWu;
 import com.xyrlsz.xcimoc.source.DuManWuOrg;
+import com.xyrlsz.xcimoc.source.GoDaManHua;
 import com.xyrlsz.xcimoc.source.GuFeng;
 import com.xyrlsz.xcimoc.source.HotManga;
 import com.xyrlsz.xcimoc.source.IKanman;
@@ -77,7 +78,8 @@ public class UpdateHelper {
         ComicSourceHash.put(DuManWu.TYPE, DuManWu.getDefaultSource());
         ComicSourceHash.put(DuManWuOrg.TYPE, DuManWuOrg.getDefaultSource());
         ComicSourceHash.put(Komiic.TYPE, Komiic.getDefaultSource());
-        ComicSourceHash.put(Manhuayu.TYPE,Manhuayu.getDefaultSource());
+        ComicSourceHash.put(Manhuayu.TYPE, Manhuayu.getDefaultSource());
+        ComicSourceHash.put(GoDaManHua.TYPE, GoDaManHua.getDefaultSource());
     }
 
     public static void update(PreferenceManager manager, final DaoSession session) {
@@ -179,6 +181,7 @@ public class UpdateHelper {
         list.add(DuManWuOrg.getDefaultSource());
         list.add(Komiic.getDefaultSource());
         list.add(Manhuayu.getDefaultSource());
+        list.add(GoDaManHua.getDefaultSource());
 
         session.getSourceDao().insertOrReplaceInTx(list);
     }
