@@ -1,5 +1,7 @@
 package com.xyrlsz.xcimoc.source;
 
+import android.annotation.SuppressLint;
+
 import com.google.common.collect.Lists;
 import com.xyrlsz.xcimoc.core.Manga;
 import com.xyrlsz.xcimoc.model.Chapter;
@@ -17,11 +19,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -75,6 +81,7 @@ public class GoDaManHua extends MangaParser {
         return new Request.Builder().url(baseUrl + "/manga/" + cid).build();
     }
 
+    @SuppressLint("SimpleDateFormat")
     @Override
     public Comic parseInfo(String html, Comic comic) throws UnsupportedEncodingException, JSONException {
         String regex = "<script type=\"application/ld\\+json\">(.*?)</script>";
@@ -98,7 +105,20 @@ public class GoDaManHua extends MangaParser {
                 }
             }
             String update = data.getJSONObject("hasPart").getString("datePublished");
+            SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+            isoFormat.setTimeZone(TimeZone.getDefault());
 
+            Date date = null;
+            try {
+                date = isoFormat.parse(update);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            outputFormat.setTimeZone(TimeZone.getDefault());
+
+            update = outputFormat.format(date);
             comic.setInfo(title, cover, update, intro, author.toString(), isFinish(status));
 
         }
