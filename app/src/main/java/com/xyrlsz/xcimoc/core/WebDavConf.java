@@ -11,24 +11,22 @@ import java.io.IOException;
 
 public class WebDavConf {
     public static String url = "";
-    public static String username = "";
-    public static String password = "";
+    public static Sardine sardine = null;
 
     public static void init(Context context) {
         SharedPreferences sharedPreferences = context.getSharedPreferences(Constants.WEBDAV_SHARED, Context.MODE_PRIVATE);
         url = sharedPreferences.getString(Constants.WEBDAV_SHARED_URL, "");
-        username = sharedPreferences.getString(Constants.WEBDAV_SHARED_USERNAME, "");
-        password = sharedPreferences.getString(Constants.WEBDAV_SHARED_PASSWORD, "");
+        String username = sharedPreferences.getString(Constants.WEBDAV_SHARED_USERNAME, "");
+        String password = sharedPreferences.getString(Constants.WEBDAV_SHARED_PASSWORD, "");
         if (!(username.isEmpty() || password.isEmpty() || url.isEmpty())) {
-            Sardine mSardine = new OkHttpSardine();
-            mSardine.setCredentials(username, password);
+            sardine = new OkHttpSardine();
+            sardine.setCredentials(username, password);
             new Thread(() -> {
                 try {
                     String mWebDavUrl = url + "/cimoc";
-                    if (!mSardine.exists(mWebDavUrl)) {
-                        mSardine.createDirectory(mWebDavUrl);
+                    if (!sardine.exists(mWebDavUrl)) {
+                        sardine.createDirectory(mWebDavUrl);
                     }
-
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

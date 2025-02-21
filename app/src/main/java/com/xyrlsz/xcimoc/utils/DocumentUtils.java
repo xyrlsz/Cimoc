@@ -97,7 +97,7 @@ public class DocumentUtils {
         try {
             Uri fileData = file.getUri();
             if (UriUtils.isHttpOrHttps(fileData)) {
-                input = new WebDavDocumentFile(null).getInputStream(fileData.toString());
+                input = WebDavDocumentFile.getInputStream(fileData.toString());
             } else {
                 input = resolver.openInputStream(fileData);
             }
@@ -120,7 +120,8 @@ public class DocumentUtils {
         try {
             Uri fileData = file.getUri();
             if (UriUtils.isHttpOrHttps(fileData)) {
-                input = new WebDavDocumentFile(null).getInputStream(fileData.toString());
+                new WebDavDocumentFile(null);
+                input = WebDavDocumentFile.getInputStream(fileData.toString());
             } else {
                 input = resolver.openInputStream(fileData);
             }
@@ -156,7 +157,7 @@ public class DocumentUtils {
                 writer.write(data);
                 writer.flush();
                 if (tmp != null) {
-                    new WebDavDocumentFile(null).UploadFile(tmp, file.getUri().toString());
+                    WebDavDocumentFile.UploadFile(tmp, file.getUri().toString());
                 }
             } else {
                 throw new IOException();
@@ -171,7 +172,7 @@ public class DocumentUtils {
         BufferedOutputStream outputStream = null;
         boolean isHttp = UriUtils.isHttpOrHttps(file.getUri());
         if (isHttp) {
-            new WebDavDocumentFile(null).UploadStreamFile(input, file.getUri().toString());
+            WebDavDocumentFile.UploadStreamFile(input, file.getUri().toString());
             return;
         }
         try {

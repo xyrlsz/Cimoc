@@ -5,7 +5,6 @@ import android.webkit.MimeTypeMap;
 
 import com.thegrizzlylabs.sardineandroid.DavResource;
 import com.thegrizzlylabs.sardineandroid.Sardine;
-import com.thegrizzlylabs.sardineandroid.impl.OkHttpSardine;
 import com.xyrlsz.xcimoc.core.WebDavConf;
 import com.xyrlsz.xcimoc.utils.BinStreamUtils;
 
@@ -21,19 +20,19 @@ import java.util.List;
 
 
 public class WebDavDocumentFile extends DocumentFile {
-    private final Sardine mSardine;
-    private final String mUsername = WebDavConf.username;
-    private final String mPassword = WebDavConf.password;
+    private static final Sardine mSardine = WebDavConf.sardine;
     private final String mWebDavUrl = WebDavConf.url + "/cimoc";
     private final String mCurrentPath;
     private DavResource mDavResource;
 
     public WebDavDocumentFile(DocumentFile parent) {
         super(parent);
-
-        mSardine = new OkHttpSardine();
-        mSardine.setCredentials(mUsername, mPassword);
-        mCurrentPath = mWebDavUrl;
+        if (parent == null) {
+            mCurrentPath = mWebDavUrl;
+        } else {
+            WebDavDocumentFile tmp = (WebDavDocumentFile) parent;
+            mCurrentPath = tmp.getCurrentPath();
+        }
         new Thread(() -> {
             try {
                 List<DavResource> resources = mSardine.list(mWebDavUrl, 0);
@@ -47,20 +46,17 @@ public class WebDavDocumentFile extends DocumentFile {
 
     }
 
-    WebDavDocumentFile(DocumentFile parent, String path, DavResource resource) {
+    // 传入currPath
+    WebDavDocumentFile(DocumentFile parent, String currPath, DavResource resource) {
         super(parent);
-
-        mSardine = new OkHttpSardine();
-        mSardine.setCredentials(mUsername, mPassword);
-        mCurrentPath = path;
+        mCurrentPath = currPath;
         mDavResource = resource;
     }
 
+    // 传入相对路径
     public WebDavDocumentFile(WebDavDocumentFile parent, String path) {
         super(parent);
 
-        mSardine = new OkHttpSardine();
-        mSardine.setCredentials(mUsername, mPassword);
         if (path.startsWith("/")) {
             path = path.substring(1);
         }
@@ -95,6 +91,41 @@ public class WebDavDocumentFile extends DocumentFile {
             }
         }
         return "application/octet-stream";
+    }
+
+    public static void UploadFile(File src, String urlPath) {
+
+        try {
+
+            byte[] fileContent = new byte[(int) src.length()];
+            try (InputStream inputStream = new java.io.FileInputStream(src)) {
+                inputStream.read(fileContent);
+            }
+
+            // 上传文件到 WebDAV 服务器
+            mSardine.put(urlPath, fileContent);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void UploadStreamFile(InputStream inputStream, String urlPath) {
+
+        try {
+            // 上传文件到 WebDAV 服务器
+            mSardine.put(urlPath, BinStreamUtils.readAllBytesCompat(inputStream));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static InputStream getInputStream(String path) throws FileNotFoundException {
+        try {
+            return new BufferedInputStream(mSardine.get(path));
+        } catch (IOException e) {
+            throw new FileNotFoundException(e.getMessage());
+        }
     }
 
     public String getCurrentPath() {
@@ -284,52 +315,6 @@ public class WebDavDocumentFile extends DocumentFile {
         } catch (IOException e) {
             e.printStackTrace();
             return false;
-        }
-    }
-
-    public void UploadFile(File src, String urlPath) {
-
-        try {
-
-            byte[] fileContent = new byte[(int) src.length()];
-            try (InputStream inputStream = new java.io.FileInputStream(src)) {
-                inputStream.read(fileContent);
-            }
-
-            // 上传文件到 WebDAV 服务器
-            mSardine.put(urlPath, fileContent);
-
-            // 更新当前资源信息
-            List<DavResource> resources = mSardine.list(urlPath, 0);
-            if (!resources.isEmpty()) {
-                mDavResource = resources.get(0);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void UploadStreamFile(InputStream inputStream, String urlPath) {
-
-        try {
-            // 上传文件到 WebDAV 服务器
-            mSardine.put(urlPath, BinStreamUtils.readAllBytesCompat(inputStream));
-
-            // 更新当前资源信息
-            List<DavResource> resources = mSardine.list(urlPath, 0);
-            if (!resources.isEmpty()) {
-                mDavResource = resources.get(0);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public InputStream getInputStream(String path) throws FileNotFoundException {
-        try {
-            return new BufferedInputStream(mSardine.get(path));
-        } catch (IOException e) {
-            throw new FileNotFoundException(e.getMessage());
         }
     }
 }

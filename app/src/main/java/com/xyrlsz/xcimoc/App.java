@@ -170,7 +170,10 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         manager_wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         //获取栈顶Activity以及当前App上下文
         mApp = this;
+
+        // 初始化WebDAV配置
         WebDavConf.init(getAppContext());
+
 //        this.registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
 //            @Override
 //            public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
