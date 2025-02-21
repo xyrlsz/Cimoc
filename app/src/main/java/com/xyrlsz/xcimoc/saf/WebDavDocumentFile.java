@@ -36,9 +36,6 @@ public class WebDavDocumentFile extends DocumentFile {
         mCurrentPath = mWebDavUrl;
         new Thread(() -> {
             try {
-                if (!mSardine.exists(mWebDavUrl)) {
-                    mSardine.createDirectory(mWebDavUrl);
-                }
                 List<DavResource> resources = mSardine.list(mWebDavUrl, 0);
                 if (!resources.isEmpty()) {
                     mDavResource = resources.get(0);
@@ -55,16 +52,6 @@ public class WebDavDocumentFile extends DocumentFile {
 
         mSardine = new OkHttpSardine();
         mSardine.setCredentials(mUsername, mPassword);
-        new Thread(() -> {
-            try {
-                if (!mSardine.exists(mWebDavUrl)) {
-                    mSardine.createDirectory(mWebDavUrl);
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }).start();
         mCurrentPath = path;
         mDavResource = resource;
     }
@@ -82,14 +69,7 @@ public class WebDavDocumentFile extends DocumentFile {
         }
         mCurrentPath = parent.getCurrentPath() + "/" + path;
         new Thread(() -> {
-            try {
-                if (!mSardine.exists(mWebDavUrl)) {
-                    mSardine.createDirectory(mWebDavUrl);
-                }
 
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
             try {
                 if (!mSardine.exists(mCurrentPath)) {
                     mSardine.createDirectory(mCurrentPath);
