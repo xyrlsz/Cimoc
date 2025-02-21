@@ -19,19 +19,21 @@ public class WebDavConf {
         url = sharedPreferences.getString(Constants.WEBDAV_SHARED_URL, "");
         username = sharedPreferences.getString(Constants.WEBDAV_SHARED_USERNAME, "");
         password = sharedPreferences.getString(Constants.WEBDAV_SHARED_PASSWORD, "");
-        Sardine mSardine = new OkHttpSardine();
-        mSardine.setCredentials(username, password);
-        new Thread(() -> {
-            try {
-                String mWebDavUrl = url + "/cimoc";
-                if (!mSardine.exists(mWebDavUrl)) {
-                    mSardine.createDirectory(mWebDavUrl);
-                }
+        if (!(username.isEmpty() || password.isEmpty() || url.isEmpty())) {
+            Sardine mSardine = new OkHttpSardine();
+            mSardine.setCredentials(username, password);
+            new Thread(() -> {
+                try {
+                    String mWebDavUrl = url + "/cimoc";
+                    if (!mSardine.exists(mWebDavUrl)) {
+                        mSardine.createDirectory(mWebDavUrl);
+                    }
 
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }).start();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }).start();
+        }
     }
 
     public static void update(Context context) {
