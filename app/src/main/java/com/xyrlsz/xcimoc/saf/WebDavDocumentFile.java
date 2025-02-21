@@ -96,14 +96,8 @@ public class WebDavDocumentFile extends DocumentFile {
     public static void UploadFile(File src, String urlPath) {
 
         try {
-
-            byte[] fileContent = new byte[(int) src.length()];
-            try (InputStream inputStream = new java.io.FileInputStream(src)) {
-                inputStream.read(fileContent);
-            }
-
             // 上传文件到 WebDAV 服务器
-            mSardine.put(urlPath, fileContent);
+            mSardine.put(urlPath, src, "application/octet-stream");
 
         } catch (IOException e) {
             e.printStackTrace();
