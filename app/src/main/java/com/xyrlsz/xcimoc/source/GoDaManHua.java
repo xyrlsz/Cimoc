@@ -39,6 +39,7 @@ public class GoDaManHua extends MangaParser {
     public static final String DEFAULT_TITLE = "GoDa漫畫";
     private static final String baseUrl = "https://manhuafree.com";
     private static final String picBaseUrl = "https://f40-1-4.g-mh.online";
+    private static final String apiBaseUrl = "https://api-get-v2.mgsearcher.com";
     private String _mid = "";
 
     public GoDaManHua(Source source) {
@@ -129,7 +130,7 @@ public class GoDaManHua extends MangaParser {
 
     @Override
     public Request getChapterRequest(String html, String cid) {
-        return new Request.Builder().url(StringUtils.format("https://api-get-v2.mgsearcher.com/api/manga/get?mid=%s", _mid))
+        return new Request.Builder().url(StringUtils.format(apiBaseUrl + "/api/manga/get?mid=%s&mode=all", _mid))
                 .addHeader("referer", baseUrl.concat("/"))
                 .build();
     }
@@ -151,7 +152,7 @@ public class GoDaManHua extends MangaParser {
 
     @Override
     public Request getImagesRequest(String cid, String path) {
-        return new Request.Builder().url(StringUtils.format("https://api-get-v2.mgsearcher.com/api/chapter/getinfo?m=%s&c=%s", _mid, path))
+        return new Request.Builder().url(StringUtils.format(apiBaseUrl + "/api/chapter/getinfo?m=%s&c=%s", _mid, path))
                 .addHeader("referer", baseUrl.concat("/"))
                 .addHeader("Accept", "application/json")
                 .addHeader("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36")
