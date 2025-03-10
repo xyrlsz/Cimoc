@@ -58,7 +58,7 @@ Online manga reader based on Android
 > 这个没什么大用的感觉，个人不常用，直接删掉不会有什么影响 -->
 - 在 SourceManger 的 getParser() 方法中加入相应分支
 > case 里面无脑添加
-- 在 UpdateHelper 的 initSource() 方法中初始化图源，以及修改UpdateHelper()构造方法
+- 在 UpdateHelper 的 initSource() 方法中初始化图源，以及修改initComicSourceTable()方法
 
 # 软件更新方向：
 - 能正常搜索解析网络上大部分免费的漫画
