@@ -40,10 +40,17 @@ public class ChapterButton extends AppCompatTextView {
     private void init(Context context, AttributeSet attrs) {
         TypedArray typedArray = context.getTheme().obtainStyledAttributes(
                 attrs, R.styleable.ChapterButton, 0, 0);
+        TypedArray typedArray2 = context.getTheme().obtainStyledAttributes(
+                attrs, R.styleable.ThemeAttributes, 0, 0);
         accentColor = typedArray.getColor(R.styleable.ChapterButton_selected_color, Color.BLACK);
+        normalColor = typedArray2.getColor(R.styleable.ThemeAttributes_colorAutoGW, Color.BLACK);
         typedArray.recycle();
-
-        normalColor = 0x8A000000;
+        typedArray2.recycle();
+//        normalColor = 0x8A000000;
+//
+//        if(ThemeUtils.isDarkMode(context)){
+//            normalColor = Color.GRAY;
+//        }
 
         setClickable(true);
         download = false;

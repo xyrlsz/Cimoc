@@ -1,6 +1,7 @@
 package com.xyrlsz.xcimoc.utils;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.util.TypedValue;
 
 import com.xyrlsz.xcimoc.R;
@@ -76,6 +77,11 @@ public class ThemeUtils {
             case THEME_BROWN:
                 return R.color.colorPrimaryBrown;
         }
+    }
+
+    public static boolean isDarkMode(Context context) {
+        int nightModeFlags = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        return nightModeFlags == Configuration.UI_MODE_NIGHT_YES;
     }
 
 }

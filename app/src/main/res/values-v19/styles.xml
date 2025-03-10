@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="colorBackgroundTrans">@color/colorBackgroundTrans</item>
+        <item name="colorAutoWG">@color/colorAutoWG</item>
+        <item name="colorAutoGW">@color/colorAutoGW</item>
         <item name="android:windowTranslucentStatus">true</item>
     </style>
 </resources>

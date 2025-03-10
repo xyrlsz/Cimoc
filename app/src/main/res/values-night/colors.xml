@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorBackgroundTrans">#AA9A9A9A</color>
+    <color name="colorAutoWG">#343434</color>
+    <color name="colorAutoGW">#A9A9A9</color>
+
+    <color name="colorPrimaryBlue">#0D47A1</color>
+    <color name="colorPrimaryBlueDark">#0B3D91</color>
+
+    <color name="colorPrimaryGrey">#212121</color>
+    <color name="colorPrimaryGreyDark">#121212</color>
+
+    <color name="colorPrimaryTeal">#004D40</color>
+    <color name="colorPrimaryTealDark">#00332E</color>
+
+    <color name="colorPrimaryPurple">#4A148C</color>
+    <color name="colorPrimaryPurpleDark">#38006B</color>
+
+    <color name="colorPrimaryPink">#880E4F</color>
+    <color name="colorPrimaryPinkDark">#560027</color>
+
+    <color name="colorPrimaryBrown">#3E2723</color>
+    <color name="colorPrimaryBrownDark">#1B0000</color>
+</resources>

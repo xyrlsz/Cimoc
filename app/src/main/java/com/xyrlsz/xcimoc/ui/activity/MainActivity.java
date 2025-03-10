@@ -20,6 +20,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -106,6 +107,29 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
         mPresenter = new MainPresenter();
         mPresenter.attachView(this);
         return mPresenter;
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+            private long mExitTime = 0;
+
+            @Override
+            public void handleOnBackPressed() {
+                if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    mDrawerLayout.closeDrawer(GravityCompat.START);
+                } else if (System.currentTimeMillis() - mExitTime > 2000) {
+                    HintUtils.showToast(MainActivity.this, R.string.main_double_click);
+                    mExitTime = System.currentTimeMillis();
+                } else {
+                    finish();
+                }
+            }
+        };
+
+        // 注册回调
+        getOnBackPressedDispatcher().addCallback(this, callback);
     }
 
     @Override
@@ -334,18 +358,18 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
         super.onSaveInstanceState(outState);
     }
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
-            mDrawerLayout.closeDrawer(GravityCompat.START);
-        } else if (System.currentTimeMillis() - mExitTime > 2000) {
-            HintUtils.showToast(this, R.string.main_double_click);
-            mExitTime = System.currentTimeMillis();
-        } else {
-            finish();
-        }
-    }
+//    @Override
+//    public void onBackPressed() {
+//        super.onBackPressed();
+//        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+//            mDrawerLayout.closeDrawer(GravityCompat.START);
+//        } else if (System.currentTimeMillis() - mExitTime > 2000) {
+//            HintUtils.showToast(this, R.string.main_double_click);
+//            mExitTime = System.currentTimeMillis();
+//        } else {
+//            finish();
+//        }
+//    }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {

@@ -10,9 +10,7 @@
     </style>
 
     <style name="AppThemeNoDark" parent="Theme.AppCompat.Light.NoActionBar">
-        <!--        // 防止miui及其他魔改ROM启用反色-->
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
-
     </style>
 
     <style name="AppThemeBlue" parent="AppTheme">
@@ -22,51 +20,51 @@
         <item name="alertDialogTheme">@style/DialogThemeBlue</item>
     </style>
 
-    <style name="DialogThemeBlue" parent="Theme.AppCompat.Light.Dialog.Alert">
+    <style name="DialogThemeBlue" parent="Theme.AppCompat.DayNight.Dialog.Alert">
         <item name="colorAccent">@color/colorPrimaryBlueDark</item>
     </style>
 
     <style name="AppThemeGrey" parent="AppTheme">
-        <item name="colorPrimary">@color/colorPrimaryGrey</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryGreyDark</item>
-        <item name="colorAccent">@color/colorPrimaryGreyDark</item>
+        <item name="colorPrimary">@color/colorPrimaryGrey </item>
+        <item name="colorPrimaryDark">@color/colorPrimaryGreyDark </item>
+        <item name="colorAccent">@color/colorPrimaryGreyDark </item>
         <item name="alertDialogTheme">@style/DialogThemeGrey</item>
     </style>
 
-    <style name="DialogThemeGrey" parent="Theme.AppCompat.Light.Dialog.Alert">
-        <item name="colorAccent">@color/colorPrimaryGreyDark</item>
+    <style name="DialogThemeGrey" parent="Theme.AppCompat.DayNight.Dialog.Alert">
+        <item name="colorAccent">@color/colorPrimaryGreyDark </item>
     </style>
 
     <style name="AppThemeTeal" parent="AppTheme">
-        <item name="colorPrimary">@color/colorPrimaryTeal</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryTealDark</item>
-        <item name="colorAccent">@color/colorPrimaryTealDark</item>
+        <item name="colorPrimary">@color/colorPrimaryTeal </item>
+        <item name="colorPrimaryDark">@color/colorPrimaryTealDark </item>
+        <item name="colorAccent">@color/colorPrimaryTealDark </item>
         <item name="alertDialogTheme">@style/DialogThemeTeal</item>
     </style>
 
-    <style name="DialogThemeTeal" parent="Theme.AppCompat.Light.Dialog.Alert">
-        <item name="colorAccent">@color/colorPrimaryTealDark</item>
+    <style name="DialogThemeTeal" parent="Theme.AppCompat.DayNight.Dialog.Alert">
+        <item name="colorAccent">@color/colorPrimaryTealDark </item>
     </style>
 
     <style name="AppThemePurple" parent="AppTheme">
-        <item name="colorPrimary">@color/colorPrimaryPurple</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryPurpleDark</item>
-        <item name="colorAccent">@color/colorPrimaryPurpleDark</item>
+        <item name="colorPrimary">@color/colorPrimaryPurple </item>
+        <item name="colorPrimaryDark">@color/colorPrimaryPurpleDark </item>
+        <item name="colorAccent">@color/colorPrimaryPurpleDark </item>
         <item name="alertDialogTheme">@style/DialogThemePurple</item>
     </style>
 
-    <style name="DialogThemePurple" parent="Theme.AppCompat.Light.Dialog.Alert">
-        <item name="colorAccent">@color/colorPrimaryPurpleDark</item>
+    <style name="DialogThemePurple" parent="Theme.AppCompat.DayNight.Dialog.Alert">
+        <item name="colorAccent">@color/colorPrimaryPurpleDark </item>
     </style>
 
     <style name="AppThemePink" parent="AppTheme">
-        <item name="colorPrimary">@color/colorPrimaryPink</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryPinkDark</item>
-        <item name="colorAccent">@color/colorPrimaryPinkDark</item>
+        <item name="colorPrimary">@color/colorPrimaryPink </item>
+        <item name="colorPrimaryDark">@color/colorPrimaryPinkDark </item>
+        <item name="colorAccent">@color/colorPrimaryPinkDark </item>
         <item name="alertDialogTheme">@style/DialogThemePink</item>
     </style>
 
-    <style name="DialogThemePink" parent="Theme.AppCompat.Light.Dialog.Alert">
+    <style name="DialogThemePink" parent="Theme.AppCompat.DayNight.Dialog.Alert">
         <item name="colorAccent">@color/colorPrimaryPinkDark</item>
     </style>
 
@@ -77,7 +75,7 @@
         <item name="alertDialogTheme">@style/DialogThemeBrown</item>
     </style>
 
-    <style name="DialogThemeBrown" parent="Theme.AppCompat.Light.Dialog.Alert">
+    <style name="DialogThemeBrown" parent="Theme.AppCompat.DayNight.Dialog.Alert">
         <item name="colorAccent">@color/colorPrimaryBrownDark</item>
     </style>
 
@@ -85,4 +83,5 @@
         <item name="android:textColorSecondary">@color/white</item>
         <item name="colorAccent">@color/white</item>
     </style>
+
 </resources>

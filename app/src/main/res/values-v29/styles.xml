@@ -3,6 +3,5 @@
 
     <style name="AppThemeNoDark" parent="AppTheme">
         <item name="android:forceDarkAllowed">false</item>
-
     </style>
 </resources>

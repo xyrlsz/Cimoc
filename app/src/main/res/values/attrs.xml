@@ -11,4 +11,9 @@
         <attr name="min" format="integer" />
         <attr name="max" format="integer" />
     </declare-styleable>
+    <declare-styleable name="ThemeAttributes">
+        <attr name="colorBackgroundTrans" format="color" />
+        <attr name="colorAutoWG" format="color" />
+        <attr name="colorAutoGW" format="color" />
+    </declare-styleable>
 </resources>
