@@ -27,8 +27,16 @@ public class HintUtils {
         Toast.makeText(context, resId, Toast.LENGTH_SHORT).show();
     }
 
+    public static void showToastLong(Context context, int resId) {
+        Toast.makeText(context, resId, Toast.LENGTH_LONG).show();
+    }
+
     public static void showToast(Context context, CharSequence text) {
         Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
+    }
+
+    public static void showToastLong(Context context, CharSequence text) {
+        Toast.makeText(context, text, Toast.LENGTH_LONG).show();
     }
 
 }

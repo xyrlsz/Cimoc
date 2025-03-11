@@ -1,5 +1,6 @@
 package com.xyrlsz.xcimoc;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -148,8 +149,15 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
     public static void restartApp() {
         Context context = getAppContext();
         Intent intent = new Intent(context, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
+        if (context instanceof Activity) {
+            ((Activity) context).finish();
+        }
+        System.exit(0);
+    }
+
+    public static void exitApp() {
         System.exit(0);
     }
 
