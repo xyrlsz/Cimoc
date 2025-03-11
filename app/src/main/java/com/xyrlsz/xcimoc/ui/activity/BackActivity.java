@@ -1,10 +1,11 @@
 package com.xyrlsz.xcimoc.ui.activity;
 
 import android.graphics.PorterDuff;
-import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import android.view.View;
 import android.widget.ProgressBar;
+
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
@@ -30,6 +31,7 @@ public abstract class BackActivity extends BaseActivity {
                     onBackPressed();
                 }
             });
+            mToolbar.setFitsSystemWindows(true);
         }
     }
 

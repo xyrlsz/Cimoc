@@ -54,7 +54,7 @@ public class DetailAdapter extends BaseAdapter<Chapter> {
         textPaint.setFakeBoldText(true);
         textPaint.setAntiAlias(true);
         textPaint.setTextSize(40);//文字大小
-        textPaint.setColor(Color.BLACK);//背景颜色
+        textPaint.setColor(context.getResources().getColor(R.color.colorAutoGW));//背景颜色
         textPaint.setTextAlign(Paint.Align.LEFT);
         paint = new Paint();
         paint.setColor(ContextCompat.getColor(context, R.color.transparent));

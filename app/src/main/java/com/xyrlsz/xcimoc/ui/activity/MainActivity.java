@@ -78,6 +78,7 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
 
     private static final int FRAGMENT_NUM = 3;
     private final Update update = new Update();
+    private final long mExitTime = 0;
     @BindView(R.id.main_layout)
     DrawerLayout mDrawerLayout;
     @BindView(R.id.main_navigation_view)
@@ -89,7 +90,6 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
     private ControllerBuilderProvider mControllerBuilderProvider;
     private MainPresenter mPresenter;
     private ActionBarDrawerToggle mDrawerToggle;
-    private long mExitTime = 0;
     private long mLastId = -1;
     private int mLastSource = -1;
     private String mLastCid;
@@ -100,6 +100,7 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
     private boolean night;
     private String versionName, content, mUrl, md5;
     private int versionCode;
+
     //auth0
 //    private Auth0 auth0;
     @Override
@@ -123,7 +124,8 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
                     HintUtils.showToast(MainActivity.this, R.string.main_double_click);
                     mExitTime = System.currentTimeMillis();
                 } else {
-                    finish();
+//                    finish();
+                    System.exit(0);
                 }
             }
         };
@@ -382,7 +384,7 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
 //                case R.id.drawer_tag:
                     mCheckItem = itemId;
                     getSupportFragmentManager().beginTransaction().hide(mCurrentFragment).commit();
-                    if(itemId == R.id.drawer_source){
+                    if (itemId == R.id.drawer_source) {
                         mToolbarTitle.setText(item.getTitle().toString());
                     }
                     mDrawerLayout.closeDrawer(GravityCompat.START);

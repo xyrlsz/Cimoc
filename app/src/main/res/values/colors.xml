@@ -2,7 +2,7 @@
 <resources>
     <color name="colorBackgroundTrans">#AAFBFBFB</color>
     <color name="colorAutoWG">@color/white</color>
-    <color name="colorAutoGW">@color/black</color>
+    <color name="colorAutoGW">#505050</color>
 
     <color name="colorPrimaryBlue">#2196F3</color>
     <color name="colorPrimaryBlueDark">#1976D2</color>
