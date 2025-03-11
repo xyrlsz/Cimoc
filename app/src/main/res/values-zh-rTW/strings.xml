@@ -231,8 +231,8 @@
     <string name="backup_cloud_clear_tag_summary">清除雲端同步的資料</string>
     <string name="backup_cloud_backup_tag">備份到雲端</string>
     <string name="backup_cloud_backup_tag_summary">備份收藏與歷史漫畫到雲端</string>
-    <string name="backup_cloud_sync_tag">自動同步</string>
-    <string name="backup_cloud_sync_tag_summary">自動同步收藏到雲端</string>
+    <string name="backup_cloud_sync_tag">自動備份</string>
+    <string name="backup_cloud_sync_tag_summary">自動備份收藏和歷史到雲端</string>
     <string name="backup_cloud_upload_tag_summary">本地漫畫備份檔案上傳到雲端</string>
     <string name="backup_clear">清除</string>
     <string name="backup_clear_record">清除备份记录</string>

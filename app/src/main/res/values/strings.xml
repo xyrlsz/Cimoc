@@ -36,7 +36,7 @@
     <string name="result">搜索结果</string>
     <string name="result_empty">搜索结果为空</string>
 
-    <string name="detail"></string>
+    <string name="detail" translatable="false"></string>
     <string name="detail_favorite">收藏成功</string>
     <string name="detail_unfavorite">取消收藏成功</string>
     <string name="detail_tag_favorite">请先收藏漫画</string>
@@ -235,8 +235,8 @@
     <string name="backup_cloud_clear_tag_summary">清除云端同步的数据</string>
     <string name="backup_cloud_backup_tag">备份到云端</string>
     <string name="backup_cloud_backup_tag_summary">备份收藏与历史漫画到云端</string>
-    <string name="backup_cloud_sync_tag">自动同步</string>
-    <string name="backup_cloud_sync_tag_summary">自动同步收藏到云</string>
+    <string name="backup_cloud_sync_tag">自动备份</string>
+    <string name="backup_cloud_sync_tag_summary">自动备份收藏和历史到云端</string>
     <string name="backup_cloud_upload_tag">本地备份上传</string>
     <string name="backup_cloud_upload_tag_summary">本地漫画备份文件上传到云端</string>
     <string name="backup_clear">清除</string>
