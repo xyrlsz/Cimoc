@@ -31,7 +31,6 @@ public abstract class BackActivity extends BaseActivity {
                     onBackPressed();
                 }
             });
-            mToolbar.setFitsSystemWindows(true);
         }
     }
 

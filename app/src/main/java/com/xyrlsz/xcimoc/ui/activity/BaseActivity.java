@@ -98,16 +98,16 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
             mToolbar.setTitle("");
             if (mToolbarTitle != null) {
                 mToolbarTitle.setText(getDefaultTitle());
-                mToolbar.setFitsSystemWindows(true);
             }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                mToolbar.setPadding(0, ViewUtils.getStatusBarHeight(this), 0, mToolbar.getPaddingBottom());
+            }
+//            mToolbar.setFitsSystemWindows(true);
             setSupportActionBar(mToolbar);
             if (getSupportActionBar() != null) {
                 getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             }
 
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-//                mToolbar.setPadding(0, ViewUtils.getStatusBarHeight(this), 0, mToolbar.getPaddingBottom());
-//            }
         }
     }
 
