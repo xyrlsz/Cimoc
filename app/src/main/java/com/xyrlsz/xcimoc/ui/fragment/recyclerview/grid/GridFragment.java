@@ -170,12 +170,14 @@ public abstract class GridFragment extends RecyclerViewFragment implements GridV
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        HintUtils.showToastLong(getContext(), R.string.fragment_destroy_tip);
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        App.restartApp();
+        if (!App.isNormalExited()) {
+            HintUtils.showToastLong(getContext(), R.string.fragment_destroy_tip);
+            App.restartApp();
+        }
     }
 }

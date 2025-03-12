@@ -70,7 +70,7 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
     private RecyclerView.RecycledViewPool mRecycledPool;
     private DaoSession mDaoSession;
     private ActivityLifecycle mActivityLifecycle;
-
+    private static boolean isNormalExited = false;
     public static Context getAppContext() {
         return mApp.getApplicationContext();
     }
@@ -158,6 +158,11 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
     }
 
     public static void exitApp() {
+        setIsNormalExited(true);
+        Context context = getAppContext();
+        if (context instanceof Activity) {
+            ((Activity) context).finish();
+        }
         System.exit(0);
     }
 
@@ -296,6 +301,12 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         MultiDex.install(this);
     }
 
+    public static boolean isNormalExited() {
+        return isNormalExited;
+    }
+    public static void setIsNormalExited(boolean isNormalExited) {
+        App.isNormalExited = isNormalExited;
+    }
     // 1.实现X509TrustManager接口
     private static class TrustAllCerts implements X509TrustManager {
         @Override

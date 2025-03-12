@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Environment;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -16,38 +17,33 @@ public class PermissionUtils {
 
     public static boolean hasStoragePermission(Activity activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-
+            // Android 13 (API 33) and above - use granular media permissions
             int imagesResult = checkPermission(activity, Manifest.permission.READ_MEDIA_IMAGES);
             int videoResult = checkPermission(activity, Manifest.permission.READ_MEDIA_VIDEO);
             int audioResult = checkPermission(activity, Manifest.permission.READ_MEDIA_AUDIO);
             return imagesResult == PackageManager.PERMISSION_GRANTED &&
                     videoResult == PackageManager.PERMISSION_GRANTED &&
                     audioResult == PackageManager.PERMISSION_GRANTED;
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // Android 11 (API 30) and Android 12 (API 31-32)
+            // Check for MANAGE_EXTERNAL_STORAGE permission
+            boolean check = Environment.isExternalStorageManager();
+            return check;
         } else {
+            // Android 10 (API 29) and below
+            int readResult = checkPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE);
             int writeResult = checkPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-            return writeResult == PackageManager.PERMISSION_GRANTED;
+            return readResult == PackageManager.PERMISSION_GRANTED &&
+                    writeResult == PackageManager.PERMISSION_GRANTED;
         }
     }
 
     public static boolean hasAllPermissions(Activity activity) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            int imagesResult = checkPermission(activity, Manifest.permission.READ_MEDIA_IMAGES);
-            int videoResult = checkPermission(activity, Manifest.permission.READ_MEDIA_VIDEO);
-            int audioResult = checkPermission(activity, Manifest.permission.READ_MEDIA_AUDIO);
-//            int readPhoneState = checkPermission(activity, Manifest.permission.READ_PHONE_STATE);
-            return imagesResult == PackageManager.PERMISSION_GRANTED &&
-                    videoResult == PackageManager.PERMISSION_GRANTED &&
-                    audioResult == PackageManager.PERMISSION_GRANTED ;
-//                    &&
-//                    readPhoneState == PackageManager.PERMISSION_GRANTED;
-        } else {
-            int readResult = checkPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE);
-            int writeResult = checkPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-            int readPhoneState = checkPermission(activity, Manifest.permission.READ_PHONE_STATE);
-            return readResult == PackageManager.PERMISSION_GRANTED &&
-                    writeResult == PackageManager.PERMISSION_GRANTED &&
-                    readPhoneState == PackageManager.PERMISSION_GRANTED;
-        }
+        boolean hasStoragePermission = hasStoragePermission(activity);
+        int readPhoneState = checkPermission(activity, Manifest.permission.READ_PHONE_STATE);
+
+        return hasStoragePermission &&
+                readPhoneState == PackageManager.PERMISSION_GRANTED;
     }
 
     public static int checkPermission(@NonNull Activity activity, @NonNull String permission) {

@@ -124,7 +124,13 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
                     HintUtils.showToast(MainActivity.this, R.string.main_double_click);
                     mExitTime = System.currentTimeMillis();
                 } else {
-//                    finish();
+                    App.setIsNormalExited(true);
+                    finishAffinity();
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                     System.exit(0);
                 }
             }
@@ -476,32 +482,31 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
 //                    startActivity(intent);
 //                }
             case DIALOG_REQUEST_PERMISSION:
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    //Above Android 11 (API 30)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        // Android 13 (API 33) and above
-                        ActivityCompat.requestPermissions(this, new String[]{
-                                Manifest.permission.READ_MEDIA_IMAGES,
-                                Manifest.permission.READ_MEDIA_VIDEO,
-                                Manifest.permission.READ_MEDIA_AUDIO
-                        }, Constants.RE_CODE_STORAGE_PERMISSION);
-
-                    }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    // Android 13 (API 33) and above
+                    ActivityCompat.requestPermissions(this, new String[]{
+                            Manifest.permission.READ_MEDIA_IMAGES,
+                            Manifest.permission.READ_MEDIA_VIDEO,
+                            Manifest.permission.READ_MEDIA_AUDIO,
+                            Manifest.permission.READ_PHONE_STATE
+                    }, Constants.RE_CODE_STORAGE_PERMISSION);
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    // Android 11 (API 30) and Android 12 (API 31-32)
                     if (!Environment.isExternalStorageManager()) {
                         Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
                         startActivity(intent);
-                    } else {
-                        // Fallback to request READ/WRITE_EXTERNAL_STORAGE for Android 11 and 12
-                        ActivityCompat.requestPermissions(this, new String[]{
-                                Manifest.permission.READ_EXTERNAL_STORAGE,
-                                Manifest.permission.WRITE_EXTERNAL_STORAGE
-                        }, Constants.RE_CODE_STORAGE_PERMISSION);
+
                     }
+                    ActivityCompat.requestPermissions(this, new String[]{
+                            Manifest.permission.READ_PHONE_STATE
+                    }, Constants.RE_CODE_STORAGE_PERMISSION);
+
                 } else {
                     // Below Android 11
                     ActivityCompat.requestPermissions(this, new String[]{
                             Manifest.permission.READ_EXTERNAL_STORAGE,
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                            Manifest.permission.READ_PHONE_STATE
                     }, Constants.RE_CODE_STORAGE_PERMISSION);
                 }
                 break;
@@ -673,7 +678,7 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
 //    }
 
     private void showPermission() {
-        if (!PermissionUtils.hasAllPermissions(this)) {
+        if (!PermissionUtils.hasStoragePermission(this)) {
             MessageDialogFragment fragment = MessageDialogFragment.newInstance(R.string.main_permission,
                     R.string.main_permission_content, false, DIALOG_REQUEST_PERMISSION);
             fragment.show(getSupportFragmentManager(), null);
