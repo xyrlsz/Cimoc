@@ -2,10 +2,10 @@ name: Sync Github Repos To Gitee
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  # push:
+  #   branches: [ "main" ]
+  # pull_request:
+  #   branches: [ "main" ]
   workflow_run:
       workflows: ["Android CI (tag)"]
       types:
