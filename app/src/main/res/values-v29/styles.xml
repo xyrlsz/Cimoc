@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="AppThemeNoDark" parent="AppTheme">
+    <style name="AppThemeNoDark" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:forceDarkAllowed">false</item>
     </style>
 </resources>

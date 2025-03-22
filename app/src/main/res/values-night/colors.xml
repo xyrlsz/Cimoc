@@ -21,4 +21,7 @@
 
     <color name="colorPrimaryBrown">#4E3733</color>
     <color name="colorPrimaryBrownDark">#2B1010</color>
+
+    <color name="colorBackground">#121212</color>  
+
 </resources>
