@@ -3,6 +3,7 @@ package com.xyrlsz.xcimoc.ui.activity;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.net.Uri;
+
 import androidx.appcompat.widget.AppCompatSpinner;
 
 import android.view.View;
@@ -37,10 +38,12 @@ public class AboutActivity extends BackActivity implements AboutView, AdapterVie
     TextView mVersionName;
     @BindView(R.id.about_layout)
     View mLayoutView;
-
     private AboutPresenter mPresenter;
     private boolean update = false;
     private boolean checking = false;
+    private TextView tvHomePageUrl;
+    private TextView tvResourceUrl;
+    private TextView tvSupportUrl;
 
     private List<String> listSources = new ArrayList<>();
 
@@ -57,6 +60,14 @@ public class AboutActivity extends BackActivity implements AboutView, AdapterVie
         try {
             PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), 0);
             mVersionName.setText(StringUtils.format("Version  %s (%s)", info.versionName, info.versionCode));
+
+            tvHomePageUrl = findViewById(R.id.tv_about_home_page_url);
+            tvResourceUrl = findViewById(R.id.tv_about_resource_url);
+            tvSupportUrl = findViewById(R.id.tv_about_support_url);
+            tvHomePageUrl.setText(Constants.GITHUB_HOME_PAGE_URL);
+            tvResourceUrl.setText(Constants.GITHUB_RELEASE_URL);
+            tvSupportUrl.setText(Constants.GITHUB_ISSUE_URL);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -64,7 +75,7 @@ public class AboutActivity extends BackActivity implements AboutView, AdapterVie
 
     @OnClick(R.id.home_page_btn)
     void onHomeClick() {
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.home_page_url)));
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.GITHUB_HOME_PAGE_URL));
         try {
             startActivity(intent);
         } catch (Exception e) {
@@ -84,7 +95,7 @@ public class AboutActivity extends BackActivity implements AboutView, AdapterVie
 
     @OnClick(R.id.about_support_btn)
     void onSupportClick() {
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.about_support_url)));
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.GITHUB_ISSUE_URL));
         try {
             startActivity(intent);
         } catch (Exception e) {
@@ -94,7 +105,7 @@ public class AboutActivity extends BackActivity implements AboutView, AdapterVie
 
     @OnClick(R.id.about_resource_btn)
     void onResourceClick() {
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.about_resource_url)));
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.GITHUB_HOME_PAGE_URL));
         try {
             startActivity(intent);
         } catch (Exception e) {
@@ -111,6 +122,7 @@ public class AboutActivity extends BackActivity implements AboutView, AdapterVie
             showSnackbar(R.string.about_resource_fail);
         }
     }
+
     @OnClick(R.id.tv_resource_ori_url_1)
     void onOriResourceClick1() {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.about_resource_ori_url_1)));
@@ -124,7 +136,7 @@ public class AboutActivity extends BackActivity implements AboutView, AdapterVie
     @OnClick(R.id.about_update_btn)
     void onUpdateClick() {
 //        if (update) {
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.about_update_url)));
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.GITHUB_RELEASE_URL));
         try {
             startActivity(intent);
         } catch (Exception e) {
@@ -181,7 +193,7 @@ public class AboutActivity extends BackActivity implements AboutView, AdapterVie
 
     private void update() {
 //        if (Update.update(this)) {
-            mUpdateText.setText(R.string.about_update_summary);
+        mUpdateText.setText(R.string.about_update_summary);
 //        } else {
 //            showSnackbar(R.string.about_resource_fail);
 //        }
@@ -216,8 +228,7 @@ public class AboutActivity extends BackActivity implements AboutView, AdapterVie
         try {
             if (App.getPreferenceManager().getString(PreferenceManager.PREF_UPDATE_CURRENT_URL).equals(Constants.UPDATE_GITHUB_URL)) {
                 spinner.setSelection(1);
-            }
-            else if (App.getPreferenceManager().getString(PreferenceManager.PREF_UPDATE_CURRENT_URL).equals(Constants.UPDATE_GITEE_URL)) {
+            } else if (App.getPreferenceManager().getString(PreferenceManager.PREF_UPDATE_CURRENT_URL).equals(Constants.UPDATE_GITEE_URL)) {
                 spinner.setSelection(2);
             }
         } catch (NullPointerException e) {

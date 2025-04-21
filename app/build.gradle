@@ -69,8 +69,10 @@ android {
         versionCode buildVersion // 动态生成的版本号
         versionName version
         resourceConfigurations += ['en', 'zh']
-// Git 标签作为版本名
         multiDexEnabled true
+
+        buildConfigField "String", "REPOSITORIE_NAME", '"Cimoc"'
+        buildConfigField "String", "OWNER_NAME", '"xyrlsz"'
     }
 
     signingConfigs {

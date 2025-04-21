@@ -28,7 +28,6 @@
                 android:textSize="54sp" />
 
             <TextView
-                android:visibility="gone"
                 android:id="@+id/about_version_byname"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -36,7 +35,8 @@
                 android:layout_centerHorizontal="true"
                 android:text="@string/about_version"
                 android:textColor="@color/white"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:visibility="gone" />
 
             <TextView
                 android:id="@+id/about_version_name"
@@ -61,12 +61,12 @@
                 android:paddingTop="15dip">
 
                 <LinearLayout
-	                android:focusable="true"
                     android:id="@+id/home_page_btn"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="?android:attr/selectableItemBackground"
                     android:clickable="true"
+                    android:focusable="true"
                     android:gravity="center_vertical"
                     android:orientation="vertical"
                     android:padding="16dp">
@@ -79,10 +79,11 @@
                         android:textSize="16sp" />
 
                     <TextView
+                        android:id="@+id/tv_about_home_page_url"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:paddingTop="2dp"
-                        android:text="@string/home_page_url"
+
                         android:textSize="14sp" />
                 </LinearLayout>
 
@@ -114,16 +115,16 @@
                 </LinearLayout>
 
                 <LinearLayout
-	                android:focusable="true"
-                    android:visibility="gone"
                     android:id="@+id/about_resource_btn"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="?android:attr/selectableItemBackground"
                     android:clickable="true"
+                    android:focusable="true"
                     android:gravity="center_vertical"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="16dp"
+                    android:visibility="gone">
 
                     <TextView
                         android:layout_width="match_parent"
@@ -133,20 +134,21 @@
                         android:textSize="16sp" />
 
                     <TextView
+                        android:id="@+id/tv_about_resource_url"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:paddingTop="2dp"
-                        android:text="@string/about_resource_url"
+
                         android:textSize="14sp" />
                 </LinearLayout>
 
                 <LinearLayout
-	                android:focusable="true"
                     android:id="@+id/about_resource_ori_btn"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="?android:attr/selectableItemBackground"
                     android:clickable="true"
+                    android:focusable="true"
                     android:gravity="center_vertical"
                     android:orientation="vertical"
                     android:padding="16dp">
@@ -194,10 +196,10 @@
                         android:textSize="16sp" />
 
                     <TextView
+                        android:id="@+id/tv_about_support_url"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:paddingTop="2dp"
-                        android:text="@string/about_support_url"
                         android:textSize="14sp" />
                 </LinearLayout>
             </LinearLayout>
