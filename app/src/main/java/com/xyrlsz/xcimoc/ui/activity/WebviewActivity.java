@@ -11,15 +11,13 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.xyrlsz.xcimoc.R;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class WebviewActivity extends AppCompatActivity {
+public class WebviewActivity extends BackActivity {
 
     private WebView webView;
     public static final String EXTRA_WEB_URL = "extra_web_url";
@@ -92,6 +90,11 @@ public class WebviewActivity extends AppCompatActivity {
         });
         exitButton.setOnClickListener(v -> finish());
 
+    }
+
+    @Override
+    protected int getLayoutRes() {
+        return R.layout.activity_webview;
     }
 
     @Override
