@@ -27,7 +27,7 @@ public class WebviewActivity extends AppCompatActivity {
     public static final String EXTRA_WEB_HTML = "extra_web_html";
     public static final String EXTRA_IS_USE_TO_WEB_PARSER = "extra_is_use_to_web_parser";
     private String htmlStr = "";
-    String nowUrl = "";
+
     FloatingActionButton loadButton;
     FloatingActionButton exitButton;
 
@@ -61,11 +61,7 @@ public class WebviewActivity extends AppCompatActivity {
 
             }
 
-            @Override
-            public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
-                super.onPageStarted(view, url, favicon);
-                nowUrl = url;
-            }
+
         });
 
 
@@ -91,7 +87,7 @@ public class WebviewActivity extends AppCompatActivity {
 
         loadButton.setOnClickListener(v -> {
             Intent intent = new Intent(WebviewActivity.this, BrowserFilter.class);
-            intent.putExtra(URL_KEY, nowUrl);
+            intent.putExtra(URL_KEY, webView.getOriginalUrl());
             startActivity(intent);
         });
         exitButton.setOnClickListener(v -> finish());
