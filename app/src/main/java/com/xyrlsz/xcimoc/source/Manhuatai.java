@@ -14,6 +14,7 @@ import com.xyrlsz.xcimoc.parser.JsonIterator;
 import com.xyrlsz.xcimoc.parser.MangaCategory;
 import com.xyrlsz.xcimoc.parser.MangaParser;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
+import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
@@ -54,6 +55,12 @@ public class Manhuatai extends MangaParser {
 
     public static Source getDefaultSource() {
         return new Source(null, DEFAULT_TITLE, TYPE, true);
+    }
+
+    @Override
+    protected void initUrlFilterList() {
+        super.initUrlFilterList();
+        filter.add(new UrlFilter("www.kanman.com"));
     }
 
     @Override

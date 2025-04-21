@@ -19,7 +19,7 @@
                 android:id="@+id/item_grid_image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                fresco:actualImageScaleType="fitCenter" />
+                fresco:actualImageScaleType="focusCrop" />
 
             <View
                 android:id="@+id/item_grid_symbol"

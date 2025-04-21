@@ -52,7 +52,7 @@ public class UpdateHelper {
     private static void initComicSourceTable() {
 
         ComicSourceTable.put(Animx2.TYPE, Animx2.getDefaultSource());
-        ComicSourceTable.put(Baozi.TYPE, DuManWu.getDefaultSource());
+        ComicSourceTable.put(Baozi.TYPE, Baozi.getDefaultSource());
         ComicSourceTable.put(BuKa.TYPE, BuKa.getDefaultSource());
         ComicSourceTable.put(Cartoonmad.TYPE, Cartoonmad.getDefaultSource());
         ComicSourceTable.put(CopyMH.TYPE, CopyMH.getDefaultSource());

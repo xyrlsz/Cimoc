@@ -7,11 +7,25 @@ import android.os.Bundle;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.manager.SourceManager;
 import com.xyrlsz.xcimoc.source.Animx2;
+import com.xyrlsz.xcimoc.source.Baozi;
 import com.xyrlsz.xcimoc.source.BuKa;
 import com.xyrlsz.xcimoc.source.Cartoonmad;
+import com.xyrlsz.xcimoc.source.CopyMH;
 import com.xyrlsz.xcimoc.source.DM5;
+import com.xyrlsz.xcimoc.source.Dmzj;
+import com.xyrlsz.xcimoc.source.DongManManHua;
+import com.xyrlsz.xcimoc.source.DuManWu;
+import com.xyrlsz.xcimoc.source.DuManWuOrg;
+import com.xyrlsz.xcimoc.source.GoDaManHua;
+import com.xyrlsz.xcimoc.source.GuFeng;
 import com.xyrlsz.xcimoc.source.HotManga;
 import com.xyrlsz.xcimoc.source.IKanman;
+import com.xyrlsz.xcimoc.source.Komiic;
+import com.xyrlsz.xcimoc.source.MYCOMIC;
+import com.xyrlsz.xcimoc.source.MangaBZ;
+import com.xyrlsz.xcimoc.source.Mangakakalot;
+import com.xyrlsz.xcimoc.source.Manhuatai;
+import com.xyrlsz.xcimoc.source.Manhuayu;
 import com.xyrlsz.xcimoc.source.MiGu;
 import com.xyrlsz.xcimoc.source.Tencent;
 import com.xyrlsz.xcimoc.source.YKMH;
@@ -21,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BrowserFilter extends BaseActivity {
+    public static final String URL_KEY = "url";
 
     @Override
     protected int getLayoutRes() {
@@ -47,29 +62,29 @@ public class BrowserFilter extends BaseActivity {
 
     private List<Integer> registUrlListener() {
         List<Integer> list = new ArrayList<>();
-
-//        list.add(Dmzjv2.TYPE);
-        list.add(BuKa.TYPE);
-//        list.add(PuFei.TYPE);
-        list.add(Cartoonmad.TYPE);
         list.add(Animx2.TYPE);
-//        list.add(MH517.TYPE);
-//        list.add(BaiNian.TYPE);
-        list.add(MiGu.TYPE);
-        list.add(Tencent.TYPE);
-//        list.add(U17.TYPE);
-//        list.add(MH57.TYPE);
-//        list.add(MH50.TYPE);
+        list.add(Baozi.TYPE);
+        list.add(BuKa.TYPE);
+        list.add(Cartoonmad.TYPE);
+        list.add(CopyMH.TYPE);
         list.add(DM5.TYPE);
-        list.add(IKanman.TYPE);
-//        list.add(Hhxxee.TYPE);
-//        list.add(BaiNian.TYPE);
-//        list.add(ChuiXue.TYPE);
-//        list.add(ManHuaDB.TYPE);
-//        list.add(TuHao.TYPE);
-        list.add(YKMH.TYPE);
-//        list.add(SixMH.TYPE);
+        list.add(Dmzj.TYPE);
+        list.add(GuFeng.TYPE);
         list.add(HotManga.TYPE);
+        list.add(IKanman.TYPE);
+        list.add(Mangakakalot.TYPE);
+        list.add(MangaBZ.TYPE);
+        list.add(Manhuatai.TYPE);
+        list.add(MiGu.TYPE);
+        list.add(MYCOMIC.TYPE);
+        list.add(Tencent.TYPE);
+        list.add(DongManManHua.TYPE);
+        list.add(YKMH.TYPE);
+        list.add(DuManWu.TYPE);
+        list.add(DuManWuOrg.TYPE);
+        list.add(Komiic.TYPE);
+        list.add(Manhuayu.TYPE);
+        list.add(GoDaManHua.TYPE);
         return list;
     }
 
@@ -79,8 +94,9 @@ public class BrowserFilter extends BaseActivity {
             String comicId;
 
             for (int i : registUrlListener()) {
-                if (mSourceManager.getParser(i).isHere(uri)
-                        && ((comicId = mSourceManager.getParser(i).getComicId(uri)) != null)) {
+                boolean isHere = mSourceManager.getParser(i).isHere(uri);
+                comicId = mSourceManager.getParser(i).getComicId(uri);
+                if (isHere && comicId != null) {
                     openDetailActivity(i, comicId);
                 }
             }
@@ -105,8 +121,14 @@ public class BrowserFilter extends BaseActivity {
             }
         }
 
+        // 来自输入链接
+        else if (intent.hasExtra(URL_KEY)) {
+            String url = intent.getStringExtra(URL_KEY);
+            openReader(Uri.parse(url));
+        }
+
         //来自分享
-        if (Intent.ACTION_SEND.equals(action) && "text/plain".equals(type)) {
+        else if (Intent.ACTION_SEND.equals(action) && "text/plain".equals(type)) {
             try {
                 openReader(Uri.parse(intent.getStringExtra(Intent.EXTRA_TEXT).replace("https://m.ykmh.commanhua", "https://m.ykmh.com/manhua")));
             } catch (Exception ex) {

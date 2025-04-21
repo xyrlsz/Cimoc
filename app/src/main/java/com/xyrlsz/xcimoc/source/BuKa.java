@@ -93,7 +93,7 @@ public class BuKa extends MangaParser {
 
     @Override
     protected void initUrlFilterList() {
-        filter.add(new UrlFilter("www.bukamh.org"));
+        filter.add(new UrlFilter("www.bukamh.org", ".*",0));
     }
 
     @Override

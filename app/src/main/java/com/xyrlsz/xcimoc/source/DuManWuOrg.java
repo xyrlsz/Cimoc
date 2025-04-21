@@ -48,8 +48,8 @@ public class DuManWuOrg extends MangaParser {
 //        } else {
 //            url = StringUtils.format("%s/search/%s/%d", baseUrl, keyword, page);
 //        }
-        if(page != 1){
-            return  null;
+        if (page != 1) {
+            return null;
         }
         url = baseUrl + "/index.php/search?key=" + keyword;
         return new Request.Builder().url(url).build();
@@ -80,8 +80,8 @@ public class DuManWuOrg extends MangaParser {
 
     @Override
     protected void initUrlFilterList() {
-        filter.add(new UrlFilter("dumanwu.org"));
-        filter.add(new UrlFilter("www.dumanwu.org"));
+        filter.add(new UrlFilter("dumanwu.org", "comic/(\\w+)"));
+        filter.add(new UrlFilter("www.dumanwu.org", "comic/(\\w+)"));
     }
 
     @Override
@@ -94,8 +94,8 @@ public class DuManWuOrg extends MangaParser {
     public Comic parseInfo(String html, Comic comic) throws UnsupportedEncodingException {
         Node body = new Node(html);
         String title = body.text(".comicInfo > .info > .title");
-        if(title.contains("分")){
-            title = title.substring(title.indexOf("分")+1);
+        if (title.contains("分")) {
+            title = title.substring(title.indexOf("分") + 1);
         }
         String cover = body.src(".comicInfo > .cover > .img > img");
         List<Node> infoList = body.list(".comicInfo > .info > p > span");

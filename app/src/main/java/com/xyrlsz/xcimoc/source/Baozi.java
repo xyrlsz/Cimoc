@@ -71,7 +71,7 @@ public class Baozi extends MangaParser {
 
     @Override
     protected void initUrlFilterList() {
-        filter.add(new UrlFilter("cn.baozimhcn.com"));
+        filter.add(new UrlFilter("cn.baozimhcn.com","comic/([\\w\\-]+)"));
     }
 
     @Override

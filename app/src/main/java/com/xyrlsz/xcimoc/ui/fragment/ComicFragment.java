@@ -1,11 +1,17 @@
 package com.xyrlsz.xcimoc.ui.fragment;
 
+import static com.xyrlsz.xcimoc.ui.activity.BrowserFilter.URL_KEY;
+
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.ColorRes;
@@ -21,6 +27,7 @@ import com.xyrlsz.xcimoc.manager.TagManager;
 import com.xyrlsz.xcimoc.model.Tag;
 import com.xyrlsz.xcimoc.presenter.BasePresenter;
 import com.xyrlsz.xcimoc.presenter.ComicPresenter;
+import com.xyrlsz.xcimoc.ui.activity.BrowserFilter;
 import com.xyrlsz.xcimoc.ui.activity.PartFavoriteActivity;
 import com.xyrlsz.xcimoc.ui.activity.SearchActivity;
 import com.xyrlsz.xcimoc.ui.adapter.TabPagerAdapter;
@@ -55,6 +62,7 @@ public class ComicFragment extends BaseFragment implements ComicView {
     private TabPagerAdapter mTabAdapter;
     private List<Tag> mTagList;
     private String currTitle;
+
     @Override
     protected BasePresenter initPresenter() {
         mPresenter = new ComicPresenter();
@@ -173,8 +181,29 @@ public class ComicFragment extends BaseFragment implements ComicView {
             case R.id.comic_cancel_highlight:
                 ((FavoriteFragment) mTabAdapter.getItem(1)).cancelAllHighlight();
                 break;
+
+            case R.id.comic_open_use_url:
+                AlertDialog dialog = getAlertDialog();
+                dialog.show();
+                break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private AlertDialog getAlertDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle(getString(R.string.comic_open_use_url_dialog_title));
+        final EditText input = new EditText(getContext());
+        input.setHint(getString(R.string.comic_open_use_url_dialog_content));
+        builder.setView(input);
+        builder.setPositiveButton(getString(R.string.dialog_positive), (dialog, which) -> {
+            String userInput = input.getText().toString();
+            Intent intent = new Intent(getActivity(), BrowserFilter.class);
+            intent.putExtra(URL_KEY, userInput);
+            startActivity(intent);
+        });
+        builder.setNegativeButton(getString(R.string.dialog_negative), (dialog, which) -> dialog.cancel());
+        return builder.create();
     }
 
     @Override
@@ -238,8 +267,8 @@ public class ComicFragment extends BaseFragment implements ComicView {
         return currTitle;
     }
 
-    private void setToolbarTitle(CharSequence title){
-        if(mToolbarTitle!=null){
+    private void setToolbarTitle(CharSequence title) {
+        if (mToolbarTitle != null) {
             mToolbarTitle.setText(title);
         }
     }

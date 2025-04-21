@@ -50,7 +50,7 @@ class MangaBZ(source: Source?) : MangaParser() {
     }
 
     override fun initUrlFilterList() {
-        filter.add(UrlFilter("www.mangabz.com"))
+        filter.add(UrlFilter("www.mangabz.com", ".*", 0))
     }
 
     override fun getInfoRequest(cid: String): Request {
@@ -59,12 +59,14 @@ class MangaBZ(source: Source?) : MangaParser() {
     }
 
     @Throws(UnsupportedEncodingException::class)
-    override fun parseInfo(html: String, comic: Comic):Comic {
+    override fun parseInfo(html: String, comic: Comic): Comic {
         val body = Node(html)
         val title = body.text(".detail-info-title")
         val cover = body.src(".detail-info-cover")
-        val update = StringUtils.match("(..月..號 | ....-..-..)",
-                body.text(".detail-list-form-title"), 1)
+        val update = StringUtils.match(
+            "(..月..號 | ....-..-..)",
+            body.text(".detail-list-form-title"), 1
+        )
         val author = body.text(".detail-info-tip > span > a")
         val intro = body.text(".detail-info-content")
         val status = isFinish(".detail-list-form-title")
@@ -81,7 +83,14 @@ class MangaBZ(source: Source?) : MangaParser() {
             val path = node.href().trim('/')
 
             //list.add(Chapter(title, path))
-            list.add(Chapter((sourceComic.toString() + "0" + i++).toLong(), sourceComic, title, path))
+            list.add(
+                Chapter(
+                    (sourceComic.toString() + "0" + i++).toLong(),
+                    sourceComic,
+                    title,
+                    path
+                )
+            )
         }
         return list
     }
@@ -94,8 +103,8 @@ class MangaBZ(source: Source?) : MangaParser() {
         this._cid = cid
         this._path = path
         return Request.Builder()
-                .url(url)
-                .build()
+            .url(url)
+            .build()
     }
 
     fun getValFromRegex(html: String, keyword: String, searchfor: String): String? {
@@ -104,7 +113,7 @@ class MangaBZ(source: Source?) : MangaParser() {
         return match?.groups?.get(1)?.value
     }
 
-    override fun parseImages(html: String,chapter: Chapter ): List<ImageUrl> {
+    override fun parseImages(html: String, chapter: Chapter): List<ImageUrl> {
         val list: MutableList<ImageUrl> = LinkedList()
         try {
             // get page num
@@ -113,7 +122,8 @@ class MangaBZ(source: Source?) : MangaParser() {
             val sign = getValFromRegex(html, "MANGABZ_VIEWSIGN", """\"(\w+)\"""")!!
             val pageCount = getValFromRegex(html, "MANGABZ_IMAGE_COUNT", "(\\d+)")!!.toInt()
             for (i in 1..pageCount) {
-                val url = "http://www.mangabz.com/$_path/chapterimage.ashx?cid=$cid&page=$i&key=&_cid=$cid&_mid=$mid&_sign=$sign&_dt="
+                val url =
+                    "http://www.mangabz.com/$_path/chapterimage.ashx?cid=$cid&page=$i&key=&_cid=$cid&_mid=$mid&_sign=$sign&_dt="
                 //list.add(ImageUrl(i + 1, url, true))
 
                 val comicChapter = chapter.id
@@ -130,21 +140,24 @@ class MangaBZ(source: Source?) : MangaParser() {
     override fun getLazyRequest(url: String?): Request? {
         val dateFmt = "yyyy-MM-dd+HH:mm:ss"
         val dateStr =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val current = LocalDateTime.now()
-            val formatter = DateTimeFormatter.ofPattern(dateFmt)
-            current.format(formatter)
-        } else {
-            var date = Date();
-            val formatter = SimpleDateFormat(dateFmt)
-            formatter.format(date)
-        }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val current = LocalDateTime.now()
+                val formatter = DateTimeFormatter.ofPattern(dateFmt)
+                current.format(formatter)
+            } else {
+                var date = Date();
+                val formatter = SimpleDateFormat(dateFmt)
+                formatter.format(date)
+            }
 
 
         return Request.Builder()
-                .addHeader("Referer", "http://www.mangabz.com/$_path/")
-                .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36")
-                .url(url + dateStr).build()
+            .addHeader("Referer", "http://www.mangabz.com/$_path/")
+            .addHeader(
+                "User-Agent",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36"
+            )
+            .url(url + dateStr).build()
     }
 
     override fun parseLazy(html: String?, url: String?): String? {
@@ -157,8 +170,10 @@ class MangaBZ(source: Source?) : MangaParser() {
     }
 
     override fun parseCheck(html: String?): String? {
-        return StringUtils.match("(..月..號 | ....-..-..)",
-                Node(html).text(".detail-list-form-title"), 1)
+        return StringUtils.match(
+            "(..月..號 | ....-..-..)",
+            Node(html).text(".detail-list-form-title"), 1
+        )
     }
 
     override fun getHeader(): Headers {

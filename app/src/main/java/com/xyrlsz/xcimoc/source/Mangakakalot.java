@@ -11,6 +11,7 @@ import com.xyrlsz.xcimoc.parser.MangaCategory;
 import com.xyrlsz.xcimoc.parser.MangaParser;
 import com.xyrlsz.xcimoc.parser.NodeIterator;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
+import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
@@ -40,6 +41,12 @@ public class Mangakakalot extends MangaParser {
 //        init(source, new Category());
         init(source, null);
         setParseImagesUseWebParser(true);
+    }
+
+    @Override
+    protected void initUrlFilterList() {
+        super.initUrlFilterList();
+        filter.add(new UrlFilter("mangakakalot.to", ".*", 0));
     }
 
     public static Source getDefaultSource() {
@@ -83,7 +90,7 @@ public class Mangakakalot extends MangaParser {
 
     @Override
     public String getUrl(String cid) {
-        return baseUrl + cid;
+        return baseUrl + "/" + cid;
     }
 
     /**
@@ -93,7 +100,7 @@ public class Mangakakalot extends MangaParser {
      */
     @Override
     public Request getInfoRequest(String cid) {
-        return new Request.Builder().url(baseUrl + cid).addHeader("Referer", baseUrl + "/").build();
+        return new Request.Builder().url(baseUrl + "/" + cid).addHeader("Referer", baseUrl + "/").build();
     }
 
     /**
@@ -121,7 +128,7 @@ public class Mangakakalot extends MangaParser {
         List<String> tmp = Arrays.asList(cid.split("-"));
         return new Request.Builder()
                 .url(baseUrl + "/ajax/manga/list-chapter-volume?id=" + tmp.get(tmp.size() - 1))
-                .header("referer", baseUrl + cid)
+                .header("referer", baseUrl + "/" + cid)
                 .build();
     }
 
@@ -152,8 +159,8 @@ public class Mangakakalot extends MangaParser {
      */
     @Override
     public Request getImagesRequest(String cid, String path) {
-        return new Request.Builder().url(baseUrl + path)
-                .addHeader("Referer", baseUrl + cid)
+        return new Request.Builder().url(baseUrl + "/" + path)
+                .addHeader("Referer", baseUrl + "/" + cid)
                 .addHeader("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
                 .build();
     }

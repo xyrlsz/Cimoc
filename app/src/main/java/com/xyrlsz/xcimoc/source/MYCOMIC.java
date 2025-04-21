@@ -7,6 +7,7 @@ import com.xyrlsz.xcimoc.model.Source;
 import com.xyrlsz.xcimoc.parser.MangaParser;
 import com.xyrlsz.xcimoc.parser.NodeIterator;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
+import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
@@ -33,10 +34,7 @@ public class MYCOMIC extends MangaParser {
 
     public static final int TYPE = 103;
     public static final String DEFAULT_TITLE = "MYCOMIC";
-
     private static final String baseUrl = "https://mycomic.com";
-
-
     public MYCOMIC(Source source) {
         init(source, null);
     }
@@ -80,7 +78,7 @@ public class MYCOMIC extends MangaParser {
 
     @Override
     protected void initUrlFilterList() {
-//        filter.add(new UrlFilter("mycomic.com"));
+        filter.add(new UrlFilter("mycomic.com"));
     }
 
     @Override

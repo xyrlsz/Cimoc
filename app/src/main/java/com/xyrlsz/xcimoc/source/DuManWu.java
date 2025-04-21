@@ -87,7 +87,8 @@ public class DuManWu extends MangaParser {
 
     @Override
     protected void initUrlFilterList() {
-        filter.add(new UrlFilter("dumanwu.com"));
+        filter.add(new UrlFilter("dumanwu.com",".*",0));
+        filter.add(new UrlFilter("dumanwu1.com",".*",0));
     }
 
     @Override

@@ -20,4 +20,9 @@
         android:id="@+id/comic_cancel_highlight"
         android:title="@string/comic_cancel_highlight"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/comic_open_use_url"
+        android:title="@string/comic_open_use_url"
+        app:showAsAction="never" />
 </menu>

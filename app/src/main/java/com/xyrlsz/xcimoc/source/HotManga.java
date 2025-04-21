@@ -61,7 +61,7 @@ public class HotManga extends MangaParser {
 
     @Override
     protected void initUrlFilterList() {
-        filter.add(new UrlFilter("www.manga2024.com", "/comic/(\\w.+)"));
+        filter.add(new UrlFilter("manga2025.com", "/comic/(\\w.+)"));
     }
 
     @Override

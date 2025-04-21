@@ -74,7 +74,7 @@ public class YKMH extends MangaParser {
 
     @Override
     protected void initUrlFilterList() {
-        filter.add(new UrlFilter("m.ykmh.net", "/manhua/(\\w.+)/"));
+        filter.add(new UrlFilter("m.ykmh.net", "/manhua/(\\w.+)"));
 
     }
 

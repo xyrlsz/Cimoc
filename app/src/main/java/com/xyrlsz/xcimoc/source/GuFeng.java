@@ -8,6 +8,7 @@ import com.xyrlsz.xcimoc.model.Source;
 import com.xyrlsz.xcimoc.parser.MangaParser;
 import com.xyrlsz.xcimoc.parser.NodeIterator;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
+import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
@@ -34,6 +35,12 @@ public class GuFeng extends MangaParser {
 
     public GuFeng(Source source) {
         init(source, null);
+    }
+
+    @Override
+    protected void initUrlFilterList() {
+        super.initUrlFilterList();
+        filter.add(new UrlFilter("gufengmh.com", "manhua/(\\w+)"));
     }
 
     @Override
@@ -106,7 +113,7 @@ public class GuFeng extends MangaParser {
     @Override
     public List<Chapter> parseChapter(String html, Comic comic, Long sourceComic) {
         List<Chapter> list = new LinkedList<>();
-        int i=0;
+        int i = 0;
         for (Node node : new Node(html).list("ul[id^=chapter-list] > li > a")) {
             String title = node.text();
             String path = node.hrefWithSplit(2);

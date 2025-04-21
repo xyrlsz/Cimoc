@@ -11,6 +11,7 @@ import com.xyrlsz.xcimoc.model.Source;
 import com.xyrlsz.xcimoc.parser.MangaParser;
 import com.xyrlsz.xcimoc.parser.NodeIterator;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
+import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
@@ -49,6 +50,12 @@ public class GoDaManHua extends MangaParser {
 
     public static Source getDefaultSource() {
         return new Source(null, DEFAULT_TITLE, TYPE, true);
+    }
+
+    @Override
+    protected void initUrlFilterList() {
+        super.initUrlFilterList();
+        filter.add(new UrlFilter("manhuafree.com", "manga/(\\w+)"));
     }
 
     @Override

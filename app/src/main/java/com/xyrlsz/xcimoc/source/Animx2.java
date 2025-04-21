@@ -68,7 +68,7 @@ public class Animx2 extends MangaParser {
 
     @Override
     protected void initUrlFilterList() {
-        filter.add(new UrlFilter("m.bnmanhua.com", ".*", 0));
+        filter.add(new UrlFilter("www.2animx.com", ".*",0));
     }
 
     @Override

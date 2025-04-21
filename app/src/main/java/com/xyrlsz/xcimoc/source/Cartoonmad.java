@@ -114,7 +114,7 @@ public class Cartoonmad extends MangaParser {
     public List<Chapter> parseChapter(String html, Comic comic, Long sourceComic) {
         List<Chapter> list = new LinkedList<>();
         Matcher mChapter = Pattern.compile("<a href=(.*?) target=_blank>(.*?)<\\/a>&nbsp;").matcher(html);
-        int i=0;
+        int i = 0;
         while (mChapter.find()) {
             String title = mChapter.group(2);
             String path = mChapter.group(1);
@@ -134,7 +134,7 @@ public class Cartoonmad extends MangaParser {
     }
 
     @Override
-    public List<ImageUrl> parseImages(String html,Chapter chapter) {
+    public List<ImageUrl> parseImages(String html, Chapter chapter) {
         List<ImageUrl> list = new ArrayList<>();
         Matcher pageMatcher = Pattern.compile("<a class=onpage>.*<a class=pages href=(.*)\\d{3}\\.html>(.*?)<\\/a>").matcher(html);
         if (!pageMatcher.find()) return null;
@@ -142,7 +142,7 @@ public class Cartoonmad extends MangaParser {
         for (int i = 1; i <= page; ++i) {
             Long comicChapter = chapter.getId();
             Long id = Long.parseLong(comicChapter + "0" + i);
-            String url = StringUtils.format("https://cc.fun8.us/post/%s%03d.html", pageMatcher.group(1),i);
+            String url = StringUtils.format("https://cc.fun8.us/post/%s%03d.html", pageMatcher.group(1), i);
             list.add(new ImageUrl(id, comicChapter, i, url, true));
         }
         return list;
