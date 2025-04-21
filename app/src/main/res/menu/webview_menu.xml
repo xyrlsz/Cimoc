@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/copy_link"
+        android:title="复制链接" />
+<!--    <item-->
+<!--        android:id="@+id/change_ua_to_pc"-->
+<!--        android:title="设置成电脑UA" />-->
+<!--    <item-->
+<!--        android:id="@+id/change_ua_to_mobile"-->
+<!--        android:title="设置成手机UA" />-->
+    <item
+        android:id="@+id/refresh_page"
+        android:title="刷新页面" />
+</menu>

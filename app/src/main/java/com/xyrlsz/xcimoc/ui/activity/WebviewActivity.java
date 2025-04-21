@@ -3,16 +3,23 @@ package com.xyrlsz.xcimoc.ui.activity;
 import static com.xyrlsz.xcimoc.ui.activity.BrowserFilter.URL_KEY;
 
 import android.annotation.SuppressLint;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.MenuItem;
+import android.view.View;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.PopupMenu;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.xyrlsz.xcimoc.R;
+import com.xyrlsz.xcimoc.utils.HintUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,14 +27,13 @@ import java.util.Map;
 public class WebviewActivity extends BackActivity {
 
     private WebView webView;
+    private FloatingActionButton loadButton;
+    private FloatingActionButton exitButton;
     public static final String EXTRA_WEB_URL = "extra_web_url";
     public static final String EXTRA_WEB_HEADERS = "extra_web_headers";
     public static final String EXTRA_WEB_HTML = "extra_web_html";
     public static final String EXTRA_IS_USE_TO_WEB_PARSER = "extra_is_use_to_web_parser";
     private String htmlStr = "";
-
-    FloatingActionButton loadButton;
-    FloatingActionButton exitButton;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -69,6 +75,14 @@ public class WebviewActivity extends BackActivity {
         // 启用 JavaScript 和 DOM 存储
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setDomStorageEnabled(true);
+        webView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                // 显示自定义菜单
+                showCustomMenu();
+                return true; // 返回true表示已处理长按事件
+            }
+        });
 
         // 从 Intent 中获取 URL
         String url = getIntent().getStringExtra(EXTRA_WEB_URL);
@@ -152,5 +166,41 @@ public class WebviewActivity extends BackActivity {
         });
     }
 
+    private void showCustomMenu() {
+        PopupMenu popup = new PopupMenu(getApplicationContext(), loadButton);
+        popup.getMenuInflater().inflate(R.menu.webview_menu, popup.getMenu());
 
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.copy_link:
+                        // 复制链接到剪贴板
+                        String url = webView.getUrl();
+                        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                        ClipData clip = ClipData.newPlainText("URL", url);
+                        clipboard.setPrimaryClip(clip);
+                        HintUtils.showToast(getApplicationContext(), "链接已复制到剪贴板");
+                        return true;
+                    case R.id.refresh_page:
+                        // 刷新
+                        webView.reload();
+                        return true;
+//                    case R.id.change_ua_to_pc:
+//                        // 切换 UA 为 PC 版
+//                        String pcUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0";
+//                        webView.getSettings().setUserAgentString(pcUserAgent);
+//                        webView.reload(); // 刷新使UA生效
+//                    case R.id.change_ua_to_mobile:
+//                        // 切换 UA 为移动端
+//                        webView.getSettings().setUserAgentString(WebSettings.getDefaultUserAgent(getApplicationContext()));
+//                        webView.reload(); // 刷新使UA生效
+//                        return true;
+                    default:
+                        return false;
+                }
+            }
+        });
+
+        popup.show();
+    }
 }
