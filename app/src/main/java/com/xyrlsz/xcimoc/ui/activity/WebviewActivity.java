@@ -1,5 +1,7 @@
 package com.xyrlsz.xcimoc.ui.activity;
 
+import static com.xyrlsz.xcimoc.ui.activity.BrowserFilter.URL_KEY;
+
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,6 +13,7 @@ import android.webkit.WebViewClient;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.xyrlsz.xcimoc.R;
 
 import java.util.HashMap;
@@ -24,12 +27,18 @@ public class WebviewActivity extends AppCompatActivity {
     public static final String EXTRA_WEB_HTML = "extra_web_html";
     public static final String EXTRA_IS_USE_TO_WEB_PARSER = "extra_is_use_to_web_parser";
     private String htmlStr = "";
+    String nowUrl = "";
+    FloatingActionButton loadButton;
+    FloatingActionButton exitButton;
+
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_webview);
         webView = findViewById(R.id.web);
+        loadButton = findViewById(R.id.load_button);
+        exitButton = findViewById(R.id.exit_button);
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
@@ -41,7 +50,7 @@ public class WebviewActivity extends AppCompatActivity {
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
 
-                if(getIntent().getBooleanExtra(EXTRA_IS_USE_TO_WEB_PARSER,true)){
+                if (getIntent().getBooleanExtra(EXTRA_IS_USE_TO_WEB_PARSER, true)) {
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -51,7 +60,14 @@ public class WebviewActivity extends AppCompatActivity {
                 }
 
             }
+
+            @Override
+            public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
+                super.onPageStarted(view, url, favicon);
+                nowUrl = url;
+            }
         });
+
 
         // 设置 WebChromeClient 以便获取页面中的 JavaScript 输出
         webView.setWebChromeClient(new WebChromeClient());
@@ -72,6 +88,14 @@ public class WebviewActivity extends AppCompatActivity {
         if (url != null) {
             webView.loadUrl(url, headers);
         }
+
+        loadButton.setOnClickListener(v -> {
+            Intent intent = new Intent(WebviewActivity.this, BrowserFilter.class);
+            intent.putExtra(URL_KEY, nowUrl);
+            startActivity(intent);
+        });
+        exitButton.setOnClickListener(v -> finish());
+
     }
 
     @Override
@@ -113,11 +137,11 @@ public class WebviewActivity extends AppCompatActivity {
             // 例如输出到日志
             if (value != null) {
                 // 解码 Unicode 编码为正常字符
-                String decodedHtml =  value.replace("\\u003C", "<")
+                String decodedHtml = value.replace("\\u003C", "<")
                         .replace("\\u003E", ">")
-                        .replace("\\n","\n")
-                        .replace("\\\"","\"")
-                        .replace("\\'","'");
+                        .replace("\\n", "\n")
+                        .replace("\\\"", "\"")
+                        .replace("\\'", "'");
                 System.out.println("HTML Content: " + decodedHtml);
                 htmlStr = decodedHtml;
 

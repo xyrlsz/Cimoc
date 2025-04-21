@@ -97,7 +97,10 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
         if (mToolbar != null) {
             mToolbar.setTitle("");
             if (mToolbarTitle != null) {
-                mToolbarTitle.setText(getDefaultTitle());
+                String title = getDefaultTitle();
+                if (title != null) {
+                    mToolbarTitle.setText(title);
+                }
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 mToolbar.setPadding(0, ViewUtils.getStatusBarHeight(this), 0, mToolbar.getPaddingBottom());

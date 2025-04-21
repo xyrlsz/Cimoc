@@ -36,7 +36,7 @@ public class DuManWu extends MangaParser {
 
     public static final int TYPE = 104;
     public static final String DEFAULT_TITLE = "读漫屋";
-    private static final String baseUrl = "https://dumanwu.com";
+    private static final String baseUrl = "http://dumanwu1.com";
 
     public DuManWu(Source source) {
         init(source, null);

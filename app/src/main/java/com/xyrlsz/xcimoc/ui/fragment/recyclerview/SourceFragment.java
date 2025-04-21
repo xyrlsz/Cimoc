@@ -1,5 +1,6 @@
 package com.xyrlsz.xcimoc.ui.fragment.recyclerview;
 
+import static com.xyrlsz.xcimoc.ui.activity.WebviewActivity.EXTRA_IS_USE_TO_WEB_PARSER;
 import static com.xyrlsz.xcimoc.ui.activity.WebviewActivity.EXTRA_WEB_URL;
 
 import android.content.Intent;
@@ -117,8 +118,9 @@ public class SourceFragment extends RecyclerViewFragment implements SourceView, 
 //            startActivity(intent);
 //        }
         Source source = mSourceAdapter.getItem(position);
-        Intent intent = new Intent(getActivity(), WebviewActivity.class);
+        Intent intent = new Intent(getContext(), WebviewActivity.class);
         intent.putExtra(EXTRA_WEB_URL, source.getBaseUrl());
+        intent.putExtra(EXTRA_IS_USE_TO_WEB_PARSER, false);
         startActivity(intent);
     }
 

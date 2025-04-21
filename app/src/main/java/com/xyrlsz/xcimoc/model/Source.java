@@ -20,16 +20,15 @@ public class Source {
     private int type;
     @NotNull
     private boolean enable;
-    @NotNull
     private String baseUrl;
 
 
     public Source() {
     }
 
-    @Generated(hash = 140750426)
+    @Generated(hash = 341481004)
     public Source(Long id, @NotNull String title, int type, boolean enable,
-            @NotNull String baseUrl) {
+            String baseUrl) {
         this.id = id;
         this.title = title;
         this.type = type;

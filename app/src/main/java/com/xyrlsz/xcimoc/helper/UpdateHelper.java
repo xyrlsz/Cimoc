@@ -86,16 +86,18 @@ public class UpdateHelper {
 
     public static void update(PreferenceManager manager, final DaoSession session) {
         int version = manager.getInt(PreferenceManager.PREF_APP_VERSION, 0);
+
         if (version != VERSION) {
-            initSource(session);
-            manager.putInt(PreferenceManager.PREF_APP_VERSION, VERSION);
-            updateComicSource(session);
             if (version < 963 && version != 0) {
                 updateChapterTable(session);
             }
             if (version < 1027 && version != 0) {
                 updateSourceTable(session);
             }
+            initSource(session);
+            manager.putInt(PreferenceManager.PREF_APP_VERSION, VERSION);
+            updateComicSource(session);
+
         }
 
     }
@@ -113,7 +115,6 @@ public class UpdateHelper {
         db.setTransactionSuccessful();
         db.endTransaction();
     }
-
 
     /**
      * app: 1.4.8.0 -> 1.4.8.1
@@ -219,7 +220,6 @@ public class UpdateHelper {
                 sourcesToDelete.add(source);
             }
         }
-
         for (Integer cType : ComicSourceTable.keySet()) {
             boolean isExist = false;
             for (Source source : sourceList) {
@@ -232,16 +232,24 @@ public class UpdateHelper {
                 sourcesToAdd.add(ComicSourceTable.get(cType));
             }
         }
-
         if (!sourcesToDelete.isEmpty()) {
             sourceDao.deleteInTx(sourcesToDelete);
         }
         if (!sourcesToAdd.isEmpty()) {
             sourceDao.insertOrReplaceInTx(sourcesToAdd);
         }
+        sourceList = sourceDao.loadAll();
+        for (Source source : sourceList) {
+            if (ComicSourceTable.containsKey(source.getType())) {
+                Source sourceToUpdate = ComicSourceTable.get(source.getType());
+                if (sourceToUpdate != null && (!source.getTitle().equals(sourceToUpdate.getTitle()) ||
+                        !source.getBaseUrl().equals(sourceToUpdate.getBaseUrl()))) {
+                    source.setTitle(sourceToUpdate.getTitle());
+                    source.setBaseUrl(sourceToUpdate.getBaseUrl());
+                    sourceDao.update(source);
+                }
+            }
+        }
     }
 
-    public static Map<Integer, Source> getComicSourceTable() {
-        return ComicSourceTable;
-    }
 }

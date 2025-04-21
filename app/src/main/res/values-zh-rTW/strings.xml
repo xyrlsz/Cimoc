@@ -115,6 +115,7 @@
     <string name="source_detail">圖源詳情</string>
     <string name="source_detail_type">圖源 ID</string>
     <string name="source_detail_title">圖源名稱</string>
+    <string name="source_detail_url">圖源連結</string>
     <string name="source_detail_favorite">收藏統計</string>
 
     <string name="category_subject">主題</string>

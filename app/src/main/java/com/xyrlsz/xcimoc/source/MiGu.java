@@ -46,7 +46,7 @@ public class MiGu extends MangaParser {
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, "http://www.migudm.cn");
+        return new Source(null, DEFAULT_TITLE, TYPE, true, "https://www.migudm.cn/comic");
     }
 
     @Override
