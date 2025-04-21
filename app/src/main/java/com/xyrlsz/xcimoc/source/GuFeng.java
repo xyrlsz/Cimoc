@@ -30,7 +30,7 @@ public class GuFeng extends MangaParser {
     public static final String DEFAULT_TITLE = "古风漫画";
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true);
+        return new Source(null, DEFAULT_TITLE, TYPE, true, "https://m.gufengmh.com");
     }
 
     public GuFeng(Source source) {

@@ -46,7 +46,7 @@ public class MiGu extends MangaParser {
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true);
+        return new Source(null, DEFAULT_TITLE, TYPE, true, "http://www.migudm.cn");
     }
 
     @Override
@@ -111,7 +111,7 @@ public class MiGu extends MangaParser {
     public List<Chapter> parseChapter(String html, Comic comic, Long sourceComic) {
         List<Chapter> list = new LinkedList<>();
         Matcher m = Pattern.compile("<a stat='.*?' href=\"(?:.*?)(\\d+)\\.html\" class=\"item ellipsis\" title=\"(.*?)\" data-opusname=\"(?:.*?)\" data-index=\"(?:.*?)\" data-url=\"(?:.*?)\" target=\"_blank\">").matcher(html);
-        int i=0;
+        int i = 0;
         while (m.find()) {
             list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, m.group(2), m.group(1)));
         }

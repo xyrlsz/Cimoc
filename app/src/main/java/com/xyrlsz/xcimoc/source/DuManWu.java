@@ -44,12 +44,12 @@ public class DuManWu extends MangaParser {
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true);
+        return new Source(null, DEFAULT_TITLE, TYPE, true, baseUrl);
     }
 
     @Override
     public Request getSearchRequest(String keyword, int page) throws UnsupportedEncodingException {
-        if(page == 1){
+        if (page == 1) {
             String url = baseUrl + "/s";
             int index = Math.min(keyword.length(), 12);
             RequestBody body = RequestBody.create(MediaType.parse("application/x-www-form-urlencoded; charset=UTF-8"), "k=" + URLEncoder.encode(keyword.substring(0, index), "utf-8"));
@@ -87,8 +87,8 @@ public class DuManWu extends MangaParser {
 
     @Override
     protected void initUrlFilterList() {
-        filter.add(new UrlFilter("dumanwu.com",".*",0));
-        filter.add(new UrlFilter("dumanwu1.com",".*",0));
+        filter.add(new UrlFilter("dumanwu.com", ".*", 0));
+        filter.add(new UrlFilter("dumanwu1.com", ".*", 0));
     }
 
     @Override
@@ -111,7 +111,7 @@ public class DuManWu extends MangaParser {
                 author = new StringBuilder(data.replace("作者：", ""));
             } else if (data.contains("月") && data.contains("日")) {
                 update = data;
-            } else if(!data.contains("同步")){
+            } else if (!data.contains("同步")) {
                 author.append(",").append(data);
             }
 

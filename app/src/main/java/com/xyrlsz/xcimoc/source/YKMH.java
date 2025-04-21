@@ -30,14 +30,14 @@ public class YKMH extends MangaParser {
     public static final int TYPE = 91;
     public static final String DEFAULT_TITLE = "优酷漫画";
     public final String Host = "https://www.ykmh.com/";
-    public final String mHost = "https://m.ykmh.net/";
+    public static final String mHost = "https://m.ykmh.net/";
 
     public YKMH(Source source) {
         init(source, null);
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true);
+        return new Source(null, DEFAULT_TITLE, TYPE, true, mHost);
     }
 
     @Override

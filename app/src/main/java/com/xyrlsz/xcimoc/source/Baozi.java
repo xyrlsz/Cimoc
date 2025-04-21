@@ -38,7 +38,7 @@ public class Baozi extends MangaParser {
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true);
+        return new Source(null, DEFAULT_TITLE, TYPE, true, baseUrl);
     }
 
     @Override
@@ -71,7 +71,7 @@ public class Baozi extends MangaParser {
 
     @Override
     protected void initUrlFilterList() {
-        filter.add(new UrlFilter("cn.baozimhcn.com","comic/([\\w\\-]+)"));
+        filter.add(new UrlFilter("cn.baozimhcn.com", "comic/([\\w\\-]+)"));
     }
 
     @Override

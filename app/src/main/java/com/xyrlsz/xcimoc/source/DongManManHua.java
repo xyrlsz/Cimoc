@@ -1,5 +1,7 @@
 package com.xyrlsz.xcimoc.source;
 
+import static com.xyrlsz.xcimoc.core.Manga.getResponseBody;
+
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.core.Manga;
 import com.xyrlsz.xcimoc.model.Chapter;
@@ -24,8 +26,6 @@ import java.util.List;
 import okhttp3.Headers;
 import okhttp3.Request;
 
-import static com.xyrlsz.xcimoc.core.Manga.getResponseBody;
-
 /**
  * Created by Haleydu on 2020/08/07.
  */
@@ -41,7 +41,7 @@ public class DongManManHua extends MangaParser {
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true);
+        return new Source(null, DEFAULT_TITLE, TYPE, true, baseUrl);
     }
 
     @Override

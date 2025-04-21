@@ -40,7 +40,7 @@ public class Cartoonmad extends MangaParser {
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true);
+        return new Source(null, DEFAULT_TITLE, TYPE, true, "https://www.cartoonmad.com");
     }
 
     @Override

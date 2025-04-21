@@ -54,7 +54,7 @@ public class Manhuatai extends MangaParser {
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true);
+        return new Source(null, DEFAULT_TITLE, TYPE, true, baseUrl);
     }
 
     @Override
@@ -69,7 +69,7 @@ public class Manhuatai extends MangaParser {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             url = StringUtils.format(baseUrl + "/api/getsortlist/?product_id=2&productname=mht&platformname=wap&orderby=click&search_key=%s&page=%d&size=48",
                     URLEncoder.encode(keyword, StandardCharsets.UTF_8), page);
-        }else{
+        } else {
             url = StringUtils.format(baseUrl + "/api/getsortlist/?product_id=2&productname=mht&platformname=wap&orderby=click&search_key=%s&page=%d&size=48",
                     URLEncoder.encode(keyword, "UTF-8"), page);
         }

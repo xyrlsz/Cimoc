@@ -35,7 +35,7 @@ public class Mangakakalot extends MangaParser {
     public static final int TYPE = 44;
     public static final String DEFAULT_TITLE = "Mangakakalot";
 
-    private final String baseUrl = "https://mangakakalot.to";
+    private static final String baseUrl = "https://mangakakalot.to";
 
     public Mangakakalot(Source source) {
 //        init(source, new Category());
@@ -50,7 +50,7 @@ public class Mangakakalot extends MangaParser {
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true);
+        return new Source(null, DEFAULT_TITLE, TYPE, true, baseUrl);
     }
 
     /**

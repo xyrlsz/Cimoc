@@ -35,12 +35,13 @@ public class MYCOMIC extends MangaParser {
     public static final int TYPE = 103;
     public static final String DEFAULT_TITLE = "MYCOMIC";
     private static final String baseUrl = "https://mycomic.com";
+
     public MYCOMIC(Source source) {
         init(source, null);
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true);
+        return new Source(null, DEFAULT_TITLE, TYPE, true, baseUrl);
     }
 
     @Override

@@ -20,17 +20,21 @@ public class Source {
     private int type;
     @NotNull
     private boolean enable;
+    @NotNull
+    private String baseUrl;
 
-    @Generated(hash = 615387317)
+
     public Source() {
     }
 
-    @Generated(hash = 1339691905)
-    public Source(Long id, @NotNull String title, int type, boolean enable) {
+    @Generated(hash = 140750426)
+    public Source(Long id, @NotNull String title, int type, boolean enable,
+            @NotNull String baseUrl) {
         this.id = id;
         this.title = title;
         this.type = type;
         this.enable = enable;
+        this.baseUrl = baseUrl;
     }
 
     @Override
@@ -75,4 +79,11 @@ public class Source {
         this.enable = enable;
     }
 
+    public String getBaseUrl() {
+        return this.baseUrl;
+    }
+
+    public void setBaseUrl(String baseUrl) {
+        this.baseUrl = baseUrl;
+    }
 }

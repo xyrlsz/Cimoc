@@ -1,14 +1,17 @@
 package com.xyrlsz.xcimoc.ui.fragment.recyclerview;
 
+import static com.xyrlsz.xcimoc.ui.activity.WebviewActivity.EXTRA_WEB_URL;
+
 import android.content.Intent;
-import androidx.annotation.ColorRes;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+
+import androidx.annotation.ColorRes;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.model.Source;
@@ -16,6 +19,7 @@ import com.xyrlsz.xcimoc.presenter.BasePresenter;
 import com.xyrlsz.xcimoc.presenter.SourcePresenter;
 import com.xyrlsz.xcimoc.ui.activity.SearchActivity;
 import com.xyrlsz.xcimoc.ui.activity.SourceDetailActivity;
+import com.xyrlsz.xcimoc.ui.activity.WebviewActivity;
 import com.xyrlsz.xcimoc.ui.adapter.BaseAdapter;
 import com.xyrlsz.xcimoc.ui.adapter.SourceAdapter;
 import com.xyrlsz.xcimoc.ui.view.SourceView;
@@ -112,6 +116,10 @@ public class SourceFragment extends RecyclerViewFragment implements SourceView, 
 //            Intent intent = CategoryActivity.createIntent(getActivity(), source.getType(), source.getTitle());
 //            startActivity(intent);
 //        }
+        Source source = mSourceAdapter.getItem(position);
+        Intent intent = new Intent(getActivity(), WebviewActivity.class);
+        intent.putExtra(EXTRA_WEB_URL, source.getBaseUrl());
+        startActivity(intent);
     }
 
     @Override

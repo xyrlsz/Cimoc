@@ -36,7 +36,7 @@ public class Animx2 extends MangaParser {
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true);
+        return new Source(null, DEFAULT_TITLE, TYPE, true, "https://www.2animx.com");
     }
 
     @Override
@@ -68,7 +68,7 @@ public class Animx2 extends MangaParser {
 
     @Override
     protected void initUrlFilterList() {
-        filter.add(new UrlFilter("www.2animx.com", ".*",0));
+        filter.add(new UrlFilter("www.2animx.com", ".*", 0));
     }
 
     @Override

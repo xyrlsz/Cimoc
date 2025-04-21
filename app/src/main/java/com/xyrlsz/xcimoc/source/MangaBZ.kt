@@ -186,7 +186,7 @@ class MangaBZ(source: Source?) : MangaParser() {
     companion object {
         @JvmStatic
         fun getDefaultSource(): Source {
-            return Source(null, DEFAULT_TITLE, TYPE, true);
+            return Source(null, DEFAULT_TITLE, TYPE, true, "http://www.mangabz.com");
         }
 
         const val TYPE = 82

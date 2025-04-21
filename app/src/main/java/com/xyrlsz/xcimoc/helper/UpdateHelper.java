@@ -51,35 +51,37 @@ public class UpdateHelper {
 
     private static void initComicSourceTable() {
 
-        ComicSourceTable.put(Animx2.TYPE, Animx2.getDefaultSource());
-        ComicSourceTable.put(Baozi.TYPE, Baozi.getDefaultSource());
-        ComicSourceTable.put(BuKa.TYPE, BuKa.getDefaultSource());
-        ComicSourceTable.put(Cartoonmad.TYPE, Cartoonmad.getDefaultSource());
-        ComicSourceTable.put(CopyMH.TYPE, CopyMH.getDefaultSource());
-        ComicSourceTable.put(DM5.TYPE, DM5.getDefaultSource());
-        ComicSourceTable.put(Dmzj.TYPE, Dmzj.getDefaultSource());
+        if (ComicSourceTable.isEmpty()) {
+            ComicSourceTable.put(Animx2.TYPE, Animx2.getDefaultSource());
+            ComicSourceTable.put(Baozi.TYPE, Baozi.getDefaultSource());
+            ComicSourceTable.put(BuKa.TYPE, BuKa.getDefaultSource());
+            ComicSourceTable.put(Cartoonmad.TYPE, Cartoonmad.getDefaultSource());
+            ComicSourceTable.put(CopyMH.TYPE, CopyMH.getDefaultSource());
+            ComicSourceTable.put(DM5.TYPE, DM5.getDefaultSource());
+            ComicSourceTable.put(Dmzj.TYPE, Dmzj.getDefaultSource());
 //        ComicSourceHash.put(Dmzjv2.TYPE, Dmzjv2.getDefaultSource());
 //        ComicSourceHash.put(Dmzjv3.TYPE, Dmzjv3.getDefaultSource());
-        ComicSourceTable.put(GuFeng.TYPE, GuFeng.getDefaultSource());
+            ComicSourceTable.put(GuFeng.TYPE, GuFeng.getDefaultSource());
 //        ComicSourceHash.put(HHAAZZ.TYPE, HHAAZZ.getDefaultSource());
-        ComicSourceTable.put(HotManga.TYPE, HotManga.getDefaultSource());
-        ComicSourceTable.put(IKanman.TYPE, IKanman.getDefaultSource());
+            ComicSourceTable.put(HotManga.TYPE, HotManga.getDefaultSource());
+            ComicSourceTable.put(IKanman.TYPE, IKanman.getDefaultSource());
 //        ComicSourceHash.put(JMTT.TYPE, JMTT.getDefaultSource());
-        ComicSourceTable.put(Mangakakalot.TYPE, Mangakakalot.getDefaultSource());
-        ComicSourceTable.put(MangaBZ.TYPE, MangaBZ.getDefaultSource());
+            ComicSourceTable.put(Mangakakalot.TYPE, Mangakakalot.getDefaultSource());
+            ComicSourceTable.put(MangaBZ.TYPE, MangaBZ.getDefaultSource());
 //        ComicSourceHash.put(MangaNel.TYPE, MangaNel.getDefaultSource());
-        ComicSourceTable.put(Manhuatai.TYPE, Manhuatai.getDefaultSource());
-        ComicSourceTable.put(MiGu.TYPE, MiGu.getDefaultSource());
-        ComicSourceTable.put(MYCOMIC.TYPE, MYCOMIC.getDefaultSource());
-        ComicSourceTable.put(Tencent.TYPE, Tencent.getDefaultSource());
+            ComicSourceTable.put(Manhuatai.TYPE, Manhuatai.getDefaultSource());
+            ComicSourceTable.put(MiGu.TYPE, MiGu.getDefaultSource());
+            ComicSourceTable.put(MYCOMIC.TYPE, MYCOMIC.getDefaultSource());
+            ComicSourceTable.put(Tencent.TYPE, Tencent.getDefaultSource());
 //        ComicSourceHash.put(Webtoon.TYPE, Webtoon.getDefaultSource());
-        ComicSourceTable.put(DongManManHua.TYPE, DongManManHua.getDefaultSource());
-        ComicSourceTable.put(YKMH.TYPE, YKMH.getDefaultSource());
-        ComicSourceTable.put(DuManWu.TYPE, DuManWu.getDefaultSource());
-        ComicSourceTable.put(DuManWuOrg.TYPE, DuManWuOrg.getDefaultSource());
-        ComicSourceTable.put(Komiic.TYPE, Komiic.getDefaultSource());
-        ComicSourceTable.put(Manhuayu.TYPE, Manhuayu.getDefaultSource());
-        ComicSourceTable.put(GoDaManHua.TYPE, GoDaManHua.getDefaultSource());
+            ComicSourceTable.put(DongManManHua.TYPE, DongManManHua.getDefaultSource());
+            ComicSourceTable.put(YKMH.TYPE, YKMH.getDefaultSource());
+            ComicSourceTable.put(DuManWu.TYPE, DuManWu.getDefaultSource());
+            ComicSourceTable.put(DuManWuOrg.TYPE, DuManWuOrg.getDefaultSource());
+            ComicSourceTable.put(Komiic.TYPE, Komiic.getDefaultSource());
+            ComicSourceTable.put(Manhuayu.TYPE, Manhuayu.getDefaultSource());
+            ComicSourceTable.put(GoDaManHua.TYPE, GoDaManHua.getDefaultSource());
+        }
     }
 
     public static void update(PreferenceManager manager, final DaoSession session) {
@@ -91,6 +93,9 @@ public class UpdateHelper {
             if (version < 963 && version != 0) {
                 updateChapterTable(session);
             }
+            if (version < 1027 && version != 0) {
+                updateSourceTable(session);
+            }
         }
 
     }
@@ -101,6 +106,14 @@ public class UpdateHelper {
         db.setTransactionSuccessful();
         db.endTransaction();
     }
+
+    private static void addSourceBaseUrlColumn(Database db) {
+        db.beginTransaction();
+        db.execSQL("ALTER TABLE SOURCE ADD COLUMN BASE_URL TEXT DEFAULT ''");
+        db.setTransactionSuccessful();
+        db.endTransaction();
+    }
+
 
     /**
      * app: 1.4.8.0 -> 1.4.8.1
@@ -192,6 +205,10 @@ public class UpdateHelper {
         addChapterCountColumn(session.getDatabase());
     }
 
+    private static void updateSourceTable(final DaoSession session) {
+        addSourceBaseUrlColumn(session.getDatabase());
+    }
+
     private static void updateComicSource(DaoSession session) {
         SourceDao sourceDao = session.getSourceDao();
         List<Source> sourceList = sourceDao.loadAll();
@@ -222,5 +239,9 @@ public class UpdateHelper {
         if (!sourcesToAdd.isEmpty()) {
             sourceDao.insertOrReplaceInTx(sourcesToAdd);
         }
+    }
+
+    public static Map<Integer, Source> getComicSourceTable() {
+        return ComicSourceTable;
     }
 }
