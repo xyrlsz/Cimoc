@@ -3,6 +3,7 @@ package com.xyrlsz.xcimoc.ui.activity;
 import static com.xyrlsz.xcimoc.ui.activity.BrowserFilter.URL_KEY;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -15,6 +16,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.EditText;
 import android.widget.PopupMenu;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -167,7 +169,7 @@ public class WebviewActivity extends BackActivity {
     }
 
     private void showCustomMenu() {
-        PopupMenu popup = new PopupMenu(getApplicationContext(), loadButton);
+        PopupMenu popup = new PopupMenu(WebviewActivity.this, loadButton);
         popup.getMenuInflater().inflate(R.menu.webview_menu, popup.getMenu());
 
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
@@ -179,12 +181,28 @@ public class WebviewActivity extends BackActivity {
                         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                         ClipData clip = ClipData.newPlainText("URL", url);
                         clipboard.setPrimaryClip(clip);
-                        HintUtils.showToast(getApplicationContext(), "链接已复制到剪贴板");
+                        HintUtils.showToast(WebviewActivity.this, "链接已复制到剪贴板");
                         return true;
                     case R.id.refresh_page:
                         // 刷新
                         webView.reload();
                         return true;
+                    case R.id.edit_url:
+                        // 编辑 URL
+                        String currentUrl = webView.getUrl();
+                        AlertDialog.Builder builder = new AlertDialog.Builder(WebviewActivity.this);
+                        builder.setTitle("编辑链接");
+                        final EditText input = new EditText(WebviewActivity.this);
+                        input.setText(currentUrl);
+                        builder.setView(input);
+                        builder.setPositiveButton(getString(R.string.dialog_positive), (dialog, which) -> {
+                            String userInput = input.getText().toString();
+                            webView.loadUrl(userInput);
+                        });
+                        builder.setNegativeButton(getString(R.string.dialog_negative), (dialog, which) -> dialog.cancel());
+                        builder.create().show();
+                        return true;
+
 //                    case R.id.change_ua_to_pc:
 //                        // 切换 UA 为 PC 版
 //                        String pcUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0";
@@ -192,7 +210,7 @@ public class WebviewActivity extends BackActivity {
 //                        webView.reload(); // 刷新使UA生效
 //                    case R.id.change_ua_to_mobile:
 //                        // 切换 UA 为移动端
-//                        webView.getSettings().setUserAgentString(WebSettings.getDefaultUserAgent(getApplicationContext()));
+//                        webView.getSettings().setUserAgentString(WebSettings.getDefaultUserAgent(WebviewActivity.this));
 //                        webView.reload(); // 刷新使UA生效
 //                        return true;
                     default:
