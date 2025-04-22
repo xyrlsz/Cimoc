@@ -80,6 +80,12 @@ public class ThemeUtils {
                 return R.color.colorPrimaryBrown;
         }
     }
+
+    public static boolean getSysIsDarkMode(Context context) {
+        int nightModeFlags = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        return nightModeFlags == Configuration.UI_MODE_NIGHT_YES;
+    }
+
     public static boolean isDarkMode(Context context) {
         int appDarkMode = App.getPreferenceManager().getInt(PreferenceManager.PREF_OTHER_DARK_MOD, PreferenceManager.DARK_MODE_FALLOW_SYSTEM);
         switch (appDarkMode) {

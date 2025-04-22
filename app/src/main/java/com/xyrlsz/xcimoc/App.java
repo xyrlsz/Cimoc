@@ -33,6 +33,7 @@ import com.xyrlsz.xcimoc.ui.activity.MainActivity;
 import com.xyrlsz.xcimoc.ui.adapter.GridAdapter;
 import com.xyrlsz.xcimoc.utils.DocumentUtils;
 import com.xyrlsz.xcimoc.utils.StringUtils;
+import com.xyrlsz.xcimoc.utils.ThemeUtils;
 
 import org.greenrobot.greendao.identityscope.IdentityScopeType;
 
@@ -193,10 +194,14 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
                 break;
             case PreferenceManager.DARK_MODE_ALWAYS_DARK:
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                if (!ThemeUtils.getSysIsDarkMode(getAppContext())) {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                }
                 break;
             case PreferenceManager.DARK_MODE_ALWAYS_LIGHT:
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                if (ThemeUtils.getSysIsDarkMode(getAppContext())) {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                }
                 break;
         }
 
