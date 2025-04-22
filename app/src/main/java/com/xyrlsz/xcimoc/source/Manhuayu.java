@@ -44,8 +44,8 @@ public class Manhuayu extends MangaParser {
     @Override
     protected void initUrlFilterList() {
         super.initUrlFilterList();
-        filter.add(new UrlFilter("www.manhuayu.com"));
-        filter.add(new UrlFilter("www.manhuayu8.com"));
+        filter.add(new UrlFilter("manhuayu.com"));
+        filter.add(new UrlFilter("manhuayu8.com"));
     }
 
     @Override

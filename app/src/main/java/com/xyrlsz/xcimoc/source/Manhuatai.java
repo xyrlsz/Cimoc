@@ -61,6 +61,7 @@ public class Manhuatai extends MangaParser {
     protected void initUrlFilterList() {
         super.initUrlFilterList();
         filter.add(new UrlFilter("www.kanman.com"));
+        filter.add(new UrlFilter("m.kanman.com"));
     }
 
     @Override

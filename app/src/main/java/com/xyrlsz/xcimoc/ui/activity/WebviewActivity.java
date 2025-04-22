@@ -9,7 +9,6 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebChromeClient;
@@ -17,6 +16,7 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -29,6 +29,7 @@ import java.util.Map;
 public class WebviewActivity extends BackActivity {
 
     private WebView webView;
+    private LinearLayout buttonPanel;
     private FloatingActionButton loadButton;
     private FloatingActionButton exitButton;
     public static final String EXTRA_WEB_URL = "extra_web_url";
@@ -36,6 +37,7 @@ public class WebviewActivity extends BackActivity {
     public static final String EXTRA_WEB_HTML = "extra_web_html";
     public static final String EXTRA_IS_USE_TO_WEB_PARSER = "extra_is_use_to_web_parser";
     private String htmlStr = "";
+    boolean isShowButton = true;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -45,6 +47,7 @@ public class WebviewActivity extends BackActivity {
         webView = findViewById(R.id.web);
         loadButton = findViewById(R.id.load_button);
         exitButton = findViewById(R.id.exit_button);
+        buttonPanel = findViewById(R.id.button_panel);
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
@@ -56,14 +59,14 @@ public class WebviewActivity extends BackActivity {
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
 
-                if (getIntent().getBooleanExtra(EXTRA_IS_USE_TO_WEB_PARSER, true)) {
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            smoothScrollToBottom();
-                        }
-                    }, 1000); // 延迟一秒
-                }
+//                if (getIntent().getBooleanExtra(EXTRA_IS_USE_TO_WEB_PARSER, true)) {
+//                    new Handler().postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            smoothScrollToBottom();
+//                        }
+//                    }, 1000); // 延迟一秒
+//                }
 
             }
 
@@ -123,54 +126,54 @@ public class WebviewActivity extends BackActivity {
             super.onBackPressed();
         }
     }
-
-    // 缓慢滚动到底部
-    private void smoothScrollToBottom() {
-        String js = "var scrollHeight = document.body.scrollHeight; " +
-                "var currentScroll = document.documentElement.scrollTop || document.body.scrollTop; " +
-                "var step = 100; " + // 每次滚动的距离
-                "var interval = setInterval(function() { " +
-                "  if (currentScroll < scrollHeight) { " +
-                "    currentScroll += step; " +
-                "    window.scrollTo(0, currentScroll); " +
-                "  } else { " +
-                "    clearInterval(interval); " + // 滚动完毕后停止
-                "  } " +
-                "}, 50);"; // 每次滚动的间隔时间（单位：毫秒）
-
-        webView.evaluateJavascript(js, value -> {
-            // 获取页面的 HTML 内容
-            getPageHtml();
-        });
-    }
-
-    private void getPageHtml() {
-        // 使用 JavaScript 获取页面的 HTML
-        String js = "document.documentElement.outerHTML";
-        webView.evaluateJavascript(js, value -> {
-            // 在这里你可以处理获取到的 HTML 内容
-            // 例如输出到日志
-            if (value != null) {
-                // 解码 Unicode 编码为正常字符
-                String decodedHtml = value.replace("\\u003C", "<")
-                        .replace("\\u003E", ">")
-                        .replace("\\n", "\n")
-                        .replace("\\\"", "\"")
-                        .replace("\\'", "'");
-                System.out.println("HTML Content: " + decodedHtml);
-                htmlStr = decodedHtml;
-
-                Intent resultIntent = new Intent();
-                resultIntent.putExtra(EXTRA_WEB_HTML, htmlStr);
-                setResult(RESULT_OK, resultIntent);
-                finish();
-            }
-        });
-    }
+//
+//    // 缓慢滚动到底部
+//    private void smoothScrollToBottom() {
+//        String js = "var scrollHeight = document.body.scrollHeight; " +
+//                "var currentScroll = document.documentElement.scrollTop || document.body.scrollTop; " +
+//                "var step = 100; " + // 每次滚动的距离
+//                "var interval = setInterval(function() { " +
+//                "  if (currentScroll < scrollHeight) { " +
+//                "    currentScroll += step; " +
+//                "    window.scrollTo(0, currentScroll); " +
+//                "  } else { " +
+//                "    clearInterval(interval); " + // 滚动完毕后停止
+//                "  } " +
+//                "}, 50);"; // 每次滚动的间隔时间（单位：毫秒）
+//
+//        webView.evaluateJavascript(js, value -> {
+//            // 获取页面的 HTML 内容
+//            getPageHtml();
+//        });
+//    }
+//
+//    private void getPageHtml() {
+//        // 使用 JavaScript 获取页面的 HTML
+//        String js = "document.documentElement.outerHTML";
+//        webView.evaluateJavascript(js, value -> {
+//            // 在这里你可以处理获取到的 HTML 内容
+//            // 例如输出到日志
+//            if (value != null) {
+//                // 解码 Unicode 编码为正常字符
+//                String decodedHtml = value.replace("\\u003C", "<")
+//                        .replace("\\u003E", ">")
+//                        .replace("\\n", "\n")
+//                        .replace("\\\"", "\"")
+//                        .replace("\\'", "'");
+//                System.out.println("HTML Content: " + decodedHtml);
+//                htmlStr = decodedHtml;
+//
+//                Intent resultIntent = new Intent();
+//                resultIntent.putExtra(EXTRA_WEB_HTML, htmlStr);
+//                setResult(RESULT_OK, resultIntent);
+//                finish();
+//            }
+//        });
+//    }
 
     private void showCustomMenu() {
-        PopupMenu popup = new PopupMenu(WebviewActivity.this, loadButton);
-        popup.getMenuInflater().inflate(R.menu.webview_menu, popup.getMenu());
+        PopupMenu popup = new PopupMenu(WebviewActivity.this, findViewById(R.id.button_panel));
+        popup.getMenuInflater().inflate(R.menu.menu_webview, popup.getMenu());
 
         popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             public boolean onMenuItemClick(MenuItem item) {
@@ -203,6 +206,18 @@ public class WebviewActivity extends BackActivity {
                         builder.create().show();
                         return true;
 
+                    case R.id.show_button:
+                        // 显示按钮
+                        if (isShowButton) {
+                            buttonPanel.setVisibility(View.GONE);
+                            isShowButton = false;
+                        } else {
+                            buttonPanel.setVisibility(View.VISIBLE);
+                            isShowButton = true;
+                        }
+
+                        return true;
+
 //                    case R.id.change_ua_to_pc:
 //                        // 切换 UA 为 PC 版
 //                        String pcUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36 Edg/135.0.0.0";
@@ -213,6 +228,7 @@ public class WebviewActivity extends BackActivity {
 //                        webView.getSettings().setUserAgentString(WebSettings.getDefaultUserAgent(WebviewActivity.this));
 //                        webView.reload(); // 刷新使UA生效
 //                        return true;
+
                     default:
                         return false;
                 }

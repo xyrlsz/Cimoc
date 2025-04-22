@@ -41,7 +41,7 @@ public class DongManManHua extends MangaParser {
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, baseUrl);
+        return new Source(null, DEFAULT_TITLE, TYPE, true, "https://m.dongmanmanhua.cn");
     }
 
     @Override

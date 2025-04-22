@@ -142,40 +142,40 @@
                         android:textSize="14sp" />
                 </LinearLayout>
 
-                <LinearLayout
-                    android:id="@+id/about_resource_ori_btn"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="?android:attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center_vertical"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                <!--                <LinearLayout-->
+                <!--                    android:id="@+id/about_resource_ori_btn"-->
+                <!--                    android:layout_width="match_parent"-->
+                <!--                    android:layout_height="wrap_content"-->
+                <!--                    android:background="?android:attr/selectableItemBackground"-->
+                <!--                    android:clickable="true"-->
+                <!--                    android:focusable="true"-->
+                <!--                    android:gravity="center_vertical"-->
+                <!--                    android:orientation="vertical"-->
+                <!--                    android:padding="16dp">-->
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/about_resource_ori"
-                        android:textColor="?android:attr/textColorPrimary"
-                        android:textSize="16sp" />
+                <!--                    <TextView-->
+                <!--                        android:layout_width="match_parent"-->
+                <!--                        android:layout_height="wrap_content"-->
+                <!--                        android:text="@string/about_resource_ori"-->
+                <!--                        android:textColor="?android:attr/textColorPrimary"-->
+                <!--                        android:textSize="16sp" />-->
 
-                    <TextView
-                        android:id="@+id/tv_resource_ori_url"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingTop="2dp"
-                        android:text="@string/about_resource_ori_url"
-                        android:textSize="14sp" />
+                <!--                    <TextView-->
+                <!--                        android:id="@+id/tv_resource_ori_url"-->
+                <!--                        android:layout_width="wrap_content"-->
+                <!--                        android:layout_height="wrap_content"-->
+                <!--                        android:paddingTop="2dp"-->
+                <!--                        android:text="@string/about_resource_ori_url"-->
+                <!--                        android:textSize="14sp" />-->
 
-                    <TextView
-                        android:id="@+id/tv_resource_ori_url_1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingTop="2dp"
-                        android:text="@string/about_resource_ori_url_1"
-                        android:textSize="14sp" />
-                </LinearLayout>
+                <!--                    <TextView-->
+                <!--                        android:id="@+id/tv_resource_ori_url_1"-->
+                <!--                        android:layout_width="wrap_content"-->
+                <!--                        android:layout_height="wrap_content"-->
+                <!--                        android:paddingTop="2dp"-->
+                <!--                        android:text="@string/about_resource_ori_url_1"-->
+                <!--                        android:textSize="14sp" />-->
+                <!--                </LinearLayout>-->
 
                 <LinearLayout
                     android:id="@+id/about_support_btn"
@@ -200,6 +200,31 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:paddingTop="2dp"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/about_forked"
+                        android:textColor="?android:attr/textColorPrimary"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="2dp"
+                        android:text="@string/about_forked_summary"
                         android:textSize="14sp" />
                 </LinearLayout>
             </LinearLayout>

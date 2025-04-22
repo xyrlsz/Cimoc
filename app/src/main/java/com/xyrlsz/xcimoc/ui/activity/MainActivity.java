@@ -281,6 +281,18 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
         mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
 
+    private void goToLastComic() {
+        if (mPresenter.checkLocal(mLastId)) {
+            Intent intent = TaskActivity.createIntent(MainActivity.this, mLastId);
+            startActivity(intent);
+        } else if (mLastSource != -1 && mLastCid != null) {
+            Intent intent = DetailActivity.createIntent(MainActivity.this, null, mLastSource, mLastCid);
+            startActivity(intent);
+        } else {
+            HintUtils.showToast(MainActivity.this, R.string.common_execute_fail);
+        }
+    }
+
     private void initNavigation() {
         night = mPreference.getBoolean(PreferenceManager.PREF_NIGHT, false);
         mNavigationView.getMenu().findItem(R.id.drawer_night).setTitle(night ? R.string.drawer_light : R.string.drawer_night);
@@ -288,17 +300,11 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
         View header = mNavigationView.getHeaderView(0);
         mLastText = header.findViewById(R.id.drawer_last_title);
         mDraweeView = header.findViewById(R.id.drawer_last_cover);
-
+        mDraweeView.setOnClickListener(v -> {
+            goToLastComic();
+        });
         mLastText.setOnClickListener(v -> {
-            if (mPresenter.checkLocal(mLastId)) {
-                Intent intent = TaskActivity.createIntent(MainActivity.this, mLastId);
-                startActivity(intent);
-            } else if (mLastSource != -1 && mLastCid != null) {
-                Intent intent = DetailActivity.createIntent(MainActivity.this, null, mLastSource, mLastCid);
-                startActivity(intent);
-            } else {
-                HintUtils.showToast(MainActivity.this, R.string.common_execute_fail);
-            }
+            goToLastComic();
         });
         mControllerBuilderProvider = new ControllerBuilderProvider(this,
                 SourceManager.getInstance(this).new HeaderGetter(), false);

@@ -272,7 +272,8 @@
     <string name="about_update_doing">正在检查更新</string>
     <string name="about_update_fail">检查更新失败</string>
     <string name="about_resource_fail">打开网页失败</string>
-
+    <string name="about_forked" translatable="false">Fork from</string>
+    <string name="about_forked_summary" translatable="false">https://github.com/Haleydu/Cimoc</string>
     <string name="dialog_choice">单项选择</string>
     <string name="dialog_confirm">操作确认</string>
     <string name="dialog_positive">确定</string>
@@ -335,7 +336,7 @@
     <string name="common_uploud_success">上传成功</string>
     <string name="common_uploud_fail">上传失败</string>
 
-    <string name="about_version">作者 xyrlsz</string>
+    <string name="about_version" />
     <string name="detail_disqus">评论</string>
 
     <!--登陆相关-->
