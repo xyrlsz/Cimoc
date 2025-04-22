@@ -1,0 +1,3 @@
+[submodule "xyropencc/opencc"]
+	path = xyropencc/opencc
+	url = https://github.com/longbridge/opencc.git

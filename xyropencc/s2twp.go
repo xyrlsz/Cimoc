@@ -1,7 +1,7 @@
 package xyropencc
 
 import (
-	"github.com/longbridgeapp/opencc"
+	"github.com/longbridge/opencc"
 	"sync"
 )
 
