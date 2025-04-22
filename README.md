@@ -9,7 +9,8 @@ forked from https://github.com/Haleydu/Cimoc
 
 # 下载
 
-可以前往项目的[Action](https://github.com/xyrlsz/Cimoc/actions)处或者[Release](https://github.com/xyrlsz/Cimoc/releases)处下载。
+可以前往项目的[Action](https://github.com/xyrlsz/Cimoc/actions)
+处或者[Release](https://github.com/xyrlsz/Cimoc/releases)处下载。
 
 # 漫画源
 
@@ -59,8 +60,9 @@ forked from https://github.com/Haleydu/Cimoc
 
 - 继承 MangaParser 类，参照 Parser 接口的注释
 
-> 在app\src\main\java\com\hiroshi\cimoc\source目录里面随便找一个复制一下
-> 注释是这个：app\src\main\java\com\hiroshi\cimoc\parser\MangaParser.java
+> 在app/src/main/java/com/hiroshi/cimoc/source目录里面随便找一个复制一下
+> 注释是这个：app/src/main/java/com/hiroshi/cimoc/parser/MangaParser.java
+
 <!-- - （可选）继承 MangaCategory 类，参照 Category 接口的注释
 > 这个没什么大用的感觉，个人不常用，直接删掉不会有什么影响 -->
 
@@ -85,6 +87,7 @@ forked from https://github.com/Haleydu/Cimoc
 - 本程序没有任何破解网站VIP的功能，仅仅作为网页浏览器显示网站免费浏览部分，淘宝卖家自行添加的破解或其他功能与本程序无任何关系。
 
 # 免责声明：
+
 - 本软件仅用于学习交流，不得用于商业用途
 - 本软件不对因使用本软件而导致的任何损失或损害承担责任
 - 所有漫画均来自用户在第三方网站上的手动搜索
