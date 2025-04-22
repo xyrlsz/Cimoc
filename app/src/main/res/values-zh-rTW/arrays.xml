@@ -30,6 +30,11 @@
         <item>天藍</item>
         <item>棕色</item>
     </string-array>
+    <string-array name="dark_mod_items">
+        <item>跟隨系統</item>
+        <item>深色模式</item>
+        <item>淺色模式</item>
+    </string-array>
     <string-array name="detail_text_st">
         <item>默認</item>
         <item>簡體</item>

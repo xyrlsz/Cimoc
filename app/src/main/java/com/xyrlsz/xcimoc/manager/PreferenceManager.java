@@ -37,6 +37,10 @@ public class PreferenceManager {
     public static final int ST_OPENCC4J = 1;
     public static final int ST_OPENCCGO = 2;
 
+    public static final int DARK_MODE_FALLOW_SYSTEM = 0;
+    public static final int DARK_MODE_ALWAYS_DARK = 1;
+    public static final int DARK_MODE_ALWAYS_LIGHT = 2;
+
     public static final String PREF_APP_VERSION = "pref_app_version";
 
     public static final String PREF_MAIN_NOTICE = "pref_main_notice";
@@ -129,6 +133,7 @@ public class PreferenceManager {
     public static final String PREF_OTHER_CHECK_UPDATE_LAST = "pref_other_check_update_last";
     public static final String PREF_OTHER_STORAGE = "pref_other_storage";
     public static final String PREF_OTHER_THEME = "pref_other_theme";
+    public static final String PREF_OTHER_DARK_MOD = "pref_other_dark_mod";
     public static final String PREF_OTHER_LAUNCH = "pref_other_launch";
     public static final String PREF_OTHER_NIGHT_ALPHA = "pref_other_night_alpha";
     public static final String PREF_OTHER_SHOW_TOPBAR = "pref_other_show_topbar";

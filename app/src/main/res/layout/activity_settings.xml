@@ -58,6 +58,7 @@
 
                     </RelativeLayout>
                 </com.xyrlsz.xcimoc.ui.widget.Option>
+
                 <TextView
                     android:id="@+id/settings_komiic"
                     android:layout_width="match_parent"
@@ -339,6 +340,12 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:title="@string/settings_other_theme" />
+
+                <com.xyrlsz.xcimoc.ui.widget.preference.ChoicePreference
+                    android:id="@+id/settings_other_dark_mod"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:title="@string/settings_other_dark_mod" />
 
                 <com.xyrlsz.xcimoc.ui.widget.preference.SliderPreference
                     android:id="@+id/settings_other_night_alpha"

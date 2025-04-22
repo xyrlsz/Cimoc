@@ -190,6 +190,7 @@
     <string name="settings_check_update_summary">關閉後不提示更新</string>
     <string name="settings_other_launch">預設啟動頁</string>
     <string name="settings_other_theme">主題顏色</string>
+    <string name="settings_other_dark_mod">深色模式</string>
     <string name="settings_other_night_alpha">夜間模式亮度</string>
     <string name="settings_other_storage">儲存路徑</string>
     <string name="settings_other_storage_summary">自訂儲存路徑</string>

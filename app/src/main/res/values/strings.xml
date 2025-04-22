@@ -194,6 +194,7 @@
     <string name="settings_check_update_summary">关闭后不提示更新</string>
     <string name="settings_other_launch">默认启动页</string>
     <string name="settings_other_theme">主题颜色</string>
+    <string name="settings_other_dark_mod">深色模式</string>
     <string name="settings_other_night_alpha">夜间模式亮度</string>
     <string name="settings_other_storage">存储路径</string>
     <string name="settings_other_storage_summary">自定义存储路径</string>
@@ -336,7 +337,7 @@
     <string name="common_uploud_success">上传成功</string>
     <string name="common_uploud_fail">上传失败</string>
 
-    <string name="about_version" />
+    <string name="about_version" translatable="false" />
     <string name="detail_disqus">评论</string>
 
     <!--登陆相关-->

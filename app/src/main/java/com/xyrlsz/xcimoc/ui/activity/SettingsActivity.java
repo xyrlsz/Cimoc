@@ -38,6 +38,7 @@ import com.xyrlsz.xcimoc.ui.widget.Option;
 import com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference;
 import com.xyrlsz.xcimoc.ui.widget.preference.ChoicePreference;
 import com.xyrlsz.xcimoc.ui.widget.preference.SliderPreference;
+import com.xyrlsz.xcimoc.utils.HintUtils;
 import com.xyrlsz.xcimoc.utils.KomiicUtils;
 import com.xyrlsz.xcimoc.utils.ServiceUtils;
 import com.xyrlsz.xcimoc.utils.StringUtils;
@@ -83,6 +84,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
     private static final int DIALOG_REQUEST_READER_CONTROLLER_TRIG_THRESHOLD = 9;
     private static final int DIALOG_REQUEST_DETAIL_TEXT_ST = 10;
     private static final int DIALOG_REQUEST_ST_ENGINE = 11;
+    private static final int DIALOG_REQUEST_OTHER_DARK_MOD = 12;
     private final int[] mResultArray = new int[6];
     private final Intent mResultIntent = new Intent();
     @BindView(R.id.settings_dmzj_login)
@@ -146,6 +148,8 @@ public class SettingsActivity extends BackActivity implements SettingsView {
     @BindView(R.id.settings_detail_text_st)
     ChoicePreference mDetailTextSt;
 
+    @BindView(R.id.settings_other_dark_mod)
+    ChoicePreference mOtherDarkMod;
     @BindView(R.id.settings_st_engine)
     ChoicePreference mStEngine;
 
@@ -169,6 +173,15 @@ public class SettingsActivity extends BackActivity implements SettingsView {
     @Override
     protected void initView() {
         super.initView();
+
+        boolean isDarkMod = ThemeUtils.isDarkMode(getAppInstance());
+        if (isDarkMod) {
+            mDmzjLogout.setImageResource(R.drawable.ic_logout_white);
+            mKomiicLogout.setImageResource(R.drawable.ic_logout_white);
+        } else {
+            mDmzjLogout.setImageResource(R.drawable.ic_logout);
+            mKomiicLogout.setImageResource(R.drawable.ic_logout);
+        }
 
         String dmzjUsername = getSharedPreferences(DMZJ_SHARED, MODE_PRIVATE).getString(DMZJ_SHARED_USERNAME, "");
         if (!dmzjUsername.isEmpty()) {
@@ -221,6 +234,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
                 PreferenceManager.HOME_FAVORITE, R.array.launch_items, DIALOG_REQUEST_OTHER_LAUNCH);
         mOtherTheme.bindPreference(getSupportFragmentManager(), PreferenceManager.PREF_OTHER_THEME,
                 ThemeUtils.THEME_PINK, R.array.theme_items, DIALOG_REQUEST_OTHER_THEME);
+        mOtherDarkMod.bindPreference(getSupportFragmentManager(), PreferenceManager.PREF_OTHER_DARK_MOD, PreferenceManager.DARK_MODE_FALLOW_SYSTEM, R.array.dark_mod_items, DIALOG_REQUEST_OTHER_DARK_MOD);
         mReaderScaleFactor.bindPreference(getSupportFragmentManager(), PreferenceManager.PREF_READER_SCALE_FACTOR, 200,
                 R.string.settings_reader_scale_factor, DIALOG_REQUEST_READER_SCALE_FACTOR);
         mReaderControllerTrigThreshold.bindPreference(getSupportFragmentManager(), PreferenceManager.PREF_READER_CONTROLLER_TRIG_THRESHOLD, 30,
@@ -344,6 +358,10 @@ public class SettingsActivity extends BackActivity implements SettingsView {
                 break;
             case DIALOG_REQUEST_ST_ENGINE:
                 mStEngine.setValue(bundle.getInt(EXTRA_DIALOG_RESULT_INDEX));
+                break;
+            case DIALOG_REQUEST_OTHER_DARK_MOD:
+                mOtherDarkMod.setValue(bundle.getInt(EXTRA_DIALOG_RESULT_INDEX));
+                HintUtils.showToast(getApplicationContext(), "重启生效");
                 break;
         }
     }

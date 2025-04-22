@@ -4,7 +4,9 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.util.TypedValue;
 
+import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.R;
+import com.xyrlsz.xcimoc.manager.PreferenceManager;
 
 /**
  * Created by Hiroshi on 2016/10/2.
@@ -78,10 +80,19 @@ public class ThemeUtils {
                 return R.color.colorPrimaryBrown;
         }
     }
-
     public static boolean isDarkMode(Context context) {
-        int nightModeFlags = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-        return nightModeFlags == Configuration.UI_MODE_NIGHT_YES;
+        int appDarkMode = App.getPreferenceManager().getInt(PreferenceManager.PREF_OTHER_DARK_MOD, PreferenceManager.DARK_MODE_FALLOW_SYSTEM);
+        switch (appDarkMode) {
+            case PreferenceManager.DARK_MODE_FALLOW_SYSTEM:
+                int nightModeFlags = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+                return nightModeFlags == Configuration.UI_MODE_NIGHT_YES;
+            case PreferenceManager.DARK_MODE_ALWAYS_DARK:
+                return true;
+            case PreferenceManager.DARK_MODE_ALWAYS_LIGHT:
+                return false;
+        }
+        return false;
+
     }
 
 }

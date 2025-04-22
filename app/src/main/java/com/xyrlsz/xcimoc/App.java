@@ -11,6 +11,7 @@ import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.multidex.MultiDex;
 import androidx.multidex.MultiDexApplication;
 import androidx.recyclerview.widget.RecyclerView;
@@ -71,6 +72,7 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
     private DaoSession mDaoSession;
     private ActivityLifecycle mActivityLifecycle;
     private static boolean isNormalExited = false;
+
     public static Context getAppContext() {
         return mApp.getApplicationContext();
     }
@@ -183,6 +185,20 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         manager_wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         //获取栈顶Activity以及当前App上下文
         mApp = this;
+
+        // 深色模式设置
+        int darkMode = mPreferenceManager.getInt(PreferenceManager.PREF_OTHER_DARK_MOD, PreferenceManager.DARK_MODE_FALLOW_SYSTEM);
+        switch (darkMode) {
+            case PreferenceManager.DARK_MODE_FALLOW_SYSTEM:
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+                break;
+            case PreferenceManager.DARK_MODE_ALWAYS_DARK:
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                break;
+            case PreferenceManager.DARK_MODE_ALWAYS_LIGHT:
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                break;
+        }
 
         // 初始化WebDAV配置
         WebDavConf.init(getAppContext());
@@ -304,9 +320,11 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
     public static boolean isNormalExited() {
         return isNormalExited;
     }
+
     public static void setIsNormalExited(boolean isNormalExited) {
         App.isNormalExited = isNormalExited;
     }
+
     // 1.实现X509TrustManager接口
     private static class TrustAllCerts implements X509TrustManager {
         @Override
