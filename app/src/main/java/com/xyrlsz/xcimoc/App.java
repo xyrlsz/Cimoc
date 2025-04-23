@@ -72,6 +72,7 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
     private RecyclerView.RecycledViewPool mRecycledPool;
     private DaoSession mDaoSession;
     private ActivityLifecycle mActivityLifecycle;
+    private static final TrustAllCerts trustAllCerts = new TrustAllCerts();
     private static boolean isNormalExited = false;
 
     public static Context getAppContext() {
@@ -114,7 +115,7 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
 
             // 3.OkHttp访问https的Client实例
             mHttpClient = new OkHttpClient().newBuilder()
-                    .sslSocketFactory(createSSLSocketFactory())
+                    .sslSocketFactory(createSSLSocketFactory(), trustAllCerts)
                     .hostnameVerifier(new TrustAllHostnameVerifier())
                     .followRedirects(true)
                     .followSslRedirects(true)
@@ -130,10 +131,11 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
 
         try {
             SSLContext sc = SSLContext.getInstance("TLS");
-            sc.init(null, new TrustManager[]{new TrustAllCerts()}, new SecureRandom());
+            sc.init(null, new TrustManager[]{trustAllCerts}, new SecureRandom());
 
             ssfFactory = sc.getSocketFactory();
         } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
         return ssfFactory;
