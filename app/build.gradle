@@ -52,7 +52,7 @@ if (System.getenv("CI_BUILD_NUMBER") != null) { // 兼容 CI/CD
 // }
 
 android {
-    compileSdk 35
+    compileSdk 36
     namespace "com.xyrlsz.xcimoc"
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
@@ -65,7 +65,7 @@ android {
         applicationId "com.xyrlsz.xcimoc"
         minSdkVersion 21
         //noinspection EditedTargetSdkVersion,ExpiredTargetSdkVersion
-        targetSdkVersion 35
+        targetSdkVersion 36
         versionCode buildVersion // 动态生成的版本号
         versionName version
         resourceConfigurations += ['en', 'zh']
