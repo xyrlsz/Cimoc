@@ -41,7 +41,12 @@ public class PermissionUtils {
     public static boolean hasAllPermissions(Activity activity) {
         boolean hasStoragePermission = hasStoragePermission(activity);
         int readPhoneState = checkPermission(activity, Manifest.permission.READ_PHONE_STATE);
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            int postNotificationsResult = checkPermission(activity, Manifest.permission.POST_NOTIFICATIONS);
+            return hasStoragePermission &&
+                    readPhoneState == PackageManager.PERMISSION_GRANTED &&
+                    postNotificationsResult == PackageManager.PERMISSION_GRANTED;
+        }
         return hasStoragePermission &&
                 readPhoneState == PackageManager.PERMISSION_GRANTED;
     }

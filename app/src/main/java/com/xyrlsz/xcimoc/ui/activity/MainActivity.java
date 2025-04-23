@@ -494,7 +494,8 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
                             Manifest.permission.READ_MEDIA_IMAGES,
                             Manifest.permission.READ_MEDIA_VIDEO,
                             Manifest.permission.READ_MEDIA_AUDIO,
-                            Manifest.permission.READ_PHONE_STATE
+                            Manifest.permission.READ_PHONE_STATE,
+                            Manifest.permission.POST_NOTIFICATIONS
                     }, Constants.RE_CODE_STORAGE_PERMISSION);
                 } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     // Android 11 (API 30) and Android 12 (API 31-32)
@@ -684,7 +685,7 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
 //    }
 
     private void showPermission() {
-        if (!PermissionUtils.hasStoragePermission(this)) {
+        if (!PermissionUtils.hasAllPermissions(this)) {
             MessageDialogFragment fragment = MessageDialogFragment.newInstance(R.string.main_permission,
                     R.string.main_permission_content, false, DIALOG_REQUEST_PERMISSION);
             fragment.show(getSupportFragmentManager(), null);
