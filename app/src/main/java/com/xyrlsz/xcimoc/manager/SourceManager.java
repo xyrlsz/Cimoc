@@ -30,6 +30,7 @@ import com.xyrlsz.xcimoc.source.Manhuatai;
 import com.xyrlsz.xcimoc.source.Manhuayu;
 import com.xyrlsz.xcimoc.source.MiGu;
 import com.xyrlsz.xcimoc.source.Null;
+import com.xyrlsz.xcimoc.source.TTKMH;
 import com.xyrlsz.xcimoc.source.Tencent;
 import com.xyrlsz.xcimoc.source.YKMH;
 
@@ -265,6 +266,9 @@ public class SourceManager {
                     break;
                 case GoDaManHua.TYPE:
                     parser = new GoDaManHua(source);
+                    break;
+                case TTKMH.TYPE:
+                    parser = new TTKMH(source);
                     break;
                 default:
                     parser = new Null();

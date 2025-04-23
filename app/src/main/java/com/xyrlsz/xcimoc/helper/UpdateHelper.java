@@ -28,6 +28,7 @@ import com.xyrlsz.xcimoc.source.Mangakakalot;
 import com.xyrlsz.xcimoc.source.Manhuatai;
 import com.xyrlsz.xcimoc.source.Manhuayu;
 import com.xyrlsz.xcimoc.source.MiGu;
+import com.xyrlsz.xcimoc.source.TTKMH;
 import com.xyrlsz.xcimoc.source.Tencent;
 import com.xyrlsz.xcimoc.source.YKMH;
 
@@ -81,6 +82,7 @@ public class UpdateHelper {
             ComicSourceTable.put(Komiic.TYPE, Komiic.getDefaultSource());
             ComicSourceTable.put(Manhuayu.TYPE, Manhuayu.getDefaultSource());
             ComicSourceTable.put(GoDaManHua.TYPE, GoDaManHua.getDefaultSource());
+            ComicSourceTable.put(TTKMH.TYPE, TTKMH.getDefaultSource());
         }
     }
 
@@ -196,6 +198,7 @@ public class UpdateHelper {
         list.add(Komiic.getDefaultSource());
         list.add(Manhuayu.getDefaultSource());
         list.add(GoDaManHua.getDefaultSource());
+        list.add(TTKMH.getDefaultSource());
 
         session.getSourceDao().insertOrReplaceInTx(list);
         initComicSourceTable();

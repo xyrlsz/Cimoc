@@ -60,8 +60,8 @@ forked from https://github.com/Haleydu/Cimoc
 
 - 继承 MangaParser 类，参照 Parser 接口的注释
 
-> 在app/src/main/java/com/hiroshi/cimoc/source目录里面随便找一个复制一下
-> 注释是这个：app/src/main/java/com/hiroshi/cimoc/parser/MangaParser.java
+> 在app/src/main/java/com/xyrlsz/xcimoc/source目录里面随便找一个复制一下
+> 注释是这个：app/src/main/java/com/xyrlsz/xcimoc/parser/MangaParser.java
 
 <!-- - （可选）继承 MangaCategory 类，参照 Category 接口的注释
 > 这个没什么大用的感觉，个人不常用，直接删掉不会有什么影响 -->
@@ -71,6 +71,7 @@ forked from https://github.com/Haleydu/Cimoc
 > case 里面无脑添加
 
 - 在 UpdateHelper 的 initSource() 方法中初始化图源，以及修改initComicSourceTable()方法
+- 修改"app/src/main/java/com/xyrlsz/xcimoc/ui/activity/BrowserFilter.java"的registUrlListener()方法
 
 # 软件更新方向：
 
