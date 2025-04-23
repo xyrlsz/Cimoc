@@ -45,7 +45,7 @@ public class CopyMH extends MangaParser {
 //            JChineseConvertor jChineseConvertor = JChineseConvertor.getInstance();
 //            keyword = jChineseConvertor.s2t(keyword);
             url = StringUtils.format(
-                    "%s/api/kb/web/searchbc/comics?offset=0&platform=2&limit=12&q=%sq_type=", website, keyword);
+                    "%s/api/kb/web/searchbd/comics?offset=0&platform=2&limit=12&q=%s&q_type=", website, keyword);
             return new Request.Builder()
                     .url(url)
                     .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
