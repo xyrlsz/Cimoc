@@ -32,7 +32,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import butterknife.OnClick;
+//import butterknife.OnClick;
 
 /**
  * Created by Hiroshi on 2016/9/7.
@@ -80,7 +80,14 @@ public class TaskActivity extends CoordinatorActivity implements TaskView {
         mActionButton2.show();
     }
 
-    @OnClick(R.id.coordinator_action_button2)
+    @Override
+    protected void initView() {
+        super.initView();
+        findViewById(R.id.coordinator_action_button2).setOnClickListener(v -> onActionButton2Click());
+        findViewById(R.id.coordinator_action_button).setOnClickListener(v -> onActionButtonClick());
+    }
+
+//    @OnClick(R.id.coordinator_action_button2)
     void onActionButton2Click() {
         for (int i = 0; i < mTaskAdapter.getDateSet().size(); i++) {
             Task task = mTaskAdapter.getItem(i);
@@ -114,7 +121,7 @@ public class TaskActivity extends CoordinatorActivity implements TaskView {
         return super.onCreateOptionsMenu(menu);
     }
 
-    @OnClick(R.id.coordinator_action_button)
+//    @OnClick(R.id.coordinator_action_button)
     void onActionButtonClick() {
         Intent intent = DetailActivity.createIntent(this, mPresenter.getComic().getId(),
                 mPresenter.getComic().getSource(), mPresenter.getComic().getCid());

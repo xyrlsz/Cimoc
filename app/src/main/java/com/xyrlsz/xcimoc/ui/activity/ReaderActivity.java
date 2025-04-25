@@ -59,8 +59,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-import butterknife.BindView;
-import butterknife.OnClick;
+//import butterknife.BindView;
+//import butterknife.OnClick;
 
 /**
  * Created by Hiroshi on 2016/8/6.
@@ -82,25 +82,25 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
     protected int mode;
     protected boolean mLoadPrev;
     protected boolean mLoadNext;
-    @BindView(R.id.reader_chapter_title)
+    //    @BindView(R.id.reader_chapter_title)
     TextView mChapterTitle;
-    @BindView(R.id.reader_chapter_page)
+    //    @BindView(R.id.reader_chapter_page)
     TextView mChapterPage;
-    @BindView(R.id.reader_battery)
+    //    @BindView(R.id.reader_battery)
     TextView mBatteryText;
-    @BindView(R.id.reader_progress_layout)
+    //    @BindView(R.id.reader_progress_layout)
     View mProgressLayout;
-    @BindView(R.id.reader_back_layout)
+    //    @BindView(R.id.reader_back_layout)
     View mBackLayout;
-    @BindView(R.id.reader_info_layout)
+    //    @BindView(R.id.reader_info_layout)
     View mInfoLayout;
-    @BindView(R.id.reader_seek_bar)
+    //    @BindView(R.id.reader_seek_bar)
     ReverseSeekBar mSeekBar;
-    @BindView(R.id.reader_loading)
+    //    @BindView(R.id.reader_loading)
     TextView mLoadingText;
-    @BindView(R.id.reader_recycler_view)
+    //    @BindView(R.id.reader_recycler_view)
     RecyclerView mRecyclerView;
-    @BindView(R.id.reader_box)
+    //    @BindView(R.id.reader_box)
     RelativeLayout mReaderBox;
     private boolean isSavingPicture = false;
 
@@ -171,6 +171,19 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
 
     @Override
     protected void initView() {
+        mChapterTitle = findViewById(R.id.reader_chapter_title);
+        mChapterPage = findViewById(R.id.reader_chapter_page);
+        mBatteryText = findViewById(R.id.reader_battery);
+        mProgressLayout = findViewById(R.id.reader_progress_layout);
+        mBackLayout = findViewById(R.id.reader_back_layout);
+        mInfoLayout = findViewById(R.id.reader_info_layout);
+        mSeekBar = findViewById(R.id.reader_seek_bar);
+        mLoadingText = findViewById(R.id.reader_loading);
+        mRecyclerView = findViewById(R.id.reader_recycler_view);
+        mReaderBox = findViewById(R.id.reader_box);
+
+        findViewById(R.id.reader_back_btn).setOnClickListener(v -> onBackClick());
+
         boolean isWhiteBackground = App.getPreferenceManager().getBoolean(PreferenceManager.PREF_READER_WHITE_BACKGROUND, false);
         if (isWhiteBackground) {
             mLoadingText.setTextColor(getResources().getColor(R.color.black));
@@ -298,7 +311,7 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
         }
     }
 
-    @OnClick(R.id.reader_back_btn)
+    //    @OnClick(R.id.reader_back_btn)
     void onBackClick() {
         onBackPressed();
     }

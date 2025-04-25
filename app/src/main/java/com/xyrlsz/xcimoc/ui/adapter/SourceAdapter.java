@@ -4,9 +4,11 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Rect;
+
 import androidx.annotation.ColorInt;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.SwitchCompat;
+
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
@@ -17,7 +19,7 @@ import com.xyrlsz.xcimoc.model.Source;
 
 import java.util.List;
 
-import butterknife.BindView;
+//import butterknife.BindView;
 
 /**
  * Created by Hiroshi on 2016/10/10.
@@ -88,13 +90,15 @@ public class SourceAdapter extends BaseAdapter<Source> {
     }
 
     static class SourceHolder extends BaseViewHolder {
-        @BindView(R.id.item_source_title)
+        //        @BindView(R.id.item_source_title)
         TextView sourceTitle;
-        @BindView(R.id.item_source_switch)
+        //        @BindView(R.id.item_source_switch)
         SwitchCompat sourceSwitch;
 
         SourceHolder(final View view) {
             super(view);
+            sourceTitle = view.findViewById(R.id.item_source_title);
+            sourceSwitch = view.findViewById(R.id.item_source_switch);
         }
     }
 

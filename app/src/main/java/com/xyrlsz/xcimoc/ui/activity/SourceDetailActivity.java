@@ -10,8 +10,8 @@ import com.xyrlsz.xcimoc.presenter.SourceDetailPresenter;
 import com.xyrlsz.xcimoc.ui.view.SourceDetailView;
 import com.xyrlsz.xcimoc.ui.widget.Option;
 
-import butterknife.BindView;
-import butterknife.OnClick;
+//import butterknife.BindView;
+//import butterknife.OnClick;
 
 /**
  * Created by Hiroshi on 2017/1/18.
@@ -19,11 +19,11 @@ import butterknife.OnClick;
 
 public class SourceDetailActivity extends BackActivity implements SourceDetailView {
 
-    @BindView(R.id.source_detail_type)
+//    @BindView(R.id.source_detail_type)
     Option mSourceType;
-    @BindView(R.id.source_detail_title)
+//    @BindView(R.id.source_detail_title)
     Option mSourceTitle;
-    @BindView(R.id.source_detail_favorite)
+//    @BindView(R.id.source_detail_favorite)
     Option mSourceFavorite;
     private SourceDetailPresenter mPresenter;
 
@@ -31,6 +31,14 @@ public class SourceDetailActivity extends BackActivity implements SourceDetailVi
         Intent intent = new Intent(context, SourceDetailActivity.class);
         intent.putExtra(Extra.EXTRA_SOURCE, type);
         return intent;
+    }
+
+    @Override
+    protected void initView() {
+        super.initView();
+        mSourceType = findViewById(R.id.source_detail_type);
+        mSourceTitle = findViewById(R.id.source_detail_title);
+        mSourceFavorite = findViewById(R.id.source_detail_favorite);
     }
 
     @Override
@@ -45,10 +53,10 @@ public class SourceDetailActivity extends BackActivity implements SourceDetailVi
         mPresenter.load(getIntent().getIntExtra(Extra.EXTRA_SOURCE, -1));
     }
 
-    @OnClick(R.id.source_detail_favorite)
-    void onSourceFavoriteClick() {
-        // TODO 显示这个图源的漫画
-    }
+//    @OnClick(R.id.source_detail_favorite)
+//    void onSourceFavoriteClick() {
+//        // TODO 显示这个图源的漫画
+//    }
 
     @Override
     public void onSourceLoadSuccess(int type, String title, long count) {

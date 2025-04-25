@@ -2,6 +2,7 @@ package com.xyrlsz.xcimoc.ui.fragment.dialog;
 
 import android.graphics.PorterDuff;
 import android.os.Bundle;
+
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
@@ -14,13 +15,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.xyrlsz.xcimoc.R;
+import com.xyrlsz.xcimoc.databinding.DialogProgressBinding;
 import com.xyrlsz.xcimoc.rx.RxBus;
 import com.xyrlsz.xcimoc.rx.RxEvent;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
+
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
 
@@ -30,12 +30,12 @@ import rx.subscriptions.CompositeSubscription;
 
 public class ProgressDialogFragment extends DialogFragment {
 
-    @BindView(R.id.dialog_progress_bar)
+    //    @BindView(R.id.dialog_progress_bar)
     ProgressBar mProgressBar;
-    @BindView(R.id.dialog_progress_text)
+    //    @BindView(R.id.dialog_progress_text)
     TextView mTextView;
-
-    private Unbinder unbinder;
+    private DialogProgressBinding binding;
+    //    private Unbinder unbinder;
     private CompositeSubscription mCompositeSubscription;
 
     public static ProgressDialogFragment newInstance() {
@@ -45,8 +45,12 @@ public class ProgressDialogFragment extends DialogFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.dialog_progress, container, false);
-        unbinder = ButterKnife.bind(this, view);
+        binding = DialogProgressBinding.inflate(inflater, container, false);
+        View view = binding.getRoot();
+        mProgressBar = binding.dialogProgressBar;
+        mTextView = binding.dialogProgressText;
+//        View view = inflater.inflate(R.layout.dialog_progress, container, false);
+//        unbinder = ButterKnife.bind(this, view);
         getDialog().requestWindowFeature(Window.FEATURE_NO_TITLE);
         setCancelable(false);
         int resId = ThemeUtils.getResourceId(getActivity(), R.attr.colorAccent);
@@ -67,7 +71,7 @@ public class ProgressDialogFragment extends DialogFragment {
             mCompositeSubscription.unsubscribe();
         }
         super.onDestroyView();
-        unbinder.unbind();
+//        unbinder.unbind();
     }
 
 }

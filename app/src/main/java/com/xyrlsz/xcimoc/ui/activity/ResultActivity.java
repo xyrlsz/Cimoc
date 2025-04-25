@@ -24,7 +24,7 @@ import com.xyrlsz.xcimoc.ui.view.ResultView;
 import java.util.LinkedList;
 import java.util.List;
 
-import butterknife.BindView;
+//import butterknife.BindView;
 
 /**
  * Created by Hiroshi on 2016/7/3.
@@ -41,9 +41,9 @@ public class ResultActivity extends BackActivity implements ResultView, BaseAdap
      * Extra: 格式 图源
      */
     public static final int LAUNCH_MODE_CATEGORY = 1;
-    @BindView(R.id.result_recycler_view)
+//    @BindView(R.id.result_recycler_view)
     RecyclerView mRecyclerView;
-    @BindView(R.id.result_layout)
+//    @BindView(R.id.result_layout)
     FrameLayout mLayoutView;
     private ResultAdapter mResultAdapter;
     private LinearLayoutManager mLayoutManager;
@@ -100,6 +100,9 @@ public class ResultActivity extends BackActivity implements ResultView, BaseAdap
     @Override
     protected void initView() {
         super.initView();
+        mRecyclerView = findViewById(R.id.result_recycler_view);
+        mLayoutView = findViewById(R.id.result_layout);
+
         mLayoutManager = new LinearLayoutManager(this);
         mResultAdapter = new ResultAdapter(this, new LinkedList<Comic>());
         mResultAdapter.setOnItemClickListener(this);

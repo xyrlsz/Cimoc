@@ -1,13 +1,14 @@
 package com.xyrlsz.xcimoc.ui.fragment.recyclerview;
 
 import androidx.recyclerview.widget.RecyclerView;
+
 import android.view.View;
 
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.ui.adapter.BaseAdapter;
 import com.xyrlsz.xcimoc.ui.fragment.BaseFragment;
 
-import butterknife.BindView;
+//import butterknife.BindView;
 
 /**
  * Created by Hiroshi on 2016/10/11.
@@ -16,11 +17,12 @@ import butterknife.BindView;
 public abstract class RecyclerViewFragment extends BaseFragment implements BaseAdapter.OnItemClickListener,
         BaseAdapter.OnItemLongClickListener {
 
-    @BindView(R.id.recycler_view_content)
+    //    @BindView(R.id.recycler_view_content)
     protected RecyclerView mRecyclerView;
 
     @Override
     protected void initView() {
+        mRecyclerView = requireView().findViewById(R.id.recycler_view_content);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setItemAnimator(null);
         mRecyclerView.setLayoutManager(initLayoutManager());

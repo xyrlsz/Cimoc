@@ -99,6 +99,7 @@ android {
     }
     buildFeatures {
         buildConfig true
+        viewBinding true
     }
     buildTypes {
         release {
@@ -144,11 +145,11 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
     implementation 'com.google.android.material:material:1.12.0'
-    implementation 'com.jakewharton:butterknife:10.2.1'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:10.1.0'
+//    implementation 'com.jakewharton:butterknife:10.2.1'
+//    annotationProcessor 'com.jakewharton:butterknife-compiler:10.1.0'
     implementation 'org.greenrobot:greendao:3.3.0'
-    //noinspection GradleDependency : for support android low api devices,not update OKHTTP
-    implementation 'com.squareup.okhttp3:okhttp:4.9.2'
+
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     // fresco 3.0.0 - 3.6.0 似乎有bug 以后再试试3.7以上的版本
 //    implementation 'com.facebook.fresco:fresco:2.6.0'
     implementation 'com.facebook.fresco:fresco:3.6.0'

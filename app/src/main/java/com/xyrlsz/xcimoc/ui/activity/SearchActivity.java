@@ -32,8 +32,8 @@ import com.xyrlsz.xcimoc.utils.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.OnClick;
+//import butterknife.BindView;
+//import butterknife.OnClick;
 
 /**
  * Created by Hiroshi on 2016/10/11.
@@ -43,15 +43,15 @@ public class SearchActivity extends BackActivity implements SearchView, TextView
 
     private final static int DIALOG_REQUEST_SOURCE = 0;
 
-    @BindView(R.id.search_text_layout)
+//    @BindView(R.id.search_text_layout)
     TextInputLayout mInputLayout;
-    @BindView(R.id.search_keyword_input)
+//    @BindView(R.id.search_keyword_input)
     AppCompatAutoCompleteTextView mEditText;
-    @BindView(R.id.search_action_button)
+//    @BindView(R.id.search_action_button)
     FloatingActionButton mActionButton;
-    @BindView(R.id.search_strict_checkbox)
+//    @BindView(R.id.search_strict_checkbox)
     AppCompatCheckBox mStrictCheckBox;
-    @BindView(R.id.search_STSame_checkbox)
+//    @BindView(R.id.search_STSame_checkbox)
     AppCompatCheckBox mSTSameCheckBox;
 
     private ArrayAdapter<String> mArrayAdapter;
@@ -69,6 +69,13 @@ public class SearchActivity extends BackActivity implements SearchView, TextView
 
     @Override
     protected void initView() {
+        mInputLayout = findViewById(R.id.search_text_layout);
+        mEditText = findViewById(R.id.search_keyword_input);
+        mActionButton = findViewById(R.id.search_action_button);
+        mStrictCheckBox = findViewById(R.id.search_strict_checkbox);
+        mSTSameCheckBox = findViewById(R.id.search_STSame_checkbox);
+        findViewById(R.id.search_action_button).setOnClickListener(v -> onSearchButtonClick());
+
         mAutoComplete = mPreference.getBoolean(PreferenceManager.PREF_SEARCH_AUTO_COMPLETE, false);
         mEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -162,7 +169,7 @@ public class SearchActivity extends BackActivity implements SearchView, TextView
         return false;
     }
 
-    @OnClick(R.id.search_action_button)
+//    @OnClick(R.id.search_action_button)
     void onSearchButtonClick() {
         String keyword = mEditText.getText().toString();
         boolean strictSearch = mStrictCheckBox.isChecked();

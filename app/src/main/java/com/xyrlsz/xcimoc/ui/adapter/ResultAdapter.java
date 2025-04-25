@@ -22,7 +22,7 @@ import com.xyrlsz.xcimoc.utils.STConvertUtils;
 
 import java.util.List;
 
-import butterknife.BindView;
+//import butterknife.BindView;
 
 /**
  * Created by Hiroshi on 2016/7/3.
@@ -79,19 +79,24 @@ public class ResultAdapter extends BaseAdapter<Comic> {
     }
 
     class ResultViewHolder extends BaseViewHolder {
-        @BindView(R.id.result_comic_image)
+//        @BindView(R.id.result_comic_image)
         SimpleDraweeView comicImage;
-        @BindView(R.id.result_comic_title)
+//        @BindView(R.id.result_comic_title)
         TextView comicTitle;
-        @BindView(R.id.result_comic_author)
+//        @BindView(R.id.result_comic_author)
         TextView comicAuthor;
-        @BindView(R.id.result_comic_update)
+//        @BindView(R.id.result_comic_update)
         TextView comicUpdate;
-        @BindView(R.id.result_comic_source)
+//        @BindView(R.id.result_comic_source)
         TextView comicSource;
 
         ResultViewHolder(View view) {
             super(view);
+            comicImage = view.findViewById(R.id.result_comic_image);
+            comicTitle = view.findViewById(R.id.result_comic_title);
+            comicAuthor = view.findViewById(R.id.result_comic_author);
+            comicUpdate = view.findViewById(R.id.result_comic_update);
+            comicSource = view.findViewById(R.id.result_comic_source);
         }
     }
 

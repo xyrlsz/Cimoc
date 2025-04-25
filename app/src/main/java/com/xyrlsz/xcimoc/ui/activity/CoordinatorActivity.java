@@ -9,8 +9,8 @@ import android.view.View;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.ui.adapter.BaseAdapter;
 
-import butterknife.BindView;
-
+//import butterknife.BindView;
+//
 /**
  * Created by Hiroshi on 2016/12/1.
  */
@@ -18,18 +18,23 @@ import butterknife.BindView;
 public abstract class CoordinatorActivity extends BackActivity implements
         BaseAdapter.OnItemClickListener, BaseAdapter.OnItemLongClickListener {
 
-    @BindView(R.id.coordinator_action_button)
+//    @BindView(R.id.coordinator_action_button)
     FloatingActionButton mActionButton;
-    @BindView(R.id.coordinator_action_button2)
+//    @BindView(R.id.coordinator_action_button2)
     FloatingActionButton mActionButton2;
-    @BindView(R.id.coordinator_recycler_view)
+//    @BindView(R.id.coordinator_recycler_view)
     RecyclerView mRecyclerView;
-    @BindView(R.id.coordinator_layout)
+//    @BindView(R.id.coordinator_layout)
     CoordinatorLayout mLayoutView;
 
     @Override
     protected void initView() {
         super.initView();
+        mActionButton = findViewById(R.id.coordinator_action_button);
+        mActionButton2 = findViewById(R.id.coordinator_action_button2);
+        mRecyclerView = findViewById(R.id.coordinator_recycler_view);
+        mLayoutView = findViewById(R.id.coordinator_layout);
+
         mRecyclerView.setLayoutManager(initLayoutManager());
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setItemAnimator(null);

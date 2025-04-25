@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.Constants;
 import com.xyrlsz.xcimoc.R;
+import com.xyrlsz.xcimoc.databinding.ActivityAboutBinding;
 import com.xyrlsz.xcimoc.manager.PreferenceManager;
 import com.xyrlsz.xcimoc.presenter.AboutPresenter;
 import com.xyrlsz.xcimoc.presenter.BasePresenter;
@@ -23,20 +24,18 @@ import com.xyrlsz.xcimoc.utils.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.OnClick;
 
 /**
  * Created by Hiroshi on 2016/9/21.
  */
 
 public class AboutActivity extends BackActivity implements AboutView, AdapterView.OnItemSelectedListener {
-
-    @BindView(R.id.about_update_summary)
+    private ActivityAboutBinding binding;
+//    @BindView(R.id.about_update_summary)
     TextView mUpdateText;
-    @BindView(R.id.about_version_name)
+//    @BindView(R.id.about_version_name)
     TextView mVersionName;
-    @BindView(R.id.about_layout)
+//    @BindView(R.id.about_layout)
     View mLayoutView;
     private AboutPresenter mPresenter;
     private boolean update = false;
@@ -60,6 +59,10 @@ public class AboutActivity extends BackActivity implements AboutView, AdapterVie
         try {
             PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), 0);
             mVersionName.setText(StringUtils.format("Version  %s (%s)", info.versionName, info.versionCode));
+            binding = ActivityAboutBinding.inflate(getLayoutInflater());
+            mUpdateText = binding.aboutUpdateSummary;
+            mVersionName = binding.aboutVersionName;
+            mLayoutView = binding.aboutLayout;
 
             tvHomePageUrl = findViewById(R.id.tv_about_home_page_url);
             tvResourceUrl = findViewById(R.id.tv_about_resource_url);
@@ -68,12 +71,17 @@ public class AboutActivity extends BackActivity implements AboutView, AdapterVie
             tvResourceUrl.setText(Constants.GITHUB_RELEASE_URL);
             tvSupportUrl.setText(Constants.GITHUB_ISSUE_URL);
 
+            binding.homePageBtn.setOnClickListener(v -> onHomeClick());
+            binding.aboutSupportBtn.setOnClickListener(v->onSupportClick());
+            binding.aboutResourceBtn.setOnClickListener(v->onResourceClick());
+            binding.aboutUpdateBtn.setOnClickListener(v->onUpdateClick());
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    @OnClick(R.id.home_page_btn)
+//    @OnClick(R.id.home_page_btn)
     void onHomeClick() {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.GITHUB_HOME_PAGE_URL));
         try {
@@ -93,7 +101,7 @@ public class AboutActivity extends BackActivity implements AboutView, AdapterVie
 //        }
 //    }
 
-    @OnClick(R.id.about_support_btn)
+//    @OnClick(R.id.about_support_btn)
     void onSupportClick() {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.GITHUB_ISSUE_URL));
         try {
@@ -103,7 +111,7 @@ public class AboutActivity extends BackActivity implements AboutView, AdapterVie
         }
     }
 
-    @OnClick(R.id.about_resource_btn)
+//    @OnClick(R.id.about_resource_btn)
     void onResourceClick() {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.GITHUB_HOME_PAGE_URL));
         try {
@@ -133,7 +141,7 @@ public class AboutActivity extends BackActivity implements AboutView, AdapterVie
 //        }
 //    }
 
-    @OnClick(R.id.about_update_btn)
+//    @OnClick(R.id.about_update_btn)
     void onUpdateClick() {
 //        if (update) {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.GITHUB_RELEASE_URL));

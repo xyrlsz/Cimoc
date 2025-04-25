@@ -28,7 +28,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-import butterknife.BindView;
+//import butterknife.BindView;
 
 /**
  * Created by Hiroshi on 2016/7/1.
@@ -191,19 +191,24 @@ public class GridAdapter extends BaseAdapter<Object> {
     }
 
     static class GridHolder extends BaseViewHolder {
-        @BindView(R.id.item_grid_image)
+//        @BindView(R.id.item_grid_image)
         SimpleDraweeView comicImage;
-        @BindView(R.id.item_grid_title)
+//        @BindView(R.id.item_grid_title)
         TextView comicTitle;
-        @BindView(R.id.item_grid_subtitle)
+//        @BindView(R.id.item_grid_subtitle)
         TextView comicSource;
-        @BindView(R.id.item_grid_symbol)
+//        @BindView(R.id.item_grid_symbol)
         View comicHighlight;
-        @BindView(R.id.rl_item_grid)
+//        @BindView(R.id.rl_item_grid)
         RelativeLayout rlItemGrid;
 
         GridHolder(View view) {
             super(view);
+            comicImage = view.findViewById(R.id.item_grid_image);
+            comicTitle = view.findViewById(R.id.item_grid_title);
+            comicSource = view.findViewById(R.id.item_grid_subtitle);
+            comicHighlight = view.findViewById(R.id.item_grid_symbol);
+            rlItemGrid = view.findViewById(R.id.rl_item_grid);
         }
     }
 }

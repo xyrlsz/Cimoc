@@ -17,7 +17,7 @@ import com.xyrlsz.xcimoc.ui.view.TagEditorView;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.OnClick;
+//import butterknife.OnClick;
 
 /**
  * Created by Hiroshi on 2016/12/2.
@@ -39,6 +39,12 @@ public class TagEditorActivity extends CoordinatorActivity implements TagEditorV
         mPresenter = new TagEditorPresenter();
         mPresenter.attachView(this);
         return mPresenter;
+    }
+
+    @Override
+    protected void initView() {
+        super.initView();
+        findViewById(R.id.coordinator_action_button).setOnClickListener(v -> onActionButtonClick());
     }
 
     @Override
@@ -91,7 +97,7 @@ public class TagEditorActivity extends CoordinatorActivity implements TagEditorV
         mTagAdapter.notifyItemChanged(position);
     }
 
-    @OnClick(R.id.coordinator_action_button)
+//    @OnClick(R.id.coordinator_action_button)
     void onActionButtonClick() {
         showProgressDialog();
         List<Long> list = new ArrayList<>();

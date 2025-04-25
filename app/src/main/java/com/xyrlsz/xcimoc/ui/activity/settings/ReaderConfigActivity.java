@@ -13,7 +13,7 @@ import com.xyrlsz.xcimoc.ui.fragment.BaseFragment;
 import com.xyrlsz.xcimoc.ui.fragment.config.PageConfigFragment;
 import com.xyrlsz.xcimoc.ui.fragment.config.StreamConfigFragment;
 
-import butterknife.BindView;
+//import butterknife.BindView;
 
 /**
  * Created by Hiroshi on 2016/10/14.
@@ -21,9 +21,9 @@ import butterknife.BindView;
 
 public class ReaderConfigActivity extends BackActivity implements DialogCaller {
 
-    @BindView(R.id.reader_config_tab_layout)
+//    @BindView(R.id.reader_config_tab_layout)
     TabLayout mTabLayout;
-    @BindView(R.id.reader_config_view_pager)
+//    @BindView(R.id.reader_config_view_pager)
     ViewPager mViewPager;
 
     private String[] mKeyArray;
@@ -31,6 +31,8 @@ public class ReaderConfigActivity extends BackActivity implements DialogCaller {
 
     @Override
     protected void initView() {
+        mTabLayout = findViewById(R.id.reader_config_tab_layout);
+        mViewPager = findViewById(R.id.reader_config_view_pager);
         mTabLayout.addTab(mTabLayout.newTab().setText(R.string.reader_config_page));
         mTabLayout.addTab(mTabLayout.newTab().setText(R.string.reader_config_stream));
         TabPagerAdapter tabAdapter = new TabPagerAdapter(getSupportFragmentManager(),

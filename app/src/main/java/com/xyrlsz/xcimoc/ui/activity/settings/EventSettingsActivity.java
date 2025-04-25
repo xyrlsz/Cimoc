@@ -21,7 +21,7 @@ import com.xyrlsz.xcimoc.ui.fragment.dialog.ChoiceDialogFragment;
 
 import java.util.List;
 
-import butterknife.BindViews;
+//import butterknife.BindViews;
 
 import static com.xyrlsz.xcimoc.manager.PreferenceManager.READER_ORIENTATION_AUTO;
 
@@ -31,7 +31,7 @@ import static com.xyrlsz.xcimoc.manager.PreferenceManager.READER_ORIENTATION_AUT
 
 public class EventSettingsActivity extends BaseActivity implements DialogCaller {
 
-    @BindViews({R.id.event_left, R.id.event_top, R.id.event_middle, R.id.event_bottom, R.id.event_right})
+//    @BindViews({R.id.event_left, R.id.event_top, R.id.event_middle, R.id.event_bottom, R.id.event_right})
     List<Button> mButtonList;
 
     private int[] mChoiceArray;
@@ -60,6 +60,10 @@ public class EventSettingsActivity extends BaseActivity implements DialogCaller 
 
     @Override
     protected void initView() {
+        for (int id: new int[]{R.id.event_left, R.id.event_top, R.id.event_middle, R.id.event_bottom, R.id.event_right}){
+            Button button = findViewById(id);
+            mButtonList.add(button);
+        }
         boolean isStream = getIntent().getBooleanExtra(Extra.EXTRA_IS_STREAM, false);
         isLong = getIntent().getBooleanExtra(Extra.EXTRA_IS_LONG, false);
         if (isStream) {

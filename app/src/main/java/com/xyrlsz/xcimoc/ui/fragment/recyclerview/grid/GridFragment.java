@@ -29,9 +29,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedList;
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.OnClick;
+//
+//import butterknife.BindView;
+//import butterknife.OnClick;
 
 /**
  * Created by Hiroshi on 2016/9/22.
@@ -42,8 +42,15 @@ public abstract class GridFragment extends RecyclerViewFragment implements GridV
     protected static final int DIALOG_REQUEST_OPERATION = 0;
     protected GridAdapter mGridAdapter;
     protected long mSavedId = -1;
-    @BindView(R.id.grid_action_button)
+    //    @BindView(R.id.grid_action_button)
     FloatingActionButton mActionButton;
+
+    @Override
+    protected void initView() {
+        super.initView();
+        mActionButton = requireView().findViewById(R.id.grid_action_button);
+        mActionButton.setOnClickListener(v -> onActionButtonClick());
+    }
 
     @Override
     protected BaseAdapter initAdapter() {
@@ -84,7 +91,7 @@ public abstract class GridFragment extends RecyclerViewFragment implements GridV
         return manager;
     }
 
-    @OnClick(R.id.grid_action_button)
+    //    @OnClick(R.id.grid_action_button)
     void onActionButtonClick() {
         performActionButtonClick();
     }

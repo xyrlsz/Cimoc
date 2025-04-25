@@ -10,7 +10,7 @@ import androidx.core.content.ContextCompat;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
 
-import butterknife.BindView;
+//import butterknife.BindView;
 
 /**
  * Created by Hiroshi on 2016/9/11.
@@ -18,7 +18,7 @@ import butterknife.BindView;
 public abstract class BackActivity extends BaseActivity {
 
     @Nullable
-    @BindView(R.id.custom_progress_bar)
+//    @BindView(R.id.custom_progress_bar)
     ProgressBar mProgressBar;
 
     @Override
@@ -36,6 +36,7 @@ public abstract class BackActivity extends BaseActivity {
 
     @Override
     protected void initView() {
+        mProgressBar = findViewById(R.id.custom_progress_bar);
         if (mProgressBar != null) {
             int resId = ThemeUtils.getResourceId(this, R.attr.colorAccent);
             mProgressBar.getIndeterminateDrawable().setColorFilter(ContextCompat.getColor(this, resId), PorterDuff.Mode.SRC_ATOP);

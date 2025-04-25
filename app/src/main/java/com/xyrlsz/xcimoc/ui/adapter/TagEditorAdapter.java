@@ -13,7 +13,7 @@ import com.xyrlsz.xcimoc.model.Tag;
 
 import java.util.List;
 
-import butterknife.BindView;
+//import butterknife.BindView;
 
 /**
  * Created by Hiroshi on 2016/12/2.
@@ -51,13 +51,15 @@ public class TagEditorAdapter extends BaseAdapter<Switcher<Tag>> {
     }
 
     static class TagHolder extends BaseAdapter.BaseViewHolder {
-        @BindView(R.id.item_select_title)
+//        @BindView(R.id.item_select_title)
         TextView tagTitle;
-        @BindView(R.id.item_select_checkbox)
+//        @BindView(R.id.item_select_checkbox)
         CheckBox tagChoice;
 
         TagHolder(View view) {
             super(view);
+            tagTitle = view.findViewById(R.id.item_select_title);
+            tagChoice = view.findViewById(R.id.item_select_checkbox);
         }
     }
 

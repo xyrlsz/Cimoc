@@ -35,7 +35,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
-import butterknife.BindView;
+//import butterknife.BindView;
 import okhttp3.Headers;
 
 /**
@@ -314,11 +314,12 @@ public class ReaderAdapter extends BaseAdapter<ImageUrl> {
     }
 
     public static class ImageHolder extends BaseViewHolder {
-        public @BindView(R.id.reader_image_view)
-        RetryDraweeView draweeView;
+//        public @BindView(R.id.reader_image_view)
+public RetryDraweeView draweeView;
 
         ImageHolder(View view) {
             super(view);
+            draweeView = view.findViewById(R.id.reader_image_view);
         }
     }
 

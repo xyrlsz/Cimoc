@@ -28,7 +28,7 @@ import com.xyrlsz.xcimoc.utils.HintUtils;
 import java.util.LinkedList;
 import java.util.List;
 
-import butterknife.BindView;
+//import butterknife.BindView;
 
 /**
  * Created by Hiroshi on 2016/10/11.
@@ -40,7 +40,7 @@ public class PartFavoriteActivity extends BackActivity implements PartFavoriteVi
     private static final int DIALOG_REQUEST_DELETE = 0;
     private static final int DIALOG_REQUEST_ADD = 1;
 
-    @BindView(R.id.part_favorite_recycler_view)
+//    @BindView(R.id.part_favorite_recycler_view)
     RecyclerView mRecyclerView;
 
     private PartFavoritePresenter mPresenter;
@@ -66,6 +66,7 @@ public class PartFavoriteActivity extends BackActivity implements PartFavoriteVi
     @Override
     protected void initView() {
         super.initView();
+        mRecyclerView = findViewById(R.id.part_favorite_recycler_view);
         mGridAdapter = new GridAdapter(this, new LinkedList<Object>());
         mGridAdapter.setSymbol(true);
         mGridAdapter.setProvider(((App) getApplication()).getBuilderProvider());

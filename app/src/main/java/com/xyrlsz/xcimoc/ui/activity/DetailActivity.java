@@ -41,7 +41,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import butterknife.OnClick;
+//import butterknife.OnClick;
 
 /**
  * Created by Hiroshi on 2016/7/2.
@@ -64,6 +64,13 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
         intent.putExtra(Extra.EXTRA_SOURCE, source);
         intent.putExtra(Extra.EXTRA_CID, cid);
         return intent;
+    }
+
+    @Override
+    protected void initView() {
+        super.initView();
+        findViewById(R.id.coordinator_action_button).setOnClickListener(v->onActionButtonClick());
+        findViewById(R.id.coordinator_action_button2).setOnClickListener(v->onActionButton2Click());
     }
 
     @Override
@@ -223,7 +230,7 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
         }
     }
 
-    @OnClick(R.id.coordinator_action_button)
+//    @OnClick(R.id.coordinator_action_button)
     void onActionButtonClick() {
         //todo: add comic to mangodb
         if (mPresenter.getComic().getFavorite() != null) {
@@ -239,7 +246,7 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
         }
     }
 
-    @OnClick(R.id.coordinator_action_button2)
+//    @OnClick(R.id.coordinator_action_button2)
     void onActionButton2Click() {
         if (!mDetailAdapter.getDateSet().isEmpty()) {
             String path = mPresenter.getComic().getLast();

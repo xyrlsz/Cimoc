@@ -9,6 +9,7 @@ import android.widget.LinearLayout;
 
 import com.xyrlsz.xcimoc.Constants;
 import com.xyrlsz.xcimoc.R;
+import com.xyrlsz.xcimoc.databinding.ActivityBackupBinding;
 import com.xyrlsz.xcimoc.manager.PreferenceManager;
 import com.xyrlsz.xcimoc.presenter.BackupPresenter;
 import com.xyrlsz.xcimoc.presenter.BasePresenter;
@@ -24,8 +25,8 @@ import com.xyrlsz.xcimoc.utils.PermissionUtils;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
 
-import butterknife.BindView;
-import butterknife.OnClick;
+//import butterknife.BindView;
+//import butterknife.OnClick;
 
 /**
  * Created by Hiroshi on 2016/10/19.
@@ -39,14 +40,14 @@ public class BackupActivity extends BackActivity implements BackupView {
     private static final int DIALOG_REQUEST_RESTORE_SETTINGS = 2;
     private static final int DIALOG_REQUEST_RESTORE_CLEAR = 3;
     DocumentFile mDocumentFile;
-
-    @BindView(R.id.backup_layout)
+    private ActivityBackupBinding binding;
+    //    @BindView(R.id.backup_layout)
     View mLayoutView;
-    @BindView(R.id.backup_save_comic_auto)
+    //    @BindView(R.id.backup_save_comic_auto)
     CheckBoxPreference mSaveComicAuto;
-    @BindView(R.id.backup_cloud_sync)
+    //    @BindView(R.id.backup_cloud_sync)
     CheckBoxPreference mSaveComicCloudAuto;
-    @BindView(R.id.webdav_layout)
+//    @BindView(R.id.webdav_layout)
     LinearLayout mWebDavLayout;
     private BackupPresenter mPresenter;
 
@@ -60,6 +61,27 @@ public class BackupActivity extends BackActivity implements BackupView {
     @Override
     protected void initView() {
         super.initView();
+        binding = ActivityBackupBinding.inflate(getLayoutInflater());
+        mLayoutView = binding.backupLayout;
+        mSaveComicAuto = binding.backupSaveComicAuto;
+        mSaveComicCloudAuto = binding.backupCloudSync;
+        mWebDavLayout = binding.webdavLayout;
+
+        binding.backupSaveComic.setOnClickListener(v->onSaveFavoriteClick());
+        binding.backupSaveTag.setOnClickListener(v->onSaveTagClick());
+        binding.backupSaveSettings.setOnClickListener(v->onSaveSettingsClick());
+        binding.backupRestoreComic.setOnClickListener(v->onRestoreFavoriteClick());
+        binding.backupRestoreTag.setOnClickListener(v->onRestoreTagClick());
+        binding.backupRestoreSettings.setOnClickListener(v->onRestoreSettingsClick());
+        binding.backupClearRecord.setOnClickListener(v->onClearRecordClick());
+        binding.backupCloudConfig.setOnClickListener(v->onWebDavConfClick());
+        binding.backupCloudBackup.setOnClickListener(v->onWebDavCloudBackupClick());
+        binding.backupCloudRestore.setOnClickListener(v->onWebDavCloudRestoreClick());
+        binding.backupCloudClear.setOnClickListener(v->onWebDavCloudClearClick());
+        binding.backupCloudUpload.setOnClickListener(v->onWebDavCloudUploadClick());
+        binding.backupSaveSettingsCloud.setOnClickListener(v->onSaveSettingsCloudClick());
+        binding.backupRestoreSettingsCloud.setOnClickListener(v->onRestoreSettingsCloudClick());
+
         mSaveComicAuto.bindPreference(PreferenceManager.PREF_BACKUP_SAVE_COMIC, true);
         mSaveComicCloudAuto.bindPreference(PreferenceManager.PREF_BACKUP_SAVE_COMIC_CLOUD, true);
         SharedPreferences sharedPreferences = getSharedPreferences(Constants.WEBDAV_SHARED, MODE_PRIVATE);
@@ -74,7 +96,7 @@ public class BackupActivity extends BackActivity implements BackupView {
 
     }
 
-    @OnClick(R.id.backup_save_comic)
+//    @OnClick(R.id.backup_save_comic)
     void onSaveFavoriteClick() {
         showProgressDialog();
         if (PermissionUtils.hasStoragePermission(this)) {
@@ -85,7 +107,7 @@ public class BackupActivity extends BackActivity implements BackupView {
     }
 
 
-    @OnClick(R.id.backup_save_tag)
+//    @OnClick(R.id.backup_save_tag)
     void onSaveTagClick() {
         showProgressDialog();
         if (PermissionUtils.hasStoragePermission(this)) {
@@ -95,7 +117,7 @@ public class BackupActivity extends BackActivity implements BackupView {
         }
     }
 
-    @OnClick(R.id.backup_save_settings)
+//    @OnClick(R.id.backup_save_settings)
     void onSaveSettingsClick() {
         showProgressDialog();
         if (PermissionUtils.hasStoragePermission(this)) {
@@ -105,7 +127,7 @@ public class BackupActivity extends BackActivity implements BackupView {
         }
     }
 
-    @OnClick(R.id.backup_restore_comic)
+//    @OnClick(R.id.backup_restore_comic)
     void onRestoreFavoriteClick() {
         showProgressDialog();
         if (PermissionUtils.hasStoragePermission(this)) {
@@ -116,7 +138,7 @@ public class BackupActivity extends BackActivity implements BackupView {
         }
     }
 
-    @OnClick(R.id.backup_restore_tag)
+//    @OnClick(R.id.backup_restore_tag)
     void onRestoreTagClick() {
         showProgressDialog();
         if (PermissionUtils.hasStoragePermission(this)) {
@@ -127,7 +149,7 @@ public class BackupActivity extends BackActivity implements BackupView {
         }
     }
 
-    @OnClick(R.id.backup_restore_settings)
+//    @OnClick(R.id.backup_restore_settings)
     void onRestoreSettingsClick() {
         showProgressDialog();
         if (PermissionUtils.hasStoragePermission(this)) {
@@ -138,7 +160,7 @@ public class BackupActivity extends BackActivity implements BackupView {
         }
     }
 
-    @OnClick(R.id.backup_clear_record)
+//    @OnClick(R.id.backup_clear_record)
     void onClearRecordClick() {
         showProgressDialog();
         if (PermissionUtils.hasStoragePermission(this)) {
@@ -149,7 +171,7 @@ public class BackupActivity extends BackActivity implements BackupView {
         }
     }
 
-    @OnClick(R.id.backup_cloud_config)
+//    @OnClick(R.id.backup_cloud_config)
     void onWebDavConfClick() {
         int theme = mPreference.getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_PINK);
         WebDavConfDialog dialog = new WebDavConfDialog(this, ThemeUtils.getDialogThemeById(theme), new WebDavConfDialog.SubmitCallBack() {
@@ -166,7 +188,7 @@ public class BackupActivity extends BackActivity implements BackupView {
         dialog.show();
     }
 
-    @OnClick(R.id.backup_cloud_backup)
+//    @OnClick(R.id.backup_cloud_backup)
     void onWebDavCloudBackupClick() {
         showProgressDialog();
         mDocumentFile = DocumentFile.fromWebDav();
@@ -174,21 +196,21 @@ public class BackupActivity extends BackActivity implements BackupView {
     }
 
 
-    @OnClick(R.id.backup_cloud_restore)
+//    @OnClick(R.id.backup_cloud_restore)
     void onWebDavCloudRestoreClick() {
         showProgressDialog();
         mDocumentFile = DocumentFile.fromWebDav();
         mPresenter.loadComicFile(mDocumentFile);
     }
 
-    @OnClick(R.id.backup_cloud_clear)
+//    @OnClick(R.id.backup_cloud_clear)
     void onWebDavCloudClearClick() {
         showProgressDialog();
         mDocumentFile = DocumentFile.fromWebDav();
         mPresenter.loadClearBackupFile(mDocumentFile);
     }
 
-    @OnClick(R.id.backup_cloud_upload)
+//    @OnClick(R.id.backup_cloud_upload)
     void onWebDavCloudUploadClick() {
         showProgressDialog();
         mDocumentFile = DocumentFile.fromWebDav();
@@ -196,14 +218,14 @@ public class BackupActivity extends BackActivity implements BackupView {
         mPresenter.uploadBackup2Cloud(localDocumentFiles, new WebDavDocumentFile((WebDavDocumentFile) mDocumentFile, BACKUP));
     }
 
-    @OnClick(R.id.backup_save_settings_cloud)
+//    @OnClick(R.id.backup_save_settings_cloud)
     void onSaveSettingsCloudClick() {
         showProgressDialog();
         mDocumentFile = DocumentFile.fromWebDav();
         mPresenter.saveSettings(mDocumentFile);
     }
 
-    @OnClick(R.id.backup_restore_settings_cloud)
+//    @OnClick(R.id.backup_restore_settings_cloud)
     void onRestoreSettingsCloudClick() {
         showProgressDialog();
         mDocumentFile = DocumentFile.fromWebDav();

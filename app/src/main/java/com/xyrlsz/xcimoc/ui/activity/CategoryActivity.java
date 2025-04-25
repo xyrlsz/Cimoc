@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.AdapterView;
 
 import com.xyrlsz.xcimoc.R;
+import com.xyrlsz.xcimoc.databinding.ActivityCategoryBinding;
 import com.xyrlsz.xcimoc.global.Extra;
 import com.xyrlsz.xcimoc.manager.SourceManager;
 import com.xyrlsz.xcimoc.parser.Category;
@@ -14,8 +15,8 @@ import com.xyrlsz.xcimoc.ui.adapter.CategoryAdapter;
 
 import java.util.List;
 
-import butterknife.BindViews;
-import butterknife.OnClick;
+//import butterknife.BindViews;
+//import butterknife.OnClick;
 
 /**
  * Created by Hiroshi on 2016/12/11.
@@ -23,15 +24,15 @@ import butterknife.OnClick;
 
 public class CategoryActivity extends BackActivity implements AdapterView.OnItemSelectedListener {
 
-    @BindViews({R.id.category_spinner_subject, R.id.category_spinner_area, R.id.category_spinner_reader,
-            R.id.category_spinner_year, R.id.category_spinner_progress, R.id.category_spinner_order})
+//    @BindViews({R.id.category_spinner_subject, R.id.category_spinner_area, R.id.category_spinner_reader,
+//            R.id.category_spinner_year, R.id.category_spinner_progress, R.id.category_spinner_order})
     List<AppCompatSpinner> mSpinnerList;
-    @BindViews({R.id.category_subject, R.id.category_area, R.id.category_reader,
-            R.id.category_year, R.id.category_progress, R.id.category_order})
+//    @BindViews({R.id.category_subject, R.id.category_area, R.id.category_reader,
+//            R.id.category_year, R.id.category_progress, R.id.category_order})
     List<View> mCategoryView;
 
     private Category mCategory;
-
+    private ActivityCategoryBinding binding;
     public static Intent createIntent(Context context, int source, String title) {
         Intent intent = new Intent(context, CategoryActivity.class);
         intent.putExtra(Extra.EXTRA_SOURCE, source);
@@ -41,12 +42,25 @@ public class CategoryActivity extends BackActivity implements AdapterView.OnItem
 
     @Override
     protected void initView() {
+        binding = ActivityCategoryBinding.inflate(getLayoutInflater());
+        for (int id: new int[]{R.id.category_spinner_subject, R.id.category_spinner_area, R.id.category_spinner_reader,
+                R.id.category_spinner_year, R.id.category_spinner_progress, R.id.category_spinner_order}){
+            AppCompatSpinner spinner = findViewById(id);
+            mSpinnerList.add(spinner);
+        }
+        for (int id: new int[]{R.id.category_subject, R.id.category_area, R.id.category_reader,
+                R.id.category_year, R.id.category_progress, R.id.category_order}){
+            View view = findViewById(id);
+            mCategoryView.add(view);
+        }
+
         int source = getIntent().getIntExtra(Extra.EXTRA_SOURCE, -1);
         if (mToolbar != null) {
             mToolbar.setTitle(getIntent().getStringExtra(Extra.EXTRA_KEYWORD));
         }
         mCategory = SourceManager.getInstance(this).getParser(source).getCategory();
         initSpinner();
+        binding.categoryActionButton.setOnClickListener(v -> onActionButtonClick());
     }
 
     private void initSpinner() {
@@ -78,7 +92,7 @@ public class CategoryActivity extends BackActivity implements AdapterView.OnItem
     public void onNothingSelected(AdapterView<?> parent) {
     }
 
-    @OnClick(R.id.category_action_button)
+//    @OnClick(R.id.category_action_button)
     void onActionButtonClick() {
         String[] args = new String[mSpinnerList.size()];
         for (int i = 0; i != args.length; ++i) {

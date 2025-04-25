@@ -20,8 +20,8 @@ import com.xyrlsz.xcimoc.ui.widget.ViewUtils;
 import com.xyrlsz.xcimoc.utils.HintUtils;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+//import butterknife.BindView;
+//import butterknife.ButterKnife;
 
 /**
  * Created by Hiroshi on 2016/7/1.
@@ -29,13 +29,14 @@ import butterknife.ButterKnife;
 public abstract class BaseActivity extends AppCompatActivity implements BaseView {
 
     protected PreferenceManager mPreference;
+
     @Nullable
-    @BindView(R.id.custom_night_mask)
+//    @BindView(R.id.custom_night_mask)
     View mNightMask;
     @Nullable
-    @BindView(R.id.custom_toolbar)
+//    @BindView(R.id.custom_toolbar)
     Toolbar mToolbar;
-    @BindView(R.id.toolbar_title)
+//    @BindView(R.id.toolbar_title)
     @Nullable
     TextView mToolbarTitle;
     private ProgressDialogFragment mProgressDialog;
@@ -44,11 +45,14 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mNightMask = findViewById(R.id.custom_night_mask);
+        mToolbar = findViewById(R.id.custom_toolbar);
+        mToolbarTitle = findViewById(R.id.toolbar_title);
         initAdMob();
         mPreference = App.getPreferenceManager();
         initTheme();
         setContentView(getLayoutRes());
-        ButterKnife.bind(this);
+//        ButterKnife.bind(this);
         initNight();
         initToolbar();
         mBasePresenter = initPresenter();

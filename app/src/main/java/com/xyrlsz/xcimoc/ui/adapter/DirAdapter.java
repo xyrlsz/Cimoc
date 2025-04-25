@@ -10,7 +10,7 @@ import com.xyrlsz.xcimoc.R;
 
 import java.util.List;
 
-import butterknife.BindView;
+//import butterknife.BindView;
 
 /**
  * Created by Hiroshi on 2016/12/6.
@@ -41,11 +41,12 @@ public class DirAdapter extends BaseAdapter<String> {
     }
 
     static class DirHolder extends BaseAdapter.BaseViewHolder {
-        @BindView(R.id.item_dir_title)
+//        @BindView(R.id.item_dir_title)
         TextView mDirTitle;
 
         DirHolder(View view) {
             super(view);
+            mDirTitle = view.findViewById(R.id.item_dir_title);
         }
     }
 

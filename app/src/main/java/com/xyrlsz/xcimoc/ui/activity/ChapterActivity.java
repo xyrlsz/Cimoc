@@ -13,6 +13,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.xyrlsz.xcimoc.R;
+import com.xyrlsz.xcimoc.databinding.ActivityChapterBinding;
 import com.xyrlsz.xcimoc.global.Extra;
 import com.xyrlsz.xcimoc.manager.PreferenceManager;
 import com.xyrlsz.xcimoc.misc.Switcher;
@@ -26,8 +27,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.OnClick;
+//import butterknife.BindView;
+//import butterknife.OnClick;
 
 /**
  * Created by Hiroshi on 2016/11/14.
@@ -35,7 +36,7 @@ import butterknife.OnClick;
 
 public class ChapterActivity extends BackActivity implements BaseAdapter.OnItemClickListener {
 
-    @BindView(R.id.chapter_recycler_view)
+//    @BindView(R.id.chapter_recycler_view)
     RecyclerView mRecyclerView;
 
     private ChapterAdapter mChapterAdapter;
@@ -44,6 +45,7 @@ public class ChapterActivity extends BackActivity implements BaseAdapter.OnItemC
     private Handler mHandler = new Handler();
     private RecyclerView.OnItemTouchListener mListener = new CustomTouchListener();
     private RecyclerView.ItemDecoration mDecoration;
+    private ActivityChapterBinding binding;
 
     public static Intent createIntent(Context context, ArrayList<Chapter> list) {
         Intent intent = new Intent(context, ChapterActivity.class);
@@ -53,6 +55,9 @@ public class ChapterActivity extends BackActivity implements BaseAdapter.OnItemC
 
     @Override
     protected void initView() {
+        binding = ActivityChapterBinding.inflate(getLayoutInflater());
+        mRecyclerView = binding.chapterRecyclerView;
+        binding.chapterActionButton.setOnClickListener(v -> onActionButtonClick());
         isButtonMode = mPreference.getBoolean(PreferenceManager.PREF_CHAPTER_BUTTON_MODE, false);
         mChapterAdapter = new ChapterAdapter(this, getAdapterList());
         mDecoration = mChapterAdapter.getItemDecoration();
@@ -144,7 +149,7 @@ public class ChapterActivity extends BackActivity implements BaseAdapter.OnItemC
         }
     }
 
-    @OnClick(R.id.chapter_action_button)
+//    @OnClick(R.id.chapter_action_button)
     void onActionButtonClick() {
         ArrayList<Chapter> list = new ArrayList<>();
         for (Switcher<Chapter> switcher : mChapterAdapter.getDateSet()) {

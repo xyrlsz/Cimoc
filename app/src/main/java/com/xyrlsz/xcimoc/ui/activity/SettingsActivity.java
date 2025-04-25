@@ -56,9 +56,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 
-import butterknife.BindView;
-import butterknife.BindViews;
-import butterknife.OnClick;
+//import butterknife.BindView;
+//import butterknife.BindViews;
+//import butterknife.OnClick;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
@@ -87,76 +87,76 @@ public class SettingsActivity extends BackActivity implements SettingsView {
     private static final int DIALOG_REQUEST_OTHER_DARK_MOD = 12;
     private final int[] mResultArray = new int[6];
     private final Intent mResultIntent = new Intent();
-    @BindView(R.id.settings_dmzj_login)
+    //    @BindView(R.id.settings_dmzj_login)
     Option mDmzjLogin;
-    @BindView(R.id.settings_komiic_login)
+    //    @BindView(R.id.settings_komiic_login)
     Option mkomiicLogin;
-    @BindViews({R.id.settings_reader_title, R.id.settings_download_title, R.id.settings_other_title, R.id.settings_search_title, R.id.settings_dmzj, R.id.settings_komiic})
+//    @BindViews({R.id.settings_reader_title, R.id.settings_download_title, R.id.settings_other_title, R.id.settings_search_title, R.id.settings_dmzj, R.id.settings_komiic})
     List<TextView> mTitleList;
-    @BindView(R.id.settings_layout)
+//    @BindView(R.id.settings_layout)
     View mSettingsLayout;
-    @BindView(R.id.settings_reader_keep_bright)
+//    @BindView(R.id.settings_reader_keep_bright)
     CheckBoxPreference mReaderKeepBright;
-    @BindView(R.id.settings_reader_hide_info)
+//    @BindView(R.id.settings_reader_hide_info)
     CheckBoxPreference mReaderHideInfo;
-    @BindView(R.id.settings_reader_hide_nav)
+//    @BindView(R.id.settings_reader_hide_nav)
     CheckBoxPreference mReaderHideNav;
-    @BindView(R.id.settings_reader_ban_double_click)
+//    @BindView(R.id.settings_reader_ban_double_click)
     CheckBoxPreference mReaderBanDoubleClick;
-    @BindView(R.id.settings_reader_paging)
+//    @BindView(R.id.settings_reader_paging)
     CheckBoxPreference mReaderPaging;
-    @BindView(R.id.settings_reader_closeautoresizeimage)
+//    @BindView(R.id.settings_reader_closeautoresizeimage)
     CheckBoxPreference mReaderCloseAutoResizeImage;
-    @BindView(R.id.settings_reader_paging_reverse)
+//    @BindView(R.id.settings_reader_paging_reverse)
     CheckBoxPreference mReaderPagingReverse;
-    @BindView(R.id.settings_reader_white_edge)
+//    @BindView(R.id.settings_reader_white_edge)
     CheckBoxPreference mReaderWhiteEdge;
-    @BindView(R.id.settings_reader_white_background)
+//    @BindView(R.id.settings_reader_white_background)
     CheckBoxPreference mReaderWhiteBackground;
-    @BindView(R.id.settings_reader_volume_key)
+//    @BindView(R.id.settings_reader_volume_key)
     CheckBoxPreference mReaderVolumeKeyControls;
-    @BindView(R.id.settings_search_auto_complete)
+//    @BindView(R.id.settings_search_auto_complete)
     CheckBoxPreference mSearchAutoComplete;
-    @BindView(R.id.settings_other_check_update)
+//    @BindView(R.id.settings_other_check_update)
     CheckBoxPreference mCheckCimocUpdate;
-    @BindView(R.id.settings_check_update)
+//    @BindView(R.id.settings_check_update)
     CheckBoxPreference mCheckSoftwareUpdate;
-    @BindView(R.id.settings_reader_mode)
+//    @BindView(R.id.settings_reader_mode)
     ChoicePreference mReaderMode;
-    @BindView(R.id.settings_other_launch)
+//    @BindView(R.id.settings_other_launch)
     ChoicePreference mOtherLaunch;
-    @BindView(R.id.settings_other_theme)
+//    @BindView(R.id.settings_other_theme)
     ChoicePreference mOtherTheme;
-    @BindView(R.id.settings_reader_scale_factor)
+//    @BindView(R.id.settings_reader_scale_factor)
     SliderPreference mReaderScaleFactor;
-    @BindView(R.id.settings_reader_controller_trig_threshold)
+//    @BindView(R.id.settings_reader_controller_trig_threshold)
     SliderPreference mReaderControllerTrigThreshold;
-    @BindView(R.id.settings_reader_show_topbar)
+//    @BindView(R.id.settings_reader_show_topbar)
     CheckBoxPreference mOtherShowTopbar;
-    @BindView(R.id.settings_other_night_alpha)
+//    @BindView(R.id.settings_other_night_alpha)
     SliderPreference mOtherNightAlpha;
-    @BindView(R.id.settings_download_thread)
+//    @BindView(R.id.settings_download_thread)
     SliderPreference mDownloadThread;
-    @BindView(R.id.settings_other_connect_only_wifi)
+//    @BindView(R.id.settings_other_connect_only_wifi)
     CheckBoxPreference mConnectOnlyWifi;
-    @BindView(R.id.settings_other_loadcover_only_wifi)
+//    @BindView(R.id.settings_other_loadcover_only_wifi)
     CheckBoxPreference mLoadCoverOnlyWifi;
     //    @BindView(R.id.settings_firebase_event)
 //    CheckBoxPreference mFireBaseEvent;
 //    @BindView(R.id.settings_other_reduce_ad)
 //    CheckBoxPreference mReduceAd;
-    @BindView(R.id.settings_detail_text_st)
+//    @BindView(R.id.settings_detail_text_st)
     ChoicePreference mDetailTextSt;
 
-    @BindView(R.id.settings_other_dark_mod)
+//    @BindView(R.id.settings_other_dark_mod)
     ChoicePreference mOtherDarkMod;
-    @BindView(R.id.settings_st_engine)
+//    @BindView(R.id.settings_st_engine)
     ChoicePreference mStEngine;
 
-    @BindView(R.id.settings_dmzj_logout)
+//    @BindView(R.id.settings_dmzj_logout)
     ImageButton mDmzjLogout;
 
-    @BindView(R.id.settings_komiic_logout)
+//    @BindView(R.id.settings_komiic_logout)
     ImageButton mKomiicLogout;
 
     private SettingsPresenter mPresenter;
@@ -173,6 +173,52 @@ public class SettingsActivity extends BackActivity implements SettingsView {
     @Override
     protected void initView() {
         super.initView();
+
+        mDmzjLogin = findViewById(R.id.settings_dmzj_login);
+        mDmzjLogin.setOnClickListener(v->onDmzjLoginClick());
+        mkomiicLogin = findViewById(R.id.settings_komiic_login);
+        mkomiicLogin.setOnClickListener(v->onKomiicLoginClick());
+        mDmzjLogout = findViewById(R.id.settings_dmzj_logout);
+        mDmzjLogout.setOnClickListener(v->onDmzjLogoutClick());
+        mKomiicLogout = findViewById(R.id.settings_komiic_logout);
+        mKomiicLogout.setOnClickListener(v->onKomiicLogoutClick());
+
+        for (int id : new int[]{R.id.settings_reader_title, R.id.settings_download_title, R.id.settings_other_title, R.id.settings_search_title, R.id.settings_dmzj, R.id.settings_komiic}) {
+            mTitleList.add(findViewById(id));
+        }
+        mSettingsLayout = findViewById(R.id.settings_layout);
+        mReaderKeepBright = findViewById(R.id.settings_reader_keep_bright);
+        mReaderHideInfo = findViewById(R.id.settings_reader_hide_info);
+        mReaderHideNav = findViewById(R.id.settings_reader_hide_nav);
+        mReaderBanDoubleClick = findViewById(R.id.settings_reader_ban_double_click);
+        mReaderPaging = findViewById(R.id.settings_reader_paging);
+        mReaderCloseAutoResizeImage = findViewById(R.id.settings_reader_closeautoresizeimage);
+        mReaderPagingReverse = findViewById(R.id.settings_reader_paging_reverse);
+        mReaderWhiteEdge = findViewById(R.id.settings_reader_white_edge);
+        mReaderWhiteBackground = findViewById(R.id.settings_reader_white_background);
+        mReaderVolumeKeyControls = findViewById(R.id.settings_reader_volume_key);
+        mSearchAutoComplete = findViewById(R.id.settings_search_auto_complete);
+        mCheckCimocUpdate = findViewById(R.id.settings_other_check_update);
+        mCheckSoftwareUpdate = findViewById(R.id.settings_check_update);
+        mReaderMode = findViewById(R.id.settings_reader_mode);
+        mOtherLaunch = findViewById(R.id.settings_other_launch);
+        mOtherTheme = findViewById(R.id.settings_other_theme);
+        mReaderScaleFactor = findViewById(R.id.settings_reader_scale_factor);
+        mReaderControllerTrigThreshold = findViewById(R.id.settings_reader_controller_trig_threshold);
+        mOtherShowTopbar = findViewById(R.id.settings_reader_show_topbar);
+        mOtherNightAlpha = findViewById(R.id.settings_other_night_alpha);
+        mDownloadThread = findViewById(R.id.settings_download_thread);
+        mConnectOnlyWifi = findViewById(R.id.settings_other_connect_only_wifi);
+        mLoadCoverOnlyWifi = findViewById(R.id.settings_other_loadcover_only_wifi);
+        mDetailTextSt = findViewById(R.id.settings_detail_text_st);
+        mOtherDarkMod = findViewById(R.id.settings_other_dark_mod);
+        mStEngine = findViewById(R.id.settings_st_engine);
+
+        findViewById(R.id.settings_reader_config).setOnClickListener(v->onReaderConfigBtnClick());
+        findViewById(R.id.settings_download_scan).setOnClickListener(v->onDownloadScanClick());
+        findViewById(R.id.settings_other_storage).setOnClickListener(v->onOtherStorageClick());
+        findViewById(R.id.settings_other_clear_cache).setOnClickListener(v->onOtherCacheClick());
+
 
         boolean isDarkMod = ThemeUtils.isDarkMode(getAppInstance());
         if (isDarkMod) {
@@ -253,7 +299,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
                 PreferenceManager.ST_JCC, R.array.st_engine_items, DIALOG_REQUEST_ST_ENGINE);
     }
 
-    @OnClick(R.id.settings_reader_config)
+//    @OnClick(R.id.settings_reader_config)
     void onReaderConfigBtnClick() {
         Intent intent = new Intent(this, ReaderConfigActivity.class);
         startActivity(intent);
@@ -395,7 +441,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         mReaderVolumeKeyControls.setColorStateList(stateList);
     }
 
-    @OnClick(R.id.settings_other_storage)
+//    @OnClick(R.id.settings_other_storage)
     void onOtherStorageClick() {
         if (ServiceUtils.isServiceRunning(this, DownloadService.class)) {
             showSnackbar(R.string.download_ask_stop);
@@ -406,7 +452,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         }
     }
 
-    @OnClick(R.id.settings_download_scan)
+//    @OnClick(R.id.settings_download_scan)
     void onDownloadScanClick() {
         if (ServiceUtils.isServiceRunning(this, DownloadService.class)) {
             showSnackbar(R.string.download_ask_stop);
@@ -417,7 +463,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         }
     }
 
-    @OnClick(R.id.settings_other_clear_cache)
+//    @OnClick(R.id.settings_other_clear_cache)
     void onOtherCacheClick() {
         showProgressDialog();
         mPresenter.clearCache();
@@ -425,7 +471,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         hideProgressDialog();
     }
 
-    @OnClick(R.id.settings_dmzj_login)
+//    @OnClick(R.id.settings_dmzj_login)
     void onDmzjLoginClick() {
         int theme = mPreference.getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_PINK);
         LoginDialog loginDialog = new LoginDialog(this, ThemeUtils.getDialogThemeById(theme));
@@ -512,7 +558,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
     }
 
 
-    @OnClick(R.id.settings_dmzj_logout)
+//    @OnClick(R.id.settings_dmzj_logout)
     void onDmzjLogoutClick() {
         SharedPreferences sharedPreferences = getSharedPreferences(DMZJ_SHARED, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -525,7 +571,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         showSnackbar(getString(R.string.user_login_logout_sucess));
     }
 
-    @OnClick(R.id.settings_komiic_login)
+//    @OnClick(R.id.settings_komiic_login)
     void onKomiicLoginClick() {
         int theme = mPreference.getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_PINK);
         LoginDialog loginDialog = new LoginDialog(this, ThemeUtils.getDialogThemeById(theme));
@@ -626,7 +672,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
 
     }
 
-    @OnClick(R.id.settings_komiic_logout)
+//    @OnClick(R.id.settings_komiic_logout)
     void onKomiicLogoutClick() {
         SharedPreferences sharedPreferences = getSharedPreferences(KOMIIC_SHARED, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();

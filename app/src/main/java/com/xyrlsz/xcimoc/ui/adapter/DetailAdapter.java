@@ -25,7 +25,7 @@ import com.xyrlsz.xcimoc.utils.STConvertUtils;
 
 import java.util.List;
 
-import butterknife.BindView;
+//import butterknife.BindView;
 
 /**
  * Created by Hiroshi on 2016/7/2.
@@ -256,30 +256,37 @@ public class DetailAdapter extends BaseAdapter<Chapter> {
     }
 
     static class ChapterHolder extends BaseViewHolder {
-        @BindView(R.id.item_chapter_button)
+//        @BindView(R.id.item_chapter_button)
         ChapterButton chapterButton;
 
         ChapterHolder(View view) {
             super(view);
+            chapterButton = view.findViewById(R.id.item_chapter_button);
         }
     }
 
     class HeaderHolder extends BaseViewHolder {
-        @BindView(R.id.item_header_comic_image)
+//        @BindView(R.id.item_header_comic_image)
         SimpleDraweeView mComicImage;
-        @BindView(R.id.item_header_comic_title)
+//        @BindView(R.id.item_header_comic_title)
         TextView mComicTitle;
-        @BindView(R.id.item_header_comic_intro)
+//        @BindView(R.id.item_header_comic_intro)
         TextView mComicIntro;
-        @BindView(R.id.item_header_comic_status)
+//        @BindView(R.id.item_header_comic_status)
         TextView mComicStatus;
-        @BindView(R.id.item_header_comic_update)
+//        @BindView(R.id.item_header_comic_update)
         TextView mComicUpdate;
-        @BindView(R.id.item_header_comic_author)
+//        @BindView(R.id.item_header_comic_author)
         TextView mComicAuthor;
 
         HeaderHolder(View view) {
             super(view);
+            mComicImage = view.findViewById(R.id.item_header_comic_image);
+            mComicTitle = view.findViewById(R.id.item_header_comic_title);
+            mComicIntro = view.findViewById(R.id.item_header_comic_intro);
+            mComicStatus = view.findViewById(R.id.item_header_comic_status);
+            mComicUpdate = view.findViewById(R.id.item_header_comic_update);
+            mComicAuthor = view.findViewById(R.id.item_header_comic_author);
         }
     }
 

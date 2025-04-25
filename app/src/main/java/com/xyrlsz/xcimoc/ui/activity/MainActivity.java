@@ -42,6 +42,7 @@ import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.component.ThemeResponsive;
 import com.xyrlsz.xcimoc.core.Update;
+import com.xyrlsz.xcimoc.databinding.ActivityMainBinding;
 import com.xyrlsz.xcimoc.fresco.ControllerBuilderProvider;
 import com.xyrlsz.xcimoc.global.Extra;
 import com.xyrlsz.xcimoc.manager.PreferenceManager;
@@ -59,7 +60,7 @@ import com.xyrlsz.xcimoc.utils.STConvertUtils;
 
 import java.io.IOException;
 
-import butterknife.BindView;
+//import butterknife.BindView;
 import okhttp3.Request;
 import okhttp3.Response;
 
@@ -73,17 +74,17 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
     private static final int DIALOG_REQUEST_NOTICE = 0;
     private static final int DIALOG_REQUEST_PERMISSION = 1;
     //private static final int DIALOG_REQUEST_LOGOUT = 2;
-
     private static final int REQUEST_ACTIVITY_SETTINGS = 0;
 
     private static final int FRAGMENT_NUM = 3;
     private final Update update = new Update();
     private final long mExitTime = 0;
-    @BindView(R.id.main_layout)
+
+//    @BindView(R.id.main_layout)
     DrawerLayout mDrawerLayout;
-    @BindView(R.id.main_navigation_view)
+//    @BindView(R.id.main_navigation_view)
     NavigationView mNavigationView;
-    @BindView(R.id.main_fragment_container)
+//    @BindView(R.id.main_fragment_container)
     FrameLayout mFrameLayout;
     private TextView mLastText;
     private SimpleDraweeView mDraweeView;
@@ -113,6 +114,11 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mDrawerLayout = findViewById(R.id.main_layout);
+        mNavigationView = findViewById(R.id.main_navigation_view);
+        mFrameLayout = findViewById(R.id.main_fragment_container);
+
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             private long mExitTime = 0;
 
