@@ -706,7 +706,7 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
                 } else {
                     ImagePipelineFactory factory = imageUrl.getSize() > App.mLargePixels ?
                             mLargeImagePipelineFactory : mImagePipelineFactory;
-                    BinaryResource resource = factory.getMainFileCache().getResource(new SimpleCacheKey(url));
+                    BinaryResource resource = factory.getDiskCachesStoreSupplier().get().getMainFileCache().getResource(new SimpleCacheKey(url));
                     if (resource != null) {
                         mPresenter.savePicture(resource.openStream(), url, title, progress);
                         return;

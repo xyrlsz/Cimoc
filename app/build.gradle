@@ -150,10 +150,12 @@ dependencies {
     //noinspection GradleDependency : for support android low api devices,not update OKHTTP
     implementation 'com.squareup.okhttp3:okhttp:4.9.2'
     // fresco 3.0.0 - 3.6.0 似乎有bug 以后再试试3.7以上的版本
-    implementation 'com.facebook.fresco:fresco:2.6.0'
-//    implementation 'com.facebook.fresco:middleware:3.6.0'
-//    implementation 'com.facebook.fresco:imagepipeline:3.6.0'
-//    implementation 'com.facebook.fresco:imagepipeline-okhttp3:2.6.0'
+//    implementation 'com.facebook.fresco:fresco:2.6.0'
+    implementation 'com.facebook.fresco:fresco:3.6.0'
+    implementation 'com.facebook.fresco:middleware:3.6.0'
+    implementation 'com.facebook.fresco:imagepipeline:3.6.0'
+    implementation 'com.facebook.fresco:imagepipeline-okhttp3:3.6.0'
+
     implementation 'com.facebook.infer.annotation:infer-annotation:0.18.0'
     implementation 'org.jsoup:jsoup:1.15.3'
     implementation 'org.adw.library:discrete-seekbar:1.0.1'
