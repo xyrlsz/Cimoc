@@ -250,7 +250,7 @@
     <string name="backup_clear_record_notice_summary">清除后请尽快备份以免备份数据丢失，无法恢复备份内容</string>
 
     <string name="home_page">主页</string>
-<!--    <string name="home_page_url" translatable="false">https://github.com/xyrlsz/Cimoc</string>-->
+    <!--    <string name="home_page_url" translatable="false">https://github.com/xyrlsz/Cimoc</string>-->
     <string name="home_page_cimqus">Cimqus</string>
     <string name="home_page_cimqus_url" translatable="false">https://cimqus.now.sh</string>
     <string name="home_page_gitter">Gitter</string>
@@ -258,14 +258,14 @@
     <string name="home_page_comiclist">Comiclist</string>
     <string name="home_page_comiclist_url" translatable="false">https://www.baidu.com/</string>
     <string name="about_resource">源代码</string>
-<!--    <string name="about_resource_url" translatable="false">https://github.com/xyrlsz/Cimoc</string>-->
+    <!--    <string name="about_resource_url" translatable="false">https://github.com/xyrlsz/Cimoc</string>-->
     <string name="about_resource_ori">原作仓库</string>
     <string name="about_resource_ori_url" translatable="false">https://github.com/feilongfl/Cimoc</string>
     <string name="about_resource_ori_url_1" translatable="false">https://github.com/Haleydu/Cimoc</string>
     <string name="about_support">意见反馈</string>
-<!--    <string name="about_support_url" translatable="false">https://github.com/xyrlsz/Cimoc/issues</string>-->
+    <!--    <string name="about_support_url" translatable="false">https://github.com/xyrlsz/Cimoc/issues</string>-->
     <string name="about_update">检查更新</string>
-<!--    <string name="about_update_url" translatable="false">https://github.com/xyrlsz/Cimoc/releases</string>-->
+    <!--    <string name="about_update_url" translatable="false">https://github.com/xyrlsz/Cimoc/releases</string>-->
     <string name="about_update_summary">点击访问Github Releases页面</string>
     <string name="about_update_app_auto">自动检查更新APP</string>
     <string name="about_update_latest">当前已经是最新版本</string>
@@ -365,7 +365,7 @@
     <string name="the_public_summary">关注公众号查看最新版本</string>
 
     <!--动漫之家-->
-    <string name="settings_dmzj">动漫之家</string>
+    <string name="comic_login_dmzj">动漫之家</string>
     <string name="no_login">未登录</string>
     <string name="logined">已登录</string>
     <string name="settings_dmzj_signup">注册</string>
@@ -378,6 +378,8 @@
     <string name="register">注册</string>
     <string name="show_passwd">显示密码</string>
     <string name="dmzj_should_login">请先登录动漫之家</string>
+    <string name="settings_comic_login_title">登录漫画源</string>
+    <string name="settings_comic_login_summary">部分漫画源需要登录才能使用</string>
 
     <string name="settings_komiic" translatable="false">Komiic</string>
     <string name="settings_komiic_summary">未登录只能24小时内读取300张漫画内页图</string>

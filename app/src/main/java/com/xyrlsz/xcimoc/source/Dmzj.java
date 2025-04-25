@@ -19,7 +19,7 @@ import com.xyrlsz.xcimoc.parser.MangaParser;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
-import com.xyrlsz.xcimoc.ui.activity.SettingsActivity;
+import com.xyrlsz.xcimoc.ui.activity.ComicSourceLoginActivity;
 import com.xyrlsz.xcimoc.utils.HintUtils;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 import com.xyrlsz.xcimoc.utils.UicodeBackslashU;
@@ -154,7 +154,7 @@ public class Dmzj extends MangaParser {
         SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.DMZJ_SHARED, MODE_PRIVATE);
         String cookieStr = sharedPreferences.getString(DMZJ_SHARED_COOKIES, "");
         if (cookieStr.isEmpty()) {
-            App.goActivity(SettingsActivity.class);
+            App.goActivity(ComicSourceLoginActivity.class);
             App.runOnMainThread(() ->
 //                    Toast.makeText(App.getAppContext(), App.getAppResources().getString(R.string.dmzj_should_login), Toast.LENGTH_SHORT).show()
                             HintUtils.showToast(App.getAppContext(), App.getAppResources().getString(R.string.dmzj_should_login))

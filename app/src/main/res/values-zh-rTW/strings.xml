@@ -337,7 +337,7 @@
 
     <string name="the_public">Cimoc微信公衆號</string>
     <string name="the_public_summary">關注公衆號查看最新版本</string>
-    <string name="settings_dmzj">動漫之家</string>
+    <string name="comic_login_dmzj">動漫之家</string>
 
     <string name="no_login">未登入</string>
     <string name="logined">已登入</string>
@@ -358,4 +358,6 @@
     <string name="commit">確定</string>
     <string name="backup_cloud_upload_tag">本地備份上傳</string>
     <string name="common_uploud_success">上傳成功</string>
+    <string name="settings_comic_login_title">登入漫畫源</string>
+    <string name="settings_comic_login_summary">部分漫畫源需要登入才能使用</string>
 </resources>

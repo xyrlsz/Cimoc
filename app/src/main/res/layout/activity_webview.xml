@@ -46,9 +46,7 @@
                 android:src="@drawable/materialsymbolsclose" />
 
         </LinearLayout>
-
-
     </FrameLayout>
 
-
+    <include layout="@layout/custom_night_mask" />
 </androidx.constraintlayout.widget.ConstraintLayout>
