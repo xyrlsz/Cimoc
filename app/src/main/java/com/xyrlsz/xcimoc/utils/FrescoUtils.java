@@ -267,11 +267,11 @@ public class FrescoUtils {
         File localFile = null;
         if (!TextUtils.isEmpty(url)) {
             CacheKey cacheKey = DefaultCacheKeyFactory.getInstance().getEncodedCacheKey(ImageRequest.fromUri(url), null);
-            if (ImagePipelineFactory.getInstance().getDiskCachesStoreSupplier().get().getMainFileCache().hasKey(cacheKey)) {
-                BinaryResource resource = ImagePipelineFactory.getInstance().getDiskCachesStoreSupplier().get().getMainFileCache().getResource(cacheKey);
+            if (ImagePipelineFactory.getInstance().getMainFileCache().hasKey(cacheKey)) {
+                BinaryResource resource = ImagePipelineFactory.getInstance().getMainFileCache().getResource(cacheKey);
                 localFile = ((FileBinaryResource) resource).getFile();
-            } else if (ImagePipelineFactory.getInstance().getDiskCachesStoreSupplier().get().getSmallImageFileCache().hasKey(cacheKey)) {
-                BinaryResource resource = ImagePipelineFactory.getInstance().getDiskCachesStoreSupplier().get().getSmallImageFileCache().getResource(cacheKey);
+            } else if (ImagePipelineFactory.getInstance().getSmallImageFileCache().hasKey(cacheKey)) {
+                BinaryResource resource = ImagePipelineFactory.getInstance().getSmallImageFileCache().getResource(cacheKey);
                 localFile = ((FileBinaryResource) resource).getFile();
             }
         }
@@ -359,7 +359,6 @@ public class FrescoUtils {
         CacheKey cacheKey = DefaultCacheKeyFactory.getInstance()
                 .getEncodedCacheKey(imageRequest,null);
         return ImagePipelineFactory.getInstance()
-                .getDiskCachesStoreSupplier().get()
                 .getMainFileCache().hasKey(cacheKey);
     }
 
