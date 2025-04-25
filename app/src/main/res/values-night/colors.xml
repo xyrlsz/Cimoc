@@ -4,23 +4,23 @@
     <color name="colorAutoWG">#343434</color>
     <color name="colorAutoGW">#A9A9A9</color>
 
-    <color name="colorPrimaryBlue">#1D57B1</color>
-    <color name="colorPrimaryBlueDark">#1B4DA1</color>
+    <color name="colorPrimaryBlue">#3A7AD1</color>
+    <color name="colorPrimaryBlueDark">#3A6AC1</color>
 
-    <color name="colorPrimaryGrey">#313131</color>
-    <color name="colorPrimaryGreyDark">#222222</color>
+    <color name="colorPrimaryGrey">#515151</color>
+    <color name="colorPrimaryGreyDark">#424242</color>
 
-    <color name="colorPrimaryTeal">#105D50</color>
-    <color name="colorPrimaryTealDark">#10433E</color>
+    <color name="colorPrimaryTeal">#307D70</color>
+    <color name="colorPrimaryTealDark">#30635E</color>
 
-    <color name="colorPrimaryPurple">#5A249C</color>
-    <color name="colorPrimaryPurpleDark">#48107B</color>
+    <color name="colorPrimaryPurple">#7A44BC</color>
+    <color name="colorPrimaryPurpleDark">#68309B</color>
 
-    <color name="colorPrimaryPink">#981E5F</color>
-    <color name="colorPrimaryPinkDark">#661037</color>
+    <color name="colorPrimaryPink">#B83E7F</color>
+    <color name="colorPrimaryPinkDark">#863057</color>
 
-    <color name="colorPrimaryBrown">#4E3733</color>
-    <color name="colorPrimaryBrownDark">#2B1010</color>
+    <color name="colorPrimaryBrown">#6E5753</color>
+    <color name="colorPrimaryBrownDark">#4B3030</color>
 
     <color name="colorBackground">#121212</color>  
 
