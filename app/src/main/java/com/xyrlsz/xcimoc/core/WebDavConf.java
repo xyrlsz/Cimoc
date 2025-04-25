@@ -9,6 +9,9 @@ import com.xyrlsz.xcimoc.Constants;
 
 import java.io.IOException;
 
+import rx.Observable;
+import rx.schedulers.Schedulers;
+
 public class WebDavConf {
     public static String url = "";
     public static Sardine sardine = null;
@@ -21,20 +24,25 @@ public class WebDavConf {
         if (!(username.isEmpty() || password.isEmpty() || url.isEmpty())) {
             sardine = new OkHttpSardine();
             sardine.setCredentials(username, password);
-            new Thread(() -> {
-                try {
-                    String mWebDavUrl = url + "/cimoc";
-                    if (!sardine.exists(mWebDavUrl)) {
-                        sardine.createDirectory(mWebDavUrl);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }).start();
+            Observable.create((Observable.OnSubscribe<Void>) subscriber -> {
+                        try {
+                            String mWebDavUrl = url + "/cimoc";
+                            if (!sardine.exists(mWebDavUrl)) {
+                                sardine.createDirectory(mWebDavUrl);
+                            }
+                            subscriber.onCompleted();
+                        } catch (IOException e) {
+                            subscriber.onError(e);
+                        }
+                    })
+                    .subscribeOn(Schedulers.io())
+                    .subscribe();
         }
     }
 
     public static void update(Context context) {
+        url = null;
+        sardine = null;
         init(context);
     }
 

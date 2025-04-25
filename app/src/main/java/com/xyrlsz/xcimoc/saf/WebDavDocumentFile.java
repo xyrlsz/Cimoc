@@ -18,6 +18,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import rx.Observable;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+
 
 public class WebDavDocumentFile extends DocumentFile {
     private static final Sardine mSardine = WebDavConf.sardine;
@@ -33,17 +38,39 @@ public class WebDavDocumentFile extends DocumentFile {
             WebDavDocumentFile tmp = (WebDavDocumentFile) parent;
             mCurrentPath = tmp.getCurrentPath();
         }
-        new Thread(() -> {
-            try {
-                List<DavResource> resources = mSardine.list(mWebDavUrl, 0);
-                if (!resources.isEmpty()) {
-                    mDavResource = resources.get(0);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }).start();
 
+        // 使用 RxJava 异步获取 DavResource
+        Observable.create((Observable.OnSubscribe<DavResource>) subscriber -> {
+                    try {
+                        List<DavResource> resources = mSardine.list(mWebDavUrl, 0);
+                        if (!resources.isEmpty()) {
+                            subscriber.onNext(resources.get(0));
+                        } else {
+                            subscriber.onNext(null);
+                        }
+                        subscriber.onCompleted();
+                    } catch (IOException e) {
+                        subscriber.onError(e);
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<>() {
+                    @Override
+                    public void onNext(DavResource resource) {
+                        mDavResource = resource;
+                    }
+
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                    }
+                });
     }
 
     // 传入currPath
@@ -64,20 +91,40 @@ public class WebDavDocumentFile extends DocumentFile {
             path = path.substring(0, path.length() - 1);
         }
         mCurrentPath = parent.getCurrentPath() + "/" + path;
-        new Thread(() -> {
+        Observable.create((Observable.OnSubscribe<DavResource>) subscriber -> {
+                    try {
+                        if (!mSardine.exists(mCurrentPath)) {
+                            mSardine.createDirectory(mCurrentPath);
+                        }
+                        List<DavResource> resources = mSardine.list(mCurrentPath, 0);
+                        if (!resources.isEmpty()) {
+                            subscriber.onNext(resources.get(0));
+                        } else {
+                            subscriber.onNext(null);
+                        }
+                        subscriber.onCompleted();
+                    } catch (IOException e) {
+                        subscriber.onError(e);
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<>() {
+                    @Override
+                    public void onNext(DavResource resource) {
+                        mDavResource = resource;
+                    }
 
-            try {
-                if (!mSardine.exists(mCurrentPath)) {
-                    mSardine.createDirectory(mCurrentPath);
-                }
-                List<DavResource> resources = mSardine.list(mCurrentPath, 0);
-                if (!resources.isEmpty()) {
-                    mDavResource = resources.get(0);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }).start();
+                    @Override
+                    public void onCompleted() {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                    }
+                });
 
     }
 
