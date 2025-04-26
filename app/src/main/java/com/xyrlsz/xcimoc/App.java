@@ -66,7 +66,7 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
     private static WifiManager manager_wifi;
     private static App mApp;
     // 默认Github源
-    private static String UPDATE_CURRENT_URL = "https://api.github.com/repos/xyrlsz/Cimoc/releases/latest";
+    private static String UPDATE_CURRENT_URL = Constants.UPDATE_GITHUB_URL;
     private DocumentFile mDocumentFile;
     private ControllerBuilderProvider mBuilderProvider;
     private RecyclerView.RecycledViewPool mRecycledPool;
