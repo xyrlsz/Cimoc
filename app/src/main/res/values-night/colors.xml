@@ -7,8 +7,10 @@
     <color name="colorPrimaryBlue">#3A7AD1</color>
     <color name="colorPrimaryBlueDark">#3A6AC1</color>
 
-    <color name="colorPrimaryGrey">#515151</color>
-    <color name="colorPrimaryGreyDark">#424242</color>
+<!--    <color name="colorPrimaryGrey">#515151</color>-->
+<!--    <color name="colorPrimaryGreyDark">#424242</color>-->
+    <color name="colorPrimaryGrey">#658A94</color>
+    <color name="colorPrimaryGreyDark">#90ADBB</color>
 
     <color name="colorPrimaryTeal">#307D70</color>
     <color name="colorPrimaryTealDark">#30635E</color>
