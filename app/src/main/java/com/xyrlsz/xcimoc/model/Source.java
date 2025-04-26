@@ -28,13 +28,18 @@ public class Source {
 
     @Generated(hash = 341481004)
     public Source(Long id, @NotNull String title, int type, boolean enable,
-            String baseUrl) {
+                  String baseUrl) {
         this.id = id;
         this.title = title;
         this.type = type;
         this.enable = enable;
         this.baseUrl = baseUrl;
     }
+
+    public Source(Long id, @NotNull String title, int type, boolean enable) {
+        this(id, title, type, enable, null);
+    }
+
 
     @Override
     public boolean equals(Object o) {

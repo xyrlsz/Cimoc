@@ -119,7 +119,11 @@ public class SourceFragment extends RecyclerViewFragment implements SourceView, 
 //        }
         Source source = mSourceAdapter.getItem(position);
         Intent intent = new Intent(getContext(), WebviewActivity.class);
-        intent.putExtra(EXTRA_WEB_URL, source.getBaseUrl());
+        String url = source.getBaseUrl();
+        if (url == null || url.isEmpty()) {
+            return;
+        }
+        intent.putExtra(EXTRA_WEB_URL, url);
         intent.putExtra(EXTRA_IS_USE_TO_WEB_PARSER, false);
         startActivity(intent);
     }

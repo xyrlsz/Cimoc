@@ -28,16 +28,16 @@ import java.util.Map;
 
 public class WebviewActivity extends BackActivity {
 
-    private WebView webView;
-    private LinearLayout buttonPanel;
-    private FloatingActionButton loadButton;
-    private FloatingActionButton exitButton;
     public static final String EXTRA_WEB_URL = "extra_web_url";
     public static final String EXTRA_WEB_HEADERS = "extra_web_headers";
     public static final String EXTRA_WEB_HTML = "extra_web_html";
     public static final String EXTRA_IS_USE_TO_WEB_PARSER = "extra_is_use_to_web_parser";
-    private String htmlStr = "";
     boolean isShowButton = true;
+    private WebView webView;
+    private LinearLayout buttonPanel;
+    private FloatingActionButton loadButton;
+    private FloatingActionButton exitButton;
+    private String htmlStr = "";
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -58,15 +58,6 @@ public class WebviewActivity extends BackActivity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-
-//                if (getIntent().getBooleanExtra(EXTRA_IS_USE_TO_WEB_PARSER, true)) {
-//                    new Handler().postDelayed(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            smoothScrollToBottom();
-//                        }
-//                    }, 1000); // 延迟一秒
-//                }
 
             }
 
@@ -98,10 +89,11 @@ public class WebviewActivity extends BackActivity {
                 headers.put(key, bundle.getString(key));
             }
         }
-        if (url != null) {
+        if (url == null || url.isEmpty()) {
+            finish();
+        } else {
             webView.loadUrl(url, headers);
         }
-
         loadButton.setOnClickListener(v -> {
             Intent intent = new Intent(WebviewActivity.this, BrowserFilter.class);
             intent.putExtra(URL_KEY, webView.getOriginalUrl());
@@ -126,50 +118,7 @@ public class WebviewActivity extends BackActivity {
             super.onBackPressed();
         }
     }
-//
-//    // 缓慢滚动到底部
-//    private void smoothScrollToBottom() {
-//        String js = "var scrollHeight = document.body.scrollHeight; " +
-//                "var currentScroll = document.documentElement.scrollTop || document.body.scrollTop; " +
-//                "var step = 100; " + // 每次滚动的距离
-//                "var interval = setInterval(function() { " +
-//                "  if (currentScroll < scrollHeight) { " +
-//                "    currentScroll += step; " +
-//                "    window.scrollTo(0, currentScroll); " +
-//                "  } else { " +
-//                "    clearInterval(interval); " + // 滚动完毕后停止
-//                "  } " +
-//                "}, 50);"; // 每次滚动的间隔时间（单位：毫秒）
-//
-//        webView.evaluateJavascript(js, value -> {
-//            // 获取页面的 HTML 内容
-//            getPageHtml();
-//        });
-//    }
-//
-//    private void getPageHtml() {
-//        // 使用 JavaScript 获取页面的 HTML
-//        String js = "document.documentElement.outerHTML";
-//        webView.evaluateJavascript(js, value -> {
-//            // 在这里你可以处理获取到的 HTML 内容
-//            // 例如输出到日志
-//            if (value != null) {
-//                // 解码 Unicode 编码为正常字符
-//                String decodedHtml = value.replace("\\u003C", "<")
-//                        .replace("\\u003E", ">")
-//                        .replace("\\n", "\n")
-//                        .replace("\\\"", "\"")
-//                        .replace("\\'", "'");
-//                System.out.println("HTML Content: " + decodedHtml);
-//                htmlStr = decodedHtml;
-//
-//                Intent resultIntent = new Intent();
-//                resultIntent.putExtra(EXTRA_WEB_HTML, htmlStr);
-//                setResult(RESULT_OK, resultIntent);
-//                finish();
-//            }
-//        });
-//    }
+
 
     private void showCustomMenu() {
         PopupMenu popup = new PopupMenu(WebviewActivity.this, findViewById(R.id.button_panel));
