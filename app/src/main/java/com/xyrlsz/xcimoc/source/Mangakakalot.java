@@ -78,7 +78,7 @@ public class Mangakakalot extends MangaParser {
         return new NodeIterator(body.list(".swiper-slide > .item-basic")) {
             @Override
             protected Comic parse(Node node) {
-                String cid = node.href("a");
+                String cid = node.href("a").replace("/", "");
                 String title = node.attr("img", "alt");
                 String cover = node.src("img");
 //                String update = node.text("div.story_item_right > span:eq(4)").replace("Updated :", "").trim();
