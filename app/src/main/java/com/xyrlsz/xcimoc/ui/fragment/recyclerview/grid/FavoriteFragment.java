@@ -16,7 +16,6 @@ import com.xyrlsz.xcimoc.utils.HintUtils;
 
 import java.util.Calendar;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Created by Hiroshi on 2016/7/1.
@@ -80,6 +79,7 @@ public class FavoriteFragment extends GridFragment implements FavoriteView {
                 break;
             case DIALOG_REQUEST_UPDATE:
                 checkUpdate();
+                HintUtils.showToast(getActivity(), R.string.favorite_check_update_doing);
                 break;
             case DIALOG_REQUEST_DELETE:
                 mPresenter.unfavoriteComic(mSavedId);
@@ -162,6 +162,7 @@ public class FavoriteFragment extends GridFragment implements FavoriteView {
     public void onComicCheckFail() {
         mNotification.post(getString(R.string.favorite_check_update_fail), false);
         mNotification = null;
+        HintUtils.showToast(getActivity(), R.string.favorite_check_update_fail);
     }
 
     @Override
@@ -169,6 +170,7 @@ public class FavoriteFragment extends GridFragment implements FavoriteView {
         mNotification.post(getString(R.string.favorite_check_update_done), false);
         mNotification.cancel();
         mNotification = null;
+        HintUtils.showToast(getActivity(), R.string.favorite_check_update_done);
     }
 
     @Override
