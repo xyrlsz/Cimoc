@@ -1,6 +1,7 @@
 package com.xyrlsz.xcimoc.presenter;
 
 //import com.google.firebase.analytics.FirebaseAnalytics;
+
 import com.xyrlsz.xcimoc.core.Manga;
 import com.xyrlsz.xcimoc.manager.ComicManager;
 import com.xyrlsz.xcimoc.manager.SourceManager;
@@ -17,6 +18,7 @@ import rx.Observer;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by Hiroshi on 2016/7/6.
@@ -76,25 +78,22 @@ public class FavoritePresenter extends BasePresenter<FavoriteView> {
     }
 
     public void load() {
-        mCompositeSubscription.add(mComicManager.listFavoriteInRx()
-                .compose(new ToAnotherList<>(new Func1<Comic, Object>() {
-                    @Override
-                    public MiniComic call(Comic comic) {
-                        return new MiniComic(comic);
-                    }
-                }))
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<Object>>() {
-                    @Override
-                    public void call(List<Object> list) {
-                        mBaseView.onComicLoadSuccess(list);
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        mBaseView.onComicLoadFail();
-                    }
-                }));
+        mCompositeSubscription.add(mComicManager.listFavoriteInRx().compose(new ToAnotherList<>(new Func1<Comic, Object>() {
+            @Override
+            public MiniComic call(Comic comic) {
+                return new MiniComic(comic);
+            }
+        })).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<List<Object>>() {
+            @Override
+            public void call(List<Object> list) {
+                mBaseView.onComicLoadSuccess(list);
+            }
+        }, new Action1<Throwable>() {
+            @Override
+            public void call(Throwable throwable) {
+                mBaseView.onComicLoadFail();
+            }
+        }));
     }
 
     public void cancelAllHighlight() {
@@ -111,23 +110,19 @@ public class FavoritePresenter extends BasePresenter<FavoriteView> {
 
     public void checkUpdate() {
         final List<Comic> list = mComicManager.listFavorite();
-        mCompositeSubscription.add(Manga.checkUpdate(mSourceManager, list)
-                .doOnNext(new Action1<Comic>() {
-                    @Override
-                    public void call(Comic comic) {
-                        if (comic != null) {
-                            mComicManager.update(comic);
-                        }
-                    }
-                })
-                .onBackpressureBuffer()
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<Comic>() {
-                    private int count = 0;
+        mCompositeSubscription.add(Manga.checkUpdate(mSourceManager, list).doOnNext(new Action1<Comic>() {
+            @Override
+            public void call(Comic comic) {
+                if (comic != null) {
+                    mComicManager.update(comic);
+                }
+            }
+        }).onBackpressureBuffer().subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<>() {
+            private int count = 0;
 
-                    @Override
-                    public void onCompleted() {
-                        mBaseView.onComicCheckComplete();
+            @Override
+            public void onCompleted() {
+                mBaseView.onComicCheckComplete();
 //                        if(App.getPreferenceManager().getBoolean(PreferenceManager.PREF_OTHER_FIREBASE_EVENT, true)) {
 //                            Context context = App.getAppContext();
 //                            Bundle bundle = new Bundle();
@@ -136,11 +131,11 @@ public class FavoritePresenter extends BasePresenter<FavoriteView> {
 //                            FirebaseAnalytics mFirebaseAnalytics = FirebaseAnalytics.getInstance(context);
 //                            mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.BEGIN_CHECKOUT, bundle);
 //                        }
-                    }
+            }
 
-                    @Override
-                    public void onError(Throwable e) {
-                        mBaseView.onComicCheckFail();
+            @Override
+            public void onError(Throwable e) {
+                mBaseView.onComicCheckFail();
 //                        if(App.getPreferenceManager().getBoolean(PreferenceManager.PREF_OTHER_FIREBASE_EVENT, true)) {
 //                            Bundle bundle = new Bundle();
 //                            bundle.putString(FirebaseAnalytics.Param.CONTENT, e.toString());
@@ -148,15 +143,15 @@ public class FavoritePresenter extends BasePresenter<FavoriteView> {
 //                            FirebaseAnalytics mFirebaseAnalytics = FirebaseAnalytics.getInstance(App.getAppContext());
 //                            mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.BEGIN_CHECKOUT, bundle);
 //                        }
-                    }
+            }
 
-                    @Override
-                    public void onNext(Comic comic) {
-                        ++count;
-                        MiniComic miniComic = comic == null ? null : new MiniComic(comic);
-                        mBaseView.onComicCheckSuccess(miniComic, count, list.size());
-                    }
-                }));
+            @Override
+            public void onNext(Comic comic) {
+                ++count;
+                MiniComic miniComic = comic == null ? null : new MiniComic(comic);
+                mBaseView.onComicCheckSuccess(miniComic, count, list.size());
+            }
+        }));
     }
 
 }

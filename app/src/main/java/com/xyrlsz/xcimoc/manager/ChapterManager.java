@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import rx.Observable;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 
 /**
@@ -50,9 +52,9 @@ public class ChapterManager {
                 .list();
     }
 
-    public List<Chapter> getChapter(String path,String title) {
+    public List<Chapter> getChapter(String path, String title) {
         return mChapterDao.queryBuilder()
-                .where(ChapterDao.Properties.Path.eq(path),ChapterDao.Properties.Title.eq(title))
+                .where(ChapterDao.Properties.Path.eq(path), ChapterDao.Properties.Title.eq(title))
                 .list();
     }
 
@@ -77,15 +79,27 @@ public class ChapterManager {
     }
 
     public void insertOrReplace(List<Chapter> chapterList) {
-        for (Chapter chapter:chapterList) {
-            if (chapter.getId()!=null) {
-                mChapterDao.insertOrReplace(chapter);
-            }
-        }
+//        for (Chapter chapter:chapterList) {
+//            if (chapter.getId()!=null) {
+//                mChapterDao.insertOrReplace(chapter);
+//            }
+//        }
+
+        Observable.from(chapterList)
+                .filter(chapter -> chapter.getId() != null)
+                .flatMap((Func1<Chapter, Observable<?>>) chapter -> Observable.fromCallable(new Callable<Void>() {
+                    @Override
+                    public Void call() throws Exception {
+                        mChapterDao.insertOrReplace(chapter);
+                        return null;
+                    }
+                }).subscribeOn(Schedulers.io()), 10)
+                .subscribe();
+
     }
 
     public void update(Chapter chapter) {
-        if (chapter.getId()!=null) {
+        if (chapter.getId() != null) {
             mChapterDao.update(chapter);
         }
     }

@@ -19,7 +19,7 @@ import okhttp3.Headers;
 // 解析动态加载的网页
 public class WebParser {
     private final String url;
-    private final Context context;
+
     private final Headers headers;
     private final CountDownLatch latch;
     private String htmlStr;
@@ -29,7 +29,7 @@ public class WebParser {
     public WebParser(Context context, String url, Headers headers) {
         this.url = url;
         this.headers = headers;
-        this.context = context;
+
         this.latch = new CountDownLatch(1);
         new Handler(Looper.getMainLooper()).post(() -> {
             webView = new WebView(context);
@@ -40,7 +40,6 @@ public class WebParser {
     public WebParser(Context context, String url, Headers headers, int delay) {
         this.url = url;
         this.headers = headers;
-        this.context = context;
         this.latch = new CountDownLatch(1);
         this.delay = delay;
         new Handler(Looper.getMainLooper()).post(() -> {
@@ -68,7 +67,7 @@ public class WebParser {
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
 //                new Handler().postDelayed(() -> {
-                    smoothScrollToBottom();
+                smoothScrollToBottom();
 //                }, delay);
             }
         });

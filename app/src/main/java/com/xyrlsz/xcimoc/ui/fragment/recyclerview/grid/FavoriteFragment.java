@@ -16,6 +16,7 @@ import com.xyrlsz.xcimoc.utils.HintUtils;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by Hiroshi on 2016/7/1.
@@ -95,7 +96,7 @@ public class FavoriteFragment extends GridFragment implements FavoriteView {
     private void checkUpdate() {
         if (mNotification == null) {
             mPresenter.checkUpdate();
-            mNotification = new NotificationWrapper(getActivity(), NOTIFICATION_CHECK_UPDATE,
+            mNotification = new NotificationWrapper(requireActivity(), NOTIFICATION_CHECK_UPDATE,
                     R.drawable.ic_sync_white_24dp, true);
             mNotification.post(getString(R.string.favorite_check_update_doing), 0, 0);
         } else {
@@ -118,7 +119,7 @@ public class FavoriteFragment extends GridFragment implements FavoriteView {
     public void onComicLoadSuccess(List<Object> list) {
         super.onComicLoadSuccess(list);
         WifiManager manager =
-                (WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                (WifiManager) requireActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         if (manager != null) {
             if (manager.isWifiEnabled() &&
                     mPreference.getBoolean(PreferenceManager.PREF_OTHER_CHECK_UPDATE, false)) {

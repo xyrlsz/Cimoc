@@ -377,38 +377,73 @@ public class Manga {
 
     public static Observable<Comic> checkUpdate(
             final SourceManager manager, final List<Comic> list) {
-        return Observable.create(new Observable.OnSubscribe<Comic>() {
-            @Override
-            public void call(Subscriber<? super Comic> subscriber) {
-                OkHttpClient client = new OkHttpClient.Builder()
-                        .connectTimeout(1500, TimeUnit.MILLISECONDS)
-                        .readTimeout(1500, TimeUnit.MILLISECONDS)
-                        .build();
-                for (Comic comic : list) {
-                    try {
-                        Parser parser = manager.getParser(comic.getSource());
-                        Request request = parser.getCheckRequest(comic.getCid());
-                        if (request == null) {
-                            request = parser.getInfoRequest(comic.getCid());
-                        }
-                        String update = parser.parseCheck(getResponseBody(client, request));
-                        if ((comic.getUpdate() != null && update != null && !comic.getUpdate().equals(update))
-                                || (update == null && parser.checkUpdateByChapterCount(getResponseBody(client, request), comic))) {
-                            comic.setFavorite(System.currentTimeMillis());
-                            comic.setUpdate(update);
-                            comic.setHighlight(true);
-                            subscriber.onNext(comic);
-                            continue;
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    subscriber.onNext(null);
-                }
-                subscriber.onCompleted();
-            }
-        }).subscribeOn(Schedulers.io());
+        return Observable.from(list)
+                .flatMap(comic -> Observable.just(comic)
+                        .subscribeOn(Schedulers.io())  // 每个 Comic 分配到不同的 IO 线程
+                        .map(c -> {
+                            try {
+                                OkHttpClient client = new OkHttpClient.Builder()
+                                        .connectTimeout(1500, TimeUnit.MILLISECONDS)
+                                        .readTimeout(1500, TimeUnit.MILLISECONDS)
+                                        .build();
+
+                                Parser parser = manager.getParser(c.getSource());
+                                Request request = parser.getCheckRequest(c.getCid());
+                                if (request == null) {
+                                    request = parser.getInfoRequest(c.getCid());
+                                }
+
+                                String update = parser.parseCheck(getResponseBody(client, request));
+                                if ((c.getUpdate() != null && update != null && !c.getUpdate().equals(update))
+                                        || (update == null && parser.checkUpdateByChapterCount(getResponseBody(client, request), c))) {
+                                    c.setFavorite(System.currentTimeMillis());
+                                    c.setUpdate(update);
+                                    c.setHighlight(true);
+                                    return c;  // 返回更新后的 Comic
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            return null;  // 无更新或出错时返回 null
+                        }), 10
+                )
+                .onBackpressureBuffer();  // 防止背压问题
     }
+
+    //    public static Observable<Comic> checkUpdate(
+//            final SourceManager manager, final List<Comic> list) {
+//        return Observable.create(new Observable.OnSubscribe<Comic>() {
+//            @Override
+//            public void call(Subscriber<? super Comic> subscriber) {
+//                OkHttpClient client = new OkHttpClient.Builder()
+//                        .connectTimeout(1500, TimeUnit.MILLISECONDS)
+//                        .readTimeout(1500, TimeUnit.MILLISECONDS)
+//                        .build();
+//                for (Comic comic : list) {
+//                    try {
+//                        Parser parser = manager.getParser(comic.getSource());
+//                        Request request = parser.getCheckRequest(comic.getCid());
+//                        if (request == null) {
+//                            request = parser.getInfoRequest(comic.getCid());
+//                        }
+//                        String update = parser.parseCheck(getResponseBody(client, request));
+//                        if ((comic.getUpdate() != null && update != null && !comic.getUpdate().equals(update))
+//                                || (update == null && parser.checkUpdateByChapterCount(getResponseBody(client, request), comic))) {
+//                            comic.setFavorite(System.currentTimeMillis());
+//                            comic.setUpdate(update);
+//                            comic.setHighlight(true);
+//                            subscriber.onNext(comic);
+//                            continue;
+//                        }
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+//                    subscriber.onNext(null);
+//                }
+//                subscriber.onCompleted();
+//            }
+//        }).subscribeOn(Schedulers.io());
+//    }
 
     public static String getResponseBody(OkHttpClient client, Request request) throws NetworkErrorException {
         return getResponseBody(client, request, true);
