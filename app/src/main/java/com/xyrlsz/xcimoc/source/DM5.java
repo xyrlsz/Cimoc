@@ -154,6 +154,14 @@ public class DM5 extends MangaParser {
             String path = node.hrefWithSplit(0);
             list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
         }
+
+//        Collections.sort(list, new Comparator<Chapter>() {
+//            @Override
+//            public int compare(Chapter o1, Chapter o2) {
+//                return o1.getPath().compareTo(o2.getPath());
+//            }
+//        });
+
         return Lists.reverse(list);
     }
 

@@ -29,6 +29,7 @@ import com.xyrlsz.xcimoc.source.Manhuayu;
 import com.xyrlsz.xcimoc.source.MiGu;
 import com.xyrlsz.xcimoc.source.TTKMH;
 import com.xyrlsz.xcimoc.source.Tencent;
+import com.xyrlsz.xcimoc.source.Vomicmh;
 import com.xyrlsz.xcimoc.source.YKMH;
 import com.xyrlsz.xcimoc.utils.HintUtils;
 
@@ -87,6 +88,7 @@ public class BrowserFilter extends BaseActivity {
         list.add(Manhuayu.TYPE);
         list.add(GoDaManHua.TYPE);
         list.add(TTKMH.TYPE);
+        list.add(Vomicmh.TYPE);
         return list;
     }
 

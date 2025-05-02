@@ -94,6 +94,43 @@
                             android:visibility="gone" />
                     </RelativeLayout>
                 </com.xyrlsz.xcimoc.ui.widget.Option>
+
+                <TextView
+                    android:id="@+id/comic_login_vomicmh"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_marginBottom="10dp"
+                    android:text="@string/vomicmh"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="14sp" />
+
+                <com.xyrlsz.xcimoc.ui.widget.Option
+                    android:id="@+id/comic_login_vomicmh_login"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:summary="@string/no_login"
+                    app:title="@string/login">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <ImageButton
+                            android:id="@+id/comic_login_vomicmh_logout"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:layout_marginEnd="20dp"
+                            android:background="?attr/selectableItemBackground"
+                            android:src="@drawable/ic_logout"
+                            android:visibility="gone" />
+
+                    </RelativeLayout>
+                </com.xyrlsz.xcimoc.ui.widget.Option>
             </LinearLayout>
         </ScrollView>
     </LinearLayout>

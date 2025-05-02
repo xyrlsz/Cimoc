@@ -30,6 +30,7 @@ import com.xyrlsz.xcimoc.source.Manhuayu;
 import com.xyrlsz.xcimoc.source.MiGu;
 import com.xyrlsz.xcimoc.source.TTKMH;
 import com.xyrlsz.xcimoc.source.Tencent;
+import com.xyrlsz.xcimoc.source.Vomicmh;
 import com.xyrlsz.xcimoc.source.YKMH;
 
 import org.greenrobot.greendao.database.Database;
@@ -83,6 +84,7 @@ public class UpdateHelper {
             ComicSourceTable.put(Manhuayu.TYPE, Manhuayu.getDefaultSource());
             ComicSourceTable.put(GoDaManHua.TYPE, GoDaManHua.getDefaultSource());
             ComicSourceTable.put(TTKMH.TYPE, TTKMH.getDefaultSource());
+            ComicSourceTable.put(Vomicmh.TYPE, Vomicmh.getDefaultSource());
         }
     }
 
@@ -199,6 +201,7 @@ public class UpdateHelper {
         list.add(Manhuayu.getDefaultSource());
         list.add(GoDaManHua.getDefaultSource());
         list.add(TTKMH.getDefaultSource());
+        list.add(Vomicmh.getDefaultSource());
 
         session.getSourceDao().insertOrReplaceInTx(list);
         initComicSourceTable();

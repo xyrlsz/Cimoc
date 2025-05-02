@@ -32,6 +32,7 @@ import com.xyrlsz.xcimoc.source.MiGu;
 import com.xyrlsz.xcimoc.source.Null;
 import com.xyrlsz.xcimoc.source.TTKMH;
 import com.xyrlsz.xcimoc.source.Tencent;
+import com.xyrlsz.xcimoc.source.Vomicmh;
 import com.xyrlsz.xcimoc.source.YKMH;
 
 import java.util.List;
@@ -269,6 +270,9 @@ public class SourceManager {
                     break;
                 case TTKMH.TYPE:
                     parser = new TTKMH(source);
+                    break;
+                case Vomicmh.TYPE:
+                    parser = new Vomicmh(source);
                     break;
                 default:
                     parser = new Null();

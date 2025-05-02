@@ -7,6 +7,9 @@ import static com.xyrlsz.xcimoc.Constants.KOMIIC_SHARED;
 import static com.xyrlsz.xcimoc.Constants.KOMIIC_SHARED_COOKIES;
 import static com.xyrlsz.xcimoc.Constants.KOMIIC_SHARED_EXPIRED;
 import static com.xyrlsz.xcimoc.Constants.KOMIIC_SHARED_USERNAME;
+import static com.xyrlsz.xcimoc.Constants.VOMIC_SHARED;
+import static com.xyrlsz.xcimoc.Constants.VOMIC_SHARED_COOKIES;
+import static com.xyrlsz.xcimoc.Constants.VOMIC_SHARED_USERNAME;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,6 +17,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
+
+import androidx.annotation.NonNull;
 
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.R;
@@ -46,18 +51,23 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class ComicSourceLoginActivity extends BackActivity implements ComicSourceLoginView {
+    @BindView(R.id.comic_login_layout)
+    View mComicSourceLoginLayout;
+
     @BindView(R.id.comic_login_dmzj_login)
     Option mDmzjLogin;
-    @BindView(R.id.comic_login_komiic_login)
-    Option mkomiicLogin;
-
     @BindView(R.id.comic_login_dmzj_logout)
     ImageButton mDmzjLogout;
 
+    @BindView(R.id.comic_login_komiic_login)
+    Option mkomiicLogin;
     @BindView(R.id.comic_login_komiic_logout)
     ImageButton mKomiicLogout;
-    @BindView(R.id.comic_login_layout)
-    View mComicSourceLoginLayout;
+
+    @BindView(R.id.comic_login_vomicmh_login)
+    Option mVoMiCMHLogin;
+    @BindView(R.id.comic_login_vomicmh_logout)
+    ImageButton mVoMiCMHLogout;
 
     @Override
     protected String getDefaultTitle() {
@@ -71,9 +81,11 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
         if (isDarkMod) {
             mDmzjLogout.setImageResource(R.drawable.ic_logout_white);
             mKomiicLogout.setImageResource(R.drawable.ic_logout_white);
+            mVoMiCMHLogout.setImageResource(R.drawable.ic_logout_white);
         } else {
             mDmzjLogout.setImageResource(R.drawable.ic_logout);
             mKomiicLogout.setImageResource(R.drawable.ic_logout);
+            mVoMiCMHLogout.setImageResource(R.drawable.ic_logout);
         }
 
         String dmzjUsername = getSharedPreferences(DMZJ_SHARED, MODE_PRIVATE).getString(DMZJ_SHARED_USERNAME, "");
@@ -100,6 +112,13 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
             KomiicUtils.getImageLimit(result -> mKomiicLogout.post(() -> {
                 mkomiicLogin.setSummary(tmp + "\n" + getString(R.string.settings_komiic_img_limit_summary) + result);
             }));
+        }
+
+        String vomicmhUsername = getSharedPreferences(VOMIC_SHARED, MODE_PRIVATE).getString(VOMIC_SHARED_USERNAME, "");
+        if (!vomicmhUsername.isEmpty()) {
+            mVoMiCMHLogin.setSummary(vomicmhUsername);
+            mVoMiCMHLogin.setTitle(getString(R.string.logined));
+            mVoMiCMHLogout.setVisibility(View.VISIBLE);
         }
     }
 
@@ -348,4 +367,79 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
         mKomiicLogout.setVisibility(View.GONE);
     }
 
+    @OnClick(R.id.comic_login_vomicmh_login)
+    void onVoMiCMHLoginClick() {
+        int theme = mPreference.getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_PINK);
+        LoginDialog loginDialog = new LoginDialog(this, ThemeUtils.getDialogThemeById(theme));
+        loginDialog.setOnLoginListener((username, password) -> {
+            if (username.isEmpty() || password.isEmpty()) {
+                loginDialog.dismiss();
+                showSnackbar(getString(R.string.user_login_empty));
+                return;
+            }
+            onStartLogin();
+            MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
+            String json = "{\"email\":\""
+                    + username
+                    + "\",\"password\":\""
+                    + password
+                    + "\"}";
+            RequestBody body = RequestBody.create(mediaType, json);
+            Request request = new Request.Builder().url("https://api.vomicmh.com/pics/login")
+                    .post(body)
+                    .addHeader("referer", "https://www.vomicmh.com/")
+                    .build();
+            App.getHttpClient().newCall(request).enqueue(new Callback() {
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    if (response.isSuccessful() && response.body() != null) {
+                        try {
+                            JSONObject jsonObject = new JSONObject(response.body().string());
+                            String token = jsonObject.getString("token");
+                            SharedPreferences sharedPreferences = getSharedPreferences(VOMIC_SHARED, MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString(VOMIC_SHARED_USERNAME, username);
+                            editor.putString(VOMIC_SHARED_COOKIES, "_token=" + token);
+                            editor.apply();
+                            runOnUiThread(() -> {
+                                mVoMiCMHLogin.setSummary(username);
+                                mVoMiCMHLogin.setTitle(getString(R.string.logined));
+                                mVoMiCMHLogout.setVisibility(View.VISIBLE);
+                            });
+                            onLoginSuccess();
+                            loginDialog.dismiss();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            onLoginFail();
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    onLoginFail();
+                }
+            });
+        });
+        loginDialog.setOnRegisterListener(() -> {
+            String url = "https://www.vomicmh.com/";
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(url));
+            startActivity(intent);
+        });
+        loginDialog.show();
+    }
+    @OnClick(R.id.comic_login_vomicmh_logout)
+    void onVoMiCMHLogoutClick() {
+        SharedPreferences sharedPreferences = getSharedPreferences(VOMIC_SHARED, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(VOMIC_SHARED_COOKIES);
+        editor.remove(VOMIC_SHARED_USERNAME);
+        mVoMiCMHLogin.setSummary(getString(R.string.no_login));
+        mVoMiCMHLogin.setTitle(getString(R.string.login));
+        mVoMiCMHLogout.setVisibility(View.GONE);
+        editor.apply();
+        showSnackbar(getString(R.string.user_login_logout_sucess));
+    }
 }
