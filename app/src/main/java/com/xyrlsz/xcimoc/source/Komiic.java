@@ -23,6 +23,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -151,7 +152,19 @@ public class Komiic extends MangaParser {
 
         String update = KomiicUtils.FormatTime(comicObject.getString("dateUpdated"));
         String intro = "";
-
+        String jsonBody = "{\"operationName\":\"comicDetailedInfo\",\"variables\":{\"comicId\":\""
+                + comic.getCid()
+                + "\"},\"query\":\"query comicDetailedInfo($comicId: ID!) {\\n  comicById(comicId: $comicId) {\\n    description\\n    reasons\\n    sexyLevel\\n    sexyLevelReason\\n    sexualContent\\n    ntr\\n    warnings\\n    otherTitles\\n    __typename\\n  }\\n}\"}";
+        RequestBody body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonBody);
+        Request request = new Request.Builder().url(baseUrl + "/api/query").post(body).build();
+        try {
+            String response = App.getHttpClient().newCall(request).execute().body().string();
+            JSONObject jsonObject = new JSONObject(response).getJSONObject("data");
+            JSONObject comicDetailedInfo = jsonObject.getJSONObject("comicById");
+            intro = comicDetailedInfo.getString("description");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         comic.setInfo(title, cover, update, intro, author.toString(), !comicObject.getString("status").equals("ONGOING"));
         return comic;
     }
