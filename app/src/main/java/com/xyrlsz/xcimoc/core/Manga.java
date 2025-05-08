@@ -302,12 +302,16 @@ public class Manga {
         return list;
     }
 
-    public static String getLazyUrl(Parser parser, String url) throws InterruptedIOException {
+    public static String getLazyUrl(MangaParser parser, String url) throws InterruptedIOException {
         Response response = null;
         try {
             Request request = parser.getLazyRequest(url);
             response = App.getHttpClient().newCall(request).execute();
             if (response.isSuccessful()) {
+                if (parser.isParseImagesLazyUseWebParser()) {
+                    WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
+                    return  parser.parseLazy(webParser.getHtmlStrSync(), url);
+                }
                 return parser.parseLazy(response.body().string(), url);
             } else {
                 throw new NetworkErrorException();
@@ -324,14 +328,19 @@ public class Manga {
         return null;
     }
 
-    public static Observable<String> loadLazyUrl(final Parser parser, final String url) {
+    public static Observable<String> loadLazyUrl(final MangaParser parser, final String url) {
         return Observable.create(new Observable.OnSubscribe<String>() {
             @Override
             public void call(Subscriber<? super String> subscriber) {
                 Request request = parser.getLazyRequest(url);
                 String newUrl = null;
                 try {
-                    newUrl = parser.parseLazy(getResponseBody(App.getHttpClient(), request), url);
+                    if (parser.isParseImagesLazyUseWebParser()) {
+                        WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
+                        newUrl = parser.parseLazy(webParser.getHtmlStrSync(), url);
+                    }else{
+                        newUrl = parser.parseLazy(getResponseBody(App.getHttpClient(), request), url);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

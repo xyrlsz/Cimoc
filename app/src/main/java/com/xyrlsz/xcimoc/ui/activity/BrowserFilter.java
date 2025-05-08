@@ -31,6 +31,7 @@ import com.xyrlsz.xcimoc.source.TTKMH;
 import com.xyrlsz.xcimoc.source.Tencent;
 import com.xyrlsz.xcimoc.source.Vomicmh;
 import com.xyrlsz.xcimoc.source.YKMH;
+import com.xyrlsz.xcimoc.source.YYManHua;
 import com.xyrlsz.xcimoc.utils.HintUtils;
 
 import java.util.ArrayList;
@@ -89,6 +90,7 @@ public class BrowserFilter extends BaseActivity {
         list.add(GoDaManHua.TYPE);
         list.add(TTKMH.TYPE);
         list.add(Vomicmh.TYPE);
+        list.add(YYManHua.TYPE);
         return list;
     }
 

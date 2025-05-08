@@ -30,6 +30,7 @@ public abstract class MangaParser implements Parser {
     private boolean parseInfoUseWebParser = false;
     private boolean parseChapterUseWebParser = false;
     private boolean parseImagesUseWebParser = false;
+    private boolean parseImagesLazyUseWebParser = false;
 
     protected void init(Source source, Category category) {
         mTitle = source.getTitle();
@@ -208,5 +209,13 @@ public abstract class MangaParser implements Parser {
 
     protected void setGetSearchUseWebParser(boolean getSearchUseWebParser) {
         this.getSearchUseWebParser = getSearchUseWebParser;
+    }
+
+    public boolean isParseImagesLazyUseWebParser() {
+        return parseImagesLazyUseWebParser;
+    }
+
+    public void setParseImagesLazyUseWebParser(boolean parseImagesLazyUseWebParser) {
+        this.parseImagesLazyUseWebParser = parseImagesLazyUseWebParser;
     }
 }

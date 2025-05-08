@@ -34,6 +34,7 @@ import com.xyrlsz.xcimoc.source.TTKMH;
 import com.xyrlsz.xcimoc.source.Tencent;
 import com.xyrlsz.xcimoc.source.Vomicmh;
 import com.xyrlsz.xcimoc.source.YKMH;
+import com.xyrlsz.xcimoc.source.YYManHua;
 
 import java.util.List;
 
@@ -273,6 +274,9 @@ public class SourceManager {
                     break;
                 case Vomicmh.TYPE:
                     parser = new Vomicmh(source);
+                    break;
+                case YYManHua.TYPE:
+                    parser = new YYManHua(source);
                     break;
                 default:
                     parser = new Null();
