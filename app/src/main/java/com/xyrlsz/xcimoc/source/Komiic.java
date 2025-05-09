@@ -127,7 +127,7 @@ public class Komiic extends MangaParser {
                 + "\"operationName\":\"comicById\","
                 + "\"variables\":{\"comicId\":\""
                 + cid + "\"},"
-                + "\"query\":\"query comicById($comicId: ID!) {\\n  comicById(comicId: $comicId) {\\n    id\\n    title\\n    status\\n    year\\n    imageUrl\\n    authors {\\n      id\\n      name\\n      __typename\\n    }\\n    categories {\\n      id\\n      name\\n      __typename\\n    }\\n    dateCreated\\n    dateUpdated\\n    views\\n    favoriteCount\\n    lastBookUpdate\\n    lastChapterUpdate\\n    __typename\\n  }\\n}\""
+                + "\"query\":\"query comicById($comicId: ID!) {\\n  comicById(comicId: $comicId) {\\n    description\\n    id\\n    title\\n    status\\n    year\\n    imageUrl\\n    authors {\\n      id\\n      name\\n      __typename\\n    }\\n    categories {\\n      id\\n      name\\n      __typename\\n    }\\n    dateCreated\\n    dateUpdated\\n    views\\n    favoriteCount\\n    lastBookUpdate\\n    lastChapterUpdate\\n    __typename\\n  }\\n}\""
                 + "}";
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonBody);
         return new Request.Builder().url(url).post(requestBody).build();
@@ -152,19 +152,8 @@ public class Komiic extends MangaParser {
 
         String update = KomiicUtils.FormatTime(comicObject.getString("dateUpdated"));
         String intro = "";
-        String jsonBody = "{\"operationName\":\"comicDetailedInfo\",\"variables\":{\"comicId\":\""
-                + comic.getCid()
-                + "\"},\"query\":\"query comicDetailedInfo($comicId: ID!) {\\n  comicById(comicId: $comicId) {\\n    description\\n    reasons\\n    sexyLevel\\n    sexyLevelReason\\n    sexualContent\\n    ntr\\n    warnings\\n    otherTitles\\n    __typename\\n  }\\n}\"}";
-        RequestBody body = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonBody);
-        Request request = new Request.Builder().url(baseUrl + "/api/query").post(body).build();
-        try {
-            String response = App.getHttpClient().newCall(request).execute().body().string();
-            JSONObject jsonObject = new JSONObject(response).getJSONObject("data");
-            JSONObject comicDetailedInfo = jsonObject.getJSONObject("comicById");
-            intro = comicDetailedInfo.getString("description");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        intro = comicObject.getString("description");
+
         comic.setInfo(title, cover, update, intro, author.toString(), !comicObject.getString("status").equals("ONGOING"));
         return comic;
     }
