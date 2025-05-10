@@ -37,6 +37,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -194,7 +195,7 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
                     .post(formBody)
                     .build();
 
-            App.getHttpClient().newCall(request).enqueue(new Callback() {
+            Objects.requireNonNull(App.getHttpClient()).newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
                     onLoginFail();
@@ -289,7 +290,7 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
                     .post(body)
                     .build();
 
-            App.getHttpClient().newCall(request).enqueue(new Callback() {
+            Objects.requireNonNull(App.getHttpClient()).newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
                     onLoginFail();
@@ -389,7 +390,7 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
                     .post(body)
                     .addHeader("referer", "https://www.vomicmh.com/")
                     .build();
-            App.getHttpClient().newCall(request).enqueue(new Callback() {
+            Objects.requireNonNull(App.getHttpClient()).newCall(request).enqueue(new Callback() {
 
                 @Override
                 public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {

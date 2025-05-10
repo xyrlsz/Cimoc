@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 
@@ -67,7 +68,7 @@ public class KomiicUtils {
 
         try {
 
-            App.getHttpClient().newCall(request).enqueue(new Callback() {
+            Objects.requireNonNull(App.getHttpClient()).newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
 
@@ -209,7 +210,7 @@ public class KomiicUtils {
                 .post(body)
                 .build();
         try {
-            Response response = App.getHttpClient().newCall(request).execute();
+            Response response = Objects.requireNonNull(App.getHttpClient()).newCall(request).execute();
             if (response.isSuccessful() && response.body() != null) {
                 JSONObject data;
                 try {
