@@ -85,7 +85,7 @@ public class MYCOMIC extends MangaParser {
     @Override
     public Request getInfoRequest(String cid) {
         String url = baseUrl + "/comics/" + cid;
-        return new Request.Builder().url(url).header("Referer", "https://mycomic.com/").build();
+        return new Request.Builder().url(url).header("Referer", baseUrl.concat("/")).build();
     }
 
     @Override
@@ -137,7 +137,7 @@ public class MYCOMIC extends MangaParser {
     @Override
     public Request getImagesRequest(String cid, String path) {
         String url = StringUtils.format("%s/chapters/%s", baseUrl, path);
-        return new Request.Builder().url(url).header("Referer", "https://mycomic.com/").build();
+        return new Request.Builder().url(url).header("Referer", baseUrl.concat("/")).build();
     }
 
     @Override
@@ -161,14 +161,14 @@ public class MYCOMIC extends MangaParser {
     @Override
     public Headers getHeader() {
         Map<String, String> heads = new HashMap<>();
-        heads.put("referer", "https://mycomic.com/");
+        heads.put("referer", baseUrl.concat("/"));
         return Headers.of(heads);
     }
 
     @Override
     public Headers getHeader(List<ImageUrl> list) {
         Map<String, String> heads = new HashMap<>();
-        heads.put("referer", "https://mycomic.com/");
+        heads.put("referer", baseUrl.concat("/"));
         return Headers.of(heads);
     }
 
