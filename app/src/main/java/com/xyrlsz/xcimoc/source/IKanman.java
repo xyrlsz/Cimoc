@@ -41,16 +41,19 @@ public class IKanman extends MangaParser {
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true,"https://www.manhuagui.com");
+        return new Source(null, DEFAULT_TITLE, TYPE, true, "https://www.manhuagui.com");
     }
 
     @Override
     public Request getSearchRequest(String keyword, int page) {
-        String url = StringUtils.format("https://www.manhuagui.com/s/%s_p%d.html", keyword, page);
-        return new Request.Builder()
-                .addHeader("User-Agent", "Mozilla/5.0 (Linux; Android 4.1.1; Nexus 7 Build/JRO03D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166  Safari/535.19")
-                .url(url)
-                .build();
+        if (page == 1) {
+            String url = StringUtils.format("https://www.manhuagui.com/s/%s_p%d.html", keyword, page);
+            return new Request.Builder()
+                    .addHeader("User-Agent", "Mozilla/5.0 (Linux; Android 4.1.1; Nexus 7 Build/JRO03D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166  Safari/535.19")
+                    .url(url)
+                    .build();
+        }
+        return null;
     }
 
     @Override
@@ -113,7 +116,7 @@ public class IKanman extends MangaParser {
         if (!StringUtils.isEmpty(baseText)) {
             body = new Node(DecryptionUtils.LZ64Decrypt(baseText));
         }
-        int i=0;
+        int i = 0;
         for (Node node : body.list("div.chapter-list")) {
             List<Node> uls = node.list("ul");
             Collections.reverse(uls);
