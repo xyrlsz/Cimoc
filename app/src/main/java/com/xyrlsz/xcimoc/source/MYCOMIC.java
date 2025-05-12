@@ -97,11 +97,11 @@ public class MYCOMIC extends MangaParser {
         String title = body.text("[data-flux-heading]");
         String cover = body.src("div > img");
         String author = body.text(".grow > div > div > span");
-        String intro = body.text(".grow > div > div > [x-cloak]");
+        String intro = body.text(".grow > div:nth-child(5)");
 
-        boolean status = body.text("[data-flux-badge]").equals("已完結")
-//                ||body.text("[data-flux-badge]").equals("已完结")
-                ;
+        boolean status = isFinish(body.text("[data-flux-badge]"));
+
+        ;
         String update = body.attr("time", "datetime");
         comic.setInfo(title, cover, update, intro, author, status);
         return comic;
