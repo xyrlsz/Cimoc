@@ -40,7 +40,7 @@ import okhttp3.Request;
 
 public class Dmzj extends MangaParser {
 
-    public static final int TYPE = 1000;
+    public static final int TYPE = 10;
     public static final String DEFAULT_TITLE = "动漫之家";
 
 //    private List<UrlFilter> filter = new ArrayList<>();
