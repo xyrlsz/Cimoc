@@ -39,8 +39,15 @@ public abstract class MangaParser implements Parser {
         initUrlFilterList();
     }
 
+    protected void init(Source source) {
+        mTitle = source.getTitle();
+        mCategory = null;
+
+        initUrlFilterList();
+    }
+
     protected void initUrlFilterList() {
-//        filter.add(new UrlFilter("manhua.dmzj.com", "/(\\w+)", 1));
+
     }
 
     @Override
