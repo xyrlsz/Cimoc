@@ -27,7 +27,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -92,12 +91,8 @@ public class GoDaManHua extends MangaParser {
     @SuppressLint("SimpleDateFormat")
     @Override
     public Comic parseInfo(String html, Comic comic) throws UnsupportedEncodingException, JSONException {
-        String regex = "<script type=\"application/ld\\+json\">(.*?)</script>";
-        Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
-        Matcher matcher = pattern.matcher(html);
-
-        if (matcher.find()) {
-            String json = Objects.requireNonNull(matcher.group(1)).trim();
+        String json = StringUtils.match("<script type=\"application/ld\\+json\">(.*?)</script>", html, 1);
+        if (json != null && !json.isEmpty()) {
             JSONObject data = new JSONObject(json);
             String title = data.getString("name");
             String intro = data.getString("description");
