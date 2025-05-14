@@ -30,7 +30,7 @@ import okhttp3.Request;
 public class Manhuayu extends MangaParser {
     public static final int TYPE = 107;
     public static final String DEFAULT_TITLE = "漫画鱼";
-    private static final String baseUrl = "https://www.manhuayu.com";
+    private static final String baseUrl = "https://www.manhuayu8.com";
 
     public Manhuayu(Source source) {
         init(source, null);
