@@ -65,7 +65,7 @@ public class Tencent extends MangaParser {
                 String title = node.text(".comic-title");
                 String cover = node.attr(".cover-image", "src");
                 String update = node.text(".comic-update");
-                String author = "UNKNOWN";
+                String author = "";
                 return new Comic(TYPE, cid, title, cover, update, author);
             }
         };
