@@ -15,8 +15,8 @@ forked from https://github.com/Haleydu/Cimoc
 # 漫画源
 
 <!-- > 漫画源工作情况可以在[project](https://github.com/xyrlsz/Cimoc/projects/1)中进行查看，请尽量不要重复issues -->
-> 各位大佬们提交漫画源相关issue请按照[模板](.github/ISSUE_TEMPLATE/comic-source-issues.md)填写，方便检查问题。
-
+> - 各位大佬们提交漫画源相关issue请按照[模板](.github/ISSUE_TEMPLATE/comic-source-issues.md)填写，方便检查问题。
+> - 部分漫画源可能中国大陆无法访问，需要使用代理，具体请自行搜索。
 # 功能简介
 
 - 翻页阅读（Page Reader）
