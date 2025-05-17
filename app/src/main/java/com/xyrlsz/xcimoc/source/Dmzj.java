@@ -127,7 +127,7 @@ public class Dmzj extends MangaParser {
             String JsonArrayString = StringUtils.match("initIntroData\\((.*)\\);", html, 1);
             String decodeJsonArrayString = UicodeBackslashU.unicodeToCn(JsonArrayString);
             JSONArray allJsonArray = new JSONArray(decodeJsonArrayString);
-            int k = 0;
+            int k = 1;
             for (int i = 0; i < allJsonArray.length(); i++) {
                 JSONArray JSONArray = allJsonArray.getJSONObject(i).getJSONArray("data");
                 String tag = allJsonArray.getJSONObject(i).getString("title");
