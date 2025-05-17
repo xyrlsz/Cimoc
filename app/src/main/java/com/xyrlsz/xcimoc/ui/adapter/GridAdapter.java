@@ -198,7 +198,8 @@ public class GridAdapter extends BaseAdapter<Object> {
         List<Object> temp = new ArrayList<>();
         for (Object O_comic : mDataSet) {
             MiniComic comic = (MiniComic) O_comic;
-            if (comic.getTitle().contains(keyword)) {
+            String title = STConvertUtils.T2S(comic.getTitle());
+            if (title.contains(STConvertUtils.T2S(keyword))) {
                 temp.add(comic);
             }
         }
