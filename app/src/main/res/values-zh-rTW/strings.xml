@@ -360,4 +360,6 @@
     <string name="common_uploud_success">上傳成功</string>
     <string name="settings_comic_login_title">登入漫畫源</string>
     <string name="settings_comic_login_summary">部分漫畫源需要登入才能使用</string>
+    <string name="comic_filter_by_keyword">關鍵詞過濾</string>
+    <string name="comic_filter_by_keyword_cancel">取消關鍵詞過濾</string>
 </resources>

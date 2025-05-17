@@ -17,4 +17,6 @@ public interface GridView extends BaseView, DialogCaller, ThemeResponsive {
 
     void onExecuteFail();
 
+    void filterByKeyword(String keyword);
+    void cancelFilter(List<Object>original);
 }

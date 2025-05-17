@@ -6,7 +6,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -38,6 +37,7 @@ import com.xyrlsz.xcimoc.ui.fragment.recyclerview.grid.GridFragment;
 import com.xyrlsz.xcimoc.ui.fragment.recyclerview.grid.HistoryFragment;
 import com.xyrlsz.xcimoc.ui.fragment.recyclerview.grid.LocalFragment;
 import com.xyrlsz.xcimoc.ui.view.ComicView;
+import com.xyrlsz.xcimoc.ui.widget.InputDialog;
 import com.xyrlsz.xcimoc.utils.HintUtils;
 
 import java.util.ArrayList;
@@ -185,6 +185,29 @@ public class ComicFragment extends BaseFragment implements ComicView {
             case R.id.comic_open_use_url:
                 AlertDialog dialog = getAlertDialog();
                 dialog.show();
+                break;
+
+            case R.id.comic_filter_by_keyword:
+                AlertDialog dialog1 = InputDialog.getInputDialog(getContext(), getString(R.string.comic_filter_by_keyword), getString(R.string.search_keyword_input), getString(R.string.dialog_positive), getString(R.string.dialog_negative), new InputDialog.OnItemClickListener() {
+
+                    @Override
+                    public void onPositiveClick(DialogInterface d, int which, String input) {
+                        GridFragment item = (GridFragment) mTabAdapter.getItem(mViewPager.getCurrentItem());
+                        item.filterByKeyword(input);
+                    }
+
+                    @Override
+                    public void onNegativeClick(DialogInterface d, int which) {
+                        d.cancel();
+                    }
+                });
+                dialog1.show();
+
+                break;
+
+            case R.id.comic_filter_by_keyword_cancel:
+                GridFragment item2 = (GridFragment) mTabAdapter.getItem(mViewPager.getCurrentItem());
+                item2.cancelFilter(item2.getComics());
                 break;
         }
         return super.onOptionsItemSelected(item);

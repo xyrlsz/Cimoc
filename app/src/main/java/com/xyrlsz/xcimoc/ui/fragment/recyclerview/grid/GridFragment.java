@@ -27,7 +27,7 @@ import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -44,10 +44,15 @@ public abstract class GridFragment extends RecyclerViewFragment implements GridV
     protected long mSavedId = -1;
     @BindView(R.id.grid_action_button)
     FloatingActionButton mActionButton;
+    private List<Object> comics = new ArrayList<>();
+
+    public List<Object> getComics() {
+        return comics;
+    }
 
     @Override
     protected BaseAdapter initAdapter() {
-        mGridAdapter = new GridAdapter(getActivity(), new LinkedList<>());
+        mGridAdapter = new GridAdapter(getActivity(), new ArrayList<>());
         mGridAdapter.setProvider(getAppInstance().getBuilderProvider());
         mGridAdapter.setTitleGetter(SourceManager.getInstance(this).new TitleGetter());
         mRecyclerView.setRecycledViewPool(getAppInstance().getGridRecycledPool());
@@ -109,12 +114,24 @@ public abstract class GridFragment extends RecyclerViewFragment implements GridV
 
     @Override
     public void onComicLoadSuccess(List<Object> list) {
+        comics.addAll(list);
         mGridAdapter.addAll(list);
     }
+
 
     @Override
     public void onComicLoadFail() {
         HintUtils.showToast(getActivity(), R.string.common_data_load_fail);
+    }
+
+    @Override
+    public void filterByKeyword(String keyword) {
+        mGridAdapter.filterByKeyword(keyword);
+    }
+
+    @Override
+    public void cancelFilter(List<Object> original) {
+        mGridAdapter.cancelFilter(original);
     }
 
     @Override

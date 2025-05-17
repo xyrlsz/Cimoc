@@ -1,5 +1,6 @@
 package com.xyrlsz.xcimoc.ui.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -26,6 +27,7 @@ import com.xyrlsz.xcimoc.utils.STConvertUtils;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -40,6 +42,7 @@ public class GridAdapter extends BaseAdapter<Object> {
     private ControllerBuilderProvider mProvider;
     private SourceManager.TitleGetter mTitleGetter;
     private boolean symbol = false;
+
 
     public GridAdapter(Context context, List<Object> list) {
         super(context, list);
@@ -188,6 +191,26 @@ public class GridAdapter extends BaseAdapter<Object> {
         if (remove(comic)) {
             add(findFirstNotHighlight(), comic);
         }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void filterByKeyword(String keyword) {
+        List<Object> temp = new ArrayList<>();
+        for (Object O_comic : mDataSet) {
+            MiniComic comic = (MiniComic) O_comic;
+            if (comic.getTitle().contains(keyword)) {
+                temp.add(comic);
+            }
+        }
+        mDataSet.clear();
+        mDataSet.addAll(temp);
+        notifyDataSetChanged();
+    }
+
+    public void cancelFilter(List<Object> original) {
+        mDataSet.clear();
+        mDataSet.addAll(original);
+        notifyDataSetChanged();
     }
 
     static class GridHolder extends BaseViewHolder {

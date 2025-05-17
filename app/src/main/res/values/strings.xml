@@ -395,4 +395,6 @@
     <string name="webdav" translatable="false">WebDav</string>
     <string name="commit">确定</string>
     <string name="button" translatable="false">button</string>
+    <string name="comic_filter_by_keyword">关键词过滤</string>
+    <string name="comic_filter_by_keyword_cancel">取消关键词过滤</string>
 </resources>

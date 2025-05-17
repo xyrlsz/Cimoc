@@ -25,4 +25,13 @@
         android:id="@+id/comic_open_use_url"
         android:title="@string/comic_open_use_url"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/comic_filter_by_keyword"
+        android:title="@string/comic_filter_by_keyword"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/comic_filter_by_keyword_cancel"
+        android:title="@string/comic_filter_by_keyword_cancel"
+        app:showAsAction="never" />
 </menu>
