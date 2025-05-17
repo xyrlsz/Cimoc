@@ -2,6 +2,7 @@ package com.xyrlsz.xcimoc.ui.activity;
 
 import static com.xyrlsz.xcimoc.utils.interpretationUtils.isReverseOrder;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -258,6 +259,7 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public boolean onItemLongClick(View view, int position) {
         if (position == 0) {
@@ -268,7 +270,7 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
             TextView textViewMessage = dialogView.findViewById(R.id.textViewMessage);
 
             textViewTitle.setText(STConvertUtils.convert(mDetailAdapter.title));
-            textViewMessage.setText(STConvertUtils.convert(mDetailAdapter.intro));
+            textViewMessage.setText(mDetailAdapter.author + "\n\n" + STConvertUtils.convert(mDetailAdapter.intro));
             textViewMessage.setTextIsSelectable(true);
             textViewTitle.setTextIsSelectable(true);
             builder.setView(dialogView)

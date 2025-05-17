@@ -2,7 +2,6 @@ package com.xyrlsz.xcimoc.ui.adapter;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
@@ -34,12 +33,12 @@ public class DetailAdapter extends BaseAdapter<Chapter> {
 
     public String title;
     public String intro;
+    public String author;
     Paint textPaint;
     Paint paint;
     private PipelineDraweeControllerBuilderSupplier mControllerSupplier;
     private String cover;
     private String update;
-    private String author;
     private Boolean finish;
     //漫画源中倒序
     private Boolean isReverseOrder;
@@ -193,11 +192,12 @@ public class DetailAdapter extends BaseAdapter<Chapter> {
                     headerHolder.mComicTitle.setText(STConvertUtils.convert(title));
 //                    headerHolder.mComicIntro.setTextIsSelectable(true);
                     headerHolder.mComicIntro.setText(STConvertUtils.convert(intro));
-                    headerHolder.mComicAuthor.setTextIsSelectable(true);
+//                    headerHolder.mComicAuthor.setTextIsSelectable(true);
+                    headerHolder.mComicAuthor.setSelected(true);
                     if (finish != null) {
                         headerHolder.mComicStatus.setText(finish ? "完结" : "连载中");
                     }
-                    if (update != null) {
+                    if (update != null && !update.isEmpty()) {
                         headerHolder.mComicUpdate.setText("最后更新：".concat(update));
                     }
                     headerHolder.mComicAuthor.setText(author);
