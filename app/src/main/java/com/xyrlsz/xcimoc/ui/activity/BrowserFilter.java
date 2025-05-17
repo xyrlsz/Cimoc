@@ -17,7 +17,6 @@ import com.xyrlsz.xcimoc.source.DongManManHua;
 import com.xyrlsz.xcimoc.source.DuManWu;
 import com.xyrlsz.xcimoc.source.DuManWuOrg;
 import com.xyrlsz.xcimoc.source.GoDaManHua;
-import com.xyrlsz.xcimoc.source.GuFeng;
 import com.xyrlsz.xcimoc.source.HotManga;
 import com.xyrlsz.xcimoc.source.IKanman;
 import com.xyrlsz.xcimoc.source.Komiic;
@@ -72,7 +71,7 @@ public class BrowserFilter extends BaseActivity {
         list.add(CopyMH.TYPE);
         list.add(DM5.TYPE);
         list.add(Dmzj.TYPE);
-        list.add(GuFeng.TYPE);
+//        list.add(GuFeng.TYPE);
         list.add(HotManga.TYPE);
         list.add(IKanman.TYPE);
         list.add(Mangakakalot.TYPE);

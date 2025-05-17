@@ -18,7 +18,6 @@ import com.xyrlsz.xcimoc.source.DongManManHua;
 import com.xyrlsz.xcimoc.source.DuManWu;
 import com.xyrlsz.xcimoc.source.DuManWuOrg;
 import com.xyrlsz.xcimoc.source.GoDaManHua;
-import com.xyrlsz.xcimoc.source.GuFeng;
 import com.xyrlsz.xcimoc.source.HotManga;
 import com.xyrlsz.xcimoc.source.IKanman;
 import com.xyrlsz.xcimoc.source.Komiic;
@@ -196,9 +195,9 @@ public class SourceManager {
                 case Manhuatai.TYPE:
                     parser = new Manhuatai(source);
                     break;
-                case GuFeng.TYPE:
-                    parser = new GuFeng(source);
-                    break;
+//                case GuFeng.TYPE:
+//                    parser = new GuFeng(source);
+//                    break;
 //                case CCMH.TYPE:
 //                    parser = new CCMH(source);
 //                    break;
