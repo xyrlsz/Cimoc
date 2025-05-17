@@ -110,7 +110,11 @@ public class DM5 extends MangaParser {
     @Override
     public Comic parseInfo(String html, Comic comic) {
         Node body = new Node(html);
-        String title = body.textWithSplit("div.banner_detail_form > div.info > p.title", " ", 0);
+        StringBuilder title = new StringBuilder();
+        String[] titleInfo = body.text("div.banner_detail_form > div.info > p.title").split(" ");
+        for (int i = 0; i < titleInfo.length - 1; i++) {
+            title.append(titleInfo[i]).append(" ");
+        }
         String cover = body.src("div.banner_detail_form > div.cover > img");
         String update = body.text("#tempc > div.detail-list-title > span.s > span");
         if (update != null) {
@@ -140,7 +144,7 @@ public class DM5 extends MangaParser {
             intro = intro.replace("[+展开]", "").replace("[-折叠]", "");
         }
         boolean status = isFinish(body.text("div.banner_detail_form > div.info > p.tip > span:eq(0)"));
-        comic.setInfo(title, cover, update, intro, author, status);
+        comic.setInfo(title.toString(), cover, update, intro, author, status);
         return comic;
     }
 
