@@ -2,6 +2,7 @@ package com.xyrlsz.xcimoc.ui.activity;
 
 import static com.xyrlsz.xcimoc.Constants.DMZJ_SHARED;
 import static com.xyrlsz.xcimoc.Constants.DMZJ_SHARED_COOKIES;
+import static com.xyrlsz.xcimoc.Constants.DMZJ_SHARED_UID;
 import static com.xyrlsz.xcimoc.Constants.DMZJ_SHARED_USERNAME;
 import static com.xyrlsz.xcimoc.Constants.KOMIIC_SHARED;
 import static com.xyrlsz.xcimoc.Constants.KOMIIC_SHARED_COOKIES;
@@ -27,6 +28,7 @@ import com.xyrlsz.xcimoc.ui.view.ComicSourceLoginView;
 import com.xyrlsz.xcimoc.ui.widget.LoginDialog;
 import com.xyrlsz.xcimoc.ui.widget.Option;
 import com.xyrlsz.xcimoc.utils.KomiicUtils;
+import com.xyrlsz.xcimoc.utils.StringUtils;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
 
 import org.json.JSONException;
@@ -203,8 +205,11 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
 
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
+
                     List<String> cookies = response.headers("Set-Cookie");
                     if (response.isSuccessful() && response.body() != null && !cookies.isEmpty()) {
+                        String json = response.body().string();
+                        String uid = StringUtils.match("m=(\\d+)\\|", json, 1);
                         Set<String> set = new HashSet<>();
                         for (String s : cookies) {
                             List<String> tmp = Arrays.asList(s.split("; "));
@@ -215,6 +220,7 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
                         SharedPreferences.Editor editor = sharedPreferences.edit();
                         editor.putString(DMZJ_SHARED_COOKIES, cookieStr);
                         editor.putString(DMZJ_SHARED_USERNAME, username);
+                        editor.putString(DMZJ_SHARED_UID, uid);
                         editor.apply();
                         runOnUiThread(() -> {
                             mDmzjLogin.setSummary(username);
@@ -431,6 +437,7 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
         });
         loginDialog.show();
     }
+
     @OnClick(R.id.comic_login_vomicmh_logout)
     void onVoMiCMHLogoutClick() {
         SharedPreferences sharedPreferences = getSharedPreferences(VOMIC_SHARED, MODE_PRIVATE);

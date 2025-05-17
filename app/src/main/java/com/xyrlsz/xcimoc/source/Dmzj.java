@@ -42,7 +42,8 @@ public class Dmzj extends MangaParser {
 
     public static final int TYPE = 10;
     public static final String DEFAULT_TITLE = "动漫之家";
-
+    private static final String baseUrl = "https://m.idmzj.com";
+    private static final String pcBaseUrl = "https://www.idmzj.com";
 //    private List<UrlFilter> filter = new ArrayList<>();
 
     public Dmzj(Source source) {
@@ -51,18 +52,19 @@ public class Dmzj extends MangaParser {
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, "https://m.idmzj.com");
+        return new Source(null, DEFAULT_TITLE, TYPE, true, baseUrl);
     }
 
     @Override
     protected void initUrlFilterList() {
         filter.add(new UrlFilter("dmzj.com", "info/(\\w+).html"));
+        filter.add(new UrlFilter("idmzj.com", "info/(\\w+).html"));
     }
 
     @Override
     public Request getSearchRequest(String keyword, int page) {
         if (page == 1) {
-            String url = StringUtils.format("https://www.idmzj.com/dynamic/%s", keyword);
+            String url = StringUtils.format("%s/dynamic/%s", pcBaseUrl, keyword);
             return new Request.Builder().url(url).build();
         }
         return null;
@@ -98,12 +100,12 @@ public class Dmzj extends MangaParser {
 
     @Override
     public String getUrl(String cid) {
-        return StringUtils.format("http://m.dmzj.com/info/%s.html", cid);
+        return StringUtils.format("%s/info/%s.html", baseUrl, cid);
     }
 
     @Override
     public Request getInfoRequest(String cid) {
-        String url = StringUtils.format("http://m.dmzj.com/info/%s.html", cid);
+        String url = StringUtils.format("%s/info/%s.html", baseUrl, cid);
         return new Request.Builder().url(url).build();
     }
 
@@ -137,7 +139,7 @@ public class Dmzj extends MangaParser {
                     String comic_id = chapter.getString("comic_id");
                     String chapter_id = chapter.getString("id");
                     String path = comic_id + "/" + chapter_id;
-                    list.add(new Chapter(Long.parseLong(sourceComic + "0" + k++), sourceComic, tag + " " + title, path));
+                    list.add(new Chapter(Long.parseLong(sourceComic + "0" + k++), sourceComic, title, path, tag));
                 }
             }
 
@@ -150,47 +152,66 @@ public class Dmzj extends MangaParser {
 
     @Override
     public Request getImagesRequest(String cid, String path) {
-        String url = StringUtils.format("http://m.dmzj.com/view/%s.html", path);
+        // String url = StringUtils.format("%s/view/%s.html", baseUrl, path);
         SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.DMZJ_SHARED, MODE_PRIVATE);
+        String[] split = path.split("/");
+        String comic_id = split[0];
+        String chapter_id = split[1];
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        String uid = sharedPreferences.getString(Constants.DMZJ_SHARED_UID, "");
+        String url = StringUtils.format("%s/api/v1/comic1/chapter/detail?channel=pc&app_name=dmzj&version=1.0.0&timestamp=%s&uid=%s&comic_id=%s&chapter_id=%s", pcBaseUrl, timestamp, uid, comic_id, chapter_id);
         String cookieStr = sharedPreferences.getString(DMZJ_SHARED_COOKIES, "");
-        if (cookieStr.isEmpty()) {
+        if (cookieStr.isEmpty() || uid.isEmpty()) {
             App.goActivity(ComicSourceLoginActivity.class);
             App.runOnMainThread(() ->
 //                    Toast.makeText(App.getAppContext(), App.getAppResources().getString(R.string.dmzj_should_login), Toast.LENGTH_SHORT).show()
                             HintUtils.showToast(App.getAppContext(), App.getAppResources().getString(R.string.dmzj_should_login))
             );
         }
-        return new Request.Builder().url(url).addHeader("Cookie", cookieStr).build();
+        return new Request.Builder().url(url)
+                .addHeader("Cookie", cookieStr)
+                .build();
     }
 
     @Override
     public List<ImageUrl> parseImages(String html, Chapter chapter) {
         List<ImageUrl> list = new LinkedList<>();
-        String jsonString = StringUtils.match("\"page_url\":(\\[.*?\\]),", html, 1);
-        if (jsonString != null) {
-            try {
-                JSONArray array = new JSONArray(jsonString);
-                for (int i = 0; i != array.length(); ++i) {
-                    Long comicChapter = chapter.getId();
-                    Long id = Long.parseLong(comicChapter + "0" + i);
-                    list.add(new ImageUrl(id, comicChapter, i + 1, array.getString(i), false));
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+        try {
+            JSONObject jsonObject = new JSONObject(html);
+            JSONArray array = jsonObject.getJSONObject("data").getJSONObject("chapterInfo").getJSONArray("page_url");
+            for (int i = 0; i != array.length(); ++i) {
+                Long comicChapter = chapter.getId();
+                Long id = Long.parseLong(comicChapter + "0" + i);
+                list.add(new ImageUrl(id, comicChapter, i + 1, array.getString(i), false));
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+//        String jsonString = StringUtils.match("\"page_url\":(\\[.*?\\]),", html, 1);
+//        if (jsonString != null) {
+//            try {
+//                JSONArray array = new JSONArray(jsonString);
+//                for (int i = 0; i != array.length(); ++i) {
+//                    Long comicChapter = chapter.getId();
+//                    Long id = Long.parseLong(comicChapter + "0" + i);
+//                    list.add(new ImageUrl(id, comicChapter, i + 1, array.getString(i), false));
+//                }
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
         return list;
     }
 
-    @Override
-    public Request getCheckRequest(String cid) {
-        return getInfoRequest(cid);
-    }
-
-    @Override
-    public String parseCheck(String html) {
-        return new Node(html).textWithSubstring("div.Introduct_Sub > div.sub_r > p:eq(3) > span.date", 0, 10);
-    }
+//    @Override
+//    public Request getCheckRequest(String cid) {
+//        return getInfoRequest(cid);
+//    }
+//
+//    @Override
+//    public String parseCheck(String html) {
+//        return new Node(html).textWithSubstring("div.Introduct_Sub > div.sub_r > p:eq(3) > span.date", 0, 10);
+//    }
 
     @Override
     public List<Comic> parseCategory(String html, int page) {
