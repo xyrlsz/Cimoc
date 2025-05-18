@@ -158,17 +158,17 @@ public class Dmzj extends MangaParser {
 //        String comic_id = split[0];
 //        String chapter_id = split[1];
 //        String timestamp = String.valueOf(System.currentTimeMillis());
-        String uid = sharedPreferences.getString(Constants.DMZJ_SHARED_UID, "");
+//        String uid = sharedPreferences.getString(Constants.DMZJ_SHARED_UID, "");
 //        String url = StringUtils.format("%s/api/v1/comic1/chapter/detail?channel=pc&app_name=dmzj&version=1.0.0&timestamp=%s&uid=%s&comic_id=%s&chapter_id=%s", pcBaseUrl, timestamp, uid, comic_id, chapter_id);
 
         String cookieStr = sharedPreferences.getString(Constants.DMZJ_SHARED_COOKIES, "");
-        if (cookieStr.isEmpty() || uid.isEmpty()) {
-            App.goActivity(ComicSourceLoginActivity.class);
-            App.runOnMainThread(() ->
-//                    Toast.makeText(App.getAppContext(), App.getAppResources().getString(R.string.dmzj_should_login), Toast.LENGTH_SHORT).show()
-                            HintUtils.showToast(App.getAppContext(), App.getAppResources().getString(R.string.dmzj_should_login))
-            );
-        }
+//        if (cookieStr.isEmpty() || uid.isEmpty()) {
+//            App.goActivity(ComicSourceLoginActivity.class);
+//            App.runOnMainThread(() ->
+////                    Toast.makeText(App.getAppContext(), App.getAppResources().getString(R.string.dmzj_should_login), Toast.LENGTH_SHORT).show()
+//                            HintUtils.showToast(App.getAppContext(), App.getAppResources().getString(R.string.dmzj_should_login))
+//            );
+//        }
         String url = StringUtils.format("%s/chapinfo/%s.html", baseUrl, path);
         return new Request.Builder().url(url)
                 .addHeader("Cookie", cookieStr)
