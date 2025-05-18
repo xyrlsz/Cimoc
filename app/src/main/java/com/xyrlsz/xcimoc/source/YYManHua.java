@@ -19,6 +19,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import okhttp3.Headers;
 import okhttp3.Request;
@@ -116,19 +117,16 @@ public class YYManHua extends MangaParser {
     @Override
     public List<ImageUrl> parseImages(String html, Chapter chapter) throws Manga.NetworkErrorException, JSONException {
         List<ImageUrl> list = new ArrayList<>();
-        Node body = new Node(html);
         String cid = StringUtils.match("var YYMANHUA_CID\\s*=\\s*(\\d+);", html, 1);
         String mid = StringUtils.match("var YYMANHUA_MID\\s*=\\s*(\\d+);", html, 1);
         String dt = StringUtils.match("var YYMANHUA_VIEWSIGN_DT\\s*=\\s*\"(.*?)\";", html, 1);
         String sign = StringUtils.match("var YYMANHUA_VIEWSIGN\\s*=\\s*\"(.*?)\";", html, 1);
-
-        List<Node> nodes = body.list("div.reader-bottom-page-list > a");
-        int i = 1;
-        for (Node ignored : nodes) {
+        int imgCount = Integer.parseInt(Objects.requireNonNull(StringUtils.match("var YYMANHUA_IMAGE_COUNT\\s*=\\s*(\\d+);", html, 1)));
+        for (int i = 1; i <= imgCount; i++) {
             Long comicChapter = chapter.getId();
             Long id = Long.parseLong(comicChapter + "0" + i);
             String url = baseUrl + "/m" + cid + "/chapterimage.ashx?cid=" + cid + "&page=" + i + "&key=&_cid=" + cid + "&_mid=" + mid + "&_dt=" + dt + "&_sign=" + sign;
-            list.add(new ImageUrl(id, comicChapter, i++, url, true, Headers.of("Referer", baseUrl + "/")));
+            list.add(new ImageUrl(id, comicChapter, i, url, true, Headers.of("Referer", baseUrl + "/")));
         }
         return list;
     }
