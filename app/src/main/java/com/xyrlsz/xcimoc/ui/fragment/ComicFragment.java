@@ -207,7 +207,7 @@ public class ComicFragment extends BaseFragment implements ComicView {
 
             case R.id.comic_filter_by_keyword_cancel:
                 GridFragment item2 = (GridFragment) mTabAdapter.getItem(mViewPager.getCurrentItem());
-                item2.cancelFilter(item2.getComics());
+                item2.cancelFilter();
                 break;
         }
         return super.onOptionsItemSelected(item);

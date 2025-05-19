@@ -130,8 +130,9 @@ public abstract class GridFragment extends RecyclerViewFragment implements GridV
     }
 
     @Override
-    public void cancelFilter(List<Object> original) {
-        mGridAdapter.cancelFilter(original);
+    public void cancelFilter() {
+        mGridAdapter.cancelFilter(comics);
+        comics.clear();
     }
 
     @Override
