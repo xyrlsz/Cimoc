@@ -2,6 +2,8 @@ package com.xyrlsz.xcimoc.source;
 
 import static com.xyrlsz.xcimoc.core.Manga.getResponseBody;
 
+import android.os.Build;
+
 import com.google.common.collect.Lists;
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.model.Chapter;
@@ -18,9 +20,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.Headers;
 import okhttp3.Request;
@@ -197,10 +201,46 @@ public class CopyMH extends MangaParser {
         JSONObject res = object.getJSONObject("results");
         JSONObject chapterInfo = res.getJSONObject("chapter");
         JSONArray imgUrls = chapterInfo.getJSONArray("contents");
-        for (int i = 0; i < imgUrls.length(); ++i) {
+
+        JSONArray words = chapterInfo.optJSONArray("words");
+
+        int contentSize = imgUrls.length();
+
+        // 构造 words 索引数组（如果为 null 或长度不足）
+        int[] wordIndices;
+        if (words == null || words.length() < contentSize) {
+            wordIndices = new int[contentSize];
+            for (int i = 0; i < contentSize; i++) {
+                wordIndices[i] = i;
+            }
+        } else {
+            wordIndices = new int[words.length()];
+            for (int i = 0; i < words.length(); i++) {
+                wordIndices[i] = words.getInt(i);
+            }
+        }
+
+        // 构建顺序 map
+        Map<Integer, String> indexToUrl = new HashMap<>();
+        for (int i = 0; i < contentSize; i++) {
+            int index = wordIndices[i];
+            String url = imgUrls.getJSONObject(i).optString("url", "");
+            indexToUrl.put(index, url);
+        }
+
+        // 按顺序填入 list
+        for (int i = 0; i < contentSize; i++) {
             Long comicChapter = chapter.getId();
             Long id = Long.parseLong(comicChapter + "0" + i);
-            String url = imgUrls.getJSONObject(i).getString("url");
+            String url;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                url = indexToUrl.getOrDefault(i, "");
+            } else {
+                url = indexToUrl.get(i);
+                if (url == null) {
+                    url = "";
+                }
+            }
             list.add(new ImageUrl(id, comicChapter, i + 1, url, false));
         }
 
