@@ -194,7 +194,7 @@ public class GridAdapter extends BaseAdapter<Object> {
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    public void filterByKeyword(String keyword) {
+    public void filterByKeyword(String keyword,List<Object>original) {
         List<Object> temp = new ArrayList<>();
         for (Object O_comic : mDataSet) {
             MiniComic comic = (MiniComic) O_comic;
@@ -202,6 +202,7 @@ public class GridAdapter extends BaseAdapter<Object> {
             if (title.contains(STConvertUtils.T2S(keyword.toUpperCase()))) {
                 temp.add(comic);
             }
+            original.add(comic);
         }
         mDataSet.clear();
         mDataSet.addAll(temp);

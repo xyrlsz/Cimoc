@@ -114,7 +114,6 @@ public abstract class GridFragment extends RecyclerViewFragment implements GridV
 
     @Override
     public void onComicLoadSuccess(List<Object> list) {
-        comics.addAll(list);
         mGridAdapter.addAll(list);
     }
 
@@ -126,7 +125,8 @@ public abstract class GridFragment extends RecyclerViewFragment implements GridV
 
     @Override
     public void filterByKeyword(String keyword) {
-        mGridAdapter.filterByKeyword(keyword);
+        comics.clear();
+        mGridAdapter.filterByKeyword(keyword, comics);
     }
 
     @Override
