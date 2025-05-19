@@ -3,7 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'org.greenrobot.greendao'
 //apply plugin: 'com.google.gms.google-services' // Google Services plugin
 //apply plugin: 'com.google.firebase.crashlytics'
-apply plugin: 'com.huawei.agconnect'
+//apply plugin: 'com.huawei.agconnect'
 
 //def getGitCommitHash = { ->
 //    def stdout = new ByteArrayOutputStream()
