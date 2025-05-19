@@ -241,6 +241,9 @@ public class CopyMH extends MangaParser {
                     url = "";
                 }
             }
+            if (url != null) {
+                url = url.replace("c800x.jpg", "c1500x.jpg");
+            }
             list.add(new ImageUrl(id, comicChapter, i + 1, url, false));
         }
 
@@ -266,7 +269,6 @@ public class CopyMH extends MangaParser {
 
     @Override
     public Headers getHeader() {
-
         return Headers.of("User-Agent",
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0");
     }
