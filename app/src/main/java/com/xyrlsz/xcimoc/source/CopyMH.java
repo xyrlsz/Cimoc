@@ -2,8 +2,6 @@ package com.xyrlsz.xcimoc.source;
 
 import static com.xyrlsz.xcimoc.core.Manga.getResponseBody;
 
-import android.os.Build;
-
 import com.google.common.collect.Lists;
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.model.Chapter;
@@ -119,10 +117,7 @@ public class CopyMH extends MangaParser {
             String author = ((JSONObject) body.getJSONArray("author").get(0)).getString("name");
             // 连载状态
             boolean finish = body.getJSONObject("status").getInt("value") != 0;
-            JSONObject group = comicInfo.getJSONObject("groups");
-            comic.note = group;
-
-
+            comic.note = comicInfo.getJSONObject("groups");
             comic.setInfo(title, cover, update, intro, author, finish);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -179,8 +174,6 @@ public class CopyMH extends MangaParser {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
         return Lists.reverse(list);
     }
 
@@ -224,7 +217,7 @@ public class CopyMH extends MangaParser {
         Map<Integer, String> indexToUrl = new HashMap<>();
         for (int i = 0; i < contentSize; i++) {
             int index = wordIndices[i];
-            String url = imgUrls.getJSONObject(i).optString("url", "");
+            String url = imgUrls.getJSONObject(i).getString("url");
             indexToUrl.put(index, url);
         }
 
@@ -232,15 +225,7 @@ public class CopyMH extends MangaParser {
         for (int i = 0; i < contentSize; i++) {
             Long comicChapter = chapter.getId();
             Long id = Long.parseLong(comicChapter + "0" + i);
-            String url;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                url = indexToUrl.getOrDefault(i, "");
-            } else {
-                url = indexToUrl.get(i);
-                if (url == null) {
-                    url = "";
-                }
-            }
+            String url = indexToUrl.get(i);
             if (url != null) {
                 url = url.replace("c800x.jpg", "c1500x.jpg");
             }
