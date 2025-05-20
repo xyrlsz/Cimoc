@@ -210,9 +210,17 @@ public class GridAdapter extends BaseAdapter<Object> {
     }
 
     public void cancelFilter(List<Object> original) {
-        mDataSet.clear();
-        mDataSet.addAll(original);
-        notifyDataSetChanged();
+        if (original == null || original.isEmpty()) {
+            return; // 如果 original 为 null 或空，直接返回，不修改 mDataSet
+        }
+
+        if (mDataSet == null) {
+            mDataSet = new ArrayList<>(); // 防止 mDataSet 为 null（可选）
+        }
+
+        mDataSet.clear();          // 清空旧数据
+        mDataSet.addAll(original); // 添加新数据
+        notifyDataSetChanged();    // 通知 Adapter 刷新
     }
 
     static class GridHolder extends BaseViewHolder {
