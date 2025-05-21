@@ -18,7 +18,6 @@ import com.xyrlsz.xcimoc.parser.MangaParser;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
-import com.xyrlsz.xcimoc.ui.activity.ComicSourceLoginActivity;
 import com.xyrlsz.xcimoc.utils.HintUtils;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 import com.xyrlsz.xcimoc.utils.UicodeBackslashU;
@@ -33,9 +32,11 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import okhttp3.Headers;
 import okhttp3.Request;
+import okhttp3.Response;
 
 public class Dmzj extends MangaParser {
 
@@ -43,11 +44,16 @@ public class Dmzj extends MangaParser {
     public static final String DEFAULT_TITLE = "动漫之家";
     private static final String baseUrl = "https://m.idmzj.com";
     private static final String pcBaseUrl = "https://www.idmzj.com";
-//    private List<UrlFilter> filter = new ArrayList<>();
+    //    private List<UrlFilter> filter = new ArrayList<>();
+    String COOKIES = "";
+    String UID = "";
 
     public Dmzj(Source source) {
 //        init(source, new Category());
         init(source, null);
+        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.DMZJ_SHARED, MODE_PRIVATE);
+        UID = sharedPreferences.getString(Constants.DMZJ_SHARED_UID, "");
+        COOKIES = sharedPreferences.getString(Constants.DMZJ_SHARED_COOKIES, "");
     }
 
     public static Source getDefaultSource() {
@@ -151,47 +157,64 @@ public class Dmzj extends MangaParser {
 
     @Override
     public Request getImagesRequest(String cid, String path) {
-        // String url = StringUtils.format("%s/view/%s.html", baseUrl, path);
-
-        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.DMZJ_SHARED, MODE_PRIVATE);
-//        String[] split = path.split("/");
-//        String comic_id = split[0];
-//        String chapter_id = split[1];
-//        String timestamp = String.valueOf(System.currentTimeMillis());
-//        String uid = sharedPreferences.getString(Constants.DMZJ_SHARED_UID, "");
-//        String url = StringUtils.format("%s/api/v1/comic1/chapter/detail?channel=pc&app_name=dmzj&version=1.0.0&timestamp=%s&uid=%s&comic_id=%s&chapter_id=%s", pcBaseUrl, timestamp, uid, comic_id, chapter_id);
-
-        String cookieStr = sharedPreferences.getString(Constants.DMZJ_SHARED_COOKIES, "");
-//        if (cookieStr.isEmpty() || uid.isEmpty()) {
+        if (COOKIES.isEmpty() || UID.isEmpty()) {
 //            App.goActivity(ComicSourceLoginActivity.class);
-//            App.runOnMainThread(() ->
-////                    Toast.makeText(App.getAppContext(), App.getAppResources().getString(R.string.dmzj_should_login), Toast.LENGTH_SHORT).show()
-//                            HintUtils.showToast(App.getAppContext(), App.getAppResources().getString(R.string.dmzj_should_login))
-//            );
-//        }
-        String url = StringUtils.format("%s/chapinfo/%s.html", baseUrl, path);
+            App.runOnMainThread(() ->
+                    HintUtils.showToast(App.getAppContext(), App.getAppResources().getString(R.string.dmzj_should_login))
+            );
+
+            return new Request.Builder().url(StringUtils.format("%s/chapinfo/%s.html", baseUrl, path))
+                    .build();
+        }
+        String[] split = path.split("/");
+        String comic_id = split[0];
+        String chapter_id = split[1];
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        String url = StringUtils.format("%s/api/v1/comic1/chapter/detail?channel=pc&app_name=dmzj&version=1.0.0&timestamp=%s&uid=%s&comic_id=%s&chapter_id=%s", pcBaseUrl, timestamp, UID, comic_id, chapter_id);
         return new Request.Builder().url(url)
-                .addHeader("Cookie", cookieStr)
+                .addHeader("Cookie", COOKIES)
+                .addHeader("User-Agent", "Android,DMZJ1,7.1.2")
                 .build();
 
-//        String url = StringUtils.format("%s/chapinfo/%s.html", baseUrl, path);
-//        return new Request.Builder().url(url)
-//                .build();
     }
 
     @Override
     public List<ImageUrl> parseImages(String html, Chapter chapter) {
         List<ImageUrl> list = new LinkedList<>();
         try {
-            JSONObject jsonObject = new JSONObject(html);
-            JSONArray array = jsonObject
-//                    .getJSONObject("data")
-//                    .getJSONObject("chapterInfo")
-                    .getJSONArray("page_url");
+            JSONObject jsonObject;
+            JSONArray array;
+            if (COOKIES.isEmpty() || UID.isEmpty()) {
+                jsonObject = new JSONObject(html);
+                array = jsonObject
+                        .getJSONArray("page_url");
+            } else {
+                if (html.contains("\"errno\":2,")) {
+                    String url = StringUtils.format("%s/chapinfo/%s.html", baseUrl, chapter.getPath());
+                    Request request = new Request.Builder().url(url)
+                            .build();
+                    Response response = Objects.requireNonNull(App.getHttpClient()).newCall(request).execute();
+                    String body = null;
+                    if (response.body() != null) {
+                        body = response.body().string();
+                    }
+                    jsonObject = new JSONObject(body);
+                    array = jsonObject
+                            .getJSONArray("page_url");
+                } else {
+                    jsonObject = new JSONObject(html);
+                    array = jsonObject
+                            .getJSONObject("data")
+                            .getJSONObject("chapterInfo")
+                            .getJSONArray("page_url");
+                }
+            }
+
             for (int i = 0; i != array.length(); ++i) {
                 Long comicChapter = chapter.getId();
                 Long id = Long.parseLong(comicChapter + "0" + i);
-                list.add(new ImageUrl(id, comicChapter, i + 1, array.getString(i), false));
+                String url = array.getString(i);
+                list.add(new ImageUrl(id, comicChapter, i + 1, url, false));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -249,7 +272,7 @@ public class Dmzj extends MangaParser {
 
     @Override
     public Headers getHeader() {
-        return Headers.of("Referer", "http://images.dmzj.com/");
+        return Headers.of("Referer", "https://images.idmzj.com/", "user-agent", "Dalvik/2.1.0 (Linux; U; Android 12; SM-N9700 Build/SP1A.210812.016);");
     }
 
     private static class Category extends MangaCategory {
