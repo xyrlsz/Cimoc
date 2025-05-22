@@ -95,7 +95,7 @@ public class Manhuayu extends MangaParser {
                 status = false;
             }
         }
-        String update = body.text(".metas-body > .has-text-danger");
+        String update = body.text(".has-text-danger");
         String intro = body.text(".metas-desc > p");
         comic.setInfo(title, cover, update, intro, author, status);
         return comic;
