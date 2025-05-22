@@ -131,7 +131,7 @@ public class Manhuayu extends MangaParser {
         for (int i = 1; i <= imageNodes.size(); i++) {
             Long comicChapter = chapter.getId();
             Long id = Long.parseLong(comicChapter + "0" + i);
-            String imgUrl = imageNodes.get(i - 1).attr("data-src");
+            String imgUrl = imageNodes.get(i - 1).attr("data-original");
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false));
         }
         return list;
