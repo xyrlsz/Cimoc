@@ -55,6 +55,7 @@ public class GoDaManHua extends MangaParser {
     protected void initUrlFilterList() {
         super.initUrlFilterList();
         filter.add(new UrlFilter("manhuafree.com", "manga/([\\w-]+)"));
+        filter.add(new UrlFilter("m.g-mh.org", "manga/([\\w\\-]+)"));
     }
 
     @Override
