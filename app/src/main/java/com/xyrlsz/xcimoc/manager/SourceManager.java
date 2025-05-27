@@ -14,6 +14,7 @@ import com.xyrlsz.xcimoc.source.Cartoonmad;
 import com.xyrlsz.xcimoc.source.CopyMH;
 import com.xyrlsz.xcimoc.source.DM5;
 import com.xyrlsz.xcimoc.source.Dmzj;
+import com.xyrlsz.xcimoc.source.DmzjV4;
 import com.xyrlsz.xcimoc.source.DongManManHua;
 import com.xyrlsz.xcimoc.source.DuManWu;
 import com.xyrlsz.xcimoc.source.DuManWuOrg;
@@ -276,6 +277,9 @@ public class SourceManager {
                     break;
                 case YYManHua.TYPE:
                     parser = new YYManHua(source);
+                    break;
+                case DmzjV4.TYPE:
+                    parser = new DmzjV4(source);
                     break;
                 default:
                     parser = new Null();

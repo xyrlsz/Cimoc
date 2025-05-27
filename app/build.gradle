@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'org.greenrobot.greendao'
+apply plugin: 'com.google.protobuf'
 //apply plugin: 'com.google.gms.google-services' // Google Services plugin
 //apply plugin: 'com.google.firebase.crashlytics'
 //apply plugin: 'com.huawei.agconnect'
@@ -130,8 +131,32 @@ android {
         abortOnError false
         disable 'ResourcePrefix'
     }
+    sourceSets {
+        main {
+            proto {
+                srcDir 'src/main/proto' // proto 文件目录
+            }
+        }
+    }
 }
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.25.1' // 使用与依赖相同的版本
+    }
 
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java {
+                    option "lite"
+                }
+                kotlin {
+                    option "lite"
+                }
+            }
+        }
+    }
+}
 greendao {
     schemaVersion 12
 }
@@ -178,6 +203,10 @@ dependencies {
     implementation 'com.github.houbb:opencc4j:1.8.1'
     implementation 'com.github.thegrizzlylabs:sardine-android:0.9'
     testImplementation 'junit:junit:4.13.2'
+
+    // protobuf 依赖
+    implementation 'com.google.protobuf:protobuf-javalite:3.25.1' // 使用最新版本
+    implementation 'com.google.protobuf:protobuf-kotlin-lite:3.25.1'
 
     // AndroidX Test libraries
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'

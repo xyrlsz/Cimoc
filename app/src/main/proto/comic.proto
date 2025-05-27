@@ -1,0 +1,135 @@
+// https://github.com/cijiugechu/dmzj/blob/main/crates/dmzj-proto/protos/comic.proto
+syntax = "proto3";
+package com.xyrlsz.xcimoc.utils.dmzj.protos;
+option java_outer_classname = "DmzjComic";
+message ComicChapterDetail{
+  int64 chapterId = 1;
+  int64 comicId = 2;
+  string title = 3;
+  int32 chapterOrder = 4;
+  int32 direction = 5;
+  repeated string pageUrl = 6;
+  int32 picnum = 7;
+  repeated string pageUrlHD = 8;
+  int32 commentCount = 9;
+}
+message ComicChapterInfo {
+  int64 chapterId = 1;
+  string chapterTitle = 2;
+  int64 updateTime = 3;
+  int32 fileSize = 4;
+  int32 chapterOrder = 5;
+  int32 isFee = 6;
+}
+message ComicChapterResponse {
+  int32 errno = 1;
+  string errmsg = 2;
+  ComicChapterDetail data = 3;
+}
+
+message ComicChapterList {
+  string title = 1;
+  repeated ComicChapterInfo data = 2;
+}
+
+message ComicDetailResponse {
+  int32 errno = 1;
+  string errmsg = 2;
+  ComicDetail data = 3;
+}
+
+message ComicDetail {
+  int64 id = 1;
+  string title = 2;
+  int32 direction = 3;
+  int32 islong = 4;
+  int32 isDmzj = 5;
+  string cover = 6;
+  string description = 7;
+  int64 lastUpdatetime = 8;
+  string lastUpdateChapterName = 9;
+  int32 copyright = 10;
+  string firstLetter = 11;
+  string comicPy = 12;
+  int32 hidden = 13;
+  int64 hotNum = 14;
+  int64 hitNum = 15;
+  int64 uid = 16;
+  int32 isLock = 17;
+  int32 lastUpdateChapterId = 18;
+  repeated ComicTag types = 19;
+  repeated ComicTag status = 20;
+  repeated ComicTag authors = 21;
+  int64 subscribeNum = 22;
+  repeated ComicChapterList chapters = 23;
+  int32 isNeedLogin = 24;
+  repeated ComicDetailUrlLink urlLinks = 25;
+  int32 isHideChapter = 26;
+  repeated ComicDetailUrlLink dhUrlLinks = 27;
+  string cornerMark = 28;
+  int32 isFee = 29;
+}
+
+message ComicTag {
+  int64 tagId = 1;
+  string tagName = 2;
+}
+
+message ComicDetailUrlLink {
+  string title = 1;
+  repeated ComicDetailUrl list = 2;
+}
+message ComicDetailUrl {
+  int64 id = 1;
+  string title = 2;
+  string url = 3;
+  string icon = 4;
+  string packageName = 5;
+  string dUrl = 6;
+  int32 btype = 7;
+}
+
+message ComicRankListResponse {
+  int32 errno = 1;
+  string errmsg = 2;
+  repeated ComicRankListInfo data = 3;
+}
+message ComicRankListInfo {
+  int64 comic_id = 1;
+  string title = 2;
+  string authors = 3;
+  string status = 4;
+  string cover = 5;
+  string types = 6;
+  int64 last_updatetime = 7;
+  string last_update_chapter_name = 8;
+  string comic_py = 9;
+  int64 num = 10;
+  int32 tag_id = 11;
+  string chapter_name = 12;
+  int64 chapter_id = 13;
+}
+message RankTypeFilterResponse {
+  int32 errno = 1;
+  string errmsg = 2;
+  repeated ComicTag data = 3;
+}
+
+message ComicUpdateListResponse {
+  int32 errno = 1;
+  string errmsg = 2;
+  repeated ComicUpdateListInfo data = 3;
+}
+
+message ComicUpdateListInfo {
+  int64 comicId = 1;
+  string title = 2;
+  int32 islong = 3;
+  string authors = 4;
+  string types = 5;
+  string cover = 6;
+  string status = 7;
+  string lastUpdateChapterName = 8;
+  int64 lastUpdateChapterId = 9;
+  int64 lastUpdatetime = 10;
+}

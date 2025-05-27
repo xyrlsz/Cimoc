@@ -14,6 +14,7 @@ import com.xyrlsz.xcimoc.source.Cartoonmad;
 import com.xyrlsz.xcimoc.source.CopyMH;
 import com.xyrlsz.xcimoc.source.DM5;
 import com.xyrlsz.xcimoc.source.Dmzj;
+import com.xyrlsz.xcimoc.source.DmzjV4;
 import com.xyrlsz.xcimoc.source.DongManManHua;
 import com.xyrlsz.xcimoc.source.DuManWu;
 import com.xyrlsz.xcimoc.source.DuManWuOrg;
@@ -86,6 +87,7 @@ public class UpdateHelper {
             ComicSourceTable.put(TTKMH.TYPE, TTKMH.getDefaultSource());
             ComicSourceTable.put(Vomicmh.TYPE, Vomicmh.getDefaultSource());
             ComicSourceTable.put(YYManHua.TYPE, YYManHua.getDefaultSource());
+            ComicSourceTable.put(DmzjV4.TYPE, DmzjV4.getDefaultSource());
         }
     }
 
@@ -203,6 +205,7 @@ public class UpdateHelper {
         list.add(TTKMH.getDefaultSource());
         list.add(Vomicmh.getDefaultSource());
         list.add(YYManHua.getDefaultSource());
+        list.add(DmzjV4.getDefaultSource());
 
         session.getSourceDao().insertOrReplaceInTx(list);
         initComicSourceTable();
