@@ -15,7 +15,6 @@ import com.xyrlsz.xcimoc.parser.JsonIterator;
 import com.xyrlsz.xcimoc.parser.MangaParser;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
-import com.xyrlsz.xcimoc.ui.activity.ComicSourceLoginActivity;
 import com.xyrlsz.xcimoc.utils.HintUtils;
 import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
@@ -59,8 +58,8 @@ public class DmzjV4 extends MangaParser {
 
     @Override
     protected void initUrlFilterList() {
-        filter.add(new UrlFilter("dmzj.com", "info/(\\d+).html"));
-        filter.add(new UrlFilter("idmzj.com", "info/(\\d+).html"));
+//        filter.add(new UrlFilter("dmzj.com", "info/(\\d+).html"));
+//        filter.add(new UrlFilter("idmzj.com", "info/(\\d+).html"));
     }
 
     @Override
@@ -110,7 +109,7 @@ public class DmzjV4 extends MangaParser {
                     ()
                             -> HintUtils.showToast(App.getAppContext(),
                             App.getAppResources().getString(R.string.dmzj_should_login)));
-            App.goActivity(ComicSourceLoginActivity.class);
+//            App.goActivity(ComicSourceLoginActivity.class);
         }
         String url =
                 StringUtils.format("%s/comic/detail/%s?uid=%s&channel=android", V4_API_URL, cid, UID);
