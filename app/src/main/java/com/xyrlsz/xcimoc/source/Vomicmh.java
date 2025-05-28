@@ -20,6 +20,7 @@ import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
 import com.xyrlsz.xcimoc.ui.activity.ComicSourceLoginActivity;
 import com.xyrlsz.xcimoc.utils.HintUtils;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import org.json.JSONException;
@@ -124,7 +125,8 @@ public class Vomicmh extends MangaParser {
         for (Node node : resList) {
             String title = node.text();
             String path = node.href();
-            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
+            Long id = IdCreator.chapterIdCreate(sourceComic, i++);
+            list.add(new Chapter(id, sourceComic, title, path));
         }
         return Lists.reverse(list);
     }
@@ -155,7 +157,7 @@ public class Vomicmh extends MangaParser {
 
         for (int i = 1; i <= resList.size(); i++) {
             Long comicChapter = chapter.getId();
-            Long id = Long.parseLong(comicChapter + "0" + (i - 1));
+            Long id = IdCreator.imageIdCreate(comicChapter, i);
             String imgUrl = resList.get(i - 1).src();
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false));
         }

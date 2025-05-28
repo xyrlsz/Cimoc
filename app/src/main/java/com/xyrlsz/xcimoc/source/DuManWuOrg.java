@@ -11,6 +11,7 @@ import com.xyrlsz.xcimoc.parser.NodeIterator;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -125,7 +126,8 @@ public class DuManWuOrg extends MangaParser {
         for (Node chapterNode : chapterNodes) {
             String title = chapterNode.text();
             String path = chapterNode.href().split("/")[2].replace(".html", "");
-            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
+            Long id = IdCreator.chapterIdCreate(sourceComic, i++);
+            list.add(new Chapter(id, sourceComic, title, path));
         }
 
         return Lists.reverse(list);
@@ -145,7 +147,7 @@ public class DuManWuOrg extends MangaParser {
         List<Node> imageNodes = body.list("#cp_img > img");
         for (int i = 1; i <= imageNodes.size(); i++) {
             Long comicChapter = chapter.getId();
-            Long id = Long.parseLong(comicChapter + "0" + i);
+            Long id = IdCreator.imageIdCreate(comicChapter,i);
             String imgUrl = imageNodes.get(i - 1).attr("data-src");
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false));
         }

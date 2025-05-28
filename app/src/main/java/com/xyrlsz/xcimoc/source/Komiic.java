@@ -16,6 +16,7 @@ import com.xyrlsz.xcimoc.parser.MangaParser;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.utils.HintUtils;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.KomiicUtils;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
@@ -23,7 +24,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -195,8 +195,8 @@ public class Komiic extends MangaParser {
             String title = jsonList.get(i).getString("serial");
             String path = jsonList.get(i).getString("id");
             String type = jsonList.get(i).getString("type");
-
-            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i + 1), sourceComic, title, path, type));
+            Long id = IdCreator.chapterIdCreate(sourceComic, i);
+            list.add(new Chapter(id, sourceComic, title, path, type));
         }
 
         return Lists.reverse(list);
@@ -241,7 +241,7 @@ public class Komiic extends MangaParser {
         }
         for (int i = 1; i <= images.length(); i++) {
             Long comicChapter = chapter.getId();
-            Long id = Long.parseLong(comicChapter + "0" + (i - 1));
+            Long id = IdCreator.imageIdCreate(comicChapter, i);
             String imgUrl = imgBaseUrl + images.getJSONObject(i - 1).getString("kid");
             Headers headers = Headers.of("referer", StringUtils.format("https://komiic.com/comic/%s/chapter/%s", _cid, chapter.getPath()), "cookie", _cookies);
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false, headers));

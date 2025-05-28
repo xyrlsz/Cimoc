@@ -17,6 +17,7 @@ import com.xyrlsz.xcimoc.parser.MangaParser;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 import com.xyrlsz.xcimoc.utils.UicodeBackslashU;
 
@@ -141,7 +142,8 @@ public class Dmzj extends MangaParser {
                     String comic_id = chapter.getString("comic_id");
                     String chapter_id = chapter.getString("id");
                     String path = comic_id + "/" + chapter_id;
-                    list.add(new Chapter(Long.parseLong(sourceComic + "0" + k++), sourceComic, title, path, tag));
+                    Long id = IdCreator.chapterIdCreate(sourceComic, k++);
+                    list.add(new Chapter(id, sourceComic, title, path, tag));
                 }
             }
 
@@ -184,7 +186,7 @@ public class Dmzj extends MangaParser {
                     .getJSONArray("page_url");
             for (int i = 0; i != array.length(); ++i) {
                 Long comicChapter = chapter.getId();
-                Long id = Long.parseLong(comicChapter + "0" + i);
+                Long id = IdCreator.chapterIdCreate(comicChapter, i);
                 String url = array.getString(i);
                 list.add(new ImageUrl(id, comicChapter, i + 1, url, false));
             }

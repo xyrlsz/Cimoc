@@ -9,6 +9,7 @@ import com.xyrlsz.xcimoc.parser.NodeIterator;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -101,8 +102,8 @@ public class Animx2 extends MangaParser {
             Matcher mTitle = Pattern.compile("\\d+").matcher(title);
             title = mTitle.find() ? mTitle.group() : title;
             String path = node.hrefWithSplit("a", 0);
-
-            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
+            Long id = IdCreator.chapterIdCreate(sourceComic, i++);
+            list.add(new Chapter(id, sourceComic, title, path));
         }
         return list;
     }
@@ -125,7 +126,7 @@ public class Animx2 extends MangaParser {
         int page = Integer.parseInt(pageMatcher.group(1));
         for (int i = 1; i <= page; ++i) {
             Long comicChapter = chapter.getId();
-            Long id = Long.parseLong(comicChapter + "0" + i);
+            Long id = IdCreator.imageIdCreate(comicChapter, i);
             list.add(new ImageUrl(id, comicChapter, i, StringUtils.format("%s-p-%d", _path, i), true));
         }
         return list;

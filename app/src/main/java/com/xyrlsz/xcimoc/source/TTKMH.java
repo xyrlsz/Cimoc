@@ -11,6 +11,7 @@ import com.xyrlsz.xcimoc.parser.NodeIterator;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import org.json.JSONException;
@@ -117,7 +118,8 @@ public class TTKMH extends MangaParser {
         for (Node node : resList) {
             String title = node.text("a");
             String path = node.href("a").replace("/chapter/".concat(comic.getCid()), "");
-            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
+            Long id = IdCreator.chapterIdCreate(sourceComic, i++);
+            list.add(new Chapter(id, sourceComic, title, path));
         }
         return Lists.reverse(list);
     }
@@ -137,7 +139,7 @@ public class TTKMH extends MangaParser {
         List<ImageUrl> list = new ArrayList<>();
         for (int i = 1; i <= imgNode.size(); i++) {
             Long comicChapter = chapter.getId();
-            Long id = Long.parseLong(comicChapter + "0" + (i - 1));
+            Long id = IdCreator.imageIdCreate(comicChapter, i);
             String imgUrl = imgBaseUrl + imgNode.get(i - 1).attr("data-src");
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false));
         }

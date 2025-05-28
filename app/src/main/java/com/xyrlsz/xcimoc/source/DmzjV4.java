@@ -17,6 +17,7 @@ import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.ui.activity.ComicSourceLoginActivity;
 import com.xyrlsz.xcimoc.utils.HintUtils;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 import com.xyrlsz.xcimoc.utils.TimestampUtils;
 import com.xyrlsz.xcimoc.utils.UicodeBackslashU;
@@ -34,7 +35,6 @@ import okhttp3.Headers;
 import okhttp3.Request;
 
 public class DmzjV4 extends MangaParser {
-
     public static final int TYPE = 112;
     public static final String DEFAULT_TITLE = "动漫之家v4";
     private static final String baseUrl = "https://m.idmzj.com";
@@ -45,9 +45,10 @@ public class DmzjV4 extends MangaParser {
     String UID = "";
 
     public DmzjV4(Source source) {
-//        init(source, new Category());
+        //        init(source, new Category());
         init(source, null);
-        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.DMZJ_SHARED, MODE_PRIVATE);
+        SharedPreferences sharedPreferences =
+                App.getAppContext().getSharedPreferences(Constants.DMZJ_SHARED, MODE_PRIVATE);
         UID = sharedPreferences.getString(Constants.DMZJ_SHARED_UID, "");
         COOKIES = sharedPreferences.getString(Constants.DMZJ_SHARED_COOKIES, "");
     }
@@ -65,7 +66,8 @@ public class DmzjV4 extends MangaParser {
     @Override
     public Request getSearchRequest(String keyword, int page) {
         if (page == 1) {
-            String url = StringUtils.format("%s/search/showWithLevel/0/%s/0.json", V3_API_URL, keyword);
+            String url =
+                    StringUtils.format("%s/search/showWithLevel/0/%s/0.json", V3_API_URL, keyword);
             return new Request.Builder().url(url).build();
         }
         return null;
@@ -74,7 +76,6 @@ public class DmzjV4 extends MangaParser {
     @Override
     public SearchIterator getSearchIterator(String html, int page) {
         try {
-
             String decodeJsonString = UicodeBackslashU.unicodeToCn(html).replace("\\/", "/");
             return new JsonIterator(new JSONArray(decodeJsonString)) {
                 @Override
@@ -105,12 +106,14 @@ public class DmzjV4 extends MangaParser {
     @Override
     public Request getInfoRequest(String cid) {
         if (UID.isEmpty()) {
-            App.runOnMainThread(() ->
-                    HintUtils.showToast(App.getAppContext(), App.getAppResources().getString(R.string.dmzj_should_login))
-            );
+            App.runOnMainThread(
+                    ()
+                            -> HintUtils.showToast(App.getAppContext(),
+                            App.getAppResources().getString(R.string.dmzj_should_login)));
             App.goActivity(ComicSourceLoginActivity.class);
         }
-        String url = StringUtils.format("%s/comic/detail/%s?uid=%s&channel=android", V4_API_URL, cid, UID);
+        String url =
+                StringUtils.format("%s/comic/detail/%s?uid=%s&channel=android", V4_API_URL, cid, UID);
         return new Request.Builder().url(url).build();
     }
 
@@ -126,7 +129,8 @@ public class DmzjV4 extends MangaParser {
             for (DmzjComic.ComicTag tag : response.getData().getAuthorsList()) {
                 author.append(tag.getTagName()).append(" ");
             }
-            String update = TimestampUtils.formatTimestamp(response.getData().getLastUpdatetime() * 1000);
+            String update =
+                    TimestampUtils.formatTimestamp(response.getData().getLastUpdatetime() * 1000);
             boolean status = isFinish(response.getData().getStatus(0).getTagName());
             comic.setInfo(title, cover, update, intro, author.toString(), status);
         } catch (Exception e) {
@@ -139,7 +143,6 @@ public class DmzjV4 extends MangaParser {
     public List<Chapter> parseChapter(String html, Comic comic, Long sourceComic) {
         List<Chapter> list = new LinkedList<>();
         try {
-
             byte[] data = RsaDecryptor.decryptBytes(html);
             DmzjComic.ComicDetailResponse response = DmzjComic.ComicDetailResponse.parseFrom(data);
             int k = 1;
@@ -148,7 +151,8 @@ public class DmzjV4 extends MangaParser {
                 for (DmzjComic.ComicChapterInfo chapter : chapterList.getDataList()) {
                     String title = chapter.getChapterTitle();
                     String chapter_id = Long.toString(chapter.getChapterId());
-                    list.add(new Chapter(Long.parseLong(sourceComic + "0" + k++), sourceComic, title, chapter_id, tag));
+                    Long id = IdCreator.chapterIdCreate(sourceComic, k++);
+                    list.add(new Chapter(id, sourceComic, title, chapter_id, tag));
                 }
             }
 
@@ -160,9 +164,9 @@ public class DmzjV4 extends MangaParser {
 
     @Override
     public Request getImagesRequest(String cid, String path) {
-        String url = StringUtils.format("%s/comic/chapter/%s/%s?uid=%s", V4_API_URL, cid, path, UID);
-        return new Request.Builder().url(url)
-                .build();
+        String url =
+                StringUtils.format("%s/comic/chapter/%s/%s?uid=%s", V4_API_URL, cid, path, UID);
+        return new Request.Builder().url(url).build();
     }
 
     @Override
@@ -170,11 +174,12 @@ public class DmzjV4 extends MangaParser {
         List<ImageUrl> list = new LinkedList<>();
         try {
             byte[] data = RsaDecryptor.decryptBytes(html);
-            DmzjComic.ComicChapterResponse response = DmzjComic.ComicChapterResponse.parseFrom(data);
+            DmzjComic.ComicChapterResponse response =
+                    DmzjComic.ComicChapterResponse.parseFrom(data);
             int i = 1;
             for (String PicUrl : response.getData().getPageUrlList()) {
                 Long comicChapter = chapter.getId();
-                Long id = Long.parseLong(comicChapter + "0" + i);
+                Long id = IdCreator.imageIdCreate(comicChapter, i);
                 list.add(new ImageUrl(id, comicChapter, i++, PicUrl, false));
             }
 
@@ -186,6 +191,7 @@ public class DmzjV4 extends MangaParser {
 
     @Override
     public Headers getHeader() {
-        return Headers.of("Referer", "https://images.idmzj.com/", "user-agent", "Dalvik/2.1.0 (Linux; U; Android 12; SM-N9700 Build/SP1A.210812.016);");
+        return Headers.of("Referer", "https://images.idmzj.com/", "user-agent",
+                "Dalvik/2.1.0 (Linux; U; Android 12; SM-N9700 Build/SP1A.210812.016);");
     }
 }

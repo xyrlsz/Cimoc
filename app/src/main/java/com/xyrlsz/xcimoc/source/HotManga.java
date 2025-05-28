@@ -12,6 +12,7 @@ import com.xyrlsz.xcimoc.parser.JsonIterator;
 import com.xyrlsz.xcimoc.parser.MangaParser;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import org.json.JSONArray;
@@ -139,10 +140,12 @@ public class HotManga extends MangaParser {
         List<Chapter> list = new LinkedList<>();
         JSONObject jsonObject = new JSONObject(html);
         JSONArray array = jsonObject.getJSONObject("results").getJSONArray("list");
+        int k = 0;
         for (int i = 0; i < array.length(); ++i) {
             String title = array.getJSONObject(i).getString("name");
             String path = array.getJSONObject(i).getString("uuid");
-            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i), sourceComic, title, path, "默认"));
+            Long id = IdCreator.chapterIdCreate(sourceComic, k++);
+            list.add(new Chapter(id, sourceComic, title, path, "默认"));
         }
         try {
             JSONObject groups = (JSONObject) comic.note;
@@ -163,7 +166,8 @@ public class HotManga extends MangaParser {
                 for (int i = 0; i < array.length(); ++i) {
                     String title = array.getJSONObject(i).getString("name");
                     String path = array.getJSONObject(i).getString("uuid");
-                    list.add(new Chapter(Long.parseLong(sourceComic + "0" + i), sourceComic, title, path, PathName));
+                    Long id = IdCreator.chapterIdCreate(sourceComic, k++);
+                    list.add(new Chapter(id, sourceComic, title, path, PathName));
                 }
 
             }
@@ -193,7 +197,7 @@ public class HotManga extends MangaParser {
         try {
             for (int i = 0; i < array.length(); ++i) {
                 Long comicChapter = chapter.getId();
-                Long id = Long.parseLong(comicChapter + "0" + i);
+                Long id = IdCreator.imageIdCreate(comicChapter, i);
                 String url = array.getJSONObject(i).getString("url").replace("m_read", "kb_m_read_large");
                 url = url.replace("c800x.jpg", "c1500x.jpg");
                 list.add(new ImageUrl(id, comicChapter, i + 1, url, false));

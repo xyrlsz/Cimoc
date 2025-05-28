@@ -10,6 +10,7 @@ import com.xyrlsz.xcimoc.parser.NodeIterator;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -114,7 +115,8 @@ public class Baozi extends MangaParser {
                 continue;
             }
             pathSet.add(path);
-            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
+            Long id = IdCreator.chapterIdCreate(sourceComic, i++);
+            list.add(new Chapter(id, sourceComic, title, path));
         }
         return list;
     }
@@ -133,7 +135,7 @@ public class Baozi extends MangaParser {
         List<Node> imageNodes = body.list("amp-img > noscript");
         for (int i = 1; i <= imageNodes.size(); i++) {
             Long comicChapter = chapter.getId();
-            Long id = Long.parseLong(comicChapter + "0" + i);
+            Long id = IdCreator.imageIdCreate(comicChapter, i);
             String imgUrl = imageNodes.get(i - 1).src("img");
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false));
         }

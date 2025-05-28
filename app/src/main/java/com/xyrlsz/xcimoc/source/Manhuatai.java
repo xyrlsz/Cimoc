@@ -16,6 +16,7 @@ import com.xyrlsz.xcimoc.parser.MangaParser;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import org.json.JSONArray;
@@ -103,7 +104,8 @@ public class Manhuatai extends MangaParser {
 //        try {
 //            response = client.newCall(request).execute();
 //            if (response.isSuccessful()) {
-////                return response.body().string();
+
+    /// /                return response.body().string();
 //
 //                // 1.修正gb2312编码网页读取错误
 //                byte[] bodybytes = response.body().bytes();
@@ -122,7 +124,6 @@ public class Manhuatai extends MangaParser {
 //        }
 //        throw new Manga.NetworkErrorException();
 //    }
-
     private Node getComicNode(String cid) throws Manga.NetworkErrorException {
         Request request = getInfoRequest(cid);
         String html = Manga.getResponseBody(App.getHttpClient(), request);
@@ -173,7 +174,8 @@ public class Manhuatai extends MangaParser {
         for (Node node : new Node(html).list("ol#j_chapter_list > li > a")) {
             String title = node.attr("title");
             String path = node.hrefWithSplit(1);
-            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
+            Long id = IdCreator.chapterIdCreate(sourceComic, i++);
+            list.add(new Chapter(id, sourceComic, title, path));
         }
         return Lists.reverse(list);
     }
@@ -202,7 +204,7 @@ public class Manhuatai extends MangaParser {
                 JSONArray imgUrl = currChapter.getJSONArray("chapter_img_list");
                 for (int index = currChapter.getInt("start_num"); index <= currChapter.getInt("end_num"); index++) {
                     Long comicChapter = chapter.getId();
-                    Long id = Long.parseLong(comicChapter + "0" + index);
+                    Long id = IdCreator.imageIdCreate(comicChapter, index);
                     String image = imgUrl.getString(index - 1);
 
                     list.add(new ImageUrl(id, comicChapter, index, image, false));

@@ -10,6 +10,7 @@ import com.xyrlsz.xcimoc.parser.RegexIterator;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -34,6 +35,7 @@ public class Cartoonmad extends MangaParser {
 
     public static final int TYPE = 54;
     public static final String DEFAULT_TITLE = "动漫狂";
+    private String _cid, _path;
 
     public Cartoonmad(Source source) {
         init(source, null);
@@ -73,7 +75,6 @@ public class Cartoonmad extends MangaParser {
             }
         };
     }
-
 
     @Override
     public String getUrl(String cid) {
@@ -118,12 +119,11 @@ public class Cartoonmad extends MangaParser {
         while (mChapter.find()) {
             String title = mChapter.group(2);
             String path = mChapter.group(1);
-            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
+            Long id = IdCreator.chapterIdCreate(sourceComic, i++);
+            list.add(new Chapter(id, sourceComic, title, path));
         }
         return Lists.reverse(list);
     }
-
-    private String _cid, _path;
 
     @Override
     public Request getImagesRequest(String cid, String path) {
@@ -141,7 +141,7 @@ public class Cartoonmad extends MangaParser {
         int page = Integer.parseInt(pageMatcher.group(2));
         for (int i = 1; i <= page; ++i) {
             Long comicChapter = chapter.getId();
-            Long id = Long.parseLong(comicChapter + "0" + i);
+            Long id = IdCreator.imageIdCreate(comicChapter, i);
             String url = StringUtils.format("https://cc.fun8.us/post/%s%03d.html", pageMatcher.group(1), i);
             list.add(new ImageUrl(id, comicChapter, i, url, true));
         }

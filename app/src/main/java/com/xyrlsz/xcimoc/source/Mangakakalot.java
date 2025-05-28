@@ -1,6 +1,5 @@
 package com.xyrlsz.xcimoc.source;
 
-
 import android.util.Pair;
 
 import com.xyrlsz.xcimoc.model.Chapter;
@@ -13,6 +12,7 @@ import com.xyrlsz.xcimoc.parser.NodeIterator;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import java.util.ArrayList;
@@ -31,26 +31,25 @@ import okhttp3.Request;
  */
 
 public class Mangakakalot extends MangaParser {
-
     public static final int TYPE = 44;
     public static final String DEFAULT_TITLE = "Mangakakalot";
 
     private static final String baseUrl = "https://mangakakalot.to";
 
     public Mangakakalot(Source source) {
-//        init(source, new Category());
+        //        init(source, new Category());
         init(source, null);
         setParseImagesUseWebParser(true);
+    }
+
+    public static Source getDefaultSource() {
+        return new Source(null, DEFAULT_TITLE, TYPE, true, baseUrl);
     }
 
     @Override
     protected void initUrlFilterList() {
         super.initUrlFilterList();
         filter.add(new UrlFilter("mangakakalot.to", ".*", 0));
-    }
-
-    public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, baseUrl);
     }
 
     /**
@@ -61,7 +60,8 @@ public class Mangakakalot extends MangaParser {
      */
     @Override
     public Request getSearchRequest(String keyword, int page) {
-        if (page != 1) return null;
+        if (page != 1)
+            return null;
         String url = baseUrl + "/search?keyword=" + keyword;
         return new Request.Builder().url(url).addHeader("Referer", baseUrl + "/").build();
     }
@@ -81,8 +81,10 @@ public class Mangakakalot extends MangaParser {
                 String cid = node.href("a").replace("/", "");
                 String title = node.attr("img", "alt");
                 String cover = node.src("img");
-//                String update = node.text("div.story_item_right > span:eq(4)").replace("Updated :", "").trim();
-//                String author = node.text("div.story_item_right > span:eq(3)").replace("Author(s) :", "").trim();
+                //                String update = node.text("div.story_item_right >
+                //                span:eq(4)").replace("Updated :", "").trim(); String author =
+                //                node.text("div.story_item_right > span:eq(3)").replace("Author(s)
+                //                :", "").trim();
                 return new Comic(TYPE, cid, title, cover, "", "");
             }
         };
@@ -100,7 +102,10 @@ public class Mangakakalot extends MangaParser {
      */
     @Override
     public Request getInfoRequest(String cid) {
-        return new Request.Builder().url(baseUrl + "/" + cid).addHeader("Referer", baseUrl + "/").build();
+        return new Request.Builder()
+                .url(baseUrl + "/" + cid)
+                .addHeader("Referer", baseUrl + "/")
+                .build();
     }
 
     /**
@@ -115,8 +120,9 @@ public class Mangakakalot extends MangaParser {
 
         String title = body.text("h3.manga-name");
         String cover = body.src(".manga-poster > img");
-//        String update = body.text(".db-info >.line > :eq(3)").replace("Last updated :", "").trim();
-//        String author = body.text(".db-info >.line > :eq(3)").replace("Author(s) :", "").trim();
+        //        String update = body.text(".db-info >.line > :eq(3)").replace("Last updated :",
+        //        "").trim(); String author = body.text(".db-info >.line >
+        //        :eq(3)").replace("Author(s) :", "").trim();
         String intro = body.text(".dbs-content");
         boolean status = isFinish(body.text(".db-info"));
         comic.setInfo(title, cover, "", intro, "", status);
@@ -146,7 +152,8 @@ public class Mangakakalot extends MangaParser {
         for (Node node : body.list(".cl-body > div > .item")) {
             String title = node.text(".item-name > a");
             String path = node.href(".item-name > a");
-            set.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
+            Long id = IdCreator.chapterIdCreate(sourceComic, i++);
+            set.add(new Chapter(id, sourceComic, title, path));
         }
         return new LinkedList<>(set);
     }
@@ -159,16 +166,20 @@ public class Mangakakalot extends MangaParser {
      */
     @Override
     public Request getImagesRequest(String cid, String path) {
-        return new Request.Builder().url(baseUrl + "/" + path)
+        return new Request.Builder()
+                .url(baseUrl + "/" + path)
                 .addHeader("Referer", baseUrl + "/" + cid)
-                .addHeader("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
+                .addHeader("user-agent",
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                                + "Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
                 .build();
     }
 
     /// 解析图片列表，若为惰性加载，则 [lazy][ImageUrl] 为 true
-    /// 惰性加载的情况，一次性不能拿到所有图片链接，例如网站使用了多次异步请求 [#parseImages]，或需要跳转到不同页面
-    /// 才能获取 [parseImages][]，这些情况一般可以根据页码构造出相应的请求链接，到阅读时再解析
-    /// 支持多个链接 ，例如 [#parseImages]
+    /// 惰性加载的情况，一次性不能拿到所有图片链接，例如网站使用了多次异步请求
+    /// [#parseImages]，或需要跳转到不同页面 才能获取
+    /// [parseImages][]，这些情况一般可以根据页码构造出相应的请求链接，到阅读时再解析 支持多个链接
+    /// ，例如 [#parseImages]
     ///
     /// @param html 页面源代码
     @Override
@@ -179,7 +190,7 @@ public class Mangakakalot extends MangaParser {
 
         for (Node node : body.list("#list-image > div")) {
             Long comicChapter = chapter.getId();
-            Long id = Long.parseLong(comicChapter + "0" + i);
+            Long id = IdCreator.imageIdCreate(comicChapter, i);
             list.add(new ImageUrl(id, comicChapter, ++i, node.attr("data-url"), false));
         }
 
@@ -203,9 +214,8 @@ public class Mangakakalot extends MangaParser {
     public List<Comic> parseCategory(String html, int page) {
         List<Comic> list = new LinkedList<>();
         Node body = new Node(html);
-        int total = Integer.parseInt(StringUtils.match("\\d+", body.list("div.phan-trang > a")
-                .get(4)
-                .href(), 0));
+        int total = Integer.parseInt(
+                StringUtils.match("\\d+", body.list("div.phan-trang > a").get(4).href(), 0));
         if (page <= total) {
             for (Node node : body.list("div.truyen-list > div.list-truyen-item-wrap")) {
                 String cid = node.href("h3 > a").replace("https://mangakakalot.com/manga/", "");
@@ -220,7 +230,6 @@ public class Mangakakalot extends MangaParser {
     }
 
     private static class Category extends MangaCategory {
-
         @Override
         public boolean isComposite() {
             return true;
@@ -242,16 +251,16 @@ public class Mangakakalot extends MangaParser {
             List<Pair<String, String>> list = new ArrayList<>();
             list.add(Pair.create("All", "all"));
             list.add(Pair.create("Action", "2"));
-//            list.add(Pair.create("Adult", "3"));
+            //            list.add(Pair.create("Adult", "3"));
             list.add(Pair.create("Adventure", "4"));
             list.add(Pair.create("Comedy", "6"));
             list.add(Pair.create("Cooking", "7"));
-//            list.add(Pair.create("Donjinshi", "9"));
+            //            list.add(Pair.create("Donjinshi", "9"));
             list.add(Pair.create("Drama", "10"));
-//            list.add(Pair.create("Ecchi", "11"));
+            //            list.add(Pair.create("Ecchi", "11"));
             list.add(Pair.create("Fantasy", "12"));
-//            list.add(Pair.create("Gender bender", "13"));
-//            list.add(Pair.create("Harem", "14"));
+            //            list.add(Pair.create("Gender bender", "13"));
+            //            list.add(Pair.create("Harem", "14"));
             list.add(Pair.create("Historical", "15"));
             list.add(Pair.create("Horror", "16"));
             list.add(Pair.create("Josei", "17"));
@@ -306,6 +315,5 @@ public class Mangakakalot extends MangaParser {
             list.add(Pair.create("All", ""));
             return list;
         }
-
     }
 }

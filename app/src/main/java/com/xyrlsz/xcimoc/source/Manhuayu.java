@@ -11,6 +11,7 @@ import com.xyrlsz.xcimoc.parser.NodeIterator;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import org.json.JSONException;
@@ -112,7 +113,8 @@ public class Manhuayu extends MangaParser {
         for (Node chapterNode : chapterNodes) {
             String title = chapterNode.text();
             String path = chapterNode.href().split("/")[2].replace(".html", "");
-            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
+            Long id = IdCreator.chapterIdCreate(sourceComic, i++);
+            list.add(new Chapter(id, sourceComic, title, path));
         }
 
         return Lists.reverse(list);
@@ -130,7 +132,7 @@ public class Manhuayu extends MangaParser {
         List<Node> imageNodes = body.list(".chapter-images > .chapter-image");
         for (int i = 1; i <= imageNodes.size(); i++) {
             Long comicChapter = chapter.getId();
-            Long id = Long.parseLong(comicChapter + "0" + i);
+            Long id = IdCreator.imageIdCreate(comicChapter, i);
             String imgUrl = imageNodes.get(i - 1).attr("data-original");
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false));
         }

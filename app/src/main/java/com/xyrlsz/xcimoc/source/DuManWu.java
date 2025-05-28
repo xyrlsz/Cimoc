@@ -10,6 +10,7 @@ import com.xyrlsz.xcimoc.parser.MangaParser;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import org.json.JSONArray;
@@ -147,7 +148,8 @@ public class DuManWu extends MangaParser {
                         JSONObject item = data.getJSONObject(j);
                         String title = item.getString("chaptername");
                         String path = item.getString("chapterid");
-                        list.add(new Chapter(Long.parseLong(sourceComic + "0" + j + i), sourceComic, title, path));
+                        Long id = IdCreator.chapterIdCreate(sourceComic, j + i);
+                        list.add(new Chapter(id, sourceComic, title, path));
                     }
                 }
             } catch (Exception e) {
@@ -172,7 +174,7 @@ public class DuManWu extends MangaParser {
         List<Node> imageNodes = body.list(".main_img > .chapter-img-box");
         for (int i = 1; i <= imageNodes.size(); i++) {
             Long comicChapter = chapter.getId();
-            Long id = Long.parseLong(comicChapter + "0" + i);
+            Long id = IdCreator.imageIdCreate(comicChapter,i);
             String imgUrl = imageNodes.get(i - 1).attr("img", "data-src");
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false));
         }

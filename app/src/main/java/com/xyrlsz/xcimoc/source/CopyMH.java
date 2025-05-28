@@ -12,6 +12,7 @@ import com.xyrlsz.xcimoc.parser.JsonIterator;
 import com.xyrlsz.xcimoc.parser.MangaParser;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import org.json.JSONArray;
@@ -44,13 +45,16 @@ public class CopyMH extends MangaParser {
     public Request getSearchRequest(String keyword, int page) {
         String url = "";
         if (page == 1) {
-//            JChineseConvertor jChineseConvertor = JChineseConvertor.getInstance();
-//            keyword = jChineseConvertor.s2t(keyword);
+            //            JChineseConvertor jChineseConvertor = JChineseConvertor.getInstance();
+            //            keyword = jChineseConvertor.s2t(keyword);
             url = StringUtils.format(
-                    "%s/api/kb/web/searchbd/comics?offset=0&platform=2&limit=12&q=%s&q_type=", website, keyword);
+                    "%s/api/kb/web/searchbd/comics?offset=0&platform=2&limit=12&q=%s&q_type=", website,
+                    keyword);
             return new Request.Builder()
                     .url(url)
-                    .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
+                    .addHeader("User-Agent",
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like "
+                                    + "Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
                     .build();
         }
         return null;
@@ -63,8 +67,8 @@ public class CopyMH extends MangaParser {
 
     @Override
     protected void initUrlFilterList() {
-//        filter.add(new UrlFilter("copymanga.com", "\\w+", 0));
-//        filter.add(new UrlFilter("mangacopy.com", "\\w+", 0));
+        //        filter.add(new UrlFilter("copymanga.com", "\\w+", 0));
+        //        filter.add(new UrlFilter("mangacopy.com", "\\w+", 0));
         filter.add(new UrlFilter("www.mangacopy.com", "comic/(\\w+)", 1));
         filter.add(new UrlFilter("www.copy20.com", "comic/(\\w+)", 1));
     }
@@ -77,11 +81,13 @@ public class CopyMH extends MangaParser {
                 @Override
                 protected Comic parse(JSONObject object) {
                     try {
-//                        JChineseConvertor jChineseConvertor = JChineseConvertor.getInstance();
+                        //                        JChineseConvertor jChineseConvertor =
+                        //                        JChineseConvertor.getInstance();
                         String cid = object.getString("path_word");
                         String title = object.getString("name");
                         String cover = object.getString("cover");
-                        String author = object.getJSONArray("author").getJSONObject(0).getString("name").trim();
+                        String author =
+                                object.getJSONArray("author").getJSONObject(0).getString("name").trim();
                         return new Comic(TYPE, cid, title, cover, null, author);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -100,7 +106,9 @@ public class CopyMH extends MangaParser {
         String url = StringUtils.format("%s/api/v3/comic2/%s", website, cid);
         return new Request.Builder()
                 .url(url)
-                .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
+                .addHeader("User-Agent",
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                                + "Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
                 .build();
     }
 
@@ -123,52 +131,62 @@ public class CopyMH extends MangaParser {
             e.printStackTrace();
         }
 
-
         return comic;
     }
 
     @Override
     public Request getChapterRequest(String html, String cid) {
-        String url = String.format("%s/api/v3/comic/%s/group/default/chapters?limit=500&offset=0", website, cid);
+        String url = String.format(
+                "%s/api/v3/comic/%s/group/default/chapters?limit=500&offset=0", website, cid);
         return new Request.Builder()
                 .url(url)
                 .addHeader("User-Agent",
-                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                                + "Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
                 .build();
     }
 
     @Override
-    public List<Chapter> parseChapter(String html, Comic comic, Long sourceComic) throws JSONException {
+    public List<Chapter> parseChapter(String html, Comic comic, Long sourceComic)
+            throws JSONException {
         List<Chapter> list = new LinkedList<>();
         JSONObject jsonObject = new JSONObject(html);
         JSONArray array = jsonObject.getJSONObject("results").getJSONArray("list");
+        int k = 0;
         for (int i = 0; i < array.length(); ++i) {
             String title = array.getJSONObject(i).getString("name");
             String path = array.getJSONObject(i).getString("uuid");
-            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i), sourceComic, title, path, "默认"));
+            Long id = IdCreator.chapterIdCreate(sourceComic, k++);
+            list.add(new Chapter(id, sourceComic, title, path, "默认"));
         }
         try {
             JSONObject groups = (JSONObject) comic.note;
             Iterator<String> keys = groups.keys();
             while (keys.hasNext()) {
                 String key = keys.next();
-                if (key.equals("default")) continue;
+                if (key.equals("default"))
+                    continue;
                 String path_word = groups.getJSONObject(key).getString("path_word");
                 String PathName = groups.getJSONObject(key).getString("name");
-                String url = String.format("%s/api/v3/comic/%s/group/%s/chapters?limit=500&offset=0", website, comic.getCid(), path_word);
-                Request request = new Request.Builder()
-                        .url(url)
-                        .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
-                        .build();
+                String url =
+                        String.format("%s/api/v3/comic/%s/group/%s/chapters?limit=500&offset=0",
+                                website, comic.getCid(), path_word);
+                Request request =
+                        new Request.Builder()
+                                .url(url)
+                                .addHeader("User-Agent",
+                                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, "
+                                                + "like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
+                                .build();
                 html = getResponseBody(App.getHttpClient(), request);
                 jsonObject = new JSONObject(html);
                 array = jsonObject.getJSONObject("results").getJSONArray("list");
                 for (int i = 0; i < array.length(); ++i) {
                     String title = array.getJSONObject(i).getString("name");
                     String path = array.getJSONObject(i).getString("uuid");
-                    list.add(new Chapter(Long.parseLong(sourceComic + "0" + i), sourceComic, title, path, PathName));
+                    Long id = IdCreator.chapterIdCreate(sourceComic, k++);
+                    list.add(new Chapter(id, sourceComic, title, path, PathName));
                 }
-
             }
 
         } catch (Exception e) {
@@ -183,7 +201,8 @@ public class CopyMH extends MangaParser {
         return new Request.Builder()
                 .url(url)
                 .addHeader("User-Agent",
-                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                                + "Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
                 .build();
     }
 
@@ -224,7 +243,7 @@ public class CopyMH extends MangaParser {
         // 按顺序填入 list
         for (int i = 0; i < contentSize; i++) {
             Long comicChapter = chapter.getId();
-            Long id = Long.parseLong(comicChapter + "0" + i);
+            Long id = IdCreator.imageIdCreate(comicChapter, i);
             String url = indexToUrl.get(i);
             if (url != null) {
                 url = url.replace("c800x.jpg", "c1500x.jpg");
@@ -255,6 +274,7 @@ public class CopyMH extends MangaParser {
     @Override
     public Headers getHeader() {
         return Headers.of("User-Agent",
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0");
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                        + "Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0");
     }
 }

@@ -11,6 +11,7 @@ import com.xyrlsz.xcimoc.parser.SearchIterator
 import com.xyrlsz.xcimoc.parser.UrlFilter
 import com.xyrlsz.xcimoc.soup.Node
 import com.xyrlsz.xcimoc.utils.DecryptionUtils
+import com.xyrlsz.xcimoc.utils.IdCreator
 import com.xyrlsz.xcimoc.utils.StringUtils
 import okhttp3.Headers
 import okhttp3.Request
@@ -83,9 +84,10 @@ class MangaBZ(source: Source?) : MangaParser() {
             val path = node.href().trim('/')
 
             //list.add(Chapter(title, path))
+            val id = IdCreator.chapterIdCreate(sourceComic, i++)
             list.add(
                 Chapter(
-                    (sourceComic.toString() + "0" + i++).toLong(),
+                    id,
                     sourceComic,
                     title,
                     path
@@ -127,7 +129,7 @@ class MangaBZ(source: Source?) : MangaParser() {
                 //list.add(ImageUrl(i + 1, url, true))
 
                 val comicChapter = chapter.id
-                val id = (comicChapter.toString() + "0" + i).toLong()
+                val id = IdCreator.imageIdCreate(comicChapter, i);
                 list.add(ImageUrl(id, comicChapter, i + 1, url, true))
             }
         } catch (e: Exception) {
