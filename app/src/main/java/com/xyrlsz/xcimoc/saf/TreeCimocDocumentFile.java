@@ -26,15 +26,15 @@ import java.util.Map;
 
 @RequiresApi(21)
 @TargetApi(21)
-class TreeDocumentFile extends DocumentFile {
+class TreeCimocDocumentFile extends CimocDocumentFile {
 
     private Context mContext;
     private Uri mUri;
     private String mDisplayName;
     private String mMimeType;
-    private Map<String, DocumentFile> mSubFiles;
+    private Map<String, CimocDocumentFile> mSubFiles;
 
-    private TreeDocumentFile(DocumentFile parent, Context context, Uri uri, String displayName, String mimeType) {
+    private TreeCimocDocumentFile(CimocDocumentFile parent, Context context, Uri uri, String displayName, String mimeType) {
         super(parent);
         mContext = context;
         mUri = uri;
@@ -42,7 +42,7 @@ class TreeDocumentFile extends DocumentFile {
         mMimeType = mimeType;
     }
 
-    TreeDocumentFile(DocumentFile parent, Context context, Uri uri) {
+    TreeCimocDocumentFile(CimocDocumentFile parent, Context context, Uri uri) {
         super(parent);
         mContext = context;
         mUri = uri;
@@ -73,7 +73,7 @@ class TreeDocumentFile extends DocumentFile {
             while (c.moveToNext()) {
                 Uri documentUri = DocumentsContract.buildDocumentUriUsingTree(mUri, c.getString(0));
                 String displayName = c.getString(1);
-                mSubFiles.put(displayName, new TreeDocumentFile(this, mContext, documentUri, displayName, c.getString(2)));
+                mSubFiles.put(displayName, new TreeCimocDocumentFile(this, mContext, documentUri, displayName, c.getString(2)));
             }
         } finally {
             closeQuietly(c);
@@ -97,12 +97,12 @@ class TreeDocumentFile extends DocumentFile {
     }
 
     @Override
-    public DocumentFile createFile(String displayName) {
+    public CimocDocumentFile createFile(String displayName) {
         if (!checkSubFiles()) {
             return null;
         }
 
-        DocumentFile doc = findFile(displayName);
+        CimocDocumentFile doc = findFile(displayName);
         if (doc != null) {
             return null;
         }
@@ -110,7 +110,7 @@ class TreeDocumentFile extends DocumentFile {
         try {
             Uri result = DocumentsContract.createDocument(mContext.getContentResolver(), mUri, null, displayName);
             if (result != null) {
-                doc = new TreeDocumentFile(this, mContext, result, displayName, null);
+                doc = new TreeCimocDocumentFile(this, mContext, result, displayName, null);
                 mSubFiles.put(displayName, doc);
             }
         } catch (FileNotFoundException e) {
@@ -120,12 +120,12 @@ class TreeDocumentFile extends DocumentFile {
     }
 
     @Override
-    public DocumentFile createDirectory(String displayName) {
+    public CimocDocumentFile createDirectory(String displayName) {
         if (!checkSubFiles()) {
             return null;
         }
 
-        DocumentFile doc = findFile(displayName);
+        CimocDocumentFile doc = findFile(displayName);
         if (doc != null) {
             return null;
         }
@@ -134,7 +134,7 @@ class TreeDocumentFile extends DocumentFile {
             Uri result = DocumentsContract.createDocument(mContext.getContentResolver(), mUri,
                     DocumentsContract.Document.MIME_TYPE_DIR, displayName);
             if (result != null) {
-                doc = new TreeDocumentFile(this, mContext, result, displayName, DocumentsContract.Document.MIME_TYPE_DIR);
+                doc = new TreeCimocDocumentFile(this, mContext, result, displayName, DocumentsContract.Document.MIME_TYPE_DIR);
                 mSubFiles.put(displayName, doc);
             }
         } catch (FileNotFoundException e) {
@@ -204,7 +204,7 @@ class TreeDocumentFile extends DocumentFile {
         try {
             if (DocumentsContract.deleteDocument(mContext.getContentResolver(), mUri)) {
                 // 为求方便，就这样吧
-                ((TreeDocumentFile) getParentFile()).mSubFiles.remove(mDisplayName);
+                ((TreeCimocDocumentFile) getParentFile()).mSubFiles.remove(mDisplayName);
                 return true;
             }
         } catch (FileNotFoundException e) {
@@ -231,15 +231,15 @@ class TreeDocumentFile extends DocumentFile {
     }
 
     @Override
-    public List<DocumentFile> listFiles(DocumentFileFilter filter, Comparator<? super DocumentFile> comp) {
+    public List<CimocDocumentFile> listFiles(DocumentFileFilter filter, Comparator<? super CimocDocumentFile> comp) {
         if (!checkSubFiles()) {
             return new ArrayList<>();
         }
 
-        Iterator<Map.Entry<String, DocumentFile>> iterator = mSubFiles.entrySet().iterator();
-        List<DocumentFile> list = new ArrayList<>(mSubFiles.size());
+        Iterator<Map.Entry<String, CimocDocumentFile>> iterator = mSubFiles.entrySet().iterator();
+        List<CimocDocumentFile> list = new ArrayList<>(mSubFiles.size());
         while (iterator.hasNext()) {
-            DocumentFile file = iterator.next().getValue();
+            CimocDocumentFile file = iterator.next().getValue();
             if (filter == null || filter.call(file)) {
                 list.add(file);
             }
@@ -252,14 +252,14 @@ class TreeDocumentFile extends DocumentFile {
     }
 
     @Override
-    public DocumentFile[] listFiles() {
+    public CimocDocumentFile[] listFiles() {
         if (!checkSubFiles()) {
-            return new DocumentFile[0];
+            return new CimocDocumentFile[0];
         }
 
         int size = mSubFiles.size();
-        Iterator<Map.Entry<String, DocumentFile>> iterator = mSubFiles.entrySet().iterator();
-        DocumentFile[] result = new DocumentFile[size];
+        Iterator<Map.Entry<String, CimocDocumentFile>> iterator = mSubFiles.entrySet().iterator();
+        CimocDocumentFile[] result = new CimocDocumentFile[size];
         for (int i = 0; i != size; ++i) {
             result[i] = iterator.next().getValue();
         }
@@ -276,7 +276,7 @@ class TreeDocumentFile extends DocumentFile {
     }
 
     @Override
-    public DocumentFile findFile(String displayName) {
+    public CimocDocumentFile findFile(String displayName) {
         if (!checkSubFiles()) {
             return null;
         }

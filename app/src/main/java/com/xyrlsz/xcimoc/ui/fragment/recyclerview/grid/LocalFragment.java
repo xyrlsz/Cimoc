@@ -13,7 +13,7 @@ import com.xyrlsz.xcimoc.global.Extra;
 import com.xyrlsz.xcimoc.model.MiniComic;
 import com.xyrlsz.xcimoc.presenter.BasePresenter;
 import com.xyrlsz.xcimoc.presenter.LocalPresenter;
-import com.xyrlsz.xcimoc.saf.DocumentFile;
+import com.xyrlsz.xcimoc.saf.CimocDocumentFile;
 import com.xyrlsz.xcimoc.ui.activity.DirPickerActivity;
 import com.xyrlsz.xcimoc.ui.activity.TaskActivity;
 import com.xyrlsz.xcimoc.ui.fragment.dialog.MessageDialogFragment;
@@ -82,13 +82,13 @@ public class LocalFragment extends GridFragment implements LocalView {
                             } else if ((flags & Intent.FLAG_GRANT_WRITE_URI_PERMISSION) != 0) {
                                 getActivity().getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                             }
-                            mPresenter.scan(DocumentFile.fromTreeUri(getActivity(), uri));
+                            mPresenter.scan(CimocDocumentFile.fromTreeUri(getActivity(), uri));
                         }
                     } else {
                         String path = data.getStringExtra(Extra.EXTRA_PICKER_PATH);
                         if (path != null) {
                             if (!StringUtils.isEmpty(path)) {
-                                mPresenter.scan(DocumentFile.fromFile(new File(path)));
+                                mPresenter.scan(CimocDocumentFile.fromFile(new File(path)));
                             } else {
                                 onExecuteFail();
                             }

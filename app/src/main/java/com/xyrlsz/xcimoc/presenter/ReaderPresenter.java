@@ -16,7 +16,7 @@ import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.ImageUrl;
 import com.xyrlsz.xcimoc.rx.RxBus;
 import com.xyrlsz.xcimoc.rx.RxEvent;
-import com.xyrlsz.xcimoc.saf.DocumentFile;
+import com.xyrlsz.xcimoc.saf.CimocDocumentFile;
 import com.xyrlsz.xcimoc.ui.view.ReaderView;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 import com.xyrlsz.xcimoc.utils.pictureUtils;
@@ -130,9 +130,9 @@ public class ReaderPresenter extends BasePresenter<ReaderView> {
 
     private Observable<List<ImageUrl>> getObservable(Chapter chapter) {
         if (mComic.getLocal()) {
-            DocumentFile dir = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ?
-                    DocumentFile.fromSubTreeUri(mBaseView.getAppInstance(), Uri.parse(chapter.getPath())) :
-                    DocumentFile.fromFile(new File(Uri.parse(chapter.getPath()).getPath()));
+            CimocDocumentFile dir = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ?
+                    CimocDocumentFile.fromSubTreeUri(mBaseView.getAppInstance(), Uri.parse(chapter.getPath())) :
+                    CimocDocumentFile.fromFile(new File(Uri.parse(chapter.getPath()).getPath()));
             return Local.images(dir, chapter);
         }
 

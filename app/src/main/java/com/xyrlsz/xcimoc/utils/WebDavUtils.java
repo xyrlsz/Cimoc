@@ -1,8 +1,8 @@
 package com.xyrlsz.xcimoc.utils;
 
 import com.xyrlsz.xcimoc.App;
-import com.xyrlsz.xcimoc.saf.DocumentFile;
-import com.xyrlsz.xcimoc.saf.WebDavDocumentFile;
+import com.xyrlsz.xcimoc.saf.CimocDocumentFile;
+import com.xyrlsz.xcimoc.saf.WebDavCimocDocumentFile;
 
 import java.io.IOException;
 
@@ -12,28 +12,28 @@ import rx.schedulers.Schedulers;
 
 public class WebDavUtils {
 
-    private static void copyFilesByOver(DocumentFile src, WebDavDocumentFile dst, boolean isOverwrite) throws IOException {
+    private static void copyFilesByOver(CimocDocumentFile src, WebDavCimocDocumentFile dst, boolean isOverwrite) throws IOException {
         if (src.isFile()) {
             DocumentUtils.writeBinaryToFile(App.getApp().getContentResolver(), src, dst);
         } else if (src.isDirectory()) {
-            for (DocumentFile file : src.listFiles()) {
+            for (CimocDocumentFile file : src.listFiles()) {
                 if (file.isFile()) {
-                    WebDavDocumentFile newDst = (WebDavDocumentFile) dst.findFile(file.getName());
+                    WebDavCimocDocumentFile newDst = (WebDavCimocDocumentFile) dst.findFile(file.getName());
                     if (newDst == null) {
-                        newDst = (WebDavDocumentFile) dst.createFile(file.getName());
+                        newDst = (WebDavCimocDocumentFile) dst.createFile(file.getName());
                     } else if (!isOverwrite) {
                         return;
                     }
                     DocumentUtils.writeBinaryToFile(App.getApp().getContentResolver(), file, newDst);
                 } else if (file.isDirectory()) {
-                    WebDavDocumentFile newDst = (WebDavDocumentFile) dst.createDirectory(file.getName());
+                    WebDavCimocDocumentFile newDst = (WebDavCimocDocumentFile) dst.createDirectory(file.getName());
                     copyFilesByOver(file, newDst, isOverwrite);
                 }
             }
         }
     }
 
-    public static Observable<Integer> upload2WebDav(final DocumentFile src, final WebDavDocumentFile dst, boolean isOverwrite) {
+    public static Observable<Integer> upload2WebDav(final CimocDocumentFile src, final WebDavCimocDocumentFile dst, boolean isOverwrite) {
         return Observable.create(new Observable.OnSubscribe<Integer>() {
             @Override
             public void call(Subscriber<? super Integer> subscriber) {

@@ -17,7 +17,7 @@ import com.xyrlsz.xcimoc.global.Extra;
 import com.xyrlsz.xcimoc.manager.PreferenceManager;
 import com.xyrlsz.xcimoc.presenter.BasePresenter;
 import com.xyrlsz.xcimoc.presenter.SettingsPresenter;
-import com.xyrlsz.xcimoc.saf.DocumentFile;
+import com.xyrlsz.xcimoc.saf.CimocDocumentFile;
 import com.xyrlsz.xcimoc.service.DownloadService;
 import com.xyrlsz.xcimoc.ui.activity.settings.ReaderConfigActivity;
 import com.xyrlsz.xcimoc.ui.fragment.dialog.MessageDialogFragment;
@@ -136,8 +136,12 @@ public class SettingsActivity extends BackActivity implements SettingsView {
     protected void initView() {
         super.initView();
 
-
-        mStoragePath = getAppInstance().getDocumentFile().getUri().toString();
+        String path = App.getPreferenceManager().getString(PreferenceManager.PREF_OTHER_STORAGE, "");
+        if (path.isEmpty()) {
+            mStoragePath = getAppInstance().getDocumentFile().getUri().toString();
+        } else {
+            mStoragePath = path;
+        }
         mReaderKeepBright.bindPreference(PreferenceManager.PREF_READER_KEEP_BRIGHT, false);
         mReaderHideInfo.bindPreference(PreferenceManager.PREF_READER_HIDE_INFO, false);
         mReaderHideNav.bindPreference(PreferenceManager.PREF_READER_HIDE_NAV, false);
@@ -206,12 +210,12 @@ public class SettingsActivity extends BackActivity implements SettingsView {
                                 getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                             }
                             mTempStorage = uri.toString();
-                            mPresenter.moveFiles(DocumentFile.fromTreeUri(this, uri));
+                            mPresenter.moveFiles(CimocDocumentFile.fromTreeUri(this, uri));
                         }
                     } else {
                         String path = data.getStringExtra(Extra.EXTRA_PICKER_PATH);
                         if (!StringUtils.isEmpty(path)) {
-                            DocumentFile file = DocumentFile.fromFile(new File(path));
+                            CimocDocumentFile file = CimocDocumentFile.fromFile(new File(path));
                             mTempStorage = file.getUri().toString();
                             mPresenter.moveFiles(file);
                         } else {

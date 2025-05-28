@@ -18,11 +18,11 @@ import java.util.List;
  * Created by Hiroshi on 2017/3/24.
  */
 
-class RawDocumentFile extends DocumentFile {
+class RawCimocDocumentFile extends CimocDocumentFile {
 
     private File mFile;
 
-    RawDocumentFile(DocumentFile parent, File file) {
+    RawCimocDocumentFile(CimocDocumentFile parent, File file) {
         super(parent);
         mFile = file;
     }
@@ -57,7 +57,7 @@ class RawDocumentFile extends DocumentFile {
     }
 
     @Override
-    public DocumentFile createFile(String displayName) {
+    public CimocDocumentFile createFile(String displayName) {
         File target = new File(mFile, displayName);
         if (!target.exists()) {
             try {
@@ -68,14 +68,14 @@ class RawDocumentFile extends DocumentFile {
                 return null;
             }
         }
-        return new RawDocumentFile(this, target);
+        return new RawCimocDocumentFile(this, target);
     }
 
     @Override
-    public DocumentFile createDirectory(String displayName) {
+    public CimocDocumentFile createDirectory(String displayName) {
         final File target = new File(mFile, displayName);
         if (target.isDirectory() || target.mkdir()) {
-            return new RawDocumentFile(this, target);
+            return new RawCimocDocumentFile(this, target);
         }
         return null;
     }
@@ -140,12 +140,12 @@ class RawDocumentFile extends DocumentFile {
     }
 
     @Override
-    public List<DocumentFile> listFiles(DocumentFileFilter filter, Comparator<? super DocumentFile> comp) {
-        final ArrayList<DocumentFile> results = new ArrayList<>();
+    public List<CimocDocumentFile> listFiles(DocumentFileFilter filter, Comparator<? super CimocDocumentFile> comp) {
+        final ArrayList<CimocDocumentFile> results = new ArrayList<>();
         final File[] files = mFile.listFiles();
         if (files != null) {
             for (File file : files) {
-                DocumentFile doc = new RawDocumentFile(this, file);
+                CimocDocumentFile doc = new RawCimocDocumentFile(this, file);
                 if (filter == null || filter.call(doc)) {
                     results.add(doc);
                 }
@@ -158,11 +158,11 @@ class RawDocumentFile extends DocumentFile {
     }
 
     @Override
-    public DocumentFile[] listFiles() {
+    public CimocDocumentFile[] listFiles() {
         final File[] files = mFile.listFiles();
-        final DocumentFile[] results = new DocumentFile[files.length];
+        final CimocDocumentFile[] results = new CimocDocumentFile[files.length];
         for (int i = 0; i < files.length; ++i) {
-            results[i] = new RawDocumentFile(this, files[i]);
+            results[i] = new RawCimocDocumentFile(this, files[i]);
         }
         return results;
     }
@@ -172,8 +172,8 @@ class RawDocumentFile extends DocumentFile {
     }
 
     @Override
-    public DocumentFile findFile(String displayName) {
-        for (DocumentFile file : listFiles()) {
+    public CimocDocumentFile findFile(String displayName) {
+        for (CimocDocumentFile file : listFiles()) {
             if (displayName.equals(file.getName())) {
                 return file;
             }

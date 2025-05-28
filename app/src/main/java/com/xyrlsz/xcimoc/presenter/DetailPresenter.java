@@ -14,7 +14,7 @@ import com.xyrlsz.xcimoc.model.MiniComic;
 import com.xyrlsz.xcimoc.model.Task;
 import com.xyrlsz.xcimoc.rx.RxBus;
 import com.xyrlsz.xcimoc.rx.RxEvent;
-import com.xyrlsz.xcimoc.saf.DocumentFile;
+import com.xyrlsz.xcimoc.saf.CimocDocumentFile;
 import com.xyrlsz.xcimoc.ui.view.DetailView;
 
 import java.util.ArrayList;
@@ -196,7 +196,7 @@ public class DetailPresenter extends BasePresenter<DetailView> {
         return mComic;
     }
 
-    public void backup(DocumentFile file) {
+    public void backup(CimocDocumentFile file) {
         mComicManager.listFavoriteOrHistoryInRx()
                 .doOnNext(new Action1<List<Comic>>() {
                     @Override

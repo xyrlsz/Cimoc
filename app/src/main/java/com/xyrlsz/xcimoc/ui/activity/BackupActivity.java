@@ -12,8 +12,8 @@ import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.manager.PreferenceManager;
 import com.xyrlsz.xcimoc.presenter.BackupPresenter;
 import com.xyrlsz.xcimoc.presenter.BasePresenter;
-import com.xyrlsz.xcimoc.saf.DocumentFile;
-import com.xyrlsz.xcimoc.saf.WebDavDocumentFile;
+import com.xyrlsz.xcimoc.saf.CimocDocumentFile;
+import com.xyrlsz.xcimoc.saf.WebDavCimocDocumentFile;
 import com.xyrlsz.xcimoc.ui.fragment.dialog.ChoiceDialogFragment;
 import com.xyrlsz.xcimoc.ui.fragment.dialog.MessageDialogFragment;
 import com.xyrlsz.xcimoc.ui.view.BackupView;
@@ -38,7 +38,7 @@ public class BackupActivity extends BackActivity implements BackupView {
     private static final int DIALOG_REQUEST_RESTORE_TAG = 1;
     private static final int DIALOG_REQUEST_RESTORE_SETTINGS = 2;
     private static final int DIALOG_REQUEST_RESTORE_CLEAR = 3;
-    DocumentFile mDocumentFile;
+    CimocDocumentFile mCimocDocumentFile;
 
     @BindView(R.id.backup_layout)
     View mLayoutView;
@@ -109,8 +109,8 @@ public class BackupActivity extends BackActivity implements BackupView {
     void onRestoreFavoriteClick() {
         showProgressDialog();
         if (PermissionUtils.hasStoragePermission(this)) {
-            mDocumentFile = getAppInstance().getDocumentFile();
-            mPresenter.loadComicFile(mDocumentFile);
+            mCimocDocumentFile = getAppInstance().getDocumentFile();
+            mPresenter.loadComicFile(mCimocDocumentFile);
         } else {
             onFileLoadFail();
         }
@@ -120,8 +120,8 @@ public class BackupActivity extends BackActivity implements BackupView {
     void onRestoreTagClick() {
         showProgressDialog();
         if (PermissionUtils.hasStoragePermission(this)) {
-            mDocumentFile = getAppInstance().getDocumentFile();
-            mPresenter.loadTagFile(mDocumentFile);
+            mCimocDocumentFile = getAppInstance().getDocumentFile();
+            mPresenter.loadTagFile(mCimocDocumentFile);
         } else {
             onFileLoadFail();
         }
@@ -131,8 +131,8 @@ public class BackupActivity extends BackActivity implements BackupView {
     void onRestoreSettingsClick() {
         showProgressDialog();
         if (PermissionUtils.hasStoragePermission(this)) {
-            mDocumentFile = getAppInstance().getDocumentFile();
-            mPresenter.loadSettingsFile(mDocumentFile);
+            mCimocDocumentFile = getAppInstance().getDocumentFile();
+            mPresenter.loadSettingsFile(mCimocDocumentFile);
         } else {
             onFileLoadFail();
         }
@@ -142,8 +142,8 @@ public class BackupActivity extends BackActivity implements BackupView {
     void onClearRecordClick() {
         showProgressDialog();
         if (PermissionUtils.hasStoragePermission(this)) {
-            mDocumentFile = getAppInstance().getDocumentFile();
-            mPresenter.loadClearBackupFile(mDocumentFile);
+            mCimocDocumentFile = getAppInstance().getDocumentFile();
+            mPresenter.loadClearBackupFile(mCimocDocumentFile);
         } else {
             onFileLoadFail();
         }
@@ -169,45 +169,45 @@ public class BackupActivity extends BackActivity implements BackupView {
     @OnClick(R.id.backup_cloud_backup)
     void onWebDavCloudBackupClick() {
         showProgressDialog();
-        mDocumentFile = DocumentFile.fromWebDav();
-        mPresenter.saveComic(mDocumentFile);
+        mCimocDocumentFile = CimocDocumentFile.fromWebDav();
+        mPresenter.saveComic(mCimocDocumentFile);
     }
 
 
     @OnClick(R.id.backup_cloud_restore)
     void onWebDavCloudRestoreClick() {
         showProgressDialog();
-        mDocumentFile = DocumentFile.fromWebDav();
-        mPresenter.loadComicFile(mDocumentFile);
+        mCimocDocumentFile = CimocDocumentFile.fromWebDav();
+        mPresenter.loadComicFile(mCimocDocumentFile);
     }
 
     @OnClick(R.id.backup_cloud_clear)
     void onWebDavCloudClearClick() {
         showProgressDialog();
-        mDocumentFile = DocumentFile.fromWebDav();
-        mPresenter.loadClearBackupFile(mDocumentFile);
+        mCimocDocumentFile = CimocDocumentFile.fromWebDav();
+        mPresenter.loadClearBackupFile(mCimocDocumentFile);
     }
 
     @OnClick(R.id.backup_cloud_upload)
     void onWebDavCloudUploadClick() {
         showProgressDialog();
-        mDocumentFile = DocumentFile.fromWebDav();
-        DocumentFile localDocumentFiles = DocumentUtils.getOrCreateSubDirectory(getAppInstance().getDocumentFile(), BACKUP);
-        mPresenter.uploadBackup2Cloud(localDocumentFiles, new WebDavDocumentFile((WebDavDocumentFile) mDocumentFile, BACKUP));
+        mCimocDocumentFile = CimocDocumentFile.fromWebDav();
+        CimocDocumentFile localCimocDocumentFiles = DocumentUtils.getOrCreateSubDirectory(getAppInstance().getDocumentFile(), BACKUP);
+        mPresenter.uploadBackup2Cloud(localCimocDocumentFiles, new WebDavCimocDocumentFile((WebDavCimocDocumentFile) mCimocDocumentFile, BACKUP));
     }
 
     @OnClick(R.id.backup_save_settings_cloud)
     void onSaveSettingsCloudClick() {
         showProgressDialog();
-        mDocumentFile = DocumentFile.fromWebDav();
-        mPresenter.saveSettings(mDocumentFile);
+        mCimocDocumentFile = CimocDocumentFile.fromWebDav();
+        mPresenter.saveSettings(mCimocDocumentFile);
     }
 
     @OnClick(R.id.backup_restore_settings_cloud)
     void onRestoreSettingsCloudClick() {
         showProgressDialog();
-        mDocumentFile = DocumentFile.fromWebDav();
-        mPresenter.loadSettingsFile(mDocumentFile);
+        mCimocDocumentFile = CimocDocumentFile.fromWebDav();
+        mPresenter.loadSettingsFile(mCimocDocumentFile);
     }
 
     @Override
@@ -215,24 +215,24 @@ public class BackupActivity extends BackActivity implements BackupView {
         switch (requestCode) {
             case DIALOG_REQUEST_RESTORE_COMIC:
                 showProgressDialog();
-                mPresenter.restoreComic(bundle.getString(EXTRA_DIALOG_RESULT_VALUE), mDocumentFile);
+                mPresenter.restoreComic(bundle.getString(EXTRA_DIALOG_RESULT_VALUE), mCimocDocumentFile);
                 break;
             case DIALOG_REQUEST_RESTORE_TAG:
                 showProgressDialog();
-                mPresenter.restoreTag(bundle.getString(EXTRA_DIALOG_RESULT_VALUE), mDocumentFile);
+                mPresenter.restoreTag(bundle.getString(EXTRA_DIALOG_RESULT_VALUE), mCimocDocumentFile);
                 break;
             case DIALOG_REQUEST_RESTORE_SETTINGS:
                 showProgressDialog();
-                mPresenter.restoreSetting(bundle.getString(EXTRA_DIALOG_RESULT_VALUE), mDocumentFile);
+                mPresenter.restoreSetting(bundle.getString(EXTRA_DIALOG_RESULT_VALUE), mCimocDocumentFile);
                 break;
             case DIALOG_REQUEST_RESTORE_CLEAR:
                 showProgressDialog();
-                mPresenter.clearBackup(mDocumentFile);
+                mPresenter.clearBackup(mCimocDocumentFile);
                 break;
 
             case DIALOG_REQUEST_RESTORE_DELETE:
                 showProgressDialog();
-                mPresenter.deleteBackup(bundle.getString(EXTRA_DIALOG_RESULT_VALUE), mDocumentFile);
+                mPresenter.deleteBackup(bundle.getString(EXTRA_DIALOG_RESULT_VALUE), mCimocDocumentFile);
                 break;
         }
     }

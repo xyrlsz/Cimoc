@@ -24,18 +24,18 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 
-public class WebDavDocumentFile extends DocumentFile {
+public class WebDavCimocDocumentFile extends CimocDocumentFile {
     private static final Sardine mSardine = WebDavConf.sardine;
     private final String mWebDavUrl = WebDavConf.url + "/cimoc";
     private final String mCurrentPath;
     private DavResource mDavResource;
 
-    public WebDavDocumentFile(DocumentFile parent) {
+    public WebDavCimocDocumentFile(CimocDocumentFile parent) {
         super(parent);
         if (parent == null) {
             mCurrentPath = mWebDavUrl;
         } else {
-            WebDavDocumentFile tmp = (WebDavDocumentFile) parent;
+            WebDavCimocDocumentFile tmp = (WebDavCimocDocumentFile) parent;
             mCurrentPath = tmp.getCurrentPath();
         }
 
@@ -74,14 +74,14 @@ public class WebDavDocumentFile extends DocumentFile {
     }
 
     // 传入currPath
-    WebDavDocumentFile(DocumentFile parent, String currPath, DavResource resource) {
+    WebDavCimocDocumentFile(CimocDocumentFile parent, String currPath, DavResource resource) {
         super(parent);
         mCurrentPath = currPath;
         mDavResource = resource;
     }
 
     // 传入相对路径
-    public WebDavDocumentFile(WebDavDocumentFile parent, String path) {
+    public WebDavCimocDocumentFile(WebDavCimocDocumentFile parent, String path) {
         super(parent);
 
         if (path.startsWith("/")) {
@@ -174,7 +174,7 @@ public class WebDavDocumentFile extends DocumentFile {
     }
 
     @Override
-    public DocumentFile createFile(String displayName) {
+    public CimocDocumentFile createFile(String displayName) {
         String newPath = mCurrentPath + "/" + displayName;
         try {
             if (!mSardine.exists(newPath)) {
@@ -182,7 +182,7 @@ public class WebDavDocumentFile extends DocumentFile {
                 mSardine.put(newPath, new byte[0]);
                 List<DavResource> resources = mSardine.list(newPath, 0);
                 if (!resources.isEmpty()) {
-                    return new WebDavDocumentFile(this, newPath, resources.get(0));
+                    return new WebDavCimocDocumentFile(this, newPath, resources.get(0));
                 }
             }
         } catch (IOException e) {
@@ -192,14 +192,14 @@ public class WebDavDocumentFile extends DocumentFile {
     }
 
     @Override
-    public DocumentFile createDirectory(String displayName) {
+    public CimocDocumentFile createDirectory(String displayName) {
         String newPath = mCurrentPath + "/" + displayName;
         try {
             if (!mSardine.exists(newPath)) {
                 mSardine.createDirectory(newPath);
                 List<DavResource> resources = mSardine.list(newPath, 0);
                 if (!resources.isEmpty()) {
-                    return new WebDavDocumentFile(this, newPath, resources.get(0));
+                    return new WebDavCimocDocumentFile(this, newPath, resources.get(0));
                 }
             }
         } catch (IOException e) {
@@ -289,15 +289,15 @@ public class WebDavDocumentFile extends DocumentFile {
     }
 
     @Override
-    public List<DocumentFile> listFiles(DocumentFileFilter filter, Comparator<? super DocumentFile> comp) {
-        final ArrayList<DocumentFile> results = new ArrayList<>();
+    public List<CimocDocumentFile> listFiles(DocumentFileFilter filter, Comparator<? super CimocDocumentFile> comp) {
+        final ArrayList<CimocDocumentFile> results = new ArrayList<>();
         try {
             List<DavResource> resources = mSardine.list(mCurrentPath);
             // 跳过第一个资源，因为它是当前目录
             for (int i = 1; i < resources.size(); i++) {
                 DavResource resource = resources.get(i);
                 String path = mCurrentPath + "/" + resource.getName();
-                DocumentFile doc = new WebDavDocumentFile(this, path, resource);
+                CimocDocumentFile doc = new WebDavCimocDocumentFile(this, path, resource);
                 if (filter == null || filter.call(doc)) {
                     results.add(doc);
                 }
@@ -313,9 +313,9 @@ public class WebDavDocumentFile extends DocumentFile {
     }
 
     @Override
-    public DocumentFile[] listFiles() {
-        List<DocumentFile> files = listFiles(null, null);
-        return files.toArray(new DocumentFile[0]);
+    public CimocDocumentFile[] listFiles() {
+        List<CimocDocumentFile> files = listFiles(null, null);
+        return files.toArray(new CimocDocumentFile[0]);
     }
 
     @Override
@@ -331,13 +331,13 @@ public class WebDavDocumentFile extends DocumentFile {
     }
 
     @Override
-    public DocumentFile findFile(String displayName) {
+    public CimocDocumentFile findFile(String displayName) {
         String targetPath = mCurrentPath + "/" + displayName;
         try {
             if (mSardine.exists(targetPath)) {
                 List<DavResource> resources = mSardine.list(targetPath, 0);
                 if (!resources.isEmpty()) {
-                    return new WebDavDocumentFile(this, targetPath, resources.get(0));
+                    return new WebDavCimocDocumentFile(this, targetPath, resources.get(0));
                 }
             }
         } catch (IOException e) {

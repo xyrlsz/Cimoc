@@ -9,8 +9,7 @@ import com.google.gson.Gson;
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.Tag;
-import com.xyrlsz.xcimoc.saf.DocumentFile;
-import com.xyrlsz.xcimoc.saf.WebDavDocumentFile;
+import com.xyrlsz.xcimoc.saf.CimocDocumentFile;
 import com.xyrlsz.xcimoc.utils.DocumentUtils;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
@@ -18,7 +17,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -73,27 +71,27 @@ public class Backup {
     private static final String JSON_KEY_COMIC_HISTORY = "history";
     private static final String JSON_KEY_COMIC_CHAPTER_COUNT = "chapter_count";
 
-    public static Observable<String[]> loadFavorite(DocumentFile root) {
+    public static Observable<String[]> loadFavorite(CimocDocumentFile root) {
         return load(root, SUFFIX_CIMOC, SUFFIX_CFBF);
     }
 
-    public static Observable<String[]> loadTag(DocumentFile root) {
+    public static Observable<String[]> loadTag(CimocDocumentFile root) {
         return load(root, SUFFIX_CTBF);
     }
 
-    public static Observable<String[]> loadSettings(DocumentFile root) {
+    public static Observable<String[]> loadSettings(CimocDocumentFile root) {
         return load(root, SUFFIX_CSBF);
     }
 
-    public static Observable<String[]> loadClearBackup(DocumentFile root) {
+    public static Observable<String[]> loadClearBackup(CimocDocumentFile root) {
         return load(root, SUFFIX_CIMOC, SUFFIX_CFBF, SUFFIX_CTBF, SUFFIX_CSBF);
     }
 
-    private static Observable<String[]> load(final DocumentFile root, final String... suffix) {
+    private static Observable<String[]> load(final CimocDocumentFile root, final String... suffix) {
         return Observable.create(new Observable.OnSubscribe<String[]>() {
             @Override
             public void call(Subscriber<? super String[]> subscriber) {
-                DocumentFile dir = DocumentUtils.getOrCreateSubDirectory(root, BACKUP);
+                CimocDocumentFile dir = DocumentUtils.getOrCreateSubDirectory(root, BACKUP);
                 if (dir != null) {
                     String[] files = DocumentUtils.listFilesWithSuffix(dir, suffix);
                     if (files.length != 0) {
@@ -107,14 +105,14 @@ public class Backup {
         }).subscribeOn(Schedulers.io());
     }
 
-    public static void saveComicAuto(ContentResolver resolver, DocumentFile root, List<Comic> list) {
-        DocumentFile dir = DocumentUtils.getOrCreateSubDirectory(root, BACKUP);
+    public static void saveComicAuto(ContentResolver resolver, CimocDocumentFile root, List<Comic> list) {
+        CimocDocumentFile dir = DocumentUtils.getOrCreateSubDirectory(root, BACKUP);
         if (dir != null) {
             try {
                 JSONObject result = new JSONObject();
                 result.put(JSON_KEY_VERSION, 1);
                 result.put(JSON_KEY_COMIC_ARRAY, buildComicArray(list));
-                DocumentFile file = DocumentUtils.getOrCreateFile(dir, "automatic.".concat(SUFFIX_CFBF));
+                CimocDocumentFile file = DocumentUtils.getOrCreateFile(dir, "automatic.".concat(SUFFIX_CFBF));
                 DocumentUtils.writeStringToFile(resolver, file, result.toString());
             } catch (Exception e) {
                 e.printStackTrace();
@@ -122,15 +120,15 @@ public class Backup {
         }
     }
 
-    public static int saveComic(ContentResolver resolver, DocumentFile root, List<Comic> list) {
-        DocumentFile dir = DocumentUtils.getOrCreateSubDirectory(root, BACKUP);
+    public static int saveComic(ContentResolver resolver, CimocDocumentFile root, List<Comic> list) {
+        CimocDocumentFile dir = DocumentUtils.getOrCreateSubDirectory(root, BACKUP);
         if (dir != null) {
             try {
                 JSONObject result = new JSONObject();
                 result.put(JSON_KEY_VERSION, 1);
                 result.put(JSON_KEY_COMIC_ARRAY, buildComicArray(list));
                 String filename = StringUtils.getDateStringWithSuffix(SUFFIX_CFBF);
-                DocumentFile file = DocumentUtils.getOrCreateFile(dir, filename);
+                CimocDocumentFile file = DocumentUtils.getOrCreateFile(dir, filename);
                 DocumentUtils.writeStringToFile(resolver, file, result.toString());
                 return list.size();
             } catch (Exception e) {
@@ -140,15 +138,15 @@ public class Backup {
         return -1;
     }
 
-    public static int saveTag(final ContentResolver resolver, final DocumentFile root, final List<Pair<Tag, List<Comic>>> list) {
-        DocumentFile dir = DocumentUtils.getOrCreateSubDirectory(root, BACKUP);
+    public static int saveTag(final ContentResolver resolver, final CimocDocumentFile root, final List<Pair<Tag, List<Comic>>> list) {
+        CimocDocumentFile dir = DocumentUtils.getOrCreateSubDirectory(root, BACKUP);
         if (dir != null) {
             try {
                 JSONObject result = new JSONObject();
                 result.put(JSON_KEY_VERSION, 2);
                 result.put(JSON_KEY_TAG_ARRAY, buildTagArray(list));
                 String filename = StringUtils.getDateStringWithSuffix(SUFFIX_CTBF);
-                DocumentFile file = DocumentUtils.getOrCreateFile(dir, filename);
+                CimocDocumentFile file = DocumentUtils.getOrCreateFile(dir, filename);
                 DocumentUtils.writeStringToFile(resolver, file, result.toString());
                 return list.size();
             } catch (Exception e) {
@@ -158,8 +156,8 @@ public class Backup {
         return -1;
     }
 
-    public static int saveSetting(ContentResolver resolver, DocumentFile root, Map<?, ?> settingMap) {
-        DocumentFile dir = DocumentUtils.getOrCreateSubDirectory(root, BACKUP);
+    public static int saveSetting(ContentResolver resolver, CimocDocumentFile root, Map<?, ?> settingMap) {
+        CimocDocumentFile dir = DocumentUtils.getOrCreateSubDirectory(root, BACKUP);
         if (dir != null) {
             try {
 //                String result = XMLUtils.converter(settingMap);
@@ -168,7 +166,7 @@ public class Backup {
                 String result = gson.toJson(settingMap);
 
                 String filename = StringUtils.getDateStringWithSuffix(SUFFIX_CSBF);
-                DocumentFile file = DocumentUtils.getOrCreateFile(dir, filename);
+                CimocDocumentFile file = DocumentUtils.getOrCreateFile(dir, filename);
                 DocumentUtils.writeStringToFile(resolver, file, result);
                 return settingMap.size();
             } catch (Exception e) {
@@ -218,16 +216,16 @@ public class Backup {
         return object;
     }
 
-    private static String readBackupFile(ContentResolver resolver, DocumentFile root, String filename) {
-        DocumentFile dir = DocumentUtils.getOrCreateSubDirectory(root, BACKUP);
+    private static String readBackupFile(ContentResolver resolver, CimocDocumentFile root, String filename) {
+        CimocDocumentFile dir = DocumentUtils.getOrCreateSubDirectory(root, BACKUP);
         if (dir != null) {
-            DocumentFile file = dir.findFile(filename);
+            CimocDocumentFile file = dir.findFile(filename);
             return DocumentUtils.readLineFromFile(resolver, file);
         }
         return null;
     }
 
-    public static Observable<List<Pair<Tag, List<Comic>>>> restoreTag(final ContentResolver resolver, final DocumentFile root, final String filename) {
+    public static Observable<List<Pair<Tag, List<Comic>>>> restoreTag(final ContentResolver resolver, final CimocDocumentFile root, final String filename) {
         return Observable.create(new Observable.OnSubscribe<List<Pair<Tag, List<Comic>>>>() {
             @Override
             public void call(Subscriber<? super List<Pair<Tag, List<Comic>>>> subscriber) {
@@ -254,7 +252,7 @@ public class Backup {
         }).subscribeOn(Schedulers.io());
     }
 
-    public static Observable<List<Comic>> restoreComic(final ContentResolver resolver, final DocumentFile root, final String filename) {
+    public static Observable<List<Comic>> restoreComic(final ContentResolver resolver, final CimocDocumentFile root, final String filename) {
         return Observable.create(new Observable.OnSubscribe<List<Comic>>() {
             @Override
             public void call(Subscriber<? super List<Comic>> subscriber) {
@@ -275,13 +273,13 @@ public class Backup {
             }
         }).subscribeOn(Schedulers.io());
     }
-    public static Observable<Integer> deleteBackup(final DocumentFile root, final String filename) {
+    public static Observable<Integer> deleteBackup(final CimocDocumentFile root, final String filename) {
         return Observable.create(new Observable.OnSubscribe<Integer>() {
             @Override
             public void call(Subscriber<? super Integer> subscriber) {
-                DocumentFile dir = DocumentUtils.getOrCreateSubDirectory(root, BACKUP);
+                CimocDocumentFile dir = DocumentUtils.getOrCreateSubDirectory(root, BACKUP);
                 if(dir!=null){
-                    DocumentFile file = dir.findFile(filename);
+                    CimocDocumentFile file = dir.findFile(filename);
                     if(file!=null) file.delete();
                 }
                 subscriber.onNext(1);
@@ -289,11 +287,11 @@ public class Backup {
             }
         }).subscribeOn(Schedulers.io());
     }
-    public static Observable<Integer> clearBackup(final DocumentFile root) {
+    public static Observable<Integer> clearBackup(final CimocDocumentFile root) {
         return Observable.create(new Observable.OnSubscribe<Integer>() {
             @Override
             public void call(Subscriber<? super Integer> subscriber) {
-                DocumentFile dir = DocumentUtils.getOrCreateSubDirectory(root, BACKUP);
+                CimocDocumentFile dir = DocumentUtils.getOrCreateSubDirectory(root, BACKUP);
                 if (dir != null) dir.delete();
                 subscriber.onNext(1);
                 subscriber.onCompleted();
@@ -301,7 +299,7 @@ public class Backup {
         }).subscribeOn(Schedulers.io());
     }
 
-    public static Observable<Map<String, ?>> restoreSetting(final ContentResolver resolver, final DocumentFile root, final String filename) {
+    public static Observable<Map<String, ?>> restoreSetting(final ContentResolver resolver, final CimocDocumentFile root, final String filename) {
         return Observable.create(new Observable.OnSubscribe<Map<String, ?>>() {
             @Override
             public void call(Subscriber<? super Map<String, ?>> subscriber) {

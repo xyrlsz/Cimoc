@@ -27,7 +27,7 @@ import com.xyrlsz.xcimoc.model.Task;
 import com.xyrlsz.xcimoc.parser.MangaParser;
 import com.xyrlsz.xcimoc.rx.RxBus;
 import com.xyrlsz.xcimoc.rx.RxEvent;
-import com.xyrlsz.xcimoc.saf.DocumentFile;
+import com.xyrlsz.xcimoc.saf.CimocDocumentFile;
 import com.xyrlsz.xcimoc.utils.DocumentUtils;
 import com.xyrlsz.xcimoc.utils.JMTTUtil;
 import com.xyrlsz.xcimoc.utils.StringUtils;
@@ -191,7 +191,7 @@ public class DownloadService extends Service implements AppGetter {
                 List<ImageUrl> list = onDownloadParse();
                 int size = list.size();
                 if (size != 0) {
-                    DocumentFile dir = Download.updateChapterIndex(mContentResolver, getAppInstance().getDocumentFile(), mTask);
+                    CimocDocumentFile dir = Download.updateChapterIndex(mContentResolver, getAppInstance().getDocumentFile(), mTask);
                     if (dir != null) {
                         mTask.setMax(size);
                         mTask.setState(Task.STATE_DOING);
@@ -231,7 +231,7 @@ public class DownloadService extends Service implements AppGetter {
             completeDownload(mTask.getId());
         }
 
-        private boolean RequestAndWrite(DocumentFile parent, Request request, int num, String url) throws InterruptedIOException {
+        private boolean RequestAndWrite(CimocDocumentFile parent, Request request, int num, String url) throws InterruptedIOException {
             if (request != null) {
                 Response response = null;
                 try {
@@ -260,7 +260,7 @@ public class DownloadService extends Service implements AppGetter {
                     if (response.isSuccessful()) {
                         String displayName = buildFileName(num, url);
                         displayName = displayName.replaceAll("[:/(\\\\)(\\?)<>\"(\\|)(\\.)]", "_") + ".jpg";
-                        DocumentFile file = DocumentUtils.getOrCreateFile(parent, displayName);
+                        CimocDocumentFile file = DocumentUtils.getOrCreateFile(parent, displayName);
                         DocumentUtils.writeBinaryToFile(mContentResolver, file, response.body().byteStream());
                         return true;
                     }

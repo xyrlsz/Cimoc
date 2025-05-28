@@ -29,7 +29,7 @@ import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.Task;
 import com.xyrlsz.xcimoc.presenter.BasePresenter;
 import com.xyrlsz.xcimoc.presenter.DetailPresenter;
-import com.xyrlsz.xcimoc.saf.DocumentFile;
+import com.xyrlsz.xcimoc.saf.CimocDocumentFile;
 import com.xyrlsz.xcimoc.service.DownloadService;
 import com.xyrlsz.xcimoc.ui.adapter.BaseAdapter;
 import com.xyrlsz.xcimoc.ui.adapter.DetailAdapter;
@@ -414,7 +414,7 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
         if (mAutoBackupCloud && ++mBackupCount == 10) {
             mBackupCount = 0;
             mPreference.putInt(PreferenceManager.PREF_BACKUP_SAVE_COMIC_COUNT, 0);
-            mPresenter.backup(DocumentFile.fromWebDav());
+            mPresenter.backup(CimocDocumentFile.fromWebDav());
         }
     }
 
