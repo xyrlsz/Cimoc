@@ -101,7 +101,8 @@ public class UpdateHelper {
             if (version < 1027 && version != 0) {
                 updateSourceTable(session);
             }
-            initSource(session);
+//            initSource(session);
+            initComicSourceTable();
             manager.putInt(PreferenceManager.PREF_APP_VERSION, VERSION);
             updateComicSource(session);
 
@@ -148,7 +149,7 @@ public class UpdateHelper {
      */
     private static void initSource(DaoSession session) {
         initComicSourceTable();
-        List<Source> list = new ArrayList<>(ComicSourceTable.values());
+//        List<Source> list = new ArrayList<>(ComicSourceTable.values());
 //        list.add(IKanman.getDefaultSource());
 ////        list.add(Dmzjv3.getDefaultSource());
 ////        list.add(HHAAZZ.getDefaultSource());
@@ -206,7 +207,7 @@ public class UpdateHelper {
 //        list.add(Vomicmh.getDefaultSource());
 //        list.add(YYManHua.getDefaultSource());
 //        list.add(DmzjV4.getDefaultSource());
-        session.getSourceDao().insertOrReplaceInTx(list);
+//        session.getSourceDao().insertOrReplaceInTx(list);
 
     }
 
