@@ -1,13 +1,13 @@
 ### fix
 
-- 修复漫画鱼
-- 动漫之家使用v3 api解析章节信息
-- 修复漫画取消过滤的Bug
+- 修复g社漫画的链接解析
+- 优化初始化图源方法
+- 修改章节和图片ID的编码方式
 
-<!-- ### feat
+### feat
 
-- 提升拷贝漫画和热辣漫画的画质
-- 动漫之家可以看部分被隐藏的漫画 -->
+- 添加动漫之家V4
+
 <!-- 
 ### build
 
@@ -19,4 +19,7 @@
 
 <!-- ### refactor -->
 
+### refactor  
+
+ - Refactor DocumentFile implementation to CimocDocumentFile
  
