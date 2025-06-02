@@ -118,7 +118,7 @@ public class TTKMH extends MangaParser {
         for (Node node : resList) {
             String title = node.text("a");
             String path = node.href("a").replace("/chapter/".concat(comic.getCid()), "");
-            Long id = IdCreator.chapterIdCreate(sourceComic, i++);
+            Long id = IdCreator.createChapterId(sourceComic, i++);
             list.add(new Chapter(id, sourceComic, title, path));
         }
         return Lists.reverse(list);
@@ -139,7 +139,7 @@ public class TTKMH extends MangaParser {
         List<ImageUrl> list = new ArrayList<>();
         for (int i = 1; i <= imgNode.size(); i++) {
             Long comicChapter = chapter.getId();
-            Long id = IdCreator.imageIdCreate(comicChapter, i);
+            Long id = IdCreator.createImageId(comicChapter, i);
             String imgUrl = imgBaseUrl + imgNode.get(i - 1).attr("data-src");
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false));
         }

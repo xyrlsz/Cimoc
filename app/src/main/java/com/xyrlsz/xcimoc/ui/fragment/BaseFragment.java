@@ -59,7 +59,7 @@ public abstract class BaseFragment extends Fragment implements BaseView {
 
     @Override
     public App getAppInstance() {
-        return (App) requireActivity().getApplication();
+        return App.getApp();
     }
 
     @Override

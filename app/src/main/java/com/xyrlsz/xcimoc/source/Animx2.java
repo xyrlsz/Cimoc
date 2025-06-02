@@ -102,7 +102,7 @@ public class Animx2 extends MangaParser {
             Matcher mTitle = Pattern.compile("\\d+").matcher(title);
             title = mTitle.find() ? mTitle.group() : title;
             String path = node.hrefWithSplit("a", 0);
-            Long id = IdCreator.chapterIdCreate(sourceComic, i++);
+            Long id = IdCreator.createChapterId(sourceComic, i++);
             list.add(new Chapter(id, sourceComic, title, path));
         }
         return list;
@@ -126,7 +126,7 @@ public class Animx2 extends MangaParser {
         int page = Integer.parseInt(pageMatcher.group(1));
         for (int i = 1; i <= page; ++i) {
             Long comicChapter = chapter.getId();
-            Long id = IdCreator.imageIdCreate(comicChapter, i);
+            Long id = IdCreator.createImageId(comicChapter, i);
             list.add(new ImageUrl(id, comicChapter, i, StringUtils.format("%s-p-%d", _path, i), true));
         }
         return list;

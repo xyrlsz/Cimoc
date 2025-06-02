@@ -124,7 +124,7 @@ public class MYCOMIC extends MangaParser {
                     JSONObject chapter = chaptersData.getJSONObject(j);
                     String title = chapter.getString("title");
                     String path = chapter.getString("id");
-                    Long id = IdCreator.chapterIdCreate(sourceComic, i++);
+                    Long id = IdCreator.createChapterId(sourceComic, i++);
                     list.add(new Chapter(id, sourceComic, title, path));
 
                 }
@@ -151,7 +151,7 @@ public class MYCOMIC extends MangaParser {
         List<Node> imageNodes = body.list("div > div > div > img[x-ref^=page-]");
         for (int i = 1; i <= imageNodes.size(); i++) {
             Long comicChapter = chapter.getId();
-            Long id = IdCreator.imageIdCreate(comicChapter, i);
+            Long id = IdCreator.createImageId(comicChapter, i);
             String imgUrl = imageNodes.get(i - 1).src();
             if (imgUrl.isEmpty()) {
                 imgUrl = imageNodes.get(i - 1).attr("data-src");

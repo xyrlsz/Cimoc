@@ -144,7 +144,7 @@ public class HotManga extends MangaParser {
         for (int i = 0; i < array.length(); ++i) {
             String title = array.getJSONObject(i).getString("name");
             String path = array.getJSONObject(i).getString("uuid");
-            Long id = IdCreator.chapterIdCreate(sourceComic, k++);
+            Long id = IdCreator.createChapterId(sourceComic, k++);
             list.add(new Chapter(id, sourceComic, title, path, "默认"));
         }
         try {
@@ -166,7 +166,7 @@ public class HotManga extends MangaParser {
                 for (int i = 0; i < array.length(); ++i) {
                     String title = array.getJSONObject(i).getString("name");
                     String path = array.getJSONObject(i).getString("uuid");
-                    Long id = IdCreator.chapterIdCreate(sourceComic, k++);
+                    Long id = IdCreator.createChapterId(sourceComic, k++);
                     list.add(new Chapter(id, sourceComic, title, path, PathName));
                 }
 
@@ -197,7 +197,7 @@ public class HotManga extends MangaParser {
         try {
             for (int i = 0; i < array.length(); ++i) {
                 Long comicChapter = chapter.getId();
-                Long id = IdCreator.imageIdCreate(comicChapter, i);
+                Long id = IdCreator.createImageId(comicChapter, i);
                 String url = array.getJSONObject(i).getString("url").replace("m_read", "kb_m_read_large");
                 url = url.replace("c800x.jpg", "c1500x.jpg");
                 list.add(new ImageUrl(id, comicChapter, i + 1, url, false));

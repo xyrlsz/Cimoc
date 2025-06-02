@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
+import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.model.MiniComic;
 import com.xyrlsz.xcimoc.model.Task;
@@ -11,8 +12,10 @@ import com.xyrlsz.xcimoc.presenter.BasePresenter;
 import com.xyrlsz.xcimoc.presenter.DownloadPresenter;
 import com.xyrlsz.xcimoc.service.DownloadService;
 import com.xyrlsz.xcimoc.ui.activity.TaskActivity;
+import com.xyrlsz.xcimoc.ui.fragment.dialog.ItemDialogFragment;
 import com.xyrlsz.xcimoc.ui.fragment.dialog.MessageDialogFragment;
 import com.xyrlsz.xcimoc.ui.view.DownloadView;
+import com.xyrlsz.xcimoc.utils.ComicUtils;
 import com.xyrlsz.xcimoc.utils.HintUtils;
 import com.xyrlsz.xcimoc.utils.ServiceUtils;
 
@@ -26,10 +29,14 @@ public class DownloadFragment extends GridFragment implements DownloadView {
     private static final int DIALOG_REQUEST_SWITCH = 1;
     private static final int DIALOG_REQUEST_INFO = 2;
     private static final int DIALOG_REQUEST_DELETE = 3;
-
+    private static final int DIALOG_REQUEST_OUTPUT = 4;
     private static final int OPERATION_INFO = 0;
     private static final int OPERATION_DELETE = 1;
-
+    private static final int OPERATION_OUTPUT = 2;
+    private static final int OPERATION_OUTPUT_SIMPLE = 0;
+    private static final int OPERATION_OUTPUT_ZIP = 1;
+    private static final int OPERATION_OUTPUT_EPUB = 2;
+    private static final int OPERATION_OUTPUT_CBZ = 3;
     private DownloadPresenter mPresenter;
 
     private boolean isDownload;
@@ -55,6 +62,7 @@ public class DownloadFragment extends GridFragment implements DownloadView {
     @Override
     public void onDialogResult(int requestCode, Bundle bundle) {
         switch (requestCode) {
+
             case DIALOG_REQUEST_OPERATION:
                 int index = bundle.getInt(EXTRA_DIALOG_RESULT_INDEX);
                 switch (index) {
@@ -67,6 +75,13 @@ public class DownloadFragment extends GridFragment implements DownloadView {
                         fragment.setTargetFragment(this, 0);
                         fragment.show(requireActivity().getSupportFragmentManager(), null);
                         break;
+                    case OPERATION_OUTPUT:
+                        ItemDialogFragment outputfragment = ItemDialogFragment.newInstance(R.string.common_operation_select,
+                                getOutputType(), DIALOG_REQUEST_OUTPUT);
+                        outputfragment.setTargetFragment(this, DIALOG_REQUEST_OUTPUT);
+                        outputfragment.show(requireActivity().getSupportFragmentManager(), null);
+                        break;
+
                     default:
                         break;
                 }
@@ -86,6 +101,77 @@ public class DownloadFragment extends GridFragment implements DownloadView {
                 } else {
                     showProgressDialog();
                     mPresenter.deleteComic(mSavedId);
+                }
+                break;
+            case DIALOG_REQUEST_OUTPUT:
+                int output = bundle.getInt(EXTRA_DIALOG_RESULT_INDEX);
+                switch (output) {
+                    case OPERATION_OUTPUT_SIMPLE:
+                        showProgressDialog();
+                        ComicUtils.OutputDownloadedComic(this, getContext(), ComicUtils.SIMPLE, mPresenter.load(mSavedId), new ComicUtils.OutputComicCallback() {
+                            @Override
+                            public void onSuccess() {
+                                hideProgressDialog();
+                                App.runOnMainThread(() -> HintUtils.showToast(getActivity(), R.string.common_execute_success));
+                            }
+
+                            @Override
+                            public void onFailure(String message) {
+                                hideProgressDialog();
+                                App.runOnMainThread(() -> HintUtils.showToast(getActivity(), message));
+                            }
+                        });
+                        break;
+                    case OPERATION_OUTPUT_ZIP:
+                        showProgressDialog();
+                        ComicUtils.OutputDownloadedComic(this, getContext(), ComicUtils.ZIP, mPresenter.load(mSavedId), new ComicUtils.OutputComicCallback() {
+                            @Override
+                            public void onSuccess() {
+                                hideProgressDialog();
+                                App.runOnMainThread(() -> HintUtils.showToast(getActivity(), R.string.common_execute_success));
+                            }
+
+                            @Override
+                            public void onFailure(String message) {
+                                hideProgressDialog();
+                                App.runOnMainThread(() -> HintUtils.showToast(getActivity(), message));
+                            }
+                        });
+                        break;
+
+                    case OPERATION_OUTPUT_EPUB:
+                        showProgressDialog();
+                        ComicUtils.OutputDownloadedComic(this, getContext(), ComicUtils.EPUB, mPresenter.load(mSavedId), new ComicUtils.OutputComicCallback() {
+                            @Override
+                            public void onSuccess() {
+                                hideProgressDialog();
+                                App.runOnMainThread(() -> HintUtils.showToast(getActivity(), R.string.common_execute_success));
+                            }
+
+                            @Override
+                            public void onFailure(String message) {
+                                hideProgressDialog();
+                                App.runOnMainThread(() -> HintUtils.showToast(getActivity(), message));
+                            }
+                        });
+                        break;
+                    case OPERATION_OUTPUT_CBZ:
+                        showProgressDialog();
+                        ComicUtils.OutputDownloadedComic(this, getContext(), ComicUtils.CBZ, mPresenter.load(mSavedId), new ComicUtils.OutputComicCallback() {
+                            @Override
+                            public void onSuccess() {
+                                hideProgressDialog();
+                                App.runOnMainThread(() -> HintUtils.showToast(getActivity(), R.string.common_execute_success));
+                            }
+
+                            @Override
+                            public void onFailure(String message) {
+                                hideProgressDialog();
+                                App.runOnMainThread(() -> HintUtils.showToast(getActivity(), message));
+                            }
+                        });
+                        break;
+
                 }
                 break;
             default:
@@ -165,6 +251,10 @@ public class DownloadFragment extends GridFragment implements DownloadView {
 
     @Override
     protected String[] getOperationItems() {
-        return new String[]{getString(R.string.comic_info), getString(R.string.download_delete)};
+        return new String[]{getString(R.string.comic_info), getString(R.string.download_delete), getString(R.string.download_output)};
+    }
+
+    private String[] getOutputType() {
+        return getResources().getStringArray(R.array.download_output_choice);
     }
 }

@@ -148,7 +148,7 @@ public class GoDaManHua extends MangaParser {
         for (int i = 0; i < chapters.length(); i++) {
             String title = chapters.getJSONObject(i).getJSONObject("attributes").getString("title");
             String path = chapters.getJSONObject(i).getLong("id") + "";
-            Long id = IdCreator.chapterIdCreate(sourceComic, i);
+            Long id = IdCreator.createChapterId(sourceComic, i);
             list.add(new Chapter(id, sourceComic, title, path));
         }
 
@@ -179,7 +179,7 @@ public class GoDaManHua extends MangaParser {
                 .getJSONArray("images");
         for (int i = 1; i <= images.length(); i++) {
             Long comicChapter = chapter.getId();
-            Long id = IdCreator.imageIdCreate(comicChapter, i);
+            Long id = IdCreator.createImageId(comicChapter, i);
             String imgUrl = picBaseUrl + images.getJSONObject(i - 1).getString("url");
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false));
         }

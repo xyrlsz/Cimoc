@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string-array name="download_output_choice" translatable="false">
+        <item>Simple</item>
+        <item>Zip</item>
+        <item>EPUB</item>
+        <item>CBZ</item>
+    </string-array>
     <string-array name="launch_items">
         <item>收藏</item>
         <item>图源</item>
@@ -39,7 +45,7 @@
         <item>默认</item>
         <item>简体</item>
         <item>繁体</item>
-<!--        <item>繁体（台湾词汇）</item>-->
+        <!--        <item>繁体（台湾词汇）</item>-->
     </string-array>
     <string-array name="st_engine_items">
         <item>JCC</item>

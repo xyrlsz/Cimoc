@@ -152,7 +152,7 @@ public class Mangakakalot extends MangaParser {
         for (Node node : body.list(".cl-body > div > .item")) {
             String title = node.text(".item-name > a");
             String path = node.href(".item-name > a");
-            Long id = IdCreator.chapterIdCreate(sourceComic, i++);
+            Long id = IdCreator.createChapterId(sourceComic, i++);
             set.add(new Chapter(id, sourceComic, title, path));
         }
         return new LinkedList<>(set);
@@ -190,7 +190,7 @@ public class Mangakakalot extends MangaParser {
 
         for (Node node : body.list("#list-image > div")) {
             Long comicChapter = chapter.getId();
-            Long id = IdCreator.imageIdCreate(comicChapter, i);
+            Long id = IdCreator.createImageId(comicChapter, i);
             list.add(new ImageUrl(id, comicChapter, ++i, node.attr("data-url"), false));
         }
 

@@ -141,6 +141,31 @@ public class DocumentUtils {
         return null;
     }
 
+    public static void writeBytesToFile(ContentResolver resolver, CimocDocumentFile file, byte[] bytes) throws IOException {
+        OutputStream output = null;
+        BufferedWriter writer = null;
+        File tmp = null;
+        try {
+            Uri fileData = file.getUri();
+            if (UriUtils.isHttpOrHttps(fileData)) {
+                tmp = File.createTempFile(System.currentTimeMillis() + "", "tmp");
+                fileData = Uri.fromFile(tmp);
+            }
+            output = resolver.openOutputStream(fileData);
+            if (output != null) {
+                output.write(bytes);
+                output.flush();
+                if (tmp != null) {
+                    WebDavCimocDocumentFile.UploadFile(tmp, file.getUri().toString());
+                }
+            } else {
+                throw new IOException();
+            }
+        } finally {
+            closeStream(output, writer);
+        }
+    }
+
     public static void writeStringToFile(ContentResolver resolver, CimocDocumentFile file, String data) throws IOException {
         OutputStream output = null;
         BufferedWriter writer = null;
@@ -214,5 +239,17 @@ public class DocumentUtils {
             }
         }
     }
+
+    public static boolean copyFile(ContentResolver resolver, CimocDocumentFile src, CimocDocumentFile dst) {
+
+        try {
+            writeBinaryToFile(resolver, src, dst);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 
 }

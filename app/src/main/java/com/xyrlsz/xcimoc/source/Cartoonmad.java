@@ -119,7 +119,7 @@ public class Cartoonmad extends MangaParser {
         while (mChapter.find()) {
             String title = mChapter.group(2);
             String path = mChapter.group(1);
-            Long id = IdCreator.chapterIdCreate(sourceComic, i++);
+            Long id = IdCreator.createChapterId(sourceComic, i++);
             list.add(new Chapter(id, sourceComic, title, path));
         }
         return Lists.reverse(list);
@@ -141,7 +141,7 @@ public class Cartoonmad extends MangaParser {
         int page = Integer.parseInt(pageMatcher.group(2));
         for (int i = 1; i <= page; ++i) {
             Long comicChapter = chapter.getId();
-            Long id = IdCreator.imageIdCreate(comicChapter, i);
+            Long id = IdCreator.createImageId(comicChapter, i);
             String url = StringUtils.format("https://cc.fun8.us/post/%s%03d.html", pageMatcher.group(1), i);
             list.add(new ImageUrl(id, comicChapter, i, url, true));
         }

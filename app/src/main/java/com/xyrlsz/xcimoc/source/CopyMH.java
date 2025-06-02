@@ -156,7 +156,7 @@ public class CopyMH extends MangaParser {
         for (int i = 0; i < array.length(); ++i) {
             String title = array.getJSONObject(i).getString("name");
             String path = array.getJSONObject(i).getString("uuid");
-            Long id = IdCreator.chapterIdCreate(sourceComic, k++);
+            Long id = IdCreator.createChapterId(sourceComic, k++);
             list.add(new Chapter(id, sourceComic, title, path, "默认"));
         }
         try {
@@ -184,7 +184,7 @@ public class CopyMH extends MangaParser {
                 for (int i = 0; i < array.length(); ++i) {
                     String title = array.getJSONObject(i).getString("name");
                     String path = array.getJSONObject(i).getString("uuid");
-                    Long id = IdCreator.chapterIdCreate(sourceComic, k++);
+                    Long id = IdCreator.createChapterId(sourceComic, k++);
                     list.add(new Chapter(id, sourceComic, title, path, PathName));
                 }
             }
@@ -243,7 +243,7 @@ public class CopyMH extends MangaParser {
         // 按顺序填入 list
         for (int i = 0; i < contentSize; i++) {
             Long comicChapter = chapter.getId();
-            Long id = IdCreator.imageIdCreate(comicChapter, i);
+            Long id = IdCreator.createImageId(comicChapter, i);
             String url = indexToUrl.get(i);
             if (url != null) {
                 url = url.replace("c800x.jpg", "c1500x.jpg");

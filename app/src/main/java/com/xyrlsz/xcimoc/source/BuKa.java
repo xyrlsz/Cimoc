@@ -144,7 +144,7 @@ public class BuKa extends MangaParser {
         for (Node node : new Node(html).list(".listbox > .list > li > a")) {
             String title = node.text();
             String path  = node.href();
-            Long id      = IdCreator.chapterIdCreate(sourceComic, i++);
+            Long id      = IdCreator.createChapterId(sourceComic, i++);
             list.add(new Chapter(id, sourceComic, title, path));
         }
         return Lists.reverse(list);
@@ -168,7 +168,7 @@ public class BuKa extends MangaParser {
         int i               = 0;
         for (Node n : body.list(".chapterbox >#manga-imgs > .pic > img")) {
             Long comicChapter = chapter.getId();
-            Long id           = IdCreator.imageIdCreate(comicChapter, i);
+            Long id           = IdCreator.createImageId(comicChapter, i);
             list.add(new ImageUrl(id, comicChapter, ++i, n.attr("data-src"), false));
         }
         //        Matcher m = Pattern.compile("<img class=\"lazy\" data-original=\"(http.*?jpg)\"

@@ -113,7 +113,7 @@ public class Manhuayu extends MangaParser {
         for (Node chapterNode : chapterNodes) {
             String title = chapterNode.text();
             String path = chapterNode.href().split("/")[2].replace(".html", "");
-            Long id = IdCreator.chapterIdCreate(sourceComic, i++);
+            Long id = IdCreator.createChapterId(sourceComic, i++);
             list.add(new Chapter(id, sourceComic, title, path));
         }
 
@@ -132,7 +132,7 @@ public class Manhuayu extends MangaParser {
         List<Node> imageNodes = body.list(".chapter-images > .chapter-image");
         for (int i = 1; i <= imageNodes.size(); i++) {
             Long comicChapter = chapter.getId();
-            Long id = IdCreator.imageIdCreate(comicChapter, i);
+            Long id = IdCreator.createImageId(comicChapter, i);
             String imgUrl = imageNodes.get(i - 1).attr("data-original");
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false));
         }

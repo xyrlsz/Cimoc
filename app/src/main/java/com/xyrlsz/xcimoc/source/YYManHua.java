@@ -103,7 +103,7 @@ public class YYManHua extends MangaParser {
         for (Node node : resList) {
             String title = node.text();
             String path = node.href().replace("/", "");
-            Long id = IdCreator.chapterIdCreate(sourceComic, i++);
+            Long id = IdCreator.createChapterId(sourceComic, i++);
             list.add(new Chapter(id, sourceComic, title, path));
         }
         return list;
@@ -126,7 +126,7 @@ public class YYManHua extends MangaParser {
         int imgCount = Integer.parseInt(Objects.requireNonNull(StringUtils.match("var YYMANHUA_IMAGE_COUNT\\s*=\\s*(\\d+);", html, 1)));
         for (int i = 1; i <= imgCount; i++) {
             Long comicChapter = chapter.getId();
-            Long id = IdCreator.imageIdCreate(comicChapter, i);
+            Long id = IdCreator.createImageId(comicChapter, i);
             String url = baseUrl + "/m" + cid + "/chapterimage.ashx?cid=" + cid + "&page=" + i + "&key=&_cid=" + cid + "&_mid=" + mid + "&_dt=" + dt + "&_sign=" + sign;
             list.add(new ImageUrl(id, comicChapter, i, url, true, Headers.of("Referer", baseUrl + "/")));
         }

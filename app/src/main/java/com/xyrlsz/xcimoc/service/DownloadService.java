@@ -131,7 +131,7 @@ public class DownloadService extends Service implements AppGetter {
 
     @Override
     public App getAppInstance() {
-        return (App) getApplication();
+        return App.getApp();
     }
 
     public synchronized void addWorker(long id, Worker worker, Future future) {

@@ -106,7 +106,7 @@ public class DongManManHua extends MangaParser {
         for (Node node : body.list("ul#_listUl > li > a")) {
             String title = node.text("span.subj > span") + " " + node.text("span.tx");
             String path = "https:" + node.href();
-            Long id = IdCreator.chapterIdCreate(sourceComic, k++);
+            Long id = IdCreator.createChapterId(sourceComic, k++);
             list.add(new Chapter(id, sourceComic, title, path));
         }
         return list;
@@ -186,7 +186,7 @@ public class DongManManHua extends MangaParser {
                 String key = Json_Iterator.next();
                 if (key.contains("layer")) {
                     Long comicChapter = chapter.getId();
-                    Long id = IdCreator.imageIdCreate(comicChapter, i);
+                    Long id = IdCreator.createImageId(comicChapter, i);
                     list.add(new ImageUrl(id, comicChapter, i++, motiontoonPath + motiontoonJson.getString(key), false));
                 }
             }

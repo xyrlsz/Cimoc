@@ -125,7 +125,7 @@ public class Vomicmh extends MangaParser {
         for (Node node : resList) {
             String title = node.text();
             String path = node.href();
-            Long id = IdCreator.chapterIdCreate(sourceComic, i++);
+            Long id = IdCreator.createChapterId(sourceComic, i++);
             list.add(new Chapter(id, sourceComic, title, path));
         }
         return Lists.reverse(list);
@@ -157,7 +157,7 @@ public class Vomicmh extends MangaParser {
 
         for (int i = 1; i <= resList.size(); i++) {
             Long comicChapter = chapter.getId();
-            Long id = IdCreator.imageIdCreate(comicChapter, i);
+            Long id = IdCreator.createImageId(comicChapter, i);
             String imgUrl = resList.get(i - 1).src();
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false));
         }

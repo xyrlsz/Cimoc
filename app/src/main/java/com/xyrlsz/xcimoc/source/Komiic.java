@@ -195,7 +195,7 @@ public class Komiic extends MangaParser {
             String title = jsonList.get(i).getString("serial");
             String path = jsonList.get(i).getString("id");
             String type = jsonList.get(i).getString("type");
-            Long id = IdCreator.chapterIdCreate(sourceComic, i);
+            Long id = IdCreator.createChapterId(sourceComic, i);
             list.add(new Chapter(id, sourceComic, title, path, type));
         }
 
@@ -241,7 +241,7 @@ public class Komiic extends MangaParser {
         }
         for (int i = 1; i <= images.length(); i++) {
             Long comicChapter = chapter.getId();
-            Long id = IdCreator.imageIdCreate(comicChapter, i);
+            Long id = IdCreator.createImageId(comicChapter, i);
             String imgUrl = imgBaseUrl + images.getJSONObject(i - 1).getString("kid");
             Headers headers = Headers.of("referer", StringUtils.format("https://komiic.com/comic/%s/chapter/%s", _cid, chapter.getPath()), "cookie", _cookies);
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false, headers));
