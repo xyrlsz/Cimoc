@@ -174,10 +174,14 @@ public class Manhuatai extends MangaParser {
         for (Node node : new Node(html).list("ol#j_chapter_list > li > a")) {
             String title = node.attr("title");
             String path = node.hrefWithSplit(1);
-            Long id = IdCreator.createChapterId(sourceComic, i++);
-            list.add(new Chapter(id, sourceComic, title, path));
+            list.add(new Chapter(null, sourceComic, title, path));
         }
-        return Lists.reverse(list);
+        list = Lists.reverse(list);
+        for (int j = 0; j < list.size(); j++) {
+            Long id = IdCreator.createChapterId(sourceComic, j);
+            list.get(j).setId(id);
+        }
+        return list;
     }
 
     //获取漫画图片Request

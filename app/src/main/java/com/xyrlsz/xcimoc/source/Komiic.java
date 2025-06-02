@@ -195,11 +195,14 @@ public class Komiic extends MangaParser {
             String title = jsonList.get(i).getString("serial");
             String path = jsonList.get(i).getString("id");
             String type = jsonList.get(i).getString("type");
-            Long id = IdCreator.createChapterId(sourceComic, i);
-            list.add(new Chapter(id, sourceComic, title, path, type));
+            list.add(new Chapter(null, sourceComic, title, path, type));
         }
-
-        return Lists.reverse(list);
+        list = Lists.reverse(list);
+        for (int j = 0; j < list.size(); j++) {
+            Long id = IdCreator.createChapterId(sourceComic, j);
+            list.get(j).setId(id);
+        }
+        return list;
     }
 
 

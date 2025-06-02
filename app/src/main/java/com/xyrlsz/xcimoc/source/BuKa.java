@@ -12,9 +12,11 @@ import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
 import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
+
 import java.io.UnsupportedEncodingException;
 import java.util.LinkedList;
 import java.util.List;
+
 import okhttp3.Headers;
 import okhttp3.Request;
 
@@ -24,9 +26,9 @@ import okhttp3.Request;
  */
 
 public class BuKa extends MangaParser {
-    public static final int TYPE             = 52;
+    public static final int TYPE = 52;
     public static final String DEFAULT_TITLE = "布卡漫画";
-    private static final String baseUrl      = "https://www.bukamh.org";
+    private static final String baseUrl = "https://www.bukamh.org";
 
     public BuKa(Source source) {
         init(source, null);
@@ -61,14 +63,14 @@ public class BuKa extends MangaParser {
 
     @Override
     public SearchIterator getSearchIterator(String html, int page) {
-        Node body          = new Node(html);
+        Node body = new Node(html);
         List<Node> resList = body.list(".u_list> li");
         return new NodeIterator(resList) {
             @Override
             protected Comic parse(Node node) {
-                String cover  = node.src(".pic > a >img");
-                String cid    = node.href(".neirong > .name").replace("/", "");
-                String title  = node.text(".neirong > .name");
+                String cover = node.src(".pic > a >img");
+                String cid = node.href(".neirong > .name").replace("/", "");
+                String title = node.text(".neirong > .name");
                 String author = "", update = "";
                 int i = 0;
                 for (Node n : node.list(".neirong > p")) {
@@ -99,21 +101,21 @@ public class BuKa extends MangaParser {
     public Request getInfoRequest(String cid) {
         String url = baseUrl + "/".concat(cid);
         return new Request
-            .Builder()
-            //                .addHeader("User-Agent", "Mozilla/5.0 (Linux; Android 7.0;)
-            //                Chrome/58.0.3029.110 Mobile")
-            .url(url)
-            .build();
+                .Builder()
+                //                .addHeader("User-Agent", "Mozilla/5.0 (Linux; Android 7.0;)
+                //                Chrome/58.0.3029.110 Mobile")
+                .url(url)
+                .build();
     }
 
     @Override
     public Comic parseInfo(String html, Comic comic) throws UnsupportedEncodingException {
-        Node body     = new Node(html);
-        String title  = body.text(".infobox > .title");
-        String cover  = body.src(".infobox > .info > .img > img");
+        Node body = new Node(html);
+        String title = body.text(".infobox > .title");
+        String cover = body.src(".infobox > .info > .img > img");
         String update = "";
         String author = "";
-        String intro  = body.text(".infocomic > .text");
+        String intro = body.text(".infocomic > .text");
         for (Node n : body.list(".infobox > .info > .tage")) {
             String tmp = n.text();
             if (tmp.contains("作者：")) {
@@ -140,35 +142,39 @@ public class BuKa extends MangaParser {
     @Override
     public List<Chapter> parseChapter(String html, Comic comic, Long sourceComic) {
         List<Chapter> list = new LinkedList<>();
-        int i              = 0;
+        int i = 0;
         for (Node node : new Node(html).list(".listbox > .list > li > a")) {
             String title = node.text();
-            String path  = node.href();
-            Long id      = IdCreator.createChapterId(sourceComic, i++);
-            list.add(new Chapter(id, sourceComic, title, path));
+            String path = node.href();
+            list.add(new Chapter(null, sourceComic, title, path));
         }
-        return Lists.reverse(list);
+        list = Lists.reverse(list);
+        for (int j = 0; j < list.size(); j++) {
+            Long id = IdCreator.createChapterId(sourceComic, i++);
+            list.get(j).setId(id);
+        }
+        return list;
     }
 
     @Override
     public Request getImagesRequest(String cid, String path) {
         String url = StringUtils.format("%s/%s", baseUrl, path);
         return new Request
-            .Builder()
-            //                .addHeader("User-Agent", "Mozilla/5.0 (Linux; Android 7.0;)
-            //                Chrome/58.0.3029.110 Mobile")
-            .url(url)
-            .build();
+                .Builder()
+                //                .addHeader("User-Agent", "Mozilla/5.0 (Linux; Android 7.0;)
+                //                Chrome/58.0.3029.110 Mobile")
+                .url(url)
+                .build();
     }
 
     @Override
     public List<ImageUrl> parseImages(String html, Chapter chapter) {
         List<ImageUrl> list = new LinkedList<>();
-        Node body           = new Node(html);
-        int i               = 0;
+        Node body = new Node(html);
+        int i = 0;
         for (Node n : body.list(".chapterbox >#manga-imgs > .pic > img")) {
             Long comicChapter = chapter.getId();
-            Long id           = IdCreator.createImageId(comicChapter, i);
+            Long id = IdCreator.createImageId(comicChapter, i);
             list.add(new ImageUrl(id, comicChapter, ++i, n.attr("data-src"), false));
         }
         //        Matcher m = Pattern.compile("<img class=\"lazy\" data-original=\"(http.*?jpg)\"

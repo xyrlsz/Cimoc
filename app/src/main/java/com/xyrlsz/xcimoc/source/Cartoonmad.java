@@ -119,10 +119,14 @@ public class Cartoonmad extends MangaParser {
         while (mChapter.find()) {
             String title = mChapter.group(2);
             String path = mChapter.group(1);
-            Long id = IdCreator.createChapterId(sourceComic, i++);
-            list.add(new Chapter(id, sourceComic, title, path));
+            list.add(new Chapter(null, sourceComic, title, path));
         }
-        return Lists.reverse(list);
+        list = Lists.reverse(list);
+        for (int j = 0; j < list.size(); j++) {
+            Long id = IdCreator.createChapterId(sourceComic, i++);
+            list.get(j).setId(id);
+        }
+        return list;
     }
 
     @Override

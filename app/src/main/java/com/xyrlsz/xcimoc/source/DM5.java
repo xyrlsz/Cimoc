@@ -157,8 +157,7 @@ public class DM5 extends MangaParser {
         for (Node node : body.list("#chapterlistload > ul  li > a")) {
             String title = StringUtils.split(node.text(), " ", 0);
             String path = node.hrefWithSplit(0);
-            Long id = IdCreator.createChapterId(sourceComic, i++);
-            list.add(new Chapter(id, sourceComic, title, path));
+            list.add(new Chapter(null, sourceComic, title, path));
         }
 
 //        Collections.sort(list, new Comparator<Chapter>() {
@@ -167,8 +166,12 @@ public class DM5 extends MangaParser {
 //                return o1.getPath().compareTo(o2.getPath());
 //            }
 //        });
-
-        return Lists.reverse(list);
+        list = Lists.reverse(list);
+        for (int j = 0; j < list.size(); j++) {
+            Long id = IdCreator.createChapterId(sourceComic, j);
+            list.get(j).setId(id);
+        }
+        return list;
     }
 
     @Override
