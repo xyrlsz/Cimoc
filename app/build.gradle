@@ -173,8 +173,7 @@ dependencies {
     implementation 'androidx.activity:activity-ktx:1.10.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:10.1.0'
     implementation 'org.greenrobot:greendao:3.3.0'
-    //noinspection GradleDependency : for support android low api devices,not update OKHTTP
-    implementation 'com.squareup.okhttp3:okhttp:4.9.2'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     //noinspection GradleDependency : fresco 3.0.0 - 3.6.0 似乎有bug 以后再试试3.7以上的版本
     implementation 'com.facebook.fresco:fresco:2.6.0'
     // implementation 'com.facebook.fresco:fresco:3.6.0'
@@ -203,14 +202,15 @@ dependencies {
     implementation 'com.github.houbb:opencc4j:1.8.1'
     implementation 'com.github.thegrizzlylabs:sardine-android:0.9'
 
-    implementation "androidx.documentfile:documentfile:1.1.0"
+//    implementation "androidx.documentfile:documentfile:1.1.0"
 
     // protobuf 依赖
-    implementation 'com.google.protobuf:protobuf-javalite:3.25.1' // 使用最新版本
+    implementation 'com.google.protobuf:protobuf-javalite:3.25.1'
     implementation 'com.google.protobuf:protobuf-kotlin-lite:3.25.1'
 
-    testImplementation 'junit:junit:4.13.2'
+
     // AndroidX Test libraries
+    testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 }
