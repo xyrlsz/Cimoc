@@ -95,7 +95,7 @@ public class ComicUtils {
             return;
         }
 
-        App.getHttpClient().newCall(new Request.Builder().url(coverUrl).headers(headers).build()).enqueue(new Callback() {
+        Objects.requireNonNull(App.getHttpClient()).newCall(new Request.Builder().url(coverUrl).headers(headers).build()).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 callback.onFailure("封面下载失败: " + e.getMessage());
@@ -163,7 +163,7 @@ public class ComicUtils {
 
         for (Chapter chapter : chapterList) {
 
-            String name = chapter.getTitle() + "-" + String.format("%0" + sizeDigits + "d", index);
+            String name = String.format("%0" + sizeDigits + "d", index) + "-" + chapter.getTitle();
 
 
             String displayName = sanitizeFileName(name);
@@ -269,8 +269,9 @@ public class ComicUtils {
             zos.closeEntry();
 
             int chapterIndex = 1;
+            int sizeDigits = String.valueOf(chapterList.size()).length();
             for (Chapter chapter : chapterList) {
-                String chapterDir = String.format("chapter_%s_%03d/", sanitizeFileName(chapter.getTitle()), chapterIndex);
+                String chapterDir = String.format("chapter_%0" + sizeDigits + "d_%s/", chapterIndex, sanitizeFileName(chapter.getTitle()));
                 List<ImageUrl> imageUrls = Download.images(App.getApp().getDocumentFile(), comic, chapter,
                                 sourceManager.getParser(comic.getSource()).getTitle())
                         .toBlocking().first();
@@ -281,14 +282,15 @@ public class ComicUtils {
                 }
 
                 int imgIndex = 0;
+                int imgSizeDigits = String.valueOf(imageUrls.size()).length();
                 for (ImageUrl imageUrl : imageUrls) {
                     String url = imageUrl.getUrl();
                     InputStream is = null;
-                    String imgName = String.format("%03d_", imgIndex);
+                    String imgName = String.format("%0" + imgSizeDigits + "d_", imgIndex);
                     try {
                         Uri uri = Uri.parse(url);
                         if (url.startsWith("file://")) {
-                            File f = new File(uri.getPath());
+                            File f = new File(Objects.requireNonNull(uri.getPath()));
                             is = new FileInputStream(f);
                             imgName += f.getName();
                         } else if (url.startsWith("content://")) {
@@ -533,7 +535,7 @@ public class ComicUtils {
 
             // 可选：将封面作为第一张图插入
             if (cover != null && cover.length > 0) {
-                String fileName = String.format("%05d_cover.jpg", imageIndex++);
+                String fileName = String.format("%06d_cover.jpg", imageIndex++);
                 zos.putNextEntry(new ZipEntry(fileName));
                 zos.write(cover);
                 zos.closeEntry();
@@ -569,7 +571,7 @@ public class ComicUtils {
 
                         if (is != null) {
                             String imgExt = getImageExtensionFromUri(context, uri);
-                            String fileName = String.format("%05d%s", imageIndex++, imgExt);
+                            String fileName = String.format("%06d%s", imageIndex++, imgExt);
                             zos.putNextEntry(new ZipEntry(fileName));
 
                             byte[] buffer = new byte[4096];
@@ -620,7 +622,6 @@ public class ComicUtils {
 
     public interface OutputComicCallback {
         void onSuccess();
-
 
         void onFailure(String message);
     }

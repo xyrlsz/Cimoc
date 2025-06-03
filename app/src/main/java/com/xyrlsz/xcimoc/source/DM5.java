@@ -114,7 +114,8 @@ public class DM5 extends MangaParser {
         StringBuilder title = new StringBuilder();
         String[] titleInfo = body.text("div.banner_detail_form > div.info > p.title").split(" ");
         for (int i = 0; i < titleInfo.length - 1; i++) {
-            title.append(titleInfo[i]).append(" ");
+            title.append(titleInfo[i]);
+            title.append(" ");
         }
         String cover = body.src("div.banner_detail_form > div.cover > img");
         String update = body.text("#tempc > div.detail-list-title > span.s > span");
@@ -145,7 +146,7 @@ public class DM5 extends MangaParser {
             intro = intro.replace("[+展开]", "").replace("[-折叠]", "");
         }
         boolean status = isFinish(body.text("div.banner_detail_form > div.info > p.tip > span:eq(0)"));
-        comic.setInfo(title.toString(), cover, update, intro, author, status);
+        comic.setInfo(title.toString().trim(), cover, update, intro, author, status);
         return comic;
     }
 
@@ -157,20 +158,18 @@ public class DM5 extends MangaParser {
         for (Node node : body.list("#chapterlistload > ul  li > a")) {
             String title = StringUtils.split(node.text(), " ", 0);
             String path = node.hrefWithSplit(0);
+
             list.add(new Chapter(null, sourceComic, title, path));
         }
-
-//        Collections.sort(list, new Comparator<Chapter>() {
-//            @Override
-//            public int compare(Chapter o1, Chapter o2) {
-//                return o1.getPath().compareTo(o2.getPath());
-//            }
-//        });
-        list = Lists.reverse(list);
+        boolean isReverse = body.text("a.order").contains("正序");
+        if (isReverse) {
+            list = Lists.reverse(list);
+        }
         for (int j = 0; j < list.size(); j++) {
             Long id = IdCreator.createChapterId(sourceComic, j);
             list.get(j).setId(id);
         }
+
         return list;
     }
 

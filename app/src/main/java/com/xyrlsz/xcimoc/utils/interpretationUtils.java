@@ -5,7 +5,7 @@ import com.xyrlsz.xcimoc.model.Comic;
 public class interpretationUtils {
 
     public static boolean isReverseOrder(Comic comic) {
-        int type = comic.getSource();
+//        int type = comic.getSource();
         return false;
         //type == MH50.TYPE ||
 //                type == MiGu.TYPE ||
