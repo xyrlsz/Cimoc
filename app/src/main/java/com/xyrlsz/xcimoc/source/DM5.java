@@ -146,7 +146,7 @@ public class DM5 extends MangaParser {
             intro = intro.replace("[+展开]", "").replace("[-折叠]", "");
         }
         boolean status = isFinish(body.text("div.banner_detail_form > div.info > p.tip > span:eq(0)"));
-        comic.setInfo(title.toString().trim(), cover, update, intro, author, status);
+        comic.setInfo(title.toString().strip(), cover, update, intro, author, status);
         return comic;
     }
 

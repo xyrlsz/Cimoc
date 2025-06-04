@@ -58,14 +58,14 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
+        coreLibraryDesugaringEnabled true
     }
     kotlinOptions {
-        jvmTarget = '11'
+        jvmTarget = "11"
     }
     defaultConfig {
         applicationId "com.xyrlsz.xcimoc"
         minSdkVersion 21
-        //noinspection EditedTargetSdkVersion,ExpiredTargetSdkVersion
         targetSdkVersion 36
         versionCode buildVersion // 动态生成的版本号
         versionName version
@@ -157,6 +157,7 @@ protobuf {
         }
     }
 }
+
 greendao {
     schemaVersion 12
 }
@@ -208,6 +209,7 @@ dependencies {
     implementation 'com.google.protobuf:protobuf-javalite:3.25.1'
     implementation 'com.google.protobuf:protobuf-kotlin-lite:3.25.1'
 
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
 
     // AndroidX Test libraries
     testImplementation 'junit:junit:4.13.2'
