@@ -48,7 +48,6 @@ forked from https://github.com/Haleydu/Cimoc
 - [Rhino](https://github.com/mozilla/rhino)
 - [BlazingChain](https://github.com/tommyettinger/BlazingChain)
 - [AppUpdater](https://gitee.com/jenly1314/AppUpdater)
-- [OpenCC for Go](https://github.com/longbridge/opencc)
 - [Opencc4j](https://github.com/houbb/opencc4j)
 - [sardine-android](https://github.com/thegrizzlylabs/sardine-android)
 
