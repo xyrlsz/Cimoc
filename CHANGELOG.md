@@ -1,25 +1,21 @@
 ### fix
 
-- 修复g社漫画的链接解析
-- 优化初始化图源方法
-- 修改章节和图片ID的编码方式
+- 删除Opencc For GO
+- 修复部分章节ID与章节顺序相反的问题
 
 ### feat
 
-- 添加动漫之家V4
+- 添加导出下载漫画功能
 
-<!-- 
 ### build
 
-- 更新依赖 -->
+- 更新依赖
 
-<!-- ### ui
+### ui
 
-- 修复漫画详情界面的作者显示  -->
+- 修改部分ui
 
-<!-- ### refactor -->
-
-### refactor  
+<!-- ### refactor
 
  - Refactor DocumentFile implementation to CimocDocumentFile
  
