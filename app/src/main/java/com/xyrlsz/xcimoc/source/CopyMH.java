@@ -32,7 +32,7 @@ public class CopyMH extends MangaParser {
     public static final int TYPE = 26;
     public static final String DEFAULT_TITLE = "拷贝漫画";
     public static final String website = "https://www.copy20.com";
-
+    public static final String apiBaseUrl = "https://mapi.copy20.com";
     public CopyMH(Source source) {
         init(source, null);
     }
@@ -47,14 +47,17 @@ public class CopyMH extends MangaParser {
         if (page == 1) {
             //            JChineseConvertor jChineseConvertor = JChineseConvertor.getInstance();
             //            keyword = jChineseConvertor.s2t(keyword);
+
             url = StringUtils.format(
-                    "%s/api/kb/web/searchbd/comics?offset=0&platform=2&limit=12&q=%s&q_type=", website,
+                    "%s/api/v3/search/comic?platform=1&q=%s&limit=30&offset=0&q_type&_update=true", apiBaseUrl,
                     keyword);
             return new Request.Builder()
                     .url(url)
                     .addHeader("User-Agent",
                             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like "
                                     + "Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
+                    .addHeader("version", "2025.05.09")
+                    .addHeader("platform", "1")
                     .build();
         }
         return null;

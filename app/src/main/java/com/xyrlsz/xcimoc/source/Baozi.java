@@ -105,7 +105,11 @@ public class Baozi extends MangaParser {
     public List<Chapter> parseChapter(String html, Comic comic, Long sourceComic) {
         List<Chapter> list = new LinkedList<>();
         Node body = new Node(html);
-        List<Node> chapterNodes = Lists.reverse(body.list(".comics-chapters"));
+        
+        List<Node> chapterNodes = body.list(".comics-chapters");
+        if (html.contains("章节目录")) {
+            chapterNodes = Lists.reverse(chapterNodes);
+        } 
         int i = 0;
         Set<String> pathSet = new HashSet<>();
         for (Node chapterNode : chapterNodes) {
