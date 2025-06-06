@@ -69,7 +69,7 @@ public class Komiic extends MangaParser {
                     + "\"},"
                     + "\"query\":\"query searchComicAndAuthorQuery($keyword: String!) {\\n  searchComicsAndAuthors(keyword: $keyword) {\\n    comics {\\n      id\\n      title\\n      status\\n      year\\n      imageUrl\\n      authors {\\n        id\\n        name\\n        __typename\\n      }\\n      categories {\\n        id\\n        name\\n        __typename\\n      }\\n      dateUpdated\\n      monthViews\\n      views\\n      favoriteCount\\n      lastBookUpdate\\n      lastChapterUpdate\\n      __typename\\n    }\\n    authors {\\n      id\\n      name\\n      chName\\n      enName\\n      wikiLink\\n      comicCount\\n      views\\n      __typename\\n    }\\n    __typename\\n  }\\n}\""
                     + "}";
-            RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonBody);
+            RequestBody requestBody = RequestBody.create(jsonBody, MediaType.parse("application/json; charset=utf-8"));
 
             return new Request.Builder().url(url).post(requestBody).build();
         }
@@ -129,7 +129,7 @@ public class Komiic extends MangaParser {
                 + cid + "\"},"
                 + "\"query\":\"query comicById($comicId: ID!) {\\n  comicById(comicId: $comicId) {\\n    description\\n    id\\n    title\\n    status\\n    year\\n    imageUrl\\n    authors {\\n      id\\n      name\\n      __typename\\n    }\\n    categories {\\n      id\\n      name\\n      __typename\\n    }\\n    dateCreated\\n    dateUpdated\\n    views\\n    favoriteCount\\n    lastBookUpdate\\n    lastChapterUpdate\\n    __typename\\n  }\\n}\""
                 + "}";
-        RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonBody);
+        RequestBody requestBody = RequestBody.create(jsonBody, MediaType.parse("application/json; charset=utf-8"));
         return new Request.Builder().url(url).post(requestBody).build();
     }
 
@@ -165,7 +165,7 @@ public class Komiic extends MangaParser {
                 + "\"variables\":{\"comicId\":\"" + cid + "\"},"
                 + "\"query\":\"query chapterByComicId($comicId: ID!) {\\n  chaptersByComicId(comicId: $comicId) {\\n    id\\n    serial\\n    type\\n    dateCreated\\n    dateUpdated\\n    size\\n    __typename\\n  }\\n}\""
                 + "}";
-        RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonBody);
+        RequestBody requestBody = RequestBody.create(jsonBody, MediaType.parse("application/json; charset=utf-8"));
         return new Request.Builder().url(baseUrl + "/api/query").post(requestBody).build();
     }
 
@@ -215,7 +215,7 @@ public class Komiic extends MangaParser {
                 + "}";
         _cid = cid;
         _path = path;
-        RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), jsonBody);
+        RequestBody requestBody = RequestBody.create(jsonBody, MediaType.parse("application/json; charset=utf-8"));
         return new Request.Builder().url(baseUrl + "/api/query").post(requestBody).build();
     }
 
