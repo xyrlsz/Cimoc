@@ -40,11 +40,11 @@ public class Tencent extends MangaParser {
     public static final String DEFAULT_TITLE = "腾讯动漫";
 
     public Tencent(Source source) {
-        init(source, null);
+        init(source);
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, "https://m.ac.qq.com");
+        return new Source(null, DEFAULT_TITLE, TYPE, true);
     }
 
     @Override

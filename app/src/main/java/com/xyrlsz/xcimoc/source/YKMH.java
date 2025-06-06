@@ -34,11 +34,11 @@ public class YKMH extends MangaParser {
     public final String Host = "https://www.ykmh.com/";
 
     public YKMH(Source source) {
-        init(source, null);
+        init(source);
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, mHost);
+        return new Source(null, DEFAULT_TITLE, TYPE, true);
     }
 
     @Override

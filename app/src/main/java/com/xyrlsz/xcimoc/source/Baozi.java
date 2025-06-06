@@ -35,11 +35,11 @@ public class Baozi extends MangaParser {
     private static final String baseUrl = "https://cn.baozimhcn.com";
 
     public Baozi(Source source) {
-        init(source, null);
+        init(source);
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, baseUrl);
+        return new Source(null, DEFAULT_TITLE, TYPE, true);
     }
 
     @Override
@@ -105,11 +105,11 @@ public class Baozi extends MangaParser {
     public List<Chapter> parseChapter(String html, Comic comic, Long sourceComic) {
         List<Chapter> list = new LinkedList<>();
         Node body = new Node(html);
-        
+
         List<Node> chapterNodes = body.list(".comics-chapters");
-        if (html.contains("章节目录")) {
+        if (html.contains("章节目录") || html.contains("章節目錄")) {
             chapterNodes = Lists.reverse(chapterNodes);
-        } 
+        }
         int i = 0;
         Set<String> pathSet = new HashSet<>();
         for (Node chapterNode : chapterNodes) {

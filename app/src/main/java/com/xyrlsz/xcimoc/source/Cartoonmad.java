@@ -38,11 +38,11 @@ public class Cartoonmad extends MangaParser {
     private String _cid, _path;
 
     public Cartoonmad(Source source) {
-        init(source, null);
+        init(source);
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, "https://www.cartoonmad.com");
+        return new Source(null, DEFAULT_TITLE, TYPE, true);
     }
 
     @Override

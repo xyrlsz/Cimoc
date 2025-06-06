@@ -31,12 +31,12 @@ public class BuKa extends MangaParser {
     private static final String baseUrl = "https://www.bukamh.org";
 
     public BuKa(Source source) {
-        init(source, null);
+        init(source);
         setParseImagesUseWebParser(true);
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, baseUrl);
+        return new Source(null, DEFAULT_TITLE, TYPE, true);
     }
 
     @Override

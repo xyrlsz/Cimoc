@@ -44,12 +44,12 @@ public class GoDaManHua extends MangaParser {
     private String _mid = "";
 
     public GoDaManHua(Source source) {
-        init(source, null);
+        init(source);
         setParseImagesUseWebParser(true);
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, baseUrl);
+        return new Source(null, DEFAULT_TITLE, TYPE, true);
     }
 
     @Override

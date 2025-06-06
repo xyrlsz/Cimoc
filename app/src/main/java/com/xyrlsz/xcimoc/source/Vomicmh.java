@@ -39,11 +39,11 @@ public class Vomicmh extends MangaParser {
     private static final String baseUrl = "https://www.vomicmh.com";
 
     public Vomicmh(Source source) {
-        init(source, null);
+        init(source);
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, baseUrl);
+        return new Source(null, DEFAULT_TITLE, TYPE, true);
     }
 
     @Override

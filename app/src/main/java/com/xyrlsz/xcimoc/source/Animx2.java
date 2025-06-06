@@ -33,11 +33,11 @@ public class Animx2 extends MangaParser {
     private String _cid, _path;
 
     public Animx2(Source source) {
-        init(source, null);
+        init(source);
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, "https://www.2animx.com");
+        return new Source(null, DEFAULT_TITLE, TYPE, true);
     }
 
     @Override

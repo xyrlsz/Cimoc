@@ -31,12 +31,12 @@ public class TTKMH extends MangaParser {
     private static final String imgBaseUrl = "https://img1.baipiaoguai.org";
 
     public TTKMH(Source source) {
-        init(source, null);
+        init(source);
         setParseImagesUseWebParser(true);
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, baseUrl);
+        return new Source(null, DEFAULT_TITLE, TYPE, true);
     }
 
     @Override

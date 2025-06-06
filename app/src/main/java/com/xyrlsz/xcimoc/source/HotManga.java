@@ -33,11 +33,11 @@ public class HotManga extends MangaParser {
     public static final String website = "https://www.manga2025.com";
 
     public HotManga(Source source) {
-        init(source, null);
+        init(source);
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, website);
+        return new Source(null, DEFAULT_TITLE, TYPE, true);
     }
 
     @Override
@@ -63,6 +63,7 @@ public class HotManga extends MangaParser {
     @Override
     protected void initUrlFilterList() {
         filter.add(new UrlFilter("manga2025.com", "/comic/(\\w.+)"));
+        filter.add(new UrlFilter("manga2024.com", "/comic/(\\w.+)"));
     }
 
     @Override
@@ -140,7 +141,7 @@ public class HotManga extends MangaParser {
         List<Chapter> list = new LinkedList<>();
         JSONObject jsonObject = new JSONObject(html);
         JSONArray array = jsonObject.getJSONObject("results").getJSONArray("list");
-        int k = 0;
+
         for (int i = 0; i < array.length(); ++i) {
             String title = array.getJSONObject(i).getString("name");
             String path = array.getJSONObject(i).getString("uuid");

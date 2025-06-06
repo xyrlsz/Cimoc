@@ -37,12 +37,12 @@ public class IKanman extends MangaParser {
     private String referer = "";
 
     public IKanman(Source source) {
-        init(source, null);
+        init(source);
 //        init(source, new Category());
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, "https://www.manhuagui.com");
+        return new Source(null, DEFAULT_TITLE, TYPE, true);
     }
 
     @Override
@@ -166,7 +166,7 @@ public class IKanman extends MangaParser {
                 JSONArray array = object.getJSONArray("files");
                 for (int i = 0; i != array.length(); ++i) {
                     Long comicChapter = chapter.getId();
-                    Long id = IdCreator.createImageId(comicChapter,i);
+                    Long id = IdCreator.createImageId(comicChapter, i);
                     String url = StringUtils.format("https://i.hamreus.com%s%s?e=%s&m=%s", path, array.getString(i), e, m);
                     list.add(new ImageUrl(id, comicChapter, i + 1, url, false));
                 }

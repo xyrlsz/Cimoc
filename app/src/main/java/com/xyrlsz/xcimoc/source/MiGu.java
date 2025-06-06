@@ -43,11 +43,11 @@ public class MiGu extends MangaParser {
     private String _cid, _path;
 
     public MiGu(Source source) {
-        init(source, null);
+        init(source);
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, "https://www.migudm.cn/comic");
+        return new Source(null, DEFAULT_TITLE, TYPE, true);
     }
 
     @Override

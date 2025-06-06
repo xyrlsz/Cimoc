@@ -41,18 +41,34 @@ public class DmzjV4 extends MangaParser {
     String V4_API_URL = "https://nnv4api.dmzj.com";
     String COOKIES = "";
     String UID = "";
+    private SharedPreferences sharedPreferences;
 
     public DmzjV4(Source source) {
         //        init(source, new Category());
-        init(source, null);
-        SharedPreferences sharedPreferences =
+        init(source);
+        sharedPreferences =
                 App.getAppContext().getSharedPreferences(Constants.DMZJ_SHARED, MODE_PRIVATE);
         UID = sharedPreferences.getString(Constants.DMZJ_SHARED_UID, "");
         COOKIES = sharedPreferences.getString(Constants.DMZJ_SHARED_COOKIES, "");
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, baseUrl);
+        return new Source(null, DEFAULT_TITLE, TYPE, true);
+    }
+
+
+    private String getUID() {
+        if (UID.isEmpty()) {
+            UID = sharedPreferences.getString(Constants.DMZJ_SHARED_UID, "");
+        }
+        return UID;
+    }
+
+    private String getCOOKIES() {
+        if (COOKIES.isEmpty()) {
+            COOKIES = sharedPreferences.getString(Constants.DMZJ_SHARED_COOKIES, "");
+        }
+        return COOKIES;
     }
 
     @Override
@@ -103,7 +119,8 @@ public class DmzjV4 extends MangaParser {
 
     @Override
     public Request getInfoRequest(String cid) {
-        if (UID.isEmpty()) {
+        String uid = getUID();
+        if (uid.isEmpty()) {
             App.runOnMainThread(
                     ()
                             -> HintUtils.showToast(App.getAppContext(),
@@ -111,7 +128,7 @@ public class DmzjV4 extends MangaParser {
 //            App.goActivity(ComicSourceLoginActivity.class);
         }
         String url =
-                StringUtils.format("%s/comic/detail/%s?uid=%s&channel=android", V4_API_URL, cid, UID);
+                StringUtils.format("%s/comic/detail/%s?uid=%s&channel=android", V4_API_URL, cid, uid);
         return new Request.Builder().url(url).build();
     }
 
@@ -162,8 +179,9 @@ public class DmzjV4 extends MangaParser {
 
     @Override
     public Request getImagesRequest(String cid, String path) {
+        String uid = getUID();
         String url =
-                StringUtils.format("%s/comic/chapter/%s/%s?uid=%s", V4_API_URL, cid, path, UID);
+                StringUtils.format("%s/comic/chapter/%s/%s?uid=%s", V4_API_URL, cid, path, uid);
         return new Request.Builder().url(url).build();
     }
 

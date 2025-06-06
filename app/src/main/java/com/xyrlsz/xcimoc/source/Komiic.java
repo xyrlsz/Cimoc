@@ -48,14 +48,14 @@ public class Komiic extends MangaParser {
     private String _cid = "", _path = "";
 
     public Komiic(Source source) {
-        init(source, null);
+        init(source);
         if (KomiicUtils.checkExpired()) {
             KomiicUtils.refresh();
         }
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, baseUrl);
+        return new Source(null, DEFAULT_TITLE, TYPE, true);
     }
 
     @Override

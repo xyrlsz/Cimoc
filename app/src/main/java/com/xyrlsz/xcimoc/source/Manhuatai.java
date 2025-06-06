@@ -51,11 +51,11 @@ public class Manhuatai extends MangaParser {
 
     public Manhuatai(Source source) {
 //        init(source, new Category());
-        init(source, null);
+        init(source);
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, baseUrl);
+        return new Source(null, DEFAULT_TITLE, TYPE, true);
     }
 
     @Override

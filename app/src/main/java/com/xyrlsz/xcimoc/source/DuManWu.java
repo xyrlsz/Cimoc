@@ -40,12 +40,12 @@ public class DuManWu extends MangaParser {
     private static final String baseUrl = "http://dumanwu1.com";
 
     public DuManWu(Source source) {
-        init(source, null);
+        init(source);
         setParseImagesUseWebParser(true);
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, baseUrl);
+        return new Source(null, DEFAULT_TITLE, TYPE, true);
     }
 
     @Override
@@ -174,7 +174,7 @@ public class DuManWu extends MangaParser {
         List<Node> imageNodes = body.list(".main_img > .chapter-img-box");
         for (int i = 1; i <= imageNodes.size(); i++) {
             Long comicChapter = chapter.getId();
-            Long id = IdCreator.createImageId(comicChapter,i);
+            Long id = IdCreator.createImageId(comicChapter, i);
             String imgUrl = imageNodes.get(i - 1).attr("img", "data-src");
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false));
         }
