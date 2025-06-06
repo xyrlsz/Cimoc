@@ -42,7 +42,7 @@ public class ChoicePreference extends Option implements View.OnClickListener {
         LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         layoutInflater.inflate(R.layout.custom_option, this);
 
-        mPreferenceManager = ((App) context.getApplicationContext()).getPreferenceManager();
+        mPreferenceManager = App.getPreferenceManager();
 
         setOnClickListener(this);
     }
@@ -70,7 +70,7 @@ public class ChoicePreference extends Option implements View.OnClickListener {
         mChoice = mPreferenceManager.getInt(key, def);
         mItems = getResources().getStringArray(item);
         mRequestCode = request;
-        mSummaryView.setText(mItems[mChoice]);
+        mSummaryView.setText(mItems[mChoice < mItems.length ? mChoice : 0]);
     }
 
     public int getValue() {
@@ -80,7 +80,7 @@ public class ChoicePreference extends Option implements View.OnClickListener {
     public void setValue(int choice) {
         mPreferenceManager.putInt(mPreferenceKey, choice);
         mChoice = choice;
-        mSummaryView.setText(mItems[mChoice]);
+        mSummaryView.setText(mItems[mChoice < mItems.length ? mChoice : 0]);
     }
 
 }
