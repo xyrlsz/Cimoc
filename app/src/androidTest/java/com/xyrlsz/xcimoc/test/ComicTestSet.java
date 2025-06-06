@@ -25,10 +25,11 @@ import com.xyrlsz.xcimoc.source.Vomicmh;
 import com.xyrlsz.xcimoc.source.YKMH;
 import com.xyrlsz.xcimoc.source.YYManHua;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class ComicTestSet {
-    private static Map<Integer, String> comicTestSet;
+    private static Map<Integer, String> comicTestSet = new HashMap<>();
 
     private static void init() {
         comicTestSet.put(Animx2.TYPE, "index-comic-name-女子學院的男生-id-24755");
@@ -58,7 +59,7 @@ public class ComicTestSet {
     }
 
     public static Map<Integer, String> getComicTestSet() {
-        if (comicTestSet == null) {
+        if (comicTestSet.isEmpty()) {
             init();
         }
         return comicTestSet;

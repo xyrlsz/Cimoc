@@ -50,7 +50,12 @@ public class UpdateHelper {
     private static final int VERSION = BuildConfig.VERSION_CODE;
 
     private static final Map<Integer, Source> ComicSourceTable = new HashMap<>();
-
+    public static  Map<Integer, Source> getComicSourceTable() {
+        if(ComicSourceTable.isEmpty()){
+            initComicSourceTable();
+        }
+        return ComicSourceTable;
+    }
     private static void initComicSourceTable() {
 
         if (ComicSourceTable.isEmpty()) {
