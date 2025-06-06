@@ -17,6 +17,7 @@ import com.xyrlsz.xcimoc.parser.MangaParser;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 import com.xyrlsz.xcimoc.utils.UicodeBackslashU;
 
@@ -44,17 +45,31 @@ public class Dmzj extends MangaParser {
     //    private List<UrlFilter> filter = new ArrayList<>();
     String COOKIES = "";
     String UID = "";
+    private SharedPreferences sharedPreferences;
 
     public Dmzj(Source source) {
-//        init(source, new Category());
-        init(source, null);
-        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.DMZJ_SHARED, MODE_PRIVATE);
+        init(source);
+        sharedPreferences = App.getAppContext().getSharedPreferences(Constants.DMZJ_SHARED, MODE_PRIVATE);
         UID = sharedPreferences.getString(Constants.DMZJ_SHARED_UID, "");
         COOKIES = sharedPreferences.getString(Constants.DMZJ_SHARED_COOKIES, "");
     }
 
     public static Source getDefaultSource() {
         return new Source(null, DEFAULT_TITLE, TYPE, true, baseUrl);
+    }
+
+    private String getUID() {
+        if (UID.isEmpty()) {
+            UID = sharedPreferences.getString(Constants.DMZJ_SHARED_UID, "");
+        }
+        return UID;
+    }
+
+    private String getCOOKIES() {
+        if (COOKIES.isEmpty()) {
+            COOKIES = sharedPreferences.getString(Constants.DMZJ_SHARED_COOKIES, "");
+        }
+        return COOKIES;
     }
 
     @Override
@@ -141,7 +156,8 @@ public class Dmzj extends MangaParser {
                     String comic_id = chapter.getString("comic_id");
                     String chapter_id = chapter.getString("id");
                     String path = comic_id + "/" + chapter_id;
-                    list.add(new Chapter(Long.parseLong(sourceComic + "0" + k++), sourceComic, title, path, tag));
+                    Long id = IdCreator.createChapterId(sourceComic, k++);
+                    list.add(new Chapter(id, sourceComic, title, path, tag));
                 }
             }
 
@@ -167,7 +183,7 @@ public class Dmzj extends MangaParser {
         String url = StringUtils.format("%s/chapter/%s.json?channel=Android&version=2.7.038", NNV3ApiBaseUtl, path);
 //        String url = StringUtils.format("%s/api/v1/comic1/chapter/detail?channel=pc&app_name=dmzj&version=1.0.0&timestamp=%s&uid=%s&comic_id=%s&chapter_id=%s", pcBaseUrl, timestamp, UID, comic_id, chapter_id);
         return new Request.Builder().url(url)
-                .addHeader("Cookie", COOKIES)
+                .addHeader("Cookie", getCOOKIES())
                 .addHeader("User-Agent", "Android,DMZJ1,7.1.2")
                 .build();
 
@@ -184,7 +200,7 @@ public class Dmzj extends MangaParser {
                     .getJSONArray("page_url");
             for (int i = 0; i != array.length(); ++i) {
                 Long comicChapter = chapter.getId();
-                Long id = Long.parseLong(comicChapter + "0" + i);
+                Long id = IdCreator.createChapterId(comicChapter, i);
                 String url = array.getString(i);
                 list.add(new ImageUrl(id, comicChapter, i + 1, url, false));
             }

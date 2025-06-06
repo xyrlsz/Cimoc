@@ -33,22 +33,22 @@ jobs:
           echo "GIT_REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
           echo "GIT_REPO_OWNER=$REPO_OWNER" >> $GITHUB_ENV
 
-      - name: Set up Go environment
-        uses: actions/setup-go@v5
-        with:
-          go-version: ">=1.22"
+      # - name: Set up Go environment
+      #   uses: actions/setup-go@v5
+      #   with:
+      #     go-version: ">=1.22"
 
-      - name: Install gomobile
-        run: |
-          go install golang.org/x/mobile/cmd/gomobile@latest
-          gomobile init
+      # - name: Install gomobile
+      #   run: |
+      #     go install golang.org/x/mobile/cmd/gomobile@latest
+      #     gomobile init
 
-      - name: Build xyropencc
-        run: |
-          cd xyropencc
-          chmod +x build.sh
-          ./build.sh
-          cd ..
+      # - name: Build xyropencc
+      #   run: |
+      #     cd xyropencc
+      #     chmod +x build.sh
+      #     ./build.sh
+      #     cd ..
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -61,7 +61,21 @@ jobs:
         with:
           name: app-universal-release
           path: app/build/outputs/apk/release/app-universal-release.apk
-
+    
+      - name: Sync Github Repos To Gitee   
+        uses: Yikun/hub-mirror-action@master # 使用Yikun/hub-mirror-action
+        with:
+          src: github/${{env.GIT_REPO_OWNER}}  # 源端账户名(github)
+          dst: gitee/${{env.GIT_REPO_OWNER}}   # 目的端账户名(gitee)
+          dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}  # SSH密钥对中的私钥
+          dst_token: ${{ secrets.GITEE_TOKEN }}  # Gitee账户的私人令牌
+          account_type: user  # 账户类型
+          clone_style: "https"  # 使用https方式进行clone，也可以使用ssh
+          debug: true  # 启用后会显示所有执行命令
+          force_update: true  # 启用后，强制同步，即强制覆盖目的端仓库
+          static_list: "${{env.GIT_REPO_NAME}}"  # 静态同步列表，在此填写需要同步的仓库名称，可填写多个
+          timeout: '600s'  # git超时设置，超时后会自动重试git操作
+      
       - name: Create GitHub Release and Upload APK
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/v') # Ensure this step runs only for tags

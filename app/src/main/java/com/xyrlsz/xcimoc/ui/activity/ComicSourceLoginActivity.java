@@ -253,6 +253,7 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove(DMZJ_SHARED_COOKIES);
         editor.remove(DMZJ_SHARED_USERNAME);
+        editor.remove(DMZJ_SHARED_UID);
         mDmzjLogin.setSummary(getString(R.string.no_login));
         mDmzjLogin.setTitle(getString(R.string.login));
         mDmzjLogout.setVisibility(View.GONE);

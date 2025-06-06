@@ -52,9 +52,28 @@ public class ChapterManager {
                 .list();
     }
 
+    public List<Chapter> getChapterList(Long sourceComic) {
+        return mChapterDao.queryBuilder()
+                .where(Properties.SourceComic.eq(sourceComic))
+                .list();
+    }
+
+
     public List<Chapter> getChapter(String path, String title) {
         return mChapterDao.queryBuilder()
                 .where(ChapterDao.Properties.Path.eq(path), ChapterDao.Properties.Title.eq(title))
+                .list();
+    }
+
+    public List<Chapter> getChapter(String path) {
+        return mChapterDao.queryBuilder()
+                .where(ChapterDao.Properties.Path.eq(path))
+                .list();
+    }
+
+    public List<Chapter> getChapter(Long sourceComic, String path) {
+        return mChapterDao.queryBuilder()
+                .where(ChapterDao.Properties.Path.eq(path), Properties.SourceComic.eq(sourceComic))
                 .list();
     }
 

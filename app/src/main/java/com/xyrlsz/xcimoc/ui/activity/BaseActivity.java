@@ -68,7 +68,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
 
     @Override
     public App getAppInstance() {
-        return (App) getApplication();
+        return App.getApp();
     }
 
     @Override

@@ -13,6 +13,7 @@ import com.xyrlsz.xcimoc.parser.NodeIterator;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import org.json.JSONArray;
@@ -43,12 +44,12 @@ public class GoDaManHua extends MangaParser {
     private String _mid = "";
 
     public GoDaManHua(Source source) {
-        init(source, null);
+        init(source);
         setParseImagesUseWebParser(true);
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, baseUrl);
+        return new Source(null, DEFAULT_TITLE, TYPE, true);
     }
 
     @Override
@@ -147,10 +148,14 @@ public class GoDaManHua extends MangaParser {
         for (int i = 0; i < chapters.length(); i++) {
             String title = chapters.getJSONObject(i).getJSONObject("attributes").getString("title");
             String path = chapters.getJSONObject(i).getLong("id") + "";
-            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i), sourceComic, title, path));
+            list.add(new Chapter(null, sourceComic, title, path));
         }
-
-        return Lists.reverse(list);
+        list = Lists.reverse(list);
+        for (int j = 0; j < list.size(); j++) {
+            Long id = IdCreator.createChapterId(sourceComic, j);
+            list.get(j).setId(id);
+        }
+        return list;
     }
 
     @Override
@@ -177,7 +182,7 @@ public class GoDaManHua extends MangaParser {
                 .getJSONArray("images");
         for (int i = 1; i <= images.length(); i++) {
             Long comicChapter = chapter.getId();
-            Long id = Long.parseLong(comicChapter + "0" + i);
+            Long id = IdCreator.createImageId(comicChapter, i);
             String imgUrl = picBaseUrl + images.getJSONObject(i - 1).getString("url");
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false));
         }

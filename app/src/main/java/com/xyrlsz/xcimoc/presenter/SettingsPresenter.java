@@ -12,7 +12,7 @@ import com.xyrlsz.xcimoc.model.MiniComic;
 import com.xyrlsz.xcimoc.model.Task;
 import com.xyrlsz.xcimoc.rx.RxBus;
 import com.xyrlsz.xcimoc.rx.RxEvent;
-import com.xyrlsz.xcimoc.saf.DocumentFile;
+import com.xyrlsz.xcimoc.saf.CimocDocumentFile;
 import com.xyrlsz.xcimoc.ui.view.SettingsView;
 
 import java.util.List;
@@ -39,7 +39,7 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
         Fresco.getImagePipeline().clearDiskCaches();
     }
 
-    public void moveFiles(DocumentFile dst) {
+    public void moveFiles(CimocDocumentFile dst) {
         mCompositeSubscription.add(Storage.moveRootDir(mBaseView.getAppInstance().getContentResolver(),
                 mBaseView.getAppInstance().getDocumentFile(), dst)
                 .observeOn(AndroidSchedulers.mainThread())

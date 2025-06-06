@@ -13,6 +13,7 @@ import com.xyrlsz.xcimoc.parser.NodeIterator;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilterWithCidQueryKey;
 import com.xyrlsz.xcimoc.soup.Node;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import org.json.JSONException;
@@ -35,13 +36,14 @@ public class DongManManHua extends MangaParser {
     public static final int TYPE = 11;
     public static final String DEFAULT_TITLE = "咚漫漫画";
     public static final String baseUrl = "https://www.dongmanmanhua.cn";
+    private int k = 0;
 
     public DongManManHua(Source source) {
-        init(source, null);
+        init(source);
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, "https://m.dongmanmanhua.cn");
+        return new Source(null, DEFAULT_TITLE, TYPE, true);
     }
 
     @Override
@@ -99,14 +101,13 @@ public class DongManManHua extends MangaParser {
         return comic;
     }
 
-    private int k = 0;
-
     public List<Chapter> parseChapter(Node body, Long sourceComic) {
         List<Chapter> list = new LinkedList<>();
         for (Node node : body.list("ul#_listUl > li > a")) {
             String title = node.text("span.subj > span") + " " + node.text("span.tx");
             String path = "https:" + node.href();
-            list.add(new Chapter(Long.parseLong(sourceComic + "0" + k++), sourceComic, title, path));
+            Long id = IdCreator.createChapterId(sourceComic, k++);
+            list.add(new Chapter(id, sourceComic, title, path));
         }
         return list;
     }
@@ -185,7 +186,7 @@ public class DongManManHua extends MangaParser {
                 String key = Json_Iterator.next();
                 if (key.contains("layer")) {
                     Long comicChapter = chapter.getId();
-                    Long id = Long.parseLong(comicChapter + "0" + i);
+                    Long id = IdCreator.createImageId(comicChapter, i);
                     list.add(new ImageUrl(id, comicChapter, i++, motiontoonPath + motiontoonJson.getString(key), false));
                 }
             }

@@ -11,6 +11,7 @@ import com.xyrlsz.xcimoc.parser.SearchIterator
 import com.xyrlsz.xcimoc.parser.UrlFilter
 import com.xyrlsz.xcimoc.soup.Node
 import com.xyrlsz.xcimoc.utils.DecryptionUtils
+import com.xyrlsz.xcimoc.utils.IdCreator
 import com.xyrlsz.xcimoc.utils.StringUtils
 import okhttp3.Headers
 import okhttp3.Request
@@ -83,9 +84,10 @@ class MangaBZ(source: Source?) : MangaParser() {
             val path = node.href().trim('/')
 
             //list.add(Chapter(title, path))
+            val id = IdCreator.createChapterId(sourceComic, i++)
             list.add(
                 Chapter(
-                    (sourceComic.toString() + "0" + i++).toLong(),
+                    id,
                     sourceComic,
                     title,
                     path
@@ -127,7 +129,7 @@ class MangaBZ(source: Source?) : MangaParser() {
                 //list.add(ImageUrl(i + 1, url, true))
 
                 val comicChapter = chapter.id
-                val id = (comicChapter.toString() + "0" + i).toLong()
+                val id = IdCreator.createImageId(comicChapter, i);
                 list.add(ImageUrl(id, comicChapter, i + 1, url, true))
             }
         } catch (e: Exception) {
@@ -186,7 +188,7 @@ class MangaBZ(source: Source?) : MangaParser() {
     companion object {
         @JvmStatic
         fun getDefaultSource(): Source {
-            return Source(null, DEFAULT_TITLE, TYPE, true, "http://www.mangabz.com");
+            return Source(null, DEFAULT_TITLE, TYPE, true);
         }
 
         const val TYPE = 82
@@ -194,6 +196,6 @@ class MangaBZ(source: Source?) : MangaParser() {
     }
 
     init {
-        init(source, null)
+        init(source)
     }
 }

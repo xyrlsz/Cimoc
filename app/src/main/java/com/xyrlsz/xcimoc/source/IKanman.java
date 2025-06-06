@@ -10,6 +10,7 @@ import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
 import com.xyrlsz.xcimoc.utils.DecryptionUtils;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import org.json.JSONArray;
@@ -36,12 +37,12 @@ public class IKanman extends MangaParser {
     private String referer = "";
 
     public IKanman(Source source) {
-        init(source, null);
+        init(source);
 //        init(source, new Category());
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, "https://www.manhuagui.com");
+        return new Source(null, DEFAULT_TITLE, TYPE, true);
     }
 
     @Override
@@ -124,7 +125,8 @@ public class IKanman extends MangaParser {
                 for (Node li : ul.list("li > a")) {
                     String title = li.attr("title");
                     String path = li.hrefWithSplit(2);
-                    list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
+                    Long id = IdCreator.createChapterId(sourceComic, i++);
+                    list.add(new Chapter(id, sourceComic, title, path));
                 }
             }
         }
@@ -164,7 +166,7 @@ public class IKanman extends MangaParser {
                 JSONArray array = object.getJSONArray("files");
                 for (int i = 0; i != array.length(); ++i) {
                     Long comicChapter = chapter.getId();
-                    Long id = Long.parseLong(comicChapter + "0" + i);
+                    Long id = IdCreator.createImageId(comicChapter, i);
                     String url = StringUtils.format("https://i.hamreus.com%s%s?e=%s&m=%s", path, array.getString(i), e, m);
                     list.add(new ImageUrl(id, comicChapter, i + 1, url, false));
                 }

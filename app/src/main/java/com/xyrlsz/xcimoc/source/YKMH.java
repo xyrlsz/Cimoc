@@ -12,6 +12,7 @@ import com.xyrlsz.xcimoc.parser.NodeIterator;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import org.json.JSONArray;
@@ -29,15 +30,15 @@ import okhttp3.Request;
 public class YKMH extends MangaParser {
     public static final int TYPE = 91;
     public static final String DEFAULT_TITLE = "优酷漫画";
-    public final String Host = "https://www.ykmh.com/";
     public static final String mHost = "https://m.ykmh.net/";
+    public final String Host = "https://www.ykmh.com/";
 
     public YKMH(Source source) {
-        init(source, null);
+        init(source);
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, mHost);
+        return new Source(null, DEFAULT_TITLE, TYPE, true);
     }
 
     @Override
@@ -104,8 +105,6 @@ public class YKMH extends MangaParser {
         String isFinish = info.getParent("p.txtItme > span.icon01").text();
         boolean finish = isFinish.contains("完结");
         comic.setInfo(title, cover, update, intro, author, finish);
-
-
         return comic;
     }
 
@@ -131,7 +130,8 @@ public class YKMH extends MangaParser {
             String title = node.text();
 //            String path = StringUtils.split(node.href(), "/", 3);
             String path = node.hrefWithSubString(1);
-            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
+            Long id = IdCreator.createChapterId(sourceComic, i++);
+            list.add(new Chapter(id, sourceComic, title, path));
         }
         return list;
     }
@@ -159,7 +159,7 @@ public class YKMH extends MangaParser {
             for (int i = 0; i < array.length(); i++) {
                 String url = StringUtils.format("https://js.tingliu.cc%s", array.getString(i));
                 Long comicChapter = chapter.getId();
-                Long id = Long.parseLong(comicChapter + "0" + i + 1);
+                Long id = IdCreator.createImageId(comicChapter, i);
                 list.add(new ImageUrl(id, comicChapter, i + 1, url, false));
 
             }

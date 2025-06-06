@@ -28,7 +28,7 @@ import com.xyrlsz.xcimoc.manager.SourceManager;
 import com.xyrlsz.xcimoc.misc.ActivityLifecycle;
 import com.xyrlsz.xcimoc.model.DaoMaster;
 import com.xyrlsz.xcimoc.model.DaoSession;
-import com.xyrlsz.xcimoc.saf.DocumentFile;
+import com.xyrlsz.xcimoc.saf.CimocDocumentFile;
 import com.xyrlsz.xcimoc.ui.activity.MainActivity;
 import com.xyrlsz.xcimoc.ui.adapter.GridAdapter;
 import com.xyrlsz.xcimoc.utils.DocumentUtils;
@@ -67,7 +67,7 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
     private static App mApp;
     // 默认Github源
     private static String UPDATE_CURRENT_URL = Constants.UPDATE_GITHUB_URL;
-    private DocumentFile mDocumentFile;
+    private CimocDocumentFile mCimocDocumentFile;
     private ControllerBuilderProvider mBuilderProvider;
     private RecyclerView.RecycledViewPool mRecycledPool;
     private DaoSession mDaoSession;
@@ -261,9 +261,9 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
             sb.append(element.toString());
         }
         try {
-            DocumentFile doc = getDocumentFile();
-            DocumentFile dir = DocumentUtils.getOrCreateSubDirectory(doc, "log");
-            DocumentFile file = DocumentUtils.getOrCreateFile(dir, StringUtils.getDateStringWithSuffix("log"));
+            CimocDocumentFile doc = getDocumentFile();
+            CimocDocumentFile dir = DocumentUtils.getOrCreateSubDirectory(doc, "log");
+            CimocDocumentFile file = DocumentUtils.getOrCreateFile(dir, StringUtils.getDateStringWithSuffix("log"));
             DocumentUtils.writeStringToFile(getContentResolver(), file, sb.toString());
         } catch (Exception ex) {
         }
@@ -288,14 +288,14 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
 
     public void initRootDocumentFile() {
         String uri = mPreferenceManager.getString(PreferenceManager.PREF_OTHER_STORAGE);
-        mDocumentFile = Storage.initRoot(this, uri);
+        mCimocDocumentFile = Storage.initRoot(this, uri);
     }
 
-    public DocumentFile getDocumentFile() {
-        if (mDocumentFile == null) {
+    public CimocDocumentFile getDocumentFile() {
+        if (mCimocDocumentFile == null) {
             initRootDocumentFile();
         }
-        return mDocumentFile;
+        return mCimocDocumentFile;
     }
 
     public DaoSession getDaoSession() {

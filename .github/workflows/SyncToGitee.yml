@@ -6,10 +6,11 @@ on:
   #   branches: [ "main" ]
   # pull_request:
   #   branches: [ "main" ]
-  workflow_run:
-      workflows: ["Android CI (tag)"]
-      types:
-        - completed
+  # workflow_run:
+  #     workflows: ["Android CI (tag)"]
+  #     types:
+  #       - completed
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -21,7 +22,7 @@ jobs:
         echo "GIT_REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
         echo "GIT_REPO_OWNER=$REPO_OWNER" >> $GITHUB_ENV
 
-    - name: Sync Github Repos To Gitee  # 名字随便起
+    - name: Sync Github Repos To Gitee  
       uses: Yikun/hub-mirror-action@master # 使用Yikun/hub-mirror-action
       with:
         src: github/${{env.GIT_REPO_OWNER}}  # 源端账户名(github)

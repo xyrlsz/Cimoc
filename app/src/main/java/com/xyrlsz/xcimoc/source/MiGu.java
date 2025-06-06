@@ -11,6 +11,7 @@ import com.xyrlsz.xcimoc.parser.RegexIterator;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import org.json.JSONArray;
@@ -42,11 +43,11 @@ public class MiGu extends MangaParser {
     private String _cid, _path;
 
     public MiGu(Source source) {
-        init(source, null);
+        init(source);
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, "https://www.migudm.cn/comic");
+        return new Source(null, DEFAULT_TITLE, TYPE, true);
     }
 
     @Override
@@ -113,7 +114,8 @@ public class MiGu extends MangaParser {
         Matcher m = Pattern.compile("<a stat='.*?' href=\"(?:.*?)(\\d+)\\.html\" class=\"item ellipsis\" title=\"(.*?)\" data-opusname=\"(?:.*?)\" data-index=\"(?:.*?)\" data-url=\"(?:.*?)\" target=\"_blank\">").matcher(html);
         int i = 0;
         while (m.find()) {
-            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, m.group(2), m.group(1)));
+            Long id = IdCreator.createChapterId(sourceComic, i++);
+            list.add(new Chapter(id, sourceComic, m.group(2), m.group(1)));
         }
         return list;
     }
@@ -157,7 +159,7 @@ public class MiGu extends MangaParser {
             JSONArray jpgJsonArr = json.getJSONObject("data").getJSONArray("jpgList");
             for (int i = 0; i < jpgJsonArr.length(); i++) {
                 Long comicChapter = chapter.getId();
-                Long id = Long.parseLong(comicChapter + "0" + i);
+                Long id = IdCreator.createImageId(comicChapter, i);
                 JSONObject j = jpgJsonArr.getJSONObject(i);
                 list.add(new ImageUrl(id, comicChapter, i + 1, j.getString("url"), false));
             }
@@ -170,7 +172,8 @@ public class MiGu extends MangaParser {
 //    @Override
 //    public Request getLazyRequest(String url) {
 //        return new Request.Builder()
-////                .addHeader("Referer", url)
+
+    /// /                .addHeader("Referer", url)
 //                .addHeader("User-Agent", "Mozilla/5.0 (Linux; Android 7.0;) Chrome/58.0.3029.110 Mobile")
 //                .addHeader("Cookie", "isAdult=1")
 //                .url(url).build();
@@ -184,7 +187,6 @@ public class MiGu extends MangaParser {
 //        }
 //        return null;
 //    }
-
     @Override
     public Request getCheckRequest(String cid) {
         return getInfoRequest(cid);

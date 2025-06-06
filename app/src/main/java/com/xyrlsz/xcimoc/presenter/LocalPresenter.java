@@ -10,7 +10,7 @@ import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.MiniComic;
 import com.xyrlsz.xcimoc.model.Task;
 import com.xyrlsz.xcimoc.rx.ToAnotherList;
-import com.xyrlsz.xcimoc.saf.DocumentFile;
+import com.xyrlsz.xcimoc.saf.CimocDocumentFile;
 import com.xyrlsz.xcimoc.ui.view.LocalView;
 
 import java.util.ArrayList;
@@ -117,7 +117,7 @@ public class LocalPresenter extends BasePresenter<LocalView> {
         });
     }
 
-    public void scan(DocumentFile doc) {
+    public void scan(CimocDocumentFile doc) {
         mCompositeSubscription.add(Local.scan(doc)
                 .map(new Func1<List<Pair<Comic, ArrayList<Task>>>, List<Comic>>() {
                     @Override

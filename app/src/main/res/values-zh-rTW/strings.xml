@@ -289,6 +289,7 @@
     <string name="download_ask_stop">請先暫停下載任務</string>
     <string name="download_action_confirm">是否開始或暫停下載</string>
     <string name="download_delete">刪除漫畫</string>
+    <string name="download_output">匯出漫畫</string>
     <string name="download_delete_confirm">是否刪除下載</string>
 
     <string name="task_parse">正在解析</string>

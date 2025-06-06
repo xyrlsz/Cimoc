@@ -10,6 +10,7 @@ import com.xyrlsz.xcimoc.parser.NodeIterator;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -19,37 +20,37 @@ import java.util.List;
 import okhttp3.Headers;
 import okhttp3.Request;
 
+
 /**
  * Created by FEILONG on 2017/12/21.
  */
 
 public class BuKa extends MangaParser {
-
     public static final int TYPE = 52;
     public static final String DEFAULT_TITLE = "布卡漫画";
     private static final String baseUrl = "https://www.bukamh.org";
 
     public BuKa(Source source) {
-        init(source, null);
+        init(source);
         setParseImagesUseWebParser(true);
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, baseUrl);
+        return new Source(null, DEFAULT_TITLE, TYPE, true);
     }
 
     @Override
     public Request getSearchRequest(String keyword, int page) throws UnsupportedEncodingException {
-//        String url = "http://m.buka.cn/search/ajax_search";
-//        RequestBody data = new FormBody.Builder()
-//                .add("key", keyword)
-//                .add("start", String.valueOf(15 * (page - 1)))
-//                .add("count", "15")
-//                .build();//key=%E4%B8%8D%E5%AE%9C%E5%AB%81&start=0&count=15
-//        return new Request.Builder()
-//                .url(url)
-//                .post(data)
-//                .build();
+        //        String url = "http://m.buka.cn/search/ajax_search";
+        //        RequestBody data = new FormBody.Builder()
+        //                .add("key", keyword)
+        //                .add("start", String.valueOf(15 * (page - 1)))
+        //                .add("count", "15")
+        //                .build();//key=%E4%B8%8D%E5%AE%9C%E5%AB%81&start=0&count=15
+        //        return new Request.Builder()
+        //                .url(url)
+        //                .post(data)
+        //                .build();
         String url;
         if (page == 1) {
             url = StringUtils.format("%s/index.php/search?key=%s", baseUrl, keyword);
@@ -99,9 +100,12 @@ public class BuKa extends MangaParser {
     @Override
     public Request getInfoRequest(String cid) {
         String url = baseUrl + "/".concat(cid);
-        return new Request.Builder()
-//                .addHeader("User-Agent", "Mozilla/5.0 (Linux; Android 7.0;) Chrome/58.0.3029.110 Mobile")
-                .url(url).build();
+        return new Request
+                .Builder()
+                //                .addHeader("User-Agent", "Mozilla/5.0 (Linux; Android 7.0;)
+                //                Chrome/58.0.3029.110 Mobile")
+                .url(url)
+                .build();
     }
 
     @Override
@@ -122,18 +126,18 @@ public class BuKa extends MangaParser {
             }
         }
 
-//        boolean status = isFinish("连载中");//todo: fix here
+        //        boolean status = isFinish("连载中");//todo: fix here
         comic.setInfo(title, cover, update, intro, author, false);
         return comic;
     }
 
-//    @Override
-//    public Request getChapterRequest(String html, String cid){
-//        String url = "https://m.ac.qq.com/comic/chapterList/id/".concat(cid);
-//        return new Request.Builder()
-//            .url(url)
-//            .build();
-//    }
+    //    @Override
+    //    public Request getChapterRequest(String html, String cid){
+    //        String url = "https://m.ac.qq.com/comic/chapterList/id/".concat(cid);
+    //        return new Request.Builder()
+    //            .url(url)
+    //            .build();
+    //    }
 
     @Override
     public List<Chapter> parseChapter(String html, Comic comic, Long sourceComic) {
@@ -142,16 +146,23 @@ public class BuKa extends MangaParser {
         for (Node node : new Node(html).list(".listbox > .list > li > a")) {
             String title = node.text();
             String path = node.href();
-            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
+            list.add(new Chapter(null, sourceComic, title, path));
         }
-        return Lists.reverse(list);
+        list = Lists.reverse(list);
+        for (int j = 0; j < list.size(); j++) {
+            Long id = IdCreator.createChapterId(sourceComic, i++);
+            list.get(j).setId(id);
+        }
+        return list;
     }
 
     @Override
     public Request getImagesRequest(String cid, String path) {
         String url = StringUtils.format("%s/%s", baseUrl, path);
-        return new Request.Builder()
-//                .addHeader("User-Agent", "Mozilla/5.0 (Linux; Android 7.0;) Chrome/58.0.3029.110 Mobile")
+        return new Request
+                .Builder()
+                //                .addHeader("User-Agent", "Mozilla/5.0 (Linux; Android 7.0;)
+                //                Chrome/58.0.3029.110 Mobile")
                 .url(url)
                 .build();
     }
@@ -163,22 +174,23 @@ public class BuKa extends MangaParser {
         int i = 0;
         for (Node n : body.list(".chapterbox >#manga-imgs > .pic > img")) {
             Long comicChapter = chapter.getId();
-            Long id = Long.parseLong(comicChapter + "0" + i);
+            Long id = IdCreator.createImageId(comicChapter, i);
             list.add(new ImageUrl(id, comicChapter, ++i, n.attr("data-src"), false));
         }
-//        Matcher m = Pattern.compile("<img class=\"lazy\" data-original=\"(http.*?jpg)\" />").matcher(html);
-//        if (m.find()) {
-//            try {
-//                int i = 0;
-//                do {
-//                    Long comicChapter = chapter.getId();
-//                    Long id = Long.parseLong(comicChapter + "0" + i);
-//                    list.add(new ImageUrl(id, comicChapter, ++i, StringUtils.match("http.*jpg", m.group(0), 0), false));
-//                } while (m.find());
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
+        //        Matcher m = Pattern.compile("<img class=\"lazy\" data-original=\"(http.*?jpg)\"
+        //        />").matcher(html); if (m.find()) {
+        //            try {
+        //                int i = 0;
+        //                do {
+        //                    Long comicChapter = chapter.getId();
+        //                    Long id = Long.parseLong(comicChapter + "0" + i);
+        //                    list.add(new ImageUrl(id, comicChapter, ++i,
+        //                    StringUtils.match("http.*jpg", m.group(0), 0), false));
+        //                } while (m.find());
+        //            } catch (Exception e) {
+        //                e.printStackTrace();
+        //            }
+        //        }
         return list;
     }
 
@@ -187,29 +199,28 @@ public class BuKa extends MangaParser {
         return getInfoRequest(cid);
     }
 
-//    @Override
-//    public String parseCheck(String html) {
-//        return new Node(html).text("div.book-detail > div.cont-list > dl:eq(2) > dd");
-//    }
-//
-//    @Override
-//    public List<Comic> parseCategory(String html, int page) {
-//        List<Comic> list = new LinkedList<>();
-//        Node body = new Node(html);
-//        for (Node node : body.list("li > a")) {
-//            String cid = node.hrefWithSplit(1);
-//            String title = node.text("h3");
-//            String cover = node.attr("div > img", "data-src");
-//            String update = node.text("dl:eq(5) > dd");
-//            String author = node.text("dl:eq(2) > dd");
-//            list.add(new Comic(TYPE, cid, title, cover, update, author));
-//        }
-//        return list;
-//    }
+    //    @Override
+    //    public String parseCheck(String html) {
+    //        return new Node(html).text("div.book-detail > div.cont-list > dl:eq(2) > dd");
+    //    }
+    //
+    //    @Override
+    //    public List<Comic> parseCategory(String html, int page) {
+    //        List<Comic> list = new LinkedList<>();
+    //        Node body = new Node(html);
+    //        for (Node node : body.list("li > a")) {
+    //            String cid = node.hrefWithSplit(1);
+    //            String title = node.text("h3");
+    //            String cover = node.attr("div > img", "data-src");
+    //            String update = node.text("dl:eq(5) > dd");
+    //            String author = node.text("dl:eq(2) > dd");
+    //            list.add(new Comic(TYPE, cid, title, cover, update, author));
+    //        }
+    //        return list;
+    //    }
 
     @Override
     public Headers getHeader() {
         return Headers.of("Referer", "https://www.bukamh.org");
     }
-
 }

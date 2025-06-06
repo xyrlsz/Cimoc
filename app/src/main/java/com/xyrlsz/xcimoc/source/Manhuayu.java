@@ -11,6 +11,7 @@ import com.xyrlsz.xcimoc.parser.NodeIterator;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import org.json.JSONException;
@@ -33,12 +34,12 @@ public class Manhuayu extends MangaParser {
     private static final String baseUrl = "https://www.manhuayu8.com";
 
     public Manhuayu(Source source) {
-        init(source, null);
+        init(source);
         setParseImagesUseWebParser(true);
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, baseUrl);
+        return new Source(null, DEFAULT_TITLE, TYPE, true);
     }
 
     @Override
@@ -112,10 +113,15 @@ public class Manhuayu extends MangaParser {
         for (Node chapterNode : chapterNodes) {
             String title = chapterNode.text();
             String path = chapterNode.href().split("/")[2].replace(".html", "");
-            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
+            list.add(new Chapter(null, sourceComic, title, path));
         }
 
-        return Lists.reverse(list);
+        list = Lists.reverse(list);
+        for (int j = 0; j < list.size(); j++) {
+            Long id = IdCreator.createChapterId(sourceComic, j);
+            list.get(j).setId(id);
+        }
+        return list;
     }
 
     @Override
@@ -130,7 +136,7 @@ public class Manhuayu extends MangaParser {
         List<Node> imageNodes = body.list(".chapter-images > .chapter-image");
         for (int i = 1; i <= imageNodes.size(); i++) {
             Long comicChapter = chapter.getId();
-            Long id = Long.parseLong(comicChapter + "0" + i);
+            Long id = IdCreator.createImageId(comicChapter, i);
             String imgUrl = imageNodes.get(i - 1).attr("data-original");
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false));
         }

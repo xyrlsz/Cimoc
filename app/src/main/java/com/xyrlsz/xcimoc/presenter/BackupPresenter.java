@@ -16,8 +16,8 @@ import com.xyrlsz.xcimoc.model.Tag;
 import com.xyrlsz.xcimoc.model.TagRef;
 import com.xyrlsz.xcimoc.rx.RxBus;
 import com.xyrlsz.xcimoc.rx.RxEvent;
-import com.xyrlsz.xcimoc.saf.DocumentFile;
-import com.xyrlsz.xcimoc.saf.WebDavDocumentFile;
+import com.xyrlsz.xcimoc.saf.CimocDocumentFile;
+import com.xyrlsz.xcimoc.saf.WebDavCimocDocumentFile;
 import com.xyrlsz.xcimoc.ui.view.BackupView;
 
 import java.util.ArrayList;
@@ -52,7 +52,7 @@ public class BackupPresenter extends BasePresenter<BackupView> {
         mContentResolver = mBaseView.getAppInstance().getContentResolver();
     }
 
-    public void loadComicFile(DocumentFile root) {
+    public void loadComicFile(CimocDocumentFile root) {
         mCompositeSubscription.add(Backup.loadFavorite(root)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<String[]>() {
@@ -68,7 +68,7 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                 }));
     }
 
-    public void loadTagFile(DocumentFile root) {
+    public void loadTagFile(CimocDocumentFile root) {
         mCompositeSubscription.add(Backup.loadTag(root)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<String[]>() {
@@ -84,7 +84,7 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                 }));
     }
 
-    public void loadSettingsFile(DocumentFile root) {
+    public void loadSettingsFile(CimocDocumentFile root) {
         mCompositeSubscription.add(Backup.loadSettings(root)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<String[]>() {
@@ -100,7 +100,7 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                 }));
     }
 
-    public void loadClearBackupFile(DocumentFile root) {
+    public void loadClearBackupFile(CimocDocumentFile root) {
         mCompositeSubscription.add(Backup.loadClearBackup(root)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<String[]>() {
@@ -116,7 +116,7 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                 }));
     }
 
-    public void saveComic(DocumentFile root) {
+    public void saveComic(CimocDocumentFile root) {
         mCompositeSubscription.add(mComicManager.listFavoriteOrHistoryInRx()
                 .map(new Func1<List<Comic>, Integer>() {
                     @Override
@@ -142,7 +142,7 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                 }));
     }
 
-    public void saveTag(DocumentFile root) {
+    public void saveTag(CimocDocumentFile root) {
         mCompositeSubscription.add(Observable.create(new Observable.OnSubscribe<Integer>() {
                     @Override
                     public void call(Subscriber<? super Integer> subscriber) {
@@ -169,7 +169,7 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                 }));
     }
 
-    public void saveSettings(DocumentFile root) {
+    public void saveSettings(CimocDocumentFile root) {
         mCompositeSubscription.add(Observable.create(new Observable.OnSubscribe<Integer>() {
                     @Override
                     public void call(Subscriber<? super Integer> subscriber) {
@@ -197,7 +197,7 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                 }));
     }
 
-    public void restoreComic(String filename, DocumentFile root) {
+    public void restoreComic(String filename, CimocDocumentFile root) {
         mCompositeSubscription.add(Backup.restoreComic(mContentResolver, root, filename)
                 .doOnNext(new Action1<List<Comic>>() {
                     @Override
@@ -220,7 +220,7 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                 }));
     }
 
-    public void restoreTag(String filename, DocumentFile root) {
+    public void restoreTag(String filename, CimocDocumentFile root) {
         mCompositeSubscription.add(Backup.restoreTag(mContentResolver, root, filename)
                 .doOnNext(new Action1<List<Pair<Tag, List<Comic>>>>() {
                     @Override
@@ -242,7 +242,7 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                 }));
     }
 
-    public void restoreSetting(String filename, DocumentFile root) {
+    public void restoreSetting(String filename, CimocDocumentFile root) {
         mCompositeSubscription.add(Backup.restoreSetting(mContentResolver, root, filename)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Map<String, ?>>() {
@@ -258,7 +258,7 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                 }));
     }
 
-    public void clearBackup(DocumentFile root) {
+    public void clearBackup(CimocDocumentFile root) {
         mCompositeSubscription.add(Backup.clearBackup(root)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Integer>() {
@@ -274,7 +274,7 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                 }));
     }
 
-    public void deleteBackup(String filename, DocumentFile root) {
+    public void deleteBackup(String filename, CimocDocumentFile root) {
         mCompositeSubscription.add(Backup.deleteBackup(root, filename)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Integer>() {
@@ -290,7 +290,7 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                 }));
     }
 
-    public void uploadBackup2Cloud(DocumentFile src, WebDavDocumentFile dst) {
+    public void uploadBackup2Cloud(CimocDocumentFile src, WebDavCimocDocumentFile dst) {
         mCompositeSubscription.add(upload2WebDav(src, dst, true)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Integer>() {
@@ -347,7 +347,7 @@ public class BackupPresenter extends BasePresenter<BackupView> {
         RxBus.getInstance().post(new RxEvent(RxEvent.EVENT_TAG_RESTORE, tags));
     }
 
-    private int groupAndSaveComicByTag(DocumentFile file) {
+    private int groupAndSaveComicByTag(CimocDocumentFile file) {
         final List<Pair<Tag, List<Comic>>> list = new LinkedList<>();
         mComicManager.runInTx(new Runnable() {
             @Override

@@ -136,7 +136,7 @@ public static java.lang.String TABLENAME;
 -keep class xyropencc.** { *; }
 -keep interface xyropencc.** { *; }
 -dontwarn xyropencc.**
-
+-keep class com.xyrlsz.xcimoc.utils.dmzj.protos.** { *; }
 # Please add these rules to your existing keep rules in order to suppress warnings.
 # This is generated automatically by the Android Gradle plugin.
 -dontwarn com.facebook.common.internal.VisibleForTesting

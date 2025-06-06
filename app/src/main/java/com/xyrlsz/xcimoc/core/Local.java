@@ -6,7 +6,7 @@ import com.xyrlsz.xcimoc.model.Chapter;
 import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.ImageUrl;
 import com.xyrlsz.xcimoc.model.Task;
-import com.xyrlsz.xcimoc.saf.DocumentFile;
+import com.xyrlsz.xcimoc.saf.CimocDocumentFile;
 import com.xyrlsz.xcimoc.source.Locality;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
@@ -29,7 +29,7 @@ public class Local {
 
     private static Pattern chapterPattern = null;
 
-    public static Observable<List<Pair<Comic, ArrayList<Task>>>> scan(final DocumentFile root) {
+    public static Observable<List<Pair<Comic, ArrayList<Task>>>> scan(final CimocDocumentFile root) {
         return Observable.create(new Observable.OnSubscribe<List<Pair<Comic, ArrayList<Task>>>>() {
             @Override
             public void call(Subscriber<? super List<Pair<Comic, ArrayList<Task>>>> subscriber) {
@@ -42,15 +42,15 @@ public class Local {
                     pair.second.add(buildTask(info.dir, info.count, true));
                     result.add(pair);
                 } else {
-                    List<DocumentFile> list = new LinkedList<>();
+                    List<CimocDocumentFile> list = new LinkedList<>();
                     list.add(root);
 
                     while (!list.isEmpty()) {
-                        DocumentFile dir = list.get(0);
+                        CimocDocumentFile dir = list.get(0);
 
                         List<ScanInfo> guessChapter = new LinkedList<>();
                         List<ScanInfo> guessComic = new LinkedList<>();
-                        List<DocumentFile> guessOther = classify(guessChapter, guessComic, dir);
+                        List<CimocDocumentFile> guessOther = classify(guessChapter, guessComic, dir);
 
                         if (guessChapter.size() > 2 * guessComic.size()) {  // 章节
                             result.add(merge(dir, guessChapter, guessComic));
@@ -69,18 +69,18 @@ public class Local {
         }).subscribeOn(Schedulers.io());
     }
 
-    public static Observable<List<ImageUrl>> images(final DocumentFile dir, final Chapter chapter) {
+    public static Observable<List<ImageUrl>> images(final CimocDocumentFile dir, final Chapter chapter) {
         return Observable.create(new Observable.OnSubscribe<List<ImageUrl>>() {
             @Override
             public void call(Subscriber<? super List<ImageUrl>> subscriber) {
-                List<DocumentFile> files = dir.listFiles(new DocumentFile.DocumentFileFilter() {
+                List<CimocDocumentFile> files = dir.listFiles(new CimocDocumentFile.DocumentFileFilter() {
                     @Override
-                    public boolean call(DocumentFile file) {
+                    public boolean call(CimocDocumentFile file) {
                         return file.isFile() && StringUtils.endWith(file.getName(), "jpg", "png", "jpeg");
                     }
-                }, new Comparator<DocumentFile>() {
+                }, new Comparator<CimocDocumentFile>() {
                     @Override
-                    public int compare(DocumentFile lhs, DocumentFile rhs) {
+                    public int compare(CimocDocumentFile lhs, CimocDocumentFile rhs) {
                         return lhs.getName().compareTo(rhs.getName());
                     }
                 });
@@ -98,7 +98,7 @@ public class Local {
     private static void countPicture(ScanInfo info) {
         String name = null;
         int other = 0;
-        for (DocumentFile file : info.dir.listFiles()) {
+        for (CimocDocumentFile file : info.dir.listFiles()) {
             if (file.isFile() && StringUtils.endWith(file.getName(), "png", "jpg", "jpeg")) {
                 ++info.count;
             } else {
@@ -115,11 +115,11 @@ public class Local {
         }
     }
 
-    private static List<DocumentFile> classify(List<ScanInfo> chapter,
-                                               List<ScanInfo> comic,
-                                               DocumentFile dir) {
-        List<DocumentFile> other = new LinkedList<>();
-        for (DocumentFile file : dir.listFiles()) {
+    private static List<CimocDocumentFile> classify(List<ScanInfo> chapter,
+                                                    List<ScanInfo> comic,
+                                                    CimocDocumentFile dir) {
+        List<CimocDocumentFile> other = new LinkedList<>();
+        for (CimocDocumentFile file : dir.listFiles()) {
             if (file.isDirectory()) {
                 ScanInfo info = new ScanInfo(file);
                 countPicture(info);
@@ -137,7 +137,7 @@ public class Local {
         return other;
     }
 
-    private static boolean isNameChapter(DocumentFile file) {
+    private static boolean isNameChapter(CimocDocumentFile file) {
         if (chapterPattern == null) {
             chapterPattern = Pattern.compile("^[^(\\[]{0,5}[0-9]+|[0-9]+.{0,5}$");
         }
@@ -145,17 +145,17 @@ public class Local {
         return matcher.find() && ((float) matcher.group().length() / file.getName().length() > 0.8);
     }
 
-    private static Comic buildComic(DocumentFile dir, String cover) {
+    private static Comic buildComic(CimocDocumentFile dir, String cover) {
         return new Comic(null, Locality.TYPE, dir.getUri().toString(), dir.getName(), cover,
                 false, true, null, null, null, null, null, null, null, null, null, 0, null, null);
     }
 
-    private static Task buildTask(DocumentFile dir, int count, boolean single) {
+    private static Task buildTask(CimocDocumentFile dir, int count, boolean single) {
         return single ? new Task(null, -1, dir.getUri().toString(), "第01话", count, count) :
                 new Task(null, -1, dir.getUri().toString(), dir.getName(), count, count);
     }
 
-    private static Pair<Comic, ArrayList<Task>> merge(DocumentFile dir, List<ScanInfo> list1, List<ScanInfo> list2) {
+    private static Pair<Comic, ArrayList<Task>> merge(CimocDocumentFile dir, List<ScanInfo> list1, List<ScanInfo> list2) {
         Pair<Comic, ArrayList<Task>> pair = Pair.create(buildComic(dir, list1.get(0).cover), new ArrayList<Task>());
         for (ScanInfo info : list1) {
             pair.second.add(buildTask(info.dir, info.count, false));
@@ -175,11 +175,11 @@ public class Local {
     }
 
     private static class ScanInfo {
-        DocumentFile dir = null;
+        CimocDocumentFile dir = null;
         String cover = null;
         int count = 0;
 
-        ScanInfo(DocumentFile dir) {
+        ScanInfo(CimocDocumentFile dir) {
             this.dir = dir;
         }
     }

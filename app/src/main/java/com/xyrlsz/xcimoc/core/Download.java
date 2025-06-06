@@ -7,7 +7,7 @@ import com.xyrlsz.xcimoc.model.Chapter;
 import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.ImageUrl;
 import com.xyrlsz.xcimoc.model.Task;
-import com.xyrlsz.xcimoc.saf.DocumentFile;
+import com.xyrlsz.xcimoc.saf.CimocDocumentFile;
 import com.xyrlsz.xcimoc.utils.DecryptionUtils;
 import com.xyrlsz.xcimoc.utils.DocumentUtils;
 
@@ -94,15 +94,15 @@ public class Download {
     private static final String FILE_INDEX = "index.cdif";
     private static final String NO_MEDIA = ".nomedia";
 
-    private static void createNoMedia(DocumentFile root) {
-        DocumentFile home = DocumentUtils.getOrCreateSubDirectory(root, DOWNLOAD);
+    private static void createNoMedia(CimocDocumentFile root) {
+        CimocDocumentFile home = DocumentUtils.getOrCreateSubDirectory(root, DOWNLOAD);
         DocumentUtils.getOrCreateFile(home, NO_MEDIA);
     }
 
-    private static DocumentFile createComicIndex(DocumentFile root, Comic comic) {
-        DocumentFile home = DocumentUtils.getOrCreateSubDirectory(root, DOWNLOAD);
-        DocumentFile source = DocumentUtils.getOrCreateSubDirectory(home, String.valueOf(comic.getSource()));
-        DocumentFile dir = DocumentUtils.getOrCreateSubDirectory(source, comic.getCid());
+    private static CimocDocumentFile createComicIndex(CimocDocumentFile root, Comic comic) {
+        CimocDocumentFile home = DocumentUtils.getOrCreateSubDirectory(root, DOWNLOAD);
+        CimocDocumentFile source = DocumentUtils.getOrCreateSubDirectory(home, String.valueOf(comic.getSource()));
+        CimocDocumentFile dir = DocumentUtils.getOrCreateSubDirectory(source, comic.getCid());
         if (dir != null) {
             return DocumentUtils.getOrCreateFile(dir, FILE_INDEX);
         }
@@ -115,11 +115,11 @@ public class Download {
      * @param list
      * @param comic
      */
-    public static void updateComicIndex(ContentResolver resolver, DocumentFile root, List<Chapter> list, Comic comic) {
+    public static void updateComicIndex(ContentResolver resolver, CimocDocumentFile root, List<Chapter> list, Comic comic) {
         try {
             createNoMedia(root);
             String jsonString = getJsonFromComic(list, comic);
-            DocumentFile file = createComicIndex(root, comic);
+            CimocDocumentFile file = createComicIndex(root, comic);
             DocumentUtils.writeStringToFile(resolver, file, "cimoc".concat(jsonString));
         } catch (Exception e) {
             e.printStackTrace();
@@ -145,15 +145,15 @@ public class Download {
         return object.toString();
     }
 
-    public static DocumentFile updateChapterIndex(ContentResolver resolver, DocumentFile root, Task task) {
+    public static CimocDocumentFile updateChapterIndex(ContentResolver resolver, CimocDocumentFile root, Task task) {
         try {
             String jsonString = getJsonFromChapter(task.getTitle(), task.getPath());
-            DocumentFile dir1 = DocumentUtils.getOrCreateSubDirectory(root, DOWNLOAD);
-            DocumentFile dir2 = DocumentUtils.getOrCreateSubDirectory(dir1, String.valueOf(task.getSource()));
-            DocumentFile dir3 = DocumentUtils.getOrCreateSubDirectory(dir2, task.getCid().replaceAll("[:/(\\\\)(\\?)<>\"(\\|)(\\.)]", ""));
-            DocumentFile dir4 = DocumentUtils.getOrCreateSubDirectory(dir3, DecryptionUtils.urlDecrypt(task.getPath().replaceAll("[:/(\\\\)(\\?)<>\"(\\|)(\\.)]", "-")));
+            CimocDocumentFile dir1 = DocumentUtils.getOrCreateSubDirectory(root, DOWNLOAD);
+            CimocDocumentFile dir2 = DocumentUtils.getOrCreateSubDirectory(dir1, String.valueOf(task.getSource()));
+            CimocDocumentFile dir3 = DocumentUtils.getOrCreateSubDirectory(dir2, task.getCid().replaceAll("[:/(\\\\)(\\?)<>\"(\\|)(\\.)]", ""));
+            CimocDocumentFile dir4 = DocumentUtils.getOrCreateSubDirectory(dir3, DecryptionUtils.urlDecrypt(task.getPath().replaceAll("[:/(\\\\)(\\?)<>\"(\\|)(\\.)]", "-")));
             if (dir4 != null) {
-                DocumentFile file = DocumentUtils.getOrCreateFile(dir4, FILE_INDEX);
+                CimocDocumentFile file = DocumentUtils.getOrCreateFile(dir4, FILE_INDEX);
                 DocumentUtils.writeStringToFile(resolver, file, "cimoc".concat(jsonString));
                 return dir4;
             }
@@ -180,18 +180,18 @@ public class Download {
      * @param comic
      * @return
      */
-    private static DocumentFile getComicDir(DocumentFile root, Comic comic, String title) {
-        DocumentFile result = DocumentUtils.findFile(root, DOWNLOAD, String.valueOf(comic.getSource()), comic.getCid());
+    private static CimocDocumentFile getComicDir(CimocDocumentFile root, Comic comic, String title) {
+        CimocDocumentFile result = DocumentUtils.findFile(root, DOWNLOAD, String.valueOf(comic.getSource()), comic.getCid());
         if (result == null) {
             result = DocumentUtils.findFile(root, DOWNLOAD, title, comic.getTitle());
         }
         return result;
     }
 
-    public static List<String> getComicIndex(ContentResolver resolver, DocumentFile root, Comic comic, String title) {
-        DocumentFile dir = getComicDir(root, comic, title);
+    public static List<String> getComicIndex(ContentResolver resolver, CimocDocumentFile root, Comic comic, String title) {
+        CimocDocumentFile dir = getComicDir(root, comic, title);
         if (dir != null) {
-            DocumentFile file = dir.findFile(FILE_INDEX);
+            CimocDocumentFile file = dir.findFile(FILE_INDEX);
             if (file != null) {
                 if (hasMagicNumber(resolver, file)) {
                     String jsonString = DocumentUtils.readLineFromFile(resolver, file);
@@ -221,8 +221,8 @@ public class Download {
         return list;
     }
 
-    public static DocumentFile getChapterDir(DocumentFile root, Comic comic, Chapter chapter, String title) {
-        DocumentFile result = DocumentUtils.findFile(root, DOWNLOAD,
+    public static CimocDocumentFile getChapterDir(CimocDocumentFile root, Comic comic, Chapter chapter, String title) {
+        CimocDocumentFile result = DocumentUtils.findFile(root, DOWNLOAD,
                 String.valueOf(comic.getSource()),
                 comic.getCid().replaceAll("[:/(\\\\)(\\?)<>\"(\\|)(\\.)]", ""),
                 DecryptionUtils.urlDecrypt(chapter.getPath().replaceAll("[:/(\\\\)(\\?)<>\"(\\|)(\\.)]", "-"))
@@ -233,19 +233,19 @@ public class Download {
         return result;
     }
 
-    public static Observable<List<ImageUrl>> images(final DocumentFile root, final Comic comic, final Chapter chapter, final String title) {
+    public static Observable<List<ImageUrl>> images(final CimocDocumentFile root, final Comic comic, final Chapter chapter, final String title) {
         return Observable.create(new Observable.OnSubscribe<List<ImageUrl>>() {
             @Override
             public void call(Subscriber<? super List<ImageUrl>> subscriber) {
-                DocumentFile dir = getChapterDir(root, comic, chapter, title);
-                List<DocumentFile> files = dir.listFiles(new DocumentFile.DocumentFileFilter() {
+                CimocDocumentFile dir = getChapterDir(root, comic, chapter, title);
+                List<CimocDocumentFile> files = dir.listFiles(new CimocDocumentFile.DocumentFileFilter() {
                     @Override
-                    public boolean call(DocumentFile file) {
+                    public boolean call(CimocDocumentFile file) {
                         return !file.getName().endsWith("cdif");
                     }
-                }, new Comparator<DocumentFile>() {
+                }, new Comparator<CimocDocumentFile>() {
                     @Override
-                    public int compare(DocumentFile lhs, DocumentFile rhs) {
+                    public int compare(CimocDocumentFile lhs, CimocDocumentFile rhs) {
                         return lhs.getName().compareTo(rhs.getName());
                     }
                 });
@@ -261,25 +261,25 @@ public class Download {
         }).subscribeOn(Schedulers.io());
     }
 
-    public static void delete(DocumentFile root, Comic comic, List<Chapter> list, String title) {
+    public static void delete(CimocDocumentFile root, Comic comic, List<Chapter> list, String title) {
         for (Chapter chapter : list) {
-            DocumentFile dir = getChapterDir(root, comic, chapter, title);
+            CimocDocumentFile dir = getChapterDir(root, comic, chapter, title);
             if (dir != null) {
                 dir.delete();
             }
         }
     }
 
-    public static void delete(DocumentFile root, Comic comic, String title) {
-        DocumentFile dir = getComicDir(root, comic, title);
+    public static void delete(CimocDocumentFile root, Comic comic, String title) {
+        CimocDocumentFile dir = getComicDir(root, comic, title);
         if (dir != null) {
             dir.delete();
         }
     }
 
-    private static String getIndexJsonFromDir(ContentResolver resolver, DocumentFile dir) {
+    private static String getIndexJsonFromDir(ContentResolver resolver, CimocDocumentFile dir) {
         if (dir.isDirectory()) {
-            DocumentFile file = dir.findFile(FILE_INDEX);
+            CimocDocumentFile file = dir.findFile(FILE_INDEX);
             if (hasMagicNumber(resolver, file)) {
                 String jsonString = DocumentUtils.readLineFromFile(resolver, file);
                 if (jsonString != null) {
@@ -290,7 +290,7 @@ public class Download {
         return null;
     }
 
-    private static Task buildTaskFromDir(ContentResolver resolver, DocumentFile dir) {
+    private static Task buildTaskFromDir(ContentResolver resolver, CimocDocumentFile dir) {
         String jsonString = getIndexJsonFromDir(resolver, dir);
         if (jsonString != null) {
             try {
@@ -314,7 +314,7 @@ public class Download {
      * 1.4.3 之后，因为有在章节文件夹内写索引文件，所以恢复起来简单
      * 1.4.3 之前，章节文件夹内没有索引文件，需要比较文件夹名称，有点麻烦，暂不实现
      */
-    private static Comic buildComicFromDir(ContentResolver resolver, DocumentFile dir) {
+    private static Comic buildComicFromDir(ContentResolver resolver, CimocDocumentFile dir) {
         String jsonString = getIndexJsonFromDir(resolver, dir);
         if (jsonString != null) {
             try {
@@ -334,20 +334,20 @@ public class Download {
         return null;
     }
 
-    public static Observable<Pair<Comic, List<Task>>> scan(final ContentResolver resolver, final DocumentFile root) {
+    public static Observable<Pair<Comic, List<Task>>> scan(final ContentResolver resolver, final CimocDocumentFile root) {
         return Observable.create(new Observable.OnSubscribe<Pair<Comic, List<Task>>>() {
             @Override
             public void call(Subscriber<? super Pair<Comic, List<Task>>> subscriber) {
                 root.refresh();
-                DocumentFile downloadDir = DocumentUtils.getOrCreateSubDirectory(root, DOWNLOAD);
+                CimocDocumentFile downloadDir = DocumentUtils.getOrCreateSubDirectory(root, DOWNLOAD);
                 if (downloadDir != null) {
-                    for (DocumentFile sourceDir : downloadDir.listFiles()) {
+                    for (CimocDocumentFile sourceDir : downloadDir.listFiles()) {
                         if (sourceDir.isDirectory()) {
-                            for (DocumentFile comicDir : sourceDir.listFiles()) {
+                            for (CimocDocumentFile comicDir : sourceDir.listFiles()) {
                                 Comic comic = buildComicFromDir(resolver, comicDir);
                                 if (comic != null) {
                                     List<Task> list = new LinkedList<>();
-                                    for (DocumentFile chapterDir : comicDir.listFiles()) {
+                                    for (CimocDocumentFile chapterDir : comicDir.listFiles()) {
                                         Task task = buildTaskFromDir(resolver, chapterDir);
                                         if (task != null) {
                                             list.add(task);
@@ -366,7 +366,7 @@ public class Download {
         }).subscribeOn(Schedulers.io());
     }
 
-    private static boolean hasMagicNumber(ContentResolver resolver, DocumentFile file) {
+    private static boolean hasMagicNumber(ContentResolver resolver, CimocDocumentFile file) {
         if (file != null) {
             char[] magic = DocumentUtils.readCharFromFile(resolver, file, 5);
             return Arrays.equals(magic, "cimoc".toCharArray());

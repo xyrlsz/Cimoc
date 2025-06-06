@@ -3,8 +3,8 @@ package com.xyrlsz.xcimoc.utils;
 import android.content.ContentResolver;
 import android.net.Uri;
 
-import com.xyrlsz.xcimoc.saf.DocumentFile;
-import com.xyrlsz.xcimoc.saf.WebDavDocumentFile;
+import com.xyrlsz.xcimoc.saf.CimocDocumentFile;
+import com.xyrlsz.xcimoc.saf.WebDavCimocDocumentFile;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -27,8 +27,8 @@ import java.util.List;
 
 public class DocumentUtils {
 
-    public static DocumentFile getOrCreateFile(DocumentFile parent, String displayName) {
-        DocumentFile file = parent.findFile(displayName);
+    public static CimocDocumentFile getOrCreateFile(CimocDocumentFile parent, String displayName) {
+        CimocDocumentFile file = parent.findFile(displayName);
         if (file != null) {
             if (file.isFile()) {
                 return file;
@@ -38,7 +38,7 @@ public class DocumentUtils {
         return parent.createFile(displayName);
     }
 
-    public static DocumentFile findFile(DocumentFile parent, String... filenames) {
+    public static CimocDocumentFile findFile(CimocDocumentFile parent, String... filenames) {
         if (parent != null) {
             for (String filename : filenames) {
                 parent = parent.findFile(filename);
@@ -50,10 +50,10 @@ public class DocumentUtils {
         return parent;
     }
 
-    public static int countWithoutSuffix(DocumentFile dir, String suffix) {
+    public static int countWithoutSuffix(CimocDocumentFile dir, String suffix) {
         int count = 0;
         if (dir.isDirectory()) {
-            for (DocumentFile file : dir.listFiles()) {
+            for (CimocDocumentFile file : dir.listFiles()) {
                 if (file.isFile() && !file.getName().endsWith(suffix)) {
                     ++count;
                 }
@@ -62,10 +62,10 @@ public class DocumentUtils {
         return count;
     }
 
-    public static String[] listFilesWithSuffix(DocumentFile dir, String... suffix) {
+    public static String[] listFilesWithSuffix(CimocDocumentFile dir, String... suffix) {
         List<String> list = new ArrayList<>();
         if (dir.isDirectory()) {
-            for (DocumentFile file : dir.listFiles()) {
+            for (CimocDocumentFile file : dir.listFiles()) {
                 if (file.isFile()) {
                     String name = file.getName();
                     for (String str : suffix) {
@@ -80,8 +80,8 @@ public class DocumentUtils {
         return list.toArray(new String[list.size()]);
     }
 
-    public static DocumentFile getOrCreateSubDirectory(DocumentFile parent, String displayName) {
-        DocumentFile file = parent.findFile(displayName);
+    public static CimocDocumentFile getOrCreateSubDirectory(CimocDocumentFile parent, String displayName) {
+        CimocDocumentFile file = parent.findFile(displayName);
         if (file != null) {
             if (file.isDirectory()) {
                 return file;
@@ -91,13 +91,13 @@ public class DocumentUtils {
         return parent.createDirectory(displayName);
     }
 
-    public static String readLineFromFile(ContentResolver resolver, DocumentFile file) {
+    public static String readLineFromFile(ContentResolver resolver, CimocDocumentFile file) {
         InputStream input = null;
         BufferedReader reader = null;
         try {
             Uri fileData = file.getUri();
             if (UriUtils.isHttpOrHttps(fileData)) {
-                input = WebDavDocumentFile.getInputStream(fileData.toString());
+                input = WebDavCimocDocumentFile.getInputStream(fileData.toString());
             } else {
                 input = resolver.openInputStream(fileData);
             }
@@ -114,14 +114,14 @@ public class DocumentUtils {
         return null;
     }
 
-    public static char[] readCharFromFile(ContentResolver resolver, DocumentFile file, int count) {
+    public static char[] readCharFromFile(ContentResolver resolver, CimocDocumentFile file, int count) {
         InputStream input = null;
         BufferedReader reader = null;
         try {
             Uri fileData = file.getUri();
             if (UriUtils.isHttpOrHttps(fileData)) {
-                new WebDavDocumentFile(null);
-                input = WebDavDocumentFile.getInputStream(fileData.toString());
+                new WebDavCimocDocumentFile(null);
+                input = WebDavCimocDocumentFile.getInputStream(fileData.toString());
             } else {
                 input = resolver.openInputStream(fileData);
             }
@@ -141,7 +141,32 @@ public class DocumentUtils {
         return null;
     }
 
-    public static void writeStringToFile(ContentResolver resolver, DocumentFile file, String data) throws IOException {
+    public static void writeBytesToFile(ContentResolver resolver, CimocDocumentFile file, byte[] bytes) throws IOException {
+        OutputStream output = null;
+        BufferedWriter writer = null;
+        File tmp = null;
+        try {
+            Uri fileData = file.getUri();
+            if (UriUtils.isHttpOrHttps(fileData)) {
+                tmp = File.createTempFile(System.currentTimeMillis() + "", "tmp");
+                fileData = Uri.fromFile(tmp);
+            }
+            output = resolver.openOutputStream(fileData);
+            if (output != null) {
+                output.write(bytes);
+                output.flush();
+                if (tmp != null) {
+                    WebDavCimocDocumentFile.UploadFile(tmp, file.getUri().toString());
+                }
+            } else {
+                throw new IOException();
+            }
+        } finally {
+            closeStream(output, writer);
+        }
+    }
+
+    public static void writeStringToFile(ContentResolver resolver, CimocDocumentFile file, String data) throws IOException {
         OutputStream output = null;
         BufferedWriter writer = null;
         File tmp = null;
@@ -157,7 +182,7 @@ public class DocumentUtils {
                 writer.write(data);
                 writer.flush();
                 if (tmp != null) {
-                    WebDavDocumentFile.UploadFile(tmp, file.getUri().toString());
+                    WebDavCimocDocumentFile.UploadFile(tmp, file.getUri().toString());
                 }
             } else {
                 throw new IOException();
@@ -167,12 +192,12 @@ public class DocumentUtils {
         }
     }
 
-    public static void writeBinaryToFile(ContentResolver resolver, DocumentFile file, InputStream input) throws IOException {
+    public static void writeBinaryToFile(ContentResolver resolver, CimocDocumentFile file, InputStream input) throws IOException {
         BufferedInputStream inputStream = null;
         BufferedOutputStream outputStream = null;
         boolean isHttp = UriUtils.isHttpOrHttps(file.getUri());
         if (isHttp) {
-            WebDavDocumentFile.UploadStreamFile(input, file.getUri().toString());
+            WebDavCimocDocumentFile.UploadStreamFile(input, file.getUri().toString());
             return;
         }
         try {
@@ -198,7 +223,7 @@ public class DocumentUtils {
         }
     }
 
-    public static void writeBinaryToFile(ContentResolver resolver, DocumentFile src, DocumentFile dst) throws IOException {
+    public static void writeBinaryToFile(ContentResolver resolver, CimocDocumentFile src, CimocDocumentFile dst) throws IOException {
         InputStream input = resolver.openInputStream(src.getUri());
         writeBinaryToFile(resolver, dst, input);
     }
@@ -214,5 +239,17 @@ public class DocumentUtils {
             }
         }
     }
+
+    public static boolean copyFile(ContentResolver resolver, CimocDocumentFile src, CimocDocumentFile dst) {
+
+        try {
+            writeBinaryToFile(resolver, src, dst);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 
 }

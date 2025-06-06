@@ -1,5 +1,7 @@
 package com.xyrlsz.xcimoc.source;
 
+import static com.xyrlsz.xcimoc.utils.DecryptionUtils.evalDecrypt;
+
 import com.google.common.collect.Lists;
 import com.xyrlsz.xcimoc.model.Chapter;
 import com.xyrlsz.xcimoc.model.Comic;
@@ -11,6 +13,7 @@ import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
 import com.xyrlsz.xcimoc.utils.DecryptionUtils;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import org.json.JSONArray;
@@ -26,8 +29,6 @@ import java.util.regex.Pattern;
 import okhttp3.Headers;
 import okhttp3.Request;
 
-import static com.xyrlsz.xcimoc.utils.DecryptionUtils.evalDecrypt;
-
 /**
  * Created by FEILONG on 2017/12/21.
  * need fix
@@ -39,11 +40,11 @@ public class Tencent extends MangaParser {
     public static final String DEFAULT_TITLE = "腾讯动漫";
 
     public Tencent(Source source) {
-        init(source, null);
+        init(source);
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true,"https://m.ac.qq.com");
+        return new Source(null, DEFAULT_TITLE, TYPE, true);
     }
 
     @Override
@@ -112,13 +113,18 @@ public class Tencent extends MangaParser {
     @Override
     public List<Chapter> parseChapter(String html, Comic comic, Long sourceComic) {
         List<Chapter> list = new LinkedList<>();
-        int i=0;
+        int i = 0;
         for (Node node : new Node(html).list("ul.normal > li.chapter-item")) {
             String title = node.text("a");
             String path = node.href("a").substring("/chapter/index/id/518333/cid/".length());
-            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
+            list.add(new Chapter(null, sourceComic, title, path));
         }
-        return Lists.reverse(list);
+        list = Lists.reverse(list);
+        for (int j = 0; j < list.size(); j++) {
+            Long id = IdCreator.createChapterId(sourceComic, j);
+            list.get(j).setId(id);
+        }
+        return list;
     }
 
     @Override
@@ -163,7 +169,7 @@ public class Tencent extends MangaParser {
                 JSONArray array = object.getJSONArray("picture");
                 for (int i = 0; i != array.length(); ++i) {
                     Long comicChapter = chapter.getId();
-                    Long id = Long.parseLong(comicChapter + "0" + i);
+                    Long id = IdCreator.createImageId(comicChapter, i);
                     list.add(new ImageUrl(id, comicChapter, i + 1, array.getJSONObject(i).getString("url"), false));
                 }
             } catch (Exception e) {

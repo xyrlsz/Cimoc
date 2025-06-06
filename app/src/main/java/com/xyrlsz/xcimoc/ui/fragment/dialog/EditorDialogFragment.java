@@ -38,7 +38,8 @@ public class EditorDialogFragment extends DialogFragment implements DialogInterf
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         View view = getActivity().getLayoutInflater().inflate(R.layout.dialog_editor, null);
         mEditText = view.findViewById(R.id.dialog_editor_text);
-        mEditText.setText(getArguments().getString(DialogCaller.EXTRA_DIALOG_CONTENT));
+       String s = getArguments().getString(DialogCaller.EXTRA_DIALOG_CONTENT);
+        mEditText.setText(s);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(getArguments().getInt(DialogCaller.EXTRA_DIALOG_TITLE))
                 .setView(view)

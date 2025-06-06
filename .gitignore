@@ -30,3 +30,5 @@ captures/
 /gradle.properties
 /app/src/main/BrowserFilter-data.xml
 /app/debug/
+app/libs/xyropencc-sources.jar
+app/libs/xyropencc.aar

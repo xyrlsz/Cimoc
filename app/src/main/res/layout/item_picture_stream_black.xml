@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     fresco:failureImage="@drawable/materialsymbolscloseblack"
     fresco:failureImageScaleType="center"
-    fresco:progressBarImage="@drawable/reader_progress"
+    fresco:progressBarImage="@drawable/reader_progress_2"
     fresco:progressBarImageScaleType="center"
     fresco:retryImage="@drawable/raphaelrefreshblack"
     fresco:retryImageScaleType="center" />

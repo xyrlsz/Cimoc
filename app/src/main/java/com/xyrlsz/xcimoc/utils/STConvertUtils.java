@@ -5,7 +5,7 @@ import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.manager.PreferenceManager;
 
 import taobe.tec.jcc.JChineseConvertor;
-import xyropencc.Xyropencc;
+//import xyropencc.Xyropencc;
 
 public class STConvertUtils {
 
@@ -17,8 +17,8 @@ public class STConvertUtils {
                     return JChineseConvertor.getInstance().t2s(s);
                 case PreferenceManager.ST_OPENCC4J:
                     return ZhConverterUtil.toSimple(s);
-                case PreferenceManager.ST_OPENCCGO:
-                    return Xyropencc.t2S(s);
+//                case PreferenceManager.ST_OPENCCGO:
+//                    return Xyropencc.t2S(s);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -35,8 +35,8 @@ public class STConvertUtils {
                     return JChineseConvertor.getInstance().s2t(s);
                 case PreferenceManager.ST_OPENCC4J:
                     return ZhConverterUtil.toTraditional(s);
-                case PreferenceManager.ST_OPENCCGO:
-                    return Xyropencc.s2T(s);
+//                case PreferenceManager.ST_OPENCCGO:
+//                    return Xyropencc.s2T(s);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -56,8 +56,8 @@ public class STConvertUtils {
                             return JChineseConvertor.getInstance().t2s(s);
                         case PreferenceManager.ST_OPENCC4J:
                             return ZhConverterUtil.toSimple(s);
-                        case PreferenceManager.ST_OPENCCGO:
-                            return Xyropencc.t2S(s);
+//                        case PreferenceManager.ST_OPENCCGO:
+//                            return Xyropencc.t2S(s);
                     }
 
                 } catch (Exception e) {
@@ -71,8 +71,8 @@ public class STConvertUtils {
                             return JChineseConvertor.getInstance().s2t(s);
                         case PreferenceManager.ST_OPENCC4J:
                             return ZhConverterUtil.toTraditional(s);
-                        case PreferenceManager.ST_OPENCCGO:
-                            return Xyropencc.s2T(s);
+//                        case PreferenceManager.ST_OPENCCGO:
+//                            return Xyropencc.s2T(s);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

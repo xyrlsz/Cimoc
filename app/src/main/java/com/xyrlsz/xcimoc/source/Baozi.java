@@ -10,6 +10,7 @@ import com.xyrlsz.xcimoc.parser.NodeIterator;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -34,11 +35,11 @@ public class Baozi extends MangaParser {
     private static final String baseUrl = "https://cn.baozimhcn.com";
 
     public Baozi(Source source) {
-        init(source, null);
+        init(source);
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, baseUrl);
+        return new Source(null, DEFAULT_TITLE, TYPE, true);
     }
 
     @Override
@@ -104,7 +105,11 @@ public class Baozi extends MangaParser {
     public List<Chapter> parseChapter(String html, Comic comic, Long sourceComic) {
         List<Chapter> list = new LinkedList<>();
         Node body = new Node(html);
-        List<Node> chapterNodes = Lists.reverse(body.list(".comics-chapters"));
+
+        List<Node> chapterNodes = body.list(".comics-chapters");
+        if (html.contains("章节目录") || html.contains("章節目錄")) {
+            chapterNodes = Lists.reverse(chapterNodes);
+        }
         int i = 0;
         Set<String> pathSet = new HashSet<>();
         for (Node chapterNode : chapterNodes) {
@@ -114,7 +119,8 @@ public class Baozi extends MangaParser {
                 continue;
             }
             pathSet.add(path);
-            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
+            Long id = IdCreator.createChapterId(sourceComic, i++);
+            list.add(new Chapter(id, sourceComic, title, path));
         }
         return list;
     }
@@ -133,7 +139,7 @@ public class Baozi extends MangaParser {
         List<Node> imageNodes = body.list("amp-img > noscript");
         for (int i = 1; i <= imageNodes.size(); i++) {
             Long comicChapter = chapter.getId();
-            Long id = Long.parseLong(comicChapter + "0" + i);
+            Long id = IdCreator.createImageId(comicChapter, i);
             String imgUrl = imageNodes.get(i - 1).src("img");
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false));
         }
