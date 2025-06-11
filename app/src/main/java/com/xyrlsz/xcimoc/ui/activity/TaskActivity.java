@@ -24,6 +24,7 @@ import com.xyrlsz.xcimoc.ui.adapter.BaseAdapter;
 import com.xyrlsz.xcimoc.ui.adapter.TaskAdapter;
 import com.xyrlsz.xcimoc.ui.fragment.dialog.ItemDialogFragment;
 import com.xyrlsz.xcimoc.ui.view.TaskView;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
 
@@ -174,9 +175,9 @@ public class TaskActivity extends CoordinatorActivity implements TaskView {
                     case OPERATION_DELETE:
                         showProgressDialog();
                         List<Chapter> list = new ArrayList<>(1);
-                        Long sourceComic =  Long.parseLong(mSavedTask.getSource()+"0"+mSavedTask.getId());
-                        Long id = Long.parseLong(sourceComic+"0"+0);
-                        list.add(new Chapter(id,sourceComic,mSavedTask.getTitle(), mSavedTask.getPath(), mSavedTask.getId()));
+                        Long sourceComic = IdCreator.createSourceComic(mSavedTask.getSource(), mSavedTask.getId());
+                        Long id = IdCreator.createChapterId(sourceComic, 0);
+                        list.add(new Chapter(id, sourceComic, mSavedTask.getTitle(), mSavedTask.getPath(), mSavedTask.getId()));
                         if (!mPresenter.getComic().getLocal()) {
                             mBinder.getService().removeDownload(mSavedTask.getId());
                         }
@@ -203,27 +204,27 @@ public class TaskActivity extends CoordinatorActivity implements TaskView {
                     ArrayList<Chapter> list = new ArrayList<>(mTaskAdapter.getItemCount());
                     int i = 0;
                     for (Task task : mTaskAdapter.getDateSet()) {
-                        Long sourceComic = Long.parseLong(task.getSource()+"0"+task.getId());
-                        Long id = Long.parseLong(sourceComic+"0"+i);
-                        list.add(new Chapter(id,sourceComic, task.getTitle(), task.getPath(), task.getId()));
+                        Long sourceComic = IdCreator.createSourceComic(task.getSource(), task.getId());
+                        Long id = IdCreator.createChapterId(sourceComic, i++);
+                        list.add(new Chapter(id, sourceComic, task.getTitle(), task.getPath(), task.getId()));
                     }
-                    Intent intent = ChapterActivity.createIntent(this, list);
-                    startActivityForResult(intent, REQUEST_CODE_DELETE);
+                    Intent intent1 = ChapterActivity.createIntent(this, list);
+                    startActivityForResult(intent1, REQUEST_CODE_DELETE);
                     break;
                 case R.id.detail_search_title:
                     if (!StringUtils.isEmpty(mPresenter.getComic().getTitle())) {
-                        intent = ResultActivity.createIntent(this, mPresenter.getComic().getTitle(),
+                        Intent intent2 = ResultActivity.createIntent(this, mPresenter.getComic().getTitle(),
                                 null, ResultActivity.LAUNCH_MODE_SEARCH);
-                        startActivity(intent);
+                        startActivity(intent2);
                     } else {
                         showSnackbar(R.string.common_keyword_empty);
                     }
                     break;
                 case R.id.detail_search_author:
                     if (!StringUtils.isEmpty(mPresenter.getComic().getAuthor())) {
-                        intent = ResultActivity.createIntent(this, mPresenter.getComic().getAuthor(),
+                        Intent intent3 = ResultActivity.createIntent(this, mPresenter.getComic().getAuthor(),
                                 null, ResultActivity.LAUNCH_MODE_SEARCH);
-                        startActivity(intent);
+                        startActivity(intent3);
                     } else {
                         showSnackbar(R.string.common_keyword_empty);
                     }
@@ -240,14 +241,14 @@ public class TaskActivity extends CoordinatorActivity implements TaskView {
 
     private void startReader(String path, boolean preview) {
         List<Chapter> list = new ArrayList<>();
-        int i=0;
+        int i = 0;
         for (Task t : mTaskAdapter.getDateSet()) {
-            Long sourceComic = Long.parseLong(t.getSource()+"0"+t.getId());
-            Long id = Long.parseLong(sourceComic+""+i);
+            Long sourceComic = IdCreator.createSourceComic(t.getSource(), t.getId());
+            Long id = IdCreator.createChapterId(sourceComic, i);
             if (preview && t.getProgress() > 0) {
-                list.add(new Chapter(id,sourceComic, t.getTitle(), t.getPath(), t.getProgress(), true, true, t.getId()));
+                list.add(new Chapter(id, sourceComic, t.getTitle(), t.getPath(), t.getProgress(), true, true, t.getId()));
             } else if (t.getState() == Task.STATE_FINISH) {
-                list.add(new Chapter(id,sourceComic, t.getTitle(), t.getPath(), t.getMax(), true, true, t.getId()));
+                list.add(new Chapter(id, sourceComic, t.getTitle(), t.getPath(), t.getMax(), true, true, t.getId()));
             }
             i++;
         }

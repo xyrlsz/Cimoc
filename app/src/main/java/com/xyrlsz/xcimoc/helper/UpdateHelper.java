@@ -152,7 +152,7 @@ public class UpdateHelper {
     /**
      * 初始化图源
      */
-    private static void initSource(DaoSession session) {
+  /*  private static void initSource(DaoSession session) {
         initComicSourceTable();
 //        List<Source> list = new ArrayList<>(ComicSourceTable.values());
 //        list.add(IKanman.getDefaultSource());
@@ -215,7 +215,7 @@ public class UpdateHelper {
 //        session.getSourceDao().insertOrReplaceInTx(list);
 
     }
-
+*/
     private static void updateChapterTable(final DaoSession session) {
         addChapterCountColumn(session.getDatabase());
     }

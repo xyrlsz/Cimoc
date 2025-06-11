@@ -13,7 +13,12 @@ public class IdCreator {
     }
 
     public static Long createSourceComic(Comic comic) {
-        return Long.parseLong(comic.getSource() + "0" + (comic.getId() == null ? "00" : comic.getId()));
+        return createSourceComic(comic.getSource(), comic.getId());
+    }
+
+    public static Long createSourceComic(int source, Long id) {
+//        return Long.parseLong(source + "0" + (id == null? "00" : id));
+        return (id << 16) | (source & 0xFFFF);
     }
 
 }

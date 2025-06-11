@@ -13,6 +13,7 @@ import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.WebParser;
 import com.xyrlsz.xcimoc.rx.RxBus;
 import com.xyrlsz.xcimoc.rx.RxEvent;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -161,7 +162,7 @@ public class Manga {
                                 html = getResponseBody(App.getHttpClient(), request);
                             }
                         }
-                        Long sourceComic = Long.parseLong(comic.getSource() + "0" + (comic.getId() == null ? "00" : comic.getId()));
+                        Long sourceComic = IdCreator.createSourceComic(comic);
                         list = parser.parseChapter(html, comic, sourceComic);
                         if (list == null) {
                             list = parser.parseChapter(html);
