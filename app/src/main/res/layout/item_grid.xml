@@ -11,27 +11,18 @@
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_margin="5dp"
         fresco:cardCornerRadius="7dp">
 
         <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
             <com.facebook.drawee.view.SimpleDraweeView
                 android:id="@+id/item_grid_image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 fresco:actualImageScaleType="focusCrop" />
-
-            <androidx.cardview.widget.CardView
-                android:id="@+id/item_grid_symbol"
-                android:layout_width="14dp"
-                android:layout_height="14dp"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentEnd="true"
-                android:backgroundTint="?attr/colorAccent"
-                android:visibility="invisible"
-                fresco:cardCornerRadius="7dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -61,7 +52,16 @@
                     android:textSize="12sp" />
             </LinearLayout>
         </RelativeLayout>
-
     </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/item_grid_symbol"
+        android:layout_width="14dp"
+        android:layout_height="14dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:backgroundTint="?attr/colorAccent"
+        android:visibility="invisible"
+        fresco:cardCornerRadius="7dp" />
 
 </RelativeLayout>
