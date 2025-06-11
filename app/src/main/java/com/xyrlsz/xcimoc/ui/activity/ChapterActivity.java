@@ -4,13 +4,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.global.Extra;
@@ -99,7 +101,7 @@ public class ChapterActivity extends BackActivity implements BaseAdapter.OnItemC
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (!isProgressBarShown()) {
             switch (item.getItemId()) {
                 case R.id.chapter_all:
@@ -110,13 +112,17 @@ public class ChapterActivity extends BackActivity implements BaseAdapter.OnItemC
                     break;
                 case R.id.chapter_none:
                     for (Switcher<Chapter> switcher : mChapterAdapter.getDateSet()) {
-                        switcher.setEnable(false);
+                        if (!(switcher.getElement().isDownload())) {
+                            switcher.setEnable(false);
+                        }
                     }
                     mChapterAdapter.notifyDataSetChanged();
                     break;
                 case R.id.chapter_opposition:
                     for (Switcher<Chapter> switcher : mChapterAdapter.getDateSet()) {
-                        switcher.setEnable(!switcher.isEnable());
+                        if (!(switcher.getElement().isDownload())) {
+                            switcher.setEnable(!switcher.isEnable());
+                        }
                     }
                     mChapterAdapter.notifyDataSetChanged();
                     break;
