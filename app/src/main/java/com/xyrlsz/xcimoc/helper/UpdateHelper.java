@@ -51,12 +51,14 @@ public class UpdateHelper {
     private static final int VERSION = BuildConfig.VERSION_CODE;
 
     private static final Map<Integer, Source> ComicSourceTable = new HashMap<>();
-    public static  Map<Integer, Source> getComicSourceTable() {
-        if(ComicSourceTable.isEmpty()){
+
+    public static Map<Integer, Source> getComicSourceTable() {
+        if (ComicSourceTable.isEmpty()) {
             initComicSourceTable();
         }
         return ComicSourceTable;
     }
+
     private static void initComicSourceTable() {
 
         if (ComicSourceTable.isEmpty()) {
@@ -256,12 +258,28 @@ public class UpdateHelper {
         for (Source source : sourceList) {
             if (ComicSourceTable.containsKey(source.getType())) {
                 Source sourceToUpdate = ComicSourceTable.get(source.getType());
-                if (sourceToUpdate != null && (!source.getTitle().equals(sourceToUpdate.getTitle()) ||
-                        !source.getBaseUrl().equals(sourceToUpdate.getBaseUrl()))) {
-                    source.setTitle(sourceToUpdate.getTitle());
-                    source.setBaseUrl(sourceToUpdate.getBaseUrl());
-                    sourceDao.update(source);
+//                if (sourceToUpdate != null && (!source.getTitle().equals(sourceToUpdate.getTitle()) ||
+//                        !source.getBaseUrl().equals(sourceToUpdate.getBaseUrl()))) {
+//                    source.setTitle(sourceToUpdate.getTitle());
+//                    source.setBaseUrl(sourceToUpdate.getBaseUrl());
+//                    sourceDao.update(source);
+//                }
+                if (sourceToUpdate != null) {
+                    String title1 = source.getTitle();
+                    String title2 = sourceToUpdate.getTitle();
+                    String baseUrl1 = source.getBaseUrl();
+                    String baseUrl2 = sourceToUpdate.getBaseUrl();
+
+                    boolean titleDiff = (title1 == null && title2 != null) || (title1 != null && !title1.equals(title2));
+                    boolean baseUrlDiff = (baseUrl1 == null && baseUrl2 != null) || (baseUrl1 != null && !baseUrl1.equals(baseUrl2));
+
+                    if (titleDiff || baseUrlDiff) {
+                        source.setTitle(title2);
+                        source.setBaseUrl(baseUrl2);
+                        sourceDao.update(source);
+                    }
                 }
+
             }
         }
     }

@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import rx.Observable;
 import rx.Subscriber;
@@ -34,9 +35,10 @@ public class Storage {
     private static final String BACKUP = "backup";
 
     public static CimocDocumentFile initRoot(Context context, String uri) {
-        if (uri == null) {
+        if (uri == null || uri.isEmpty()) {
 //            File file = new File(Environment.getExternalStorageDirectory(), "Cimoc");
             File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "Cimoc");
+//            File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "Cimoc");
             if (file.exists() || file.mkdirs()) {
                 return CimocDocumentFile.fromFile(file);
             } else {
@@ -45,7 +47,7 @@ public class Storage {
         } else if (uri.startsWith("content")) {
             return CimocDocumentFile.fromTreeUri(context, Uri.parse(uri));
         } else if (uri.startsWith("file")) {
-            return CimocDocumentFile.fromFile(new File(Uri.parse(uri).getPath()));
+            return CimocDocumentFile.fromFile(new File(Objects.requireNonNull(Uri.parse(uri).getPath())));
         } else {
             return CimocDocumentFile.fromFile(new File(uri, "Cimoc"));
         }

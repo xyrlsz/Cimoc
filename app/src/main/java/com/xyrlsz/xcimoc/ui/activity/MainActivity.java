@@ -5,6 +5,7 @@ import static com.xyrlsz.xcimoc.Constants.GITHUB_RELEASE_URL;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -490,6 +491,11 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
             case DIALOG_REQUEST_PERMISSION:
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     // Android 13 (API 33) and above
+                    if (!Environment.isExternalStorageManager()) {
+                        Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                        startActivity(intent);
+
+                    }
                     ActivityCompat.requestPermissions(this, new String[]{
                             Manifest.permission.READ_MEDIA_IMAGES,
                             Manifest.permission.READ_MEDIA_VIDEO,
@@ -497,6 +503,8 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
                             Manifest.permission.READ_PHONE_STATE,
                             Manifest.permission.POST_NOTIFICATIONS
                     }, Constants.RE_CODE_STORAGE_PERMISSION);
+
+
                 } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     // Android 11 (API 30) and Android 12 (API 31-32)
                     if (!Environment.isExternalStorageManager()) {
@@ -685,10 +693,17 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
 //    }
 
     private void showPermission() {
-        if (!PermissionUtils.hasAllPermissions(this)) {
-            MessageDialogFragment fragment = MessageDialogFragment.newInstance(R.string.main_permission,
-                    R.string.main_permission_content, false, DIALOG_REQUEST_PERMISSION);
-            fragment.show(getSupportFragmentManager(), null);
+        SharedPreferences sharedPreferences = getSharedPreferences("showPermission", MODE_PRIVATE);
+        boolean isFirstRun = sharedPreferences.getBoolean("isFirstRun", true);
+        if (isFirstRun) {
+            if (!PermissionUtils.hasAllPermissions(this)) {
+                MessageDialogFragment fragment = MessageDialogFragment.newInstance(R.string.main_permission,
+                        R.string.main_permission_content, false, DIALOG_REQUEST_PERMISSION);
+                fragment.show(getSupportFragmentManager(), null);
+            }
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("isFirstRun", false);
+            editor.apply();
         }
     }
 

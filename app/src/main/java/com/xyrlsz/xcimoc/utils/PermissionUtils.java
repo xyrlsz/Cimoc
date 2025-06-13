@@ -15,15 +15,29 @@ import androidx.core.content.ContextCompat;
 
 public class PermissionUtils {
 
+//    public static boolean hasStoragePermission(CimocDocumentFile documentFile) {
+//        if (documentFile == null || !documentFile.exists()) {
+//            return false;
+//        }
+//
+//        // 检查是否可读可写
+//        boolean canRead = documentFile.canRead();
+//        boolean canWrite = documentFile.canWrite();
+//
+//        return canRead && canWrite;
+//    }
+
     public static boolean hasStoragePermission(Activity activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             // Android 13 (API 33) and above - use granular media permissions
             int imagesResult = checkPermission(activity, Manifest.permission.READ_MEDIA_IMAGES);
             int videoResult = checkPermission(activity, Manifest.permission.READ_MEDIA_VIDEO);
             int audioResult = checkPermission(activity, Manifest.permission.READ_MEDIA_AUDIO);
+            boolean check = Environment.isExternalStorageManager();
             return imagesResult == PackageManager.PERMISSION_GRANTED &&
                     videoResult == PackageManager.PERMISSION_GRANTED &&
-                    audioResult == PackageManager.PERMISSION_GRANTED;
+                    audioResult == PackageManager.PERMISSION_GRANTED &&
+                    check;
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             // Android 11 (API 30) and Android 12 (API 31-32)
             // Check for MANAGE_EXTERNAL_STORAGE permission
