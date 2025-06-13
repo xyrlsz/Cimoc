@@ -190,9 +190,9 @@ public class ComicUtils {
                             } else {
                                 return false;
                             }
-
+                            int imgDigits = String.valueOf(imageUrls.size()).length();
                             if (srcFile != null && srcFile.exists()) {
-                                String imgName = i + "_" + srcFile.getName(); // 防止重名
+                                String imgName = String.format("%0" + imgDigits + "d", i + 1) + "_" + srcFile.getName(); // 防止重名
                                 CimocDocumentFile destFile = DocumentUtils.getOrCreateFile(chapterRoot, imgName);
                                 if (destFile != null) {
                                     DocumentUtils.copyFile(context.getContentResolver(), srcFile, destFile);
