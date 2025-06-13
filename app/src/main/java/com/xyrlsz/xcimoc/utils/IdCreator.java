@@ -18,6 +18,7 @@ public class IdCreator {
 
     public static Long createSourceComic(int source, Long id) {
 //        return Long.parseLong(source + "0" + (id == null? "00" : id));
+        id = id == null? 0 : id;
         return (id << 16) | (source & 0xFFFF);
     }
 
