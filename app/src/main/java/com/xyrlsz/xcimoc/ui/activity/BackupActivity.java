@@ -77,7 +77,7 @@ public class BackupActivity extends BackActivity implements BackupView {
     @OnClick(R.id.backup_save_comic)
     void onSaveFavoriteClick() {
         showProgressDialog();
-        if (PermissionUtils.hasStoragePermission(this)) {
+        if (PermissionUtils.hasStoragePermission(getAppInstance().getDocumentFile())) {
             mPresenter.saveComic(getAppInstance().getDocumentFile());
         } else {
             onFileLoadFail();
@@ -88,7 +88,7 @@ public class BackupActivity extends BackActivity implements BackupView {
     @OnClick(R.id.backup_save_tag)
     void onSaveTagClick() {
         showProgressDialog();
-        if (PermissionUtils.hasStoragePermission(this)) {
+        if (PermissionUtils.hasStoragePermission(getAppInstance().getDocumentFile())) {
             mPresenter.saveTag(getAppInstance().getDocumentFile());
         } else {
             onFileLoadFail();
@@ -98,7 +98,7 @@ public class BackupActivity extends BackActivity implements BackupView {
     @OnClick(R.id.backup_save_settings)
     void onSaveSettingsClick() {
         showProgressDialog();
-        if (PermissionUtils.hasStoragePermission(this)) {
+        if (PermissionUtils.hasStoragePermission(getAppInstance().getDocumentFile())) {
             mPresenter.saveSettings(getAppInstance().getDocumentFile());
         } else {
             onFileLoadFail();
@@ -108,7 +108,7 @@ public class BackupActivity extends BackActivity implements BackupView {
     @OnClick(R.id.backup_restore_comic)
     void onRestoreFavoriteClick() {
         showProgressDialog();
-        if (PermissionUtils.hasStoragePermission(this)) {
+        if (PermissionUtils.hasStoragePermission(getAppInstance().getDocumentFile())) {
             mCimocDocumentFile = getAppInstance().getDocumentFile();
             mPresenter.loadComicFile(mCimocDocumentFile);
         } else {
@@ -119,7 +119,7 @@ public class BackupActivity extends BackActivity implements BackupView {
     @OnClick(R.id.backup_restore_tag)
     void onRestoreTagClick() {
         showProgressDialog();
-        if (PermissionUtils.hasStoragePermission(this)) {
+        if (PermissionUtils.hasStoragePermission(getAppInstance().getDocumentFile())) {
             mCimocDocumentFile = getAppInstance().getDocumentFile();
             mPresenter.loadTagFile(mCimocDocumentFile);
         } else {
@@ -130,7 +130,7 @@ public class BackupActivity extends BackActivity implements BackupView {
     @OnClick(R.id.backup_restore_settings)
     void onRestoreSettingsClick() {
         showProgressDialog();
-        if (PermissionUtils.hasStoragePermission(this)) {
+        if (PermissionUtils.hasStoragePermission(getAppInstance().getDocumentFile())) {
             mCimocDocumentFile = getAppInstance().getDocumentFile();
             mPresenter.loadSettingsFile(mCimocDocumentFile);
         } else {
@@ -141,7 +141,7 @@ public class BackupActivity extends BackActivity implements BackupView {
     @OnClick(R.id.backup_clear_record)
     void onClearRecordClick() {
         showProgressDialog();
-        if (PermissionUtils.hasStoragePermission(this)) {
+        if (PermissionUtils.hasStoragePermission(getAppInstance().getDocumentFile())) {
             mCimocDocumentFile = getAppInstance().getDocumentFile();
             mPresenter.loadClearBackupFile(mCimocDocumentFile);
         } else {

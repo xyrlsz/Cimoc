@@ -9,11 +9,25 @@ import android.os.Environment;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
+import com.xyrlsz.xcimoc.App;
+import com.xyrlsz.xcimoc.saf.CimocDocumentFile;
+
 /**
  * Created by Hiroshi on 2016/10/20.
  */
 
 public class PermissionUtils {
+    public static boolean hasStoragePermission(CimocDocumentFile documentFile) {
+        if (documentFile == null || !documentFile.exists()) {
+            return false;
+        }
+
+        // 检查是否可读可写
+        boolean canRead = documentFile.canRead();
+        boolean canWrite = documentFile.canWrite();
+
+        return canRead && canWrite;
+    }
 
     public static boolean hasStoragePermission(Activity activity) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -39,7 +53,7 @@ public class PermissionUtils {
     }
 
     public static boolean hasAllPermissions(Activity activity) {
-        boolean hasStoragePermission = hasStoragePermission(activity);
+        boolean hasStoragePermission = hasStoragePermission(App.getApp().getDocumentFile());
         int readPhoneState = checkPermission(activity, Manifest.permission.READ_PHONE_STATE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             int postNotificationsResult = checkPermission(activity, Manifest.permission.POST_NOTIFICATIONS);

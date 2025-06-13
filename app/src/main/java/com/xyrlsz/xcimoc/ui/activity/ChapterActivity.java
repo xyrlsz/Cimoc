@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.global.Extra;
 import com.xyrlsz.xcimoc.manager.PreferenceManager;
@@ -161,7 +162,7 @@ public class ChapterActivity extends BackActivity implements BaseAdapter.OnItemC
 
         if (list.isEmpty()) {
             showSnackbar(R.string.chapter_download_empty);
-        } else if (PermissionUtils.hasStoragePermission(this)) {
+        } else if (PermissionUtils.hasStoragePermission(getAppInstance().getDocumentFile())) {
             Intent intent = new Intent();
             intent.putParcelableArrayListExtra(Extra.EXTRA_CHAPTER, list);
             setResult(Activity.RESULT_OK, intent);
