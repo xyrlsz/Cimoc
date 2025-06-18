@@ -69,7 +69,8 @@ forked from https://github.com/Haleydu/Cimoc
 
 > case 里面无脑添加
 
-- 在 UpdateHelper 的 initSource() 方法中初始化图源，以及修改initComicSourceTable()方法
+<!-- - 在 UpdateHelper 的 initSource() 方法中初始化图源，以及修改initComicSourceTable()方法 -->
+- 在 UpdateHelper 的 initComicSourceTable() 方法中初始化图源
 - 修改"app/src/main/java/com/xyrlsz/xcimoc/ui/activity/BrowserFilter.java"的registUrlListener()方法
 
 # 软件更新方向：
