@@ -50,7 +50,7 @@ public class CopyMH extends MangaParser {
             //            keyword = jChineseConvertor.s2t(keyword);
 
             url = StringUtils.format(
-                    "%s/api/v3/search/comic?platform=1&q=%s&limit=30&offset=0&q_type&_update=true", apiBaseUrl,
+                    "%s/api/v3/search/comic?platform=1&q=%s&limit=30&offset=0&q_type&_update=true&format=json", apiBaseUrl,
                     keyword);
             return new Request.Builder()
                     .url(url)
@@ -107,7 +107,14 @@ public class CopyMH extends MangaParser {
 
     @Override
     public Request getInfoRequest(String cid) {
-        String url = StringUtils.format("%s/api/v3/comic2/%s", website, cid);
+//        String url = StringUtils.format("%s/api/v3/comic2/%s", website, cid);
+//        return new Request.Builder()
+//                .url(url)
+//                .addHeader("User-Agent",
+//                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+//                                + "Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
+//                .build();
+        String url = StringUtils.format("%s/api/v3/comic2/%s?_update=true&format=json&platform=1", apiBaseUrl, cid);
         return new Request.Builder()
                 .url(url)
                 .addHeader("User-Agent",
@@ -141,7 +148,7 @@ public class CopyMH extends MangaParser {
     @Override
     public Request getChapterRequest(String html, String cid) {
         String url = String.format(
-                "%s/api/v3/comic/%s/group/default/chapters?limit=500&offset=0", website, cid);
+                "%s/api/v3/comic/%s/group/default/chapters?_update=true&format=json&limit=500&offset=0", apiBaseUrl, cid);
         return new Request.Builder()
                 .url(url)
                 .addHeader("User-Agent",
@@ -171,8 +178,8 @@ public class CopyMH extends MangaParser {
                 String path_word = groups.getJSONObject(key).getString("path_word");
                 String PathName = groups.getJSONObject(key).getString("name");
                 String url =
-                        String.format("%s/api/v3/comic/%s/group/%s/chapters?limit=500&offset=0",
-                                website, comic.getCid(), path_word);
+                        String.format("%s/api/v3/comic/%s/group/%s/chapters?_update=true&format=json&limit=500&offset=0",
+                                apiBaseUrl, comic.getCid(), path_word);
                 Request request =
                         new Request.Builder()
                                 .url(url)
@@ -203,7 +210,7 @@ public class CopyMH extends MangaParser {
 
     @Override
     public Request getImagesRequest(String cid, String path) {
-        String url = StringUtils.format("%s/api/v3/comic/%s/chapter2/%s", website, cid, path);
+        String url = StringUtils.format("%s/api/v3/comic/%s/chapter2/%s?platform=1&_update=true&format=json", apiBaseUrl, cid, path);
         return new Request.Builder()
                 .url(url)
                 .addHeader("User-Agent",
