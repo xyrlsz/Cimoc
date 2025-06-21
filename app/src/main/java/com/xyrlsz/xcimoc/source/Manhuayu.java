@@ -31,7 +31,7 @@ import okhttp3.Request;
 public class Manhuayu extends MangaParser {
     public static final int TYPE = 107;
     public static final String DEFAULT_TITLE = "漫画鱼";
-    private static final String baseUrl = "https://www.manhuayu8.com";
+    private static final String baseUrl = "https://www.manhuayu5.com";
 
     public Manhuayu(Source source) {
         init(source);
@@ -47,6 +47,7 @@ public class Manhuayu extends MangaParser {
         super.initUrlFilterList();
         filter.add(new UrlFilter("manhuayu.com"));
         filter.add(new UrlFilter("manhuayu8.com"));
+        filter.add(new UrlFilter("manhuayu5.com"));
     }
 
     @Override
