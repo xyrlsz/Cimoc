@@ -31,8 +31,8 @@ import okhttp3.Request;
 public class CopyMH extends MangaParser {
     public static final int TYPE = 26;
     public static final String DEFAULT_TITLE = "拷贝漫画";
-    public static final String website = "https://www.copy20.com";
-    public static final String apiBaseUrl = "https://mapi.copy20.com";
+    public static final String website = "https://www.2025copy.com";
+    public static final String apiBaseUrl = "https://api.2025copy.com";
 
     public CopyMH(Source source) {
         init(source);
@@ -75,6 +75,7 @@ public class CopyMH extends MangaParser {
         //        filter.add(new UrlFilter("mangacopy.com", "\\w+", 0));
         filter.add(new UrlFilter("www.mangacopy.com", "comic/(\\w+)", 1));
         filter.add(new UrlFilter("www.copy20.com", "comic/(\\w+)", 1));
+        filter.add(new UrlFilter("www.2025copy.com", "comic/(\\w+)", 1));
     }
 
     @Override
