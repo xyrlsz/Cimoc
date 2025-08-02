@@ -6,7 +6,6 @@ import com.xyrlsz.xcimoc.source.BuKa;
 import com.xyrlsz.xcimoc.source.Cartoonmad;
 import com.xyrlsz.xcimoc.source.CopyMH;
 import com.xyrlsz.xcimoc.source.DM5;
-import com.xyrlsz.xcimoc.source.Dmzj;
 import com.xyrlsz.xcimoc.source.DongManManHua;
 import com.xyrlsz.xcimoc.source.DuManWu;
 import com.xyrlsz.xcimoc.source.DuManWuOrg;
@@ -24,6 +23,7 @@ import com.xyrlsz.xcimoc.source.Tencent;
 import com.xyrlsz.xcimoc.source.Vomicmh;
 import com.xyrlsz.xcimoc.source.YKMH;
 import com.xyrlsz.xcimoc.source.YYManHua;
+import com.xyrlsz.xcimoc.source.ZaiManhua;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,7 +38,7 @@ public class ComicTestSet {
         comicTestSet.put(Cartoonmad.TYPE, "3583");
         comicTestSet.put(CopyMH.TYPE, "wueyxingxuanlv");
         comicTestSet.put(DM5.TYPE, "manhua-ruoyetongxuexiangrangnimingbaixinyi");
-        comicTestSet.put(Dmzj.TYPE, "benghuai3rd");
+//        comicTestSet.put(Dmzj.TYPE, "benghuai3rd");
         comicTestSet.put(HotManga.TYPE, "wueyxingxuanlv");
         comicTestSet.put(IKanman.TYPE, "7580");
         comicTestSet.put(Mangakakalot.TYPE, "jujutsu-kaisen-168");
@@ -56,6 +56,7 @@ public class ComicTestSet {
         comicTestSet.put(TTKMH.TYPE, "427435");
         comicTestSet.put(Vomicmh.TYPE, "92561");
         comicTestSet.put(YYManHua.TYPE, "178yy");
+        comicTestSet.put(ZaiManhua.TYPE, "65391");
     }
 
     public static Map<Integer, String> getComicTestSet() {

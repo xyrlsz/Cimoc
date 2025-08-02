@@ -12,7 +12,7 @@ import com.xyrlsz.xcimoc.source.BuKa;
 import com.xyrlsz.xcimoc.source.Cartoonmad;
 import com.xyrlsz.xcimoc.source.CopyMH;
 import com.xyrlsz.xcimoc.source.DM5;
-import com.xyrlsz.xcimoc.source.Dmzj;
+//import com.xyrlsz.xcimoc.source.Dmzj;
 import com.xyrlsz.xcimoc.source.DmzjV4;
 import com.xyrlsz.xcimoc.source.DongManManHua;
 import com.xyrlsz.xcimoc.source.DuManWu;
@@ -32,6 +32,7 @@ import com.xyrlsz.xcimoc.source.Tencent;
 import com.xyrlsz.xcimoc.source.Vomicmh;
 import com.xyrlsz.xcimoc.source.YKMH;
 import com.xyrlsz.xcimoc.source.YYManHua;
+import com.xyrlsz.xcimoc.source.ZaiManhua;
 import com.xyrlsz.xcimoc.utils.HintUtils;
 
 import java.util.ArrayList;
@@ -71,7 +72,7 @@ public class BrowserFilter extends BaseActivity {
         list.add(Cartoonmad.TYPE);
         list.add(CopyMH.TYPE);
         list.add(DM5.TYPE);
-        list.add(Dmzj.TYPE);
+//        list.add(Dmzj.TYPE);
 //        list.add(GuFeng.TYPE);
         list.add(HotManga.TYPE);
         list.add(IKanman.TYPE);
@@ -92,6 +93,7 @@ public class BrowserFilter extends BaseActivity {
         list.add(Vomicmh.TYPE);
         list.add(YYManHua.TYPE);
         list.add(DmzjV4.TYPE);
+        list.add(ZaiManhua.TYPE);
         return list;
     }
 

@@ -11,6 +11,10 @@ import static com.xyrlsz.xcimoc.Constants.KOMIIC_SHARED_USERNAME;
 import static com.xyrlsz.xcimoc.Constants.VOMIC_SHARED;
 import static com.xyrlsz.xcimoc.Constants.VOMIC_SHARED_COOKIES;
 import static com.xyrlsz.xcimoc.Constants.VOMIC_SHARED_USERNAME;
+import static com.xyrlsz.xcimoc.Constants.ZAI_SHARED;
+import static com.xyrlsz.xcimoc.Constants.ZAI_SHARED_TOKEN;
+import static com.xyrlsz.xcimoc.Constants.ZAI_SHARED_UID;
+import static com.xyrlsz.xcimoc.Constants.ZAI_SHARED_USERNAME;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -20,13 +24,16 @@ import android.view.View;
 import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.xyrlsz.xcimoc.App;
+import com.xyrlsz.xcimoc.Constants;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.manager.PreferenceManager;
 import com.xyrlsz.xcimoc.ui.view.ComicSourceLoginView;
 import com.xyrlsz.xcimoc.ui.widget.LoginDialog;
 import com.xyrlsz.xcimoc.ui.widget.Option;
+import com.xyrlsz.xcimoc.utils.HashUtils;
 import com.xyrlsz.xcimoc.utils.KomiicUtils;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
@@ -52,6 +59,7 @@ import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okio.BufferedSink;
 
 public class ComicSourceLoginActivity extends BackActivity implements ComicSourceLoginView {
     @BindView(R.id.comic_login_layout)
@@ -72,6 +80,11 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
     @BindView(R.id.comic_login_vomicmh_logout)
     ImageButton mVoMiCMHLogout;
 
+    @BindView(R.id.comic_login_zai_login)
+    Option mZaiLogin;
+    @BindView(R.id.comic_login_zai_logout)
+    ImageButton mZaiLogout;
+
     @Override
     protected String getDefaultTitle() {
         return getString(R.string.settings_comic_login_title);
@@ -85,10 +98,12 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
             mDmzjLogout.setImageResource(R.drawable.ic_logout_white);
             mKomiicLogout.setImageResource(R.drawable.ic_logout_white);
             mVoMiCMHLogout.setImageResource(R.drawable.ic_logout_white);
+            mZaiLogout.setImageResource(R.drawable.ic_logout_white);
         } else {
             mDmzjLogout.setImageResource(R.drawable.ic_logout);
             mKomiicLogout.setImageResource(R.drawable.ic_logout);
             mVoMiCMHLogout.setImageResource(R.drawable.ic_logout);
+            mZaiLogout.setImageResource(R.drawable.ic_logout);
         }
 
         String dmzjUsername = getSharedPreferences(DMZJ_SHARED, MODE_PRIVATE).getString(DMZJ_SHARED_USERNAME, "");
@@ -122,6 +137,13 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
             mVoMiCMHLogin.setSummary(vomicmhUsername);
             mVoMiCMHLogin.setTitle(getString(R.string.logined));
             mVoMiCMHLogout.setVisibility(View.VISIBLE);
+        }
+
+        String zaiUsername = getSharedPreferences(ZAI_SHARED, MODE_PRIVATE).getString(ZAI_SHARED_USERNAME, "");
+        if (!zaiUsername.isEmpty()) {
+            mZaiLogin.setSummary(zaiUsername);
+            mZaiLogin.setTitle(getString(R.string.logined));
+            mZaiLogout.setVisibility(View.VISIBLE);
         }
     }
 
@@ -157,6 +179,7 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
         return mComicSourceLoginLayout;
     }
 
+    // 动漫之家
     @OnClick(R.id.comic_login_dmzj_login)
     void onDmzjLoginClick() {
 
@@ -261,6 +284,7 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
         showSnackbar(getString(R.string.user_login_logout_sucess));
     }
 
+    // komiic
     @OnClick(R.id.comic_login_komiic_login)
     void onKomiicLoginClick() {
 
@@ -375,6 +399,7 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
         mKomiicLogout.setVisibility(View.GONE);
     }
 
+    // vomicmh漫
     @OnClick(R.id.comic_login_vomicmh_login)
     void onVoMiCMHLoginClick() {
         int theme = mPreference.getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_PINK);
@@ -450,5 +475,92 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
         mVoMiCMHLogout.setVisibility(View.GONE);
         editor.apply();
         showSnackbar(getString(R.string.user_login_logout_sucess));
+    }
+
+    // 再漫画
+    @OnClick(R.id.comic_login_zai_login)
+    void onZaiLoginClick() {
+        int theme = mPreference.getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_PINK);
+        LoginDialog loginDialog = new LoginDialog(this, ThemeUtils.getDialogThemeById(theme));
+        loginDialog.setOnLoginListener((username, password) -> {
+            if (username.isEmpty() || password.isEmpty()) {
+                loginDialog.dismiss();
+                showSnackbar(getString(R.string.user_login_empty));
+                return;
+            }
+            onStartLogin();
+
+            String url = StringUtils.format("https://i.zaimanhua.com/lpi/v1/login/passwd?username=%s&passwd=%s", username, HashUtils.MD5(password));
+            Request request = new Request.Builder()
+                    .url(url)
+                    .addHeader("Referer", "https://i.zaimanhua.com/login")
+                    .post(new RequestBody() {
+                        @Nullable
+                        @Override
+                        public MediaType contentType() {
+                            return null;
+                        }
+
+                        @Override
+                        public void writeTo(@NonNull BufferedSink bufferedSink) throws IOException {
+                        }
+                    }).build();
+            Objects.requireNonNull(App.getHttpClient()).newCall(request).enqueue(new Callback() {
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    if (response.isSuccessful() && response.body() != null) {
+                        try {
+                            JSONObject jsonObject = new JSONObject(response.body().string());
+                            JSONObject data = jsonObject.getJSONObject("data");
+                            JSONObject user = data.getJSONObject("user");
+                            String uid = user.getLong("uid") + "";
+                            String token = user.getString("token");
+                            SharedPreferences sharedPreferences = getSharedPreferences(Constants.ZAI_SHARED, MODE_PRIVATE);
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString(ZAI_SHARED_TOKEN, token);
+                            editor.putString(ZAI_SHARED_UID, uid);
+                            editor.putString(ZAI_SHARED_USERNAME, username);
+                            editor.apply();
+                            runOnUiThread(() -> {
+                                mZaiLogin.setSummary(username);
+                                mZaiLogin.setTitle(getString(R.string.logined));
+                                mZaiLogout.setVisibility(View.VISIBLE);
+                            });
+                            onLoginSuccess();
+                            loginDialog.dismiss();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            onLoginFail();
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    onLoginFail();
+                }
+            });
+        });
+        loginDialog.setOnRegisterListener(() -> {
+            String url = "https://i.zaimanhua.com/login";
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(url));
+            startActivity(intent);
+        });
+        loginDialog.show();
+    }
+
+    @OnClick(R.id.comic_login_zai_logout)
+    void onZaiLogoutClick() {
+        SharedPreferences sharedPreferences = getSharedPreferences(Constants.ZAI_SHARED, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove(ZAI_SHARED_UID);
+        editor.remove(ZAI_SHARED_TOKEN);
+        editor.remove(ZAI_SHARED_USERNAME);
+        mZaiLogin.setSummary(getString(R.string.no_login));
+        mZaiLogin.setTitle(getString(R.string.login));
+        mZaiLogout.setVisibility(View.GONE);
+        editor.apply();
     }
 }

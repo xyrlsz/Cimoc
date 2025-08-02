@@ -13,7 +13,7 @@ import com.xyrlsz.xcimoc.source.BuKa;
 import com.xyrlsz.xcimoc.source.Cartoonmad;
 import com.xyrlsz.xcimoc.source.CopyMH;
 import com.xyrlsz.xcimoc.source.DM5;
-import com.xyrlsz.xcimoc.source.Dmzj;
+//import com.xyrlsz.xcimoc.source.Dmzj;
 import com.xyrlsz.xcimoc.source.DmzjV4;
 import com.xyrlsz.xcimoc.source.DongManManHua;
 import com.xyrlsz.xcimoc.source.DuManWu;
@@ -33,6 +33,7 @@ import com.xyrlsz.xcimoc.source.Tencent;
 import com.xyrlsz.xcimoc.source.Vomicmh;
 import com.xyrlsz.xcimoc.source.YKMH;
 import com.xyrlsz.xcimoc.source.YYManHua;
+import com.xyrlsz.xcimoc.source.ZaiManhua;
 
 import org.greenrobot.greendao.database.Database;
 
@@ -68,7 +69,7 @@ public class UpdateHelper {
             ComicSourceTable.put(Cartoonmad.TYPE, Cartoonmad.getDefaultSource());
             ComicSourceTable.put(CopyMH.TYPE, CopyMH.getDefaultSource());
             ComicSourceTable.put(DM5.TYPE, DM5.getDefaultSource());
-            ComicSourceTable.put(Dmzj.TYPE, Dmzj.getDefaultSource());
+//            ComicSourceTable.put(Dmzj.TYPE, Dmzj.getDefaultSource());
 //        ComicSourceHash.put(Dmzjv2.TYPE, Dmzjv2.getDefaultSource());
 //        ComicSourceHash.put(Dmzjv3.TYPE, Dmzjv3.getDefaultSource());
 //            ComicSourceTable.put(GuFeng.TYPE, GuFeng.getDefaultSource());
@@ -95,6 +96,7 @@ public class UpdateHelper {
             ComicSourceTable.put(Vomicmh.TYPE, Vomicmh.getDefaultSource());
             ComicSourceTable.put(YYManHua.TYPE, YYManHua.getDefaultSource());
             ComicSourceTable.put(DmzjV4.TYPE, DmzjV4.getDefaultSource());
+            ComicSourceTable.put(ZaiManhua.TYPE, ZaiManhua.getDefaultSource());
         }
     }
 

@@ -13,7 +13,7 @@ import com.xyrlsz.xcimoc.source.BuKa;
 import com.xyrlsz.xcimoc.source.Cartoonmad;
 import com.xyrlsz.xcimoc.source.CopyMH;
 import com.xyrlsz.xcimoc.source.DM5;
-import com.xyrlsz.xcimoc.source.Dmzj;
+//import com.xyrlsz.xcimoc.source.Dmzj;
 import com.xyrlsz.xcimoc.source.DmzjV4;
 import com.xyrlsz.xcimoc.source.DongManManHua;
 import com.xyrlsz.xcimoc.source.DuManWu;
@@ -35,6 +35,7 @@ import com.xyrlsz.xcimoc.source.Tencent;
 import com.xyrlsz.xcimoc.source.Vomicmh;
 import com.xyrlsz.xcimoc.source.YKMH;
 import com.xyrlsz.xcimoc.source.YYManHua;
+import com.xyrlsz.xcimoc.source.ZaiManhua;
 
 import java.util.List;
 
@@ -243,9 +244,9 @@ public class SourceManager {
 //                case DmzjFix.TYPE:
 //                    parser = new DmzjFix(source);
 //                    break;
-                case Dmzj.TYPE:
-                    parser = new Dmzj(source);
-                    break;
+//                case Dmzj.TYPE:
+//                    parser = new Dmzj(source);
+//                    break;
 
                 //
                 case Baozi.TYPE:
@@ -280,6 +281,9 @@ public class SourceManager {
                     break;
                 case DmzjV4.TYPE:
                     parser = new DmzjV4(source);
+                    break;
+                case ZaiManhua.TYPE:
+                    parser = new ZaiManhua(source);
                     break;
                 default:
                     parser = new Null();

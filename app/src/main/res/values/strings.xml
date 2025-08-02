@@ -389,7 +389,7 @@
     <string name="empty_account_limit">空账号剩余页数：</string>
 
     <string name="vomicmh" translatable="false">vomic漫</string>
-
+    <string name="zaimanhua" translatable="false">再漫画</string>
     <string name="fragment_destroy_tip">当前界面已被销毁</string>
 
     <string name="webdav_url" translatable="false">WebDav Url</string>

@@ -145,7 +145,7 @@ public class DmzjV4 extends MangaParser {
                 author.append(tag.getTagName()).append(" ");
             }
             String update =
-                    TimestampUtils.formatTimestamp(response.getData().getLastUpdatetime() * 1000);
+                    TimestampUtils.formatTimestampSeconds(response.getData().getLastUpdatetime());
             boolean status = isFinish(response.getData().getStatus(0).getTagName());
             comic.setInfo(title, cover, update, intro, author.toString(), status);
         } catch (Exception e) {
