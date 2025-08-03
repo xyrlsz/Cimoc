@@ -3,6 +3,7 @@ package com.xyrlsz.xcimoc;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.wifi.WifiManager;
 import android.os.Build;
@@ -34,6 +35,7 @@ import com.xyrlsz.xcimoc.ui.adapter.GridAdapter;
 import com.xyrlsz.xcimoc.utils.DocumentUtils;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
+import com.xyrlsz.xcimoc.utils.ZaiManhuaSignUtils;
 
 import org.greenrobot.greendao.identityscope.IdentityScopeType;
 
@@ -56,6 +58,7 @@ import okhttp3.OkHttpClient;
 public class App extends MultiDexApplication implements AppGetter, Thread.UncaughtExceptionHandler {
 
     private static final String CRASH_FILE_PATH = "/Cimoc/Log/crash";
+    private static final TrustAllCerts trustAllCerts = new TrustAllCerts();
     public static int mWidthPixels;
     public static int mHeightPixels;
     public static int mCoverWidthPixels;
@@ -67,13 +70,12 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
     private static App mApp;
     // 默认Github源
     private static String UPDATE_CURRENT_URL = Constants.UPDATE_GITHUB_URL;
+    private static boolean isNormalExited = false;
     private CimocDocumentFile mCimocDocumentFile;
     private ControllerBuilderProvider mBuilderProvider;
     private RecyclerView.RecycledViewPool mRecycledPool;
     private DaoSession mDaoSession;
     private ActivityLifecycle mActivityLifecycle;
-    private static final TrustAllCerts trustAllCerts = new TrustAllCerts();
-    private static boolean isNormalExited = false;
 
     public static Context getAppContext() {
         return mApp.getApplicationContext();
@@ -171,6 +173,14 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         System.exit(0);
     }
 
+    public static boolean isNormalExited() {
+        return isNormalExited;
+    }
+
+    public static void setIsNormalExited(boolean isNormalExited) {
+        App.isNormalExited = isNormalExited;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -209,6 +219,17 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
 
         // 初始化WebDAV配置
         WebDavConf.init(getAppContext());
+
+        // 再漫画签到
+        SharedPreferences zaiSharedPreferences = getAppContext().getSharedPreferences(Constants.ZAI_SHARED, Context.MODE_PRIVATE);
+        boolean autoSign = zaiSharedPreferences.getBoolean(Constants.ZAI_SHARED_AUTO_SIGN, false);
+        if (autoSign) {
+            ZaiManhuaSignUtils.CheckSigned(isSigned -> {
+                if (!isSigned) {
+                    ZaiManhuaSignUtils.sign();
+                }
+            });
+        }
 
 //        this.registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
 //            @Override
@@ -322,14 +343,6 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
         MultiDex.install(this);
-    }
-
-    public static boolean isNormalExited() {
-        return isNormalExited;
-    }
-
-    public static void setIsNormalExited(boolean isNormalExited) {
-        App.isNormalExited = isNormalExited;
     }
 
     // 1.实现X509TrustManager接口

@@ -398,4 +398,7 @@
     <string name="button" translatable="false">button</string>
     <string name="comic_filter_by_keyword">关键词过滤</string>
     <string name="comic_filter_by_keyword_cancel">取消关键词过滤</string>
+    <string name="auto_sign">自动签到</string>
+    <string name="auto_sign_summary">未签到</string>
+    <string name="is_sign">已签到</string>
 </resources>

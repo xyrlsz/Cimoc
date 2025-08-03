@@ -169,6 +169,16 @@
                     </RelativeLayout>
                 </com.xyrlsz.xcimoc.ui.widget.Option>
 
+                <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
+                    android:id="@+id/comic_login_zai_auto_sign"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:visibility="gone"
+                    app:summary="@string/auto_sign_summary"
+                    app:title="@string/auto_sign" />
+
             </LinearLayout>
         </ScrollView>
     </LinearLayout>

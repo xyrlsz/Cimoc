@@ -363,4 +363,7 @@
     <string name="settings_comic_login_summary">部分漫畫源需要登入才能使用</string>
     <string name="comic_filter_by_keyword">關鍵詞過濾</string>
     <string name="comic_filter_by_keyword_cancel">取消關鍵詞過濾</string>
+    <string name="auto_sign">自動簽到</string>
+    <string name="auto_sign_summary">未簽到</string>
+    <string name="is_sign">已簽到</string>
 </resources>

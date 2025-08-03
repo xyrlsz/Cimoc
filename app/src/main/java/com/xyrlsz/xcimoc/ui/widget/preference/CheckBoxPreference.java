@@ -4,12 +4,13 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
-import androidx.appcompat.widget.AppCompatCheckBox;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+
+import androidx.appcompat.widget.AppCompatCheckBox;
 
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.R;
@@ -77,6 +78,19 @@ public class CheckBoxPreference extends FrameLayout implements View.OnClickListe
     @SuppressLint("RestrictedApi")
     public void setColorStateList(ColorStateList stateList) {
         mCheckBox.setSupportButtonTintList(stateList);
+    }
+
+    public boolean isChecked() {
+        return mCheckBox.isChecked();
+    }
+
+    public void setChecked(boolean checked) {
+        mCheckBox.setChecked(checked);
+    }
+
+    public void setSummary(String summary) {
+        TextView summaryView = this.findViewById(R.id.custom_option_summary);
+        summaryView.setText(summary);
     }
 
 }

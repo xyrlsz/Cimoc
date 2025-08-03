@@ -12,6 +12,7 @@ import static com.xyrlsz.xcimoc.Constants.VOMIC_SHARED;
 import static com.xyrlsz.xcimoc.Constants.VOMIC_SHARED_COOKIES;
 import static com.xyrlsz.xcimoc.Constants.VOMIC_SHARED_USERNAME;
 import static com.xyrlsz.xcimoc.Constants.ZAI_SHARED;
+import static com.xyrlsz.xcimoc.Constants.ZAI_SHARED_AUTO_SIGN;
 import static com.xyrlsz.xcimoc.Constants.ZAI_SHARED_TOKEN;
 import static com.xyrlsz.xcimoc.Constants.ZAI_SHARED_UID;
 import static com.xyrlsz.xcimoc.Constants.ZAI_SHARED_USERNAME;
@@ -33,10 +34,12 @@ import com.xyrlsz.xcimoc.manager.PreferenceManager;
 import com.xyrlsz.xcimoc.ui.view.ComicSourceLoginView;
 import com.xyrlsz.xcimoc.ui.widget.LoginDialog;
 import com.xyrlsz.xcimoc.ui.widget.Option;
+import com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference;
 import com.xyrlsz.xcimoc.utils.HashUtils;
 import com.xyrlsz.xcimoc.utils.KomiicUtils;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
+import com.xyrlsz.xcimoc.utils.ZaiManhuaSignUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -52,6 +55,7 @@ import java.util.TimeZone;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import butterknife.OnLongClick;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
@@ -84,6 +88,9 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
     Option mZaiLogin;
     @BindView(R.id.comic_login_zai_logout)
     ImageButton mZaiLogout;
+
+    @BindView(R.id.comic_login_zai_auto_sign)
+    CheckBoxPreference mZaiAutoSign;
 
     @Override
     protected String getDefaultTitle() {
@@ -144,7 +151,21 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
             mZaiLogin.setSummary(zaiUsername);
             mZaiLogin.setTitle(getString(R.string.logined));
             mZaiLogout.setVisibility(View.VISIBLE);
+
+            boolean autoSign = getSharedPreferences(ZAI_SHARED, MODE_PRIVATE).getBoolean(ZAI_SHARED_AUTO_SIGN, false);
+            mZaiAutoSign.setChecked(autoSign);
+            mZaiAutoSign.setVisibility(View.VISIBLE);
+
+            ZaiManhuaSignUtils.CheckSigned(isSigned -> {
+                if (isSigned) {
+                    App.runOnMainThread(()->{
+                        mZaiAutoSign.setSummary(getString(R.string.is_sign));
+                    });
+                }
+            });
+
         }
+
     }
 
     @Override
@@ -526,9 +547,14 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
                                 mZaiLogin.setSummary(username);
                                 mZaiLogin.setTitle(getString(R.string.logined));
                                 mZaiLogout.setVisibility(View.VISIBLE);
+                                boolean autoSign = getSharedPreferences(ZAI_SHARED, MODE_PRIVATE).getBoolean(ZAI_SHARED_AUTO_SIGN, false);
+                                mZaiAutoSign.setChecked(autoSign);
+                                mZaiAutoSign.setVisibility(View.VISIBLE);
                             });
+
                             onLoginSuccess();
                             loginDialog.dismiss();
+
                         } catch (JSONException e) {
                             e.printStackTrace();
                             onLoginFail();
@@ -562,5 +588,21 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
         mZaiLogin.setTitle(getString(R.string.login));
         mZaiLogout.setVisibility(View.GONE);
         editor.apply();
+        mZaiAutoSign.setVisibility(View.GONE);
+    }
+
+    @OnClick(R.id.comic_login_zai_auto_sign)
+    void onZaiAutoSignClick() {
+        boolean isChecked = mZaiAutoSign.isChecked();
+        mZaiAutoSign.setChecked(!isChecked);
+        SharedPreferences sharedPreferences = getSharedPreferences(Constants.ZAI_SHARED, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(ZAI_SHARED_AUTO_SIGN, mZaiAutoSign.isChecked());
+        editor.apply();
+    }
+
+    @OnLongClick(R.id.comic_login_zai_auto_sign)
+    void onZaiAutoSignLongClick() {
+        ZaiManhuaSignUtils.sign();
     }
 }
