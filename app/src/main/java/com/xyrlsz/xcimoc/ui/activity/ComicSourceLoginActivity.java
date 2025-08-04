@@ -36,6 +36,7 @@ import com.xyrlsz.xcimoc.ui.widget.LoginDialog;
 import com.xyrlsz.xcimoc.ui.widget.Option;
 import com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference;
 import com.xyrlsz.xcimoc.utils.HashUtils;
+import com.xyrlsz.xcimoc.utils.HintUtils;
 import com.xyrlsz.xcimoc.utils.KomiicUtils;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
@@ -158,7 +159,7 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
 
             ZaiManhuaSignUtils.CheckSigned(isSigned -> {
                 if (isSigned) {
-                    App.runOnMainThread(()->{
+                    App.runOnMainThread(() -> {
                         mZaiAutoSign.setSummary(getString(R.string.is_sign));
                     });
                 }
@@ -603,6 +604,14 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
 
     @OnLongClick(R.id.comic_login_zai_auto_sign)
     void onZaiAutoSignLongClick() {
-        ZaiManhuaSignUtils.sign();
+        ZaiManhuaSignUtils.CheckSigned(isSigned -> {
+            if (isSigned) {
+                App.runOnMainThread(() -> {
+                    HintUtils.showToast(getApplicationContext(), "再漫画已签到");
+                });
+            } else {
+                ZaiManhuaSignUtils.sign();
+            }
+        });
     }
 }
