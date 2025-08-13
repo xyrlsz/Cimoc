@@ -17,14 +17,21 @@ public final class Constants {
     public static final String KOMIIC_SHARED_COOKIES = "cookies";
     public static final String KOMIIC_SHARED_USERNAME = "username";
     public static final String KOMIIC_SHARED_EXPIRED = "expired";
+
     public static final String VOMIC_SHARED = "vomicmh";
     public static final String VOMIC_SHARED_COOKIES = "cookies";
     public static final String VOMIC_SHARED_USERNAME = "username";
+
     public static final String WEBDAV_SHARED = "webdav";
     public static final String WEBDAV_SHARED_URL = "url";
     public static final String WEBDAV_SHARED_USERNAME = "username";
     public static final String WEBDAV_SHARED_PASSWORD = "password";
+
     //    public static final int VERSION = 105006;
+
+    public static final String APP_SHARED = "app";
+    public static final String APP_SHARED_TEST_MODE = "test";
+
     private static final String Repository = BuildConfig.OWNER_NAME + "/" + BuildConfig.REPOSITORIE_NAME;
     public static final String UPDATE_GITHUB_URL = "https://api.github.com/repos/" + Repository + "/releases/latest";
     public static final String UPDATE_GITEE_URL = "https://gitee.com/api/v5/repos/" + Repository + "/releases/latest";

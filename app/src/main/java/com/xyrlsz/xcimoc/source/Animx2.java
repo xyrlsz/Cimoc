@@ -37,7 +37,7 @@ public class Animx2 extends MangaParser {
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true);
+        return new Source(null, DEFAULT_TITLE, TYPE, true, "https://www.2animx.com/");
     }
 
     @Override

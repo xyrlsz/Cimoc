@@ -1,6 +1,7 @@
 package com.xyrlsz.xcimoc.ui.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.net.Uri;
 
@@ -41,9 +42,11 @@ public class AboutActivity extends BackActivity implements AboutView, AdapterVie
     private AboutPresenter mPresenter;
     private boolean update = false;
     private boolean checking = false;
+    private int mVersionClickCount = 0;
     private TextView tvHomePageUrl;
     private TextView tvResourceUrl;
     private TextView tvSupportUrl;
+
 
     private List<String> listSources = new ArrayList<>();
 
@@ -73,6 +76,19 @@ public class AboutActivity extends BackActivity implements AboutView, AdapterVie
         }
     }
 
+    @OnClick(R.id.about_app_name)
+    void onVersionClick() {
+        SharedPreferences sharedPreferences = getSharedPreferences(Constants.APP_SHARED,MODE_PRIVATE);
+        boolean isTestMode = sharedPreferences.getBoolean(Constants.APP_SHARED_TEST_MODE,false);
+        if (!isTestMode){
+            mVersionClickCount++;
+            if (mVersionClickCount >= 5){
+                mVersionClickCount = 0;
+                sharedPreferences.edit().putBoolean(Constants.APP_SHARED_TEST_MODE,true).apply();
+                HintUtils.showToast(this,"OK!");
+            }
+        }
+    }
     @OnClick(R.id.home_page_btn)
     void onHomeClick() {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.GITHUB_HOME_PAGE_URL));

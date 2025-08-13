@@ -13,7 +13,6 @@ import com.xyrlsz.xcimoc.source.BuKa;
 import com.xyrlsz.xcimoc.source.Cartoonmad;
 import com.xyrlsz.xcimoc.source.CopyMH;
 import com.xyrlsz.xcimoc.source.DM5;
-//import com.xyrlsz.xcimoc.source.Dmzj;
 import com.xyrlsz.xcimoc.source.DmzjV4;
 import com.xyrlsz.xcimoc.source.DongManManHua;
 import com.xyrlsz.xcimoc.source.DuManWu;
@@ -28,7 +27,6 @@ import com.xyrlsz.xcimoc.source.MangaBZ;
 import com.xyrlsz.xcimoc.source.Mangakakalot;
 import com.xyrlsz.xcimoc.source.Manhuatai;
 import com.xyrlsz.xcimoc.source.Manhuayu;
-import com.xyrlsz.xcimoc.source.MiGu;
 import com.xyrlsz.xcimoc.source.Null;
 import com.xyrlsz.xcimoc.source.TTKMH;
 import com.xyrlsz.xcimoc.source.Tencent;
@@ -176,9 +174,9 @@ public class SourceManager {
 //                case MH517.TYPE:
 //                    parser = new MH517(source);
 //                    break;
-                case MiGu.TYPE:
-                    parser = new MiGu(source);
-                    break;
+//                case MiGu.TYPE:
+//                    parser = new MiGu(source);
+//                    break;
 //                case BaiNian.TYPE:
 //                    parser = new BaiNian(source);
 //                    break;

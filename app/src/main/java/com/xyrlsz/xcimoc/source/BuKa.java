@@ -28,7 +28,7 @@ import okhttp3.Request;
 public class BuKa extends MangaParser {
     public static final int TYPE = 52;
     public static final String DEFAULT_TITLE = "布卡漫画";
-    private static final String baseUrl = "https://www.bukamh.org";
+    private static final String baseUrl = "https://www.bukamh.com";
 
     public BuKa(Source source) {
         init(source);
@@ -36,7 +36,7 @@ public class BuKa extends MangaParser {
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true);
+        return new Source(null, DEFAULT_TITLE, TYPE, true, baseUrl);
     }
 
     @Override
@@ -94,7 +94,7 @@ public class BuKa extends MangaParser {
 
     @Override
     protected void initUrlFilterList() {
-        filter.add(new UrlFilter("www.bukamh.org", ".*", 0));
+        filter.add(new UrlFilter("www.bukamh.com", ".*", 0));
     }
 
     @Override
@@ -221,6 +221,6 @@ public class BuKa extends MangaParser {
 
     @Override
     public Headers getHeader() {
-        return Headers.of("Referer", "https://www.bukamh.org");
+        return Headers.of("Referer", "https://www.bukamh.com");
     }
 }

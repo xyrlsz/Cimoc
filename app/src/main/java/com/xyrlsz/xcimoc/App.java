@@ -199,6 +199,13 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         //获取栈顶Activity以及当前App上下文
         mApp = this;
 
+        // 检测并且关闭TestMode
+        SharedPreferences testShared = getSharedPreferences(Constants.APP_SHARED, MODE_PRIVATE);
+        boolean isTestMode = testShared.getBoolean(Constants.APP_SHARED_TEST_MODE, false);
+        if (isTestMode) {
+            testShared.edit().putBoolean(Constants.APP_SHARED_TEST_MODE, false).apply();
+        }
+
         // 深色模式设置
         int darkMode = mPreferenceManager.getInt(PreferenceManager.PREF_OTHER_DARK_MOD, PreferenceManager.DARK_MODE_FALLOW_SYSTEM);
         switch (darkMode) {

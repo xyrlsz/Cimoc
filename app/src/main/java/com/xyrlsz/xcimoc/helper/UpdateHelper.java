@@ -27,7 +27,6 @@ import com.xyrlsz.xcimoc.source.MangaBZ;
 import com.xyrlsz.xcimoc.source.Mangakakalot;
 import com.xyrlsz.xcimoc.source.Manhuatai;
 import com.xyrlsz.xcimoc.source.Manhuayu;
-import com.xyrlsz.xcimoc.source.MiGu;
 import com.xyrlsz.xcimoc.source.TTKMH;
 import com.xyrlsz.xcimoc.source.Tencent;
 import com.xyrlsz.xcimoc.source.Vomicmh;
@@ -81,7 +80,7 @@ public class UpdateHelper {
             ComicSourceTable.put(MangaBZ.TYPE, MangaBZ.getDefaultSource());
 //        ComicSourceHash.put(MangaNel.TYPE, MangaNel.getDefaultSource());
             ComicSourceTable.put(Manhuatai.TYPE, Manhuatai.getDefaultSource());
-            ComicSourceTable.put(MiGu.TYPE, MiGu.getDefaultSource());
+//            ComicSourceTable.put(MiGu.TYPE, MiGu.getDefaultSource());
             ComicSourceTable.put(MYCOMIC.TYPE, MYCOMIC.getDefaultSource());
             ComicSourceTable.put(Tencent.TYPE, Tencent.getDefaultSource());
 //        ComicSourceHash.put(Webtoon.TYPE, Webtoon.getDefaultSource());

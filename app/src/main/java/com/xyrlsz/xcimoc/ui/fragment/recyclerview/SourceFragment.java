@@ -1,9 +1,11 @@
 package com.xyrlsz.xcimoc.ui.fragment.recyclerview;
 
+import static android.content.Context.MODE_PRIVATE;
 import static com.xyrlsz.xcimoc.ui.activity.WebviewActivity.EXTRA_IS_USE_TO_WEB_PARSER;
 import static com.xyrlsz.xcimoc.ui.activity.WebviewActivity.EXTRA_WEB_URL;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -14,6 +16,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.xyrlsz.xcimoc.Constants;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.model.Source;
 import com.xyrlsz.xcimoc.presenter.BasePresenter;
@@ -120,7 +123,9 @@ public class SourceFragment extends RecyclerViewFragment implements SourceView, 
         Source source = mSourceAdapter.getItem(position);
         Intent intent = new Intent(getContext(), WebviewActivity.class);
         String url = source.getBaseUrl();
-        if (url == null || url.isEmpty()) {
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(Constants.APP_SHARED, MODE_PRIVATE);
+        boolean isUseToWebParser = sharedPreferences.getBoolean(Constants.APP_SHARED_TEST_MODE, false);
+        if (url == null || url.isEmpty() || !isUseToWebParser) {
             return;
         }
         intent.putExtra(EXTRA_WEB_URL, url);
