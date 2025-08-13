@@ -11,19 +11,26 @@
         android:background="?attr/colorPrimary"
         android:orientation="horizontal"
         android:padding="10dp">
-
-        <com.facebook.drawee.view.SimpleDraweeView
-            android:id="@+id/item_header_comic_image"
+        <androidx.cardview.widget.CardView
+            android:id="@+id/item_header_comic_image_card"
             android:layout_width="100dp"
             android:layout_height="match_parent"
             android:layout_marginEnd="10dp"
-            fresco:actualImageScaleType="fitCenter" />
+            fresco:cardCornerRadius="5dp"
+            >
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/item_header_comic_image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                fresco:actualImageScaleType="centerCrop" />
+        </androidx.cardview.widget.CardView>
+
 
         <TextView
             android:id="@+id/item_header_comic_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/item_header_comic_image"
+            android:layout_toEndOf="@id/item_header_comic_image_card"
             android:ellipsize="marquee"
             android:focusable="true"
             android:focusableInTouchMode="true"
@@ -40,7 +47,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/item_header_comic_title"
             android:layout_marginTop="6dp"
-            android:layout_toEndOf="@id/item_header_comic_image"
+            android:layout_toEndOf="@id/item_header_comic_image_card"
             android:ellipsize="marquee"
             android:marqueeRepeatLimit="marquee_forever"
             android:singleLine="true"

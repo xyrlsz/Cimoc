@@ -1,58 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:fresco="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="120dp"
+    android:layout_marginLeft="5dp"
+    android:layout_marginRight="5dp"
+    android:layout_marginTop="5dp"
     android:background="?attr/colorAutoWG"
     android:clickable="true"
+    android:focusable="true"
     android:foreground="?android:attr/selectableItemBackground"
-    android:padding="10dp">
+    fresco:cardCornerRadius="5dp">
 
-    <com.facebook.drawee.view.SimpleDraweeView
-        android:id="@+id/result_comic_image"
-        android:layout_width="80dp"
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginRight="10dp"
-        fresco:actualImageScaleType="centerCrop" />
+        android:layout_margin="10dp">
 
-    <TextView
-        android:id="@+id/result_comic_source"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
-        android:textSize="14sp" />
+        <androidx.cardview.widget.CardView
+            android:id="@+id/result_comic_image_card"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="10dp">
+            <com.facebook.drawee.view.SimpleDraweeView
+                android:id="@+id/result_comic_image"
+                android:layout_width="80dp"
+                android:layout_height="match_parent"
+                fresco:actualImageScaleType="centerCrop" />
+        </androidx.cardview.widget.CardView>
 
-    <TextView
-        android:id="@+id/result_comic_update"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:textSize="14sp" />
 
-    <TextView
-        android:id="@+id/result_comic_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_toLeftOf="@id/result_comic_source"
-        android:layout_toRightOf="@id/result_comic_image"
-        android:ellipsize="end"
-        android:maxLines="2"
-        android:paddingRight="4dp"
-        android:textColor="?android:attr/textColorPrimary"
-        android:textSize="16sp" />
+        <TextView
+            android:id="@+id/result_comic_source"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:textSize="14sp" />
 
-    <TextView
-        android:id="@+id/result_comic_author"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/result_comic_title"
-        android:layout_alignLeft="@id/result_comic_title"
-        android:layout_marginTop="6dp"
-        android:layout_toLeftOf="@id/result_comic_source"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textSize="16sp" />
-</RelativeLayout>
+        <TextView
+            android:id="@+id/result_comic_update"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/result_comic_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toStartOf="@id/result_comic_source"
+            android:layout_toEndOf="@id/result_comic_image_card"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:paddingEnd="4dp"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="16sp"
+        />
+
+        <TextView
+            android:id="@+id/result_comic_author"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/result_comic_title"
+            android:layout_alignStart="@id/result_comic_title"
+            android:layout_marginTop="6dp"
+            android:layout_toStartOf="@id/result_comic_source"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textSize="16sp" />
+    </RelativeLayout>
+
+</androidx.cardview.widget.CardView>
