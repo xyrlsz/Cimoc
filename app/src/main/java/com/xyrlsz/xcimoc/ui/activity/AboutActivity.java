@@ -82,7 +82,7 @@ public class AboutActivity extends BackActivity implements AboutView, AdapterVie
         boolean isTestMode = sharedPreferences.getBoolean(Constants.APP_SHARED_TEST_MODE,false);
         if (!isTestMode){
             mVersionClickCount++;
-            if (mVersionClickCount >= 5){
+            if (mVersionClickCount >= 10){
                 mVersionClickCount = 0;
                 sharedPreferences.edit().putBoolean(Constants.APP_SHARED_TEST_MODE,true).apply();
                 HintUtils.showToast(this,"OK!");
