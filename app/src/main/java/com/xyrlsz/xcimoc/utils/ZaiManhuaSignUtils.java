@@ -1,6 +1,11 @@
 package com.xyrlsz.xcimoc.utils;
 
+import static android.content.Context.MODE_PRIVATE;
+import static com.xyrlsz.xcimoc.Constants.ZAI_SHARED_EXP;
+import static com.xyrlsz.xcimoc.Constants.ZAI_SHARED_PASSWD_MD5;
 import static com.xyrlsz.xcimoc.Constants.ZAI_SHARED_TOKEN;
+import static com.xyrlsz.xcimoc.Constants.ZAI_SHARED_UID;
+import static com.xyrlsz.xcimoc.Constants.ZAI_SHARED_USERNAME;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -15,6 +20,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -27,7 +33,7 @@ import okio.BufferedSink;
 public class ZaiManhuaSignUtils {
 
     public static void CheckSigned(CheckSignCallback callback) {
-        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.ZAI_SHARED, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.ZAI_SHARED, MODE_PRIVATE);
         Request request = new Request.Builder()
                 .url("https://m.zaimanhua.com/lpi/v1/task/list?_v=15")
                 .addHeader("Authorization", "Bearer " + sharedPreferences.getString(ZAI_SHARED_TOKEN, ""))
@@ -53,8 +59,66 @@ public class ZaiManhuaSignUtils {
         });
     }
 
-    public static void sign() {
-        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.ZAI_SHARED, Context.MODE_PRIVATE);
+    // 登录
+    public static void Login(Context context, LoginCallback callback, String username, String password) {
+        // 密码md5加密
+        String passwdMd5 = HashUtils.MD5(password);
+        String url = StringUtils.format("https://i.zaimanhua.com/lpi/v1/login/passwd?username=%s&passwd=%s", username, passwdMd5);
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("Referer", "https://i.zaimanhua.com/login")
+                .post(new RequestBody() {
+                    @Nullable
+                    @Override
+                    public MediaType contentType() {
+                        return null;
+                    }
+
+                    @Override
+                    public void writeTo(@NonNull BufferedSink bufferedSink) throws IOException {
+                    }
+                }).build();
+        Objects.requireNonNull(App.getHttpClient()).newCall(request).enqueue(new Callback() {
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.isSuccessful() && response.body() != null) {
+                    try {
+                        JSONObject jsonObject = new JSONObject(response.body().string());
+                        JSONObject data = jsonObject.getJSONObject("data");
+                        JSONObject user = data.getJSONObject("user");
+                        String uid = user.getLong("uid") + "";
+                        String token = user.getString("token");
+                        SharedPreferences sharedPreferences = context.getSharedPreferences(Constants.ZAI_SHARED, MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putString(ZAI_SHARED_TOKEN, token);
+                        editor.putString(ZAI_SHARED_UID, uid);
+                        editor.putString(ZAI_SHARED_USERNAME, username);
+                        editor.putString(ZAI_SHARED_PASSWD_MD5, passwdMd5);
+                        JwtManualParser jwtManualParser = new JwtManualParser(token);
+                        JSONObject payload = jwtManualParser.getPayload();
+                        long exp = payload.getLong("exp");
+                        editor.putLong(ZAI_SHARED_EXP, exp);
+                        editor.apply();
+                        callback.onLoginSuccess();
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        callback.onLoginFail();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                callback.onLoginFail();
+            }
+        });
+    }
+
+    // 签到
+    public static void SignIn() {
+        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.ZAI_SHARED, MODE_PRIVATE);
         String token = sharedPreferences.getString(Constants.ZAI_SHARED_TOKEN, "");
         Request request = new Request.Builder()
                 .url("https://m.zaimanhua.com/lpi/v1/task/sign_in?_v=15")
@@ -95,6 +159,12 @@ public class ZaiManhuaSignUtils {
 
     public interface CheckSignCallback {
         void onCheckSign(boolean isSigned);
+    }
+
+    public interface LoginCallback {
+        void onLoginSuccess();
+
+        void onLoginFail();
     }
 
 }

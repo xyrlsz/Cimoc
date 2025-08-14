@@ -12,6 +12,8 @@ public final class Constants {
     public static final String ZAI_SHARED_UID = "uid";
     public static final String ZAI_SHARED_TOKEN = "token";
     public static final String ZAI_SHARED_AUTO_SIGN = "auto_sign";
+    public static final String ZAI_SHARED_PASSWD_MD5 = "passwd_md5";
+    public static final String ZAI_SHARED_EXP = "exp";
 
     public static final String KOMIIC_SHARED = "komiic";
     public static final String KOMIIC_SHARED_COOKIES = "cookies";

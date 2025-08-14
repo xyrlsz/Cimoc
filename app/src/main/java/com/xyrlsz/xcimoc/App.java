@@ -231,9 +231,28 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         SharedPreferences zaiSharedPreferences = getAppContext().getSharedPreferences(Constants.ZAI_SHARED, Context.MODE_PRIVATE);
         boolean autoSign = zaiSharedPreferences.getBoolean(Constants.ZAI_SHARED_AUTO_SIGN, false);
         if (autoSign) {
+            long timestamp = System.currentTimeMillis() / 1000;
+            SharedPreferences sharedPreferences = getSharedPreferences(Constants.ZAI_SHARED, Context.MODE_PRIVATE);
+            long exp = sharedPreferences.getLong(Constants.ZAI_SHARED_EXP, 0);
+            String username = zaiSharedPreferences.getString(Constants.ZAI_SHARED_USERNAME, "");
+            String passwordMd5 = zaiSharedPreferences.getString(Constants.ZAI_SHARED_PASSWD_MD5, "");
+            if (timestamp > exp) {
+                ZaiManhuaSignUtils.Login(this, new ZaiManhuaSignUtils.LoginCallback() {
+                    @Override
+                    public void onLoginSuccess() {
+                        ZaiManhuaSignUtils.SignIn();
+                    }
+
+                    @Override
+                    public void onLoginFail() {
+
+                    }
+                }, username, passwordMd5);
+                return;
+            }
             ZaiManhuaSignUtils.CheckSigned(isSigned -> {
                 if (!isSigned) {
-                    ZaiManhuaSignUtils.sign();
+                    ZaiManhuaSignUtils.SignIn();
                 }
             });
         }
