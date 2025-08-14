@@ -42,6 +42,7 @@ public class ZaiManhua extends MangaParser {
     //    private List<UrlFilter> filter = new ArrayList<>();
     String TOKEN = "";
     String UID = "";
+    long EXP = 0;
     private SharedPreferences sharedPreferences;
 
     public ZaiManhua(Source source) {
@@ -49,6 +50,7 @@ public class ZaiManhua extends MangaParser {
         sharedPreferences = App.getAppContext().getSharedPreferences(Constants.ZAI_SHARED, MODE_PRIVATE);
         UID = sharedPreferences.getString(Constants.ZAI_SHARED_UID, "0");
         TOKEN = sharedPreferences.getString(Constants.ZAI_SHARED_TOKEN, "");
+        EXP = sharedPreferences.getLong(Constants.ZAI_SHARED_EXP, 0);
     }
 
     public static Source getDefaultSource() {
@@ -60,6 +62,12 @@ public class ZaiManhua extends MangaParser {
             UID = sharedPreferences.getString(Constants.ZAI_SHARED_UID, "0");
         }
         return UID;
+    }
+    private long getEXP() {
+        if (EXP == 0) {
+            EXP = sharedPreferences.getLong(Constants.ZAI_SHARED_EXP, 0);
+        }
+        return EXP;
     }
 
     private String getTOKEN() {
@@ -129,7 +137,13 @@ public class ZaiManhua extends MangaParser {
     public Comic parseInfo(String html, Comic comic) {
         if (getTOKEN().isEmpty()) {
             App.runOnMainThread(() -> {
-                HintUtils.showToast(App.getAppContext(), "未登录可能导致漫画无法阅读");
+                HintUtils.showToast(App.getAppContext(), "再漫画未登录可能导致漫画无法阅读");
+            });
+        }
+        long timestamp = System.currentTimeMillis() / 1000;
+        if (timestamp > getEXP()) {
+            App.runOnMainThread(() -> {
+                HintUtils.showToast(App.getAppContext(), "再漫画登录过期，可能需要重新登录");
             });
         }
         try {
