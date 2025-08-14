@@ -176,7 +176,7 @@ dependencies {
     annotationProcessor 'com.jakewharton:butterknife-compiler:10.1.0'
     implementation 'org.greenrobot:greendao:3.3.0'
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
-    //noinspection GradleDependency : fresco 3.0.0 - 3.6.0 似乎有bug 以后再试试3.7以上的版本
+    //noinspection GradleDependency : fresco 3.0.0 - 3.6.0 似乎有问题 以后再试试3.7以上的版本
     implementation 'com.facebook.fresco:fresco:2.6.0'
     // implementation 'com.facebook.fresco:fresco:3.6.0'
     // implementation 'com.facebook.fresco:middleware:3.6.0'
@@ -193,7 +193,7 @@ dependencies {
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'com.alibaba:fastjson:1.2.83'
-    implementation "androidx.core:core-ktx:1.16.0"
+    implementation "androidx.core:core-ktx:1.17.0"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.1.0"
 //    implementation 'com.google.firebase:firebase-analytics:19.0.0'
 //    implementation 'com.google.firebase:firebase-crashlytics:18.1.0'
@@ -214,10 +214,10 @@ dependencies {
 
     // AndroidX Test libraries
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
-    androidTestImplementation 'androidx.test:runner:1.6.2'
-    androidTestImplementation 'androidx.test:rules:1.6.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.3.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.7.0'
+    androidTestImplementation 'androidx.test:runner:1.7.0'
+    androidTestImplementation 'androidx.test:rules:1.7.0'
 }
 
 repositories {
