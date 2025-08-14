@@ -3,7 +3,7 @@
     xmlns:fresco="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="120dp"
+    android:layout_height="140dp"
     android:layout_marginLeft="5dp"
     android:layout_marginRight="5dp"
     android:layout_marginTop="5dp"
