@@ -239,12 +239,12 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
             if (timestamp > exp) {
                 ZaiManhuaSignUtils.Login(this, new ZaiManhuaSignUtils.LoginCallback() {
                     @Override
-                    public void onLoginSuccess() {
+                    public void onSuccess() {
                         ZaiManhuaSignUtils.SignIn();
                     }
 
                     @Override
-                    public void onLoginFail() {
+                    public void onFail() {
 
                     }
                 }, username, passwordMd5);

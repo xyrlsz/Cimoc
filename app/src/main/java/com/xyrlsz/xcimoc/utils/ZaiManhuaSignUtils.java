@@ -100,18 +100,18 @@ public class ZaiManhuaSignUtils {
                         long exp = payload.getLong("exp");
                         editor.putLong(ZAI_SHARED_EXP, exp);
                         editor.apply();
-                        callback.onLoginSuccess();
+                        callback.onSuccess();
 
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        callback.onLoginFail();
+                        callback.onFail();
                     }
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                callback.onLoginFail();
+                callback.onFail();
             }
         });
     }
@@ -162,9 +162,9 @@ public class ZaiManhuaSignUtils {
     }
 
     public interface LoginCallback {
-        void onLoginSuccess();
+        void onSuccess();
 
-        void onLoginFail();
+        void onFail();
     }
 
 }

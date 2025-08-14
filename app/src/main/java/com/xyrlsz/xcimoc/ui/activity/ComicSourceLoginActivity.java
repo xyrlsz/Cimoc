@@ -513,7 +513,7 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
 
             ZaiManhuaSignUtils.Login(this, new ZaiManhuaSignUtils.LoginCallback() {
                 @Override
-                public void onLoginSuccess() {
+                public void onSuccess() {
                     runOnUiThread(() -> {
                         mZaiLogin.setSummary(username);
                         mZaiLogin.setTitle(getString(R.string.logined));
@@ -527,7 +527,7 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
                 }
 
                 @Override
-                public void onLoginFail() {
+                public void onFail() {
                     onLoginFail();
                 }
             }, username, password);
