@@ -23,6 +23,7 @@ import com.xyrlsz.xcimoc.source.IKanman;
 import com.xyrlsz.xcimoc.source.Komiic;
 import com.xyrlsz.xcimoc.source.Locality;
 import com.xyrlsz.xcimoc.source.MYCOMIC;
+import com.xyrlsz.xcimoc.source.ManBen;
 import com.xyrlsz.xcimoc.source.MangaBZ;
 import com.xyrlsz.xcimoc.source.Mangakakalot;
 import com.xyrlsz.xcimoc.source.Manhuatai;
@@ -282,6 +283,9 @@ public class SourceManager {
                     break;
                 case ZaiManhua.TYPE:
                     parser = new ZaiManhua(source);
+                    break;
+                case ManBen.TYPE:
+                    parser = new ManBen(source);
                     break;
                 default:
                     parser = new Null();

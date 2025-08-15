@@ -21,6 +21,7 @@ import com.xyrlsz.xcimoc.source.HotManga;
 import com.xyrlsz.xcimoc.source.IKanman;
 import com.xyrlsz.xcimoc.source.Komiic;
 import com.xyrlsz.xcimoc.source.MYCOMIC;
+import com.xyrlsz.xcimoc.source.ManBen;
 import com.xyrlsz.xcimoc.source.MangaBZ;
 import com.xyrlsz.xcimoc.source.Mangakakalot;
 import com.xyrlsz.xcimoc.source.Manhuatai;
@@ -91,6 +92,7 @@ public class BrowserFilter extends BaseActivity {
         list.add(YYManHua.TYPE);
         list.add(DmzjV4.TYPE);
         list.add(ZaiManhua.TYPE);
+        list.add(ManBen.TYPE);
         return list;
     }
 
