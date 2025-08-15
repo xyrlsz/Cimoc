@@ -39,8 +39,8 @@ public class GoDaManHua extends MangaParser {
     public static final int TYPE = 108;
     public static final String DEFAULT_TITLE = "G社漫畫";
     private static final String baseUrl = "https://m.g-mh.org";
-    private static final String picBaseUrl = "https://f40-1-4.g-mh.online";
-    private static final String apiBaseUrl = "https://api-get-v2.mgsearcher.com";
+    private static final String picBaseUrl = "https://t40-1-4.g-mh.online";
+    private static final String apiBaseUrl = "https://api-get-v3.mgsearcher.com";
     private String _mid = "";
 
     public GoDaManHua(Source source) {
