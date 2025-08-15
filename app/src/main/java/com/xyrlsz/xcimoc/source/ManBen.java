@@ -77,8 +77,8 @@ public class ManBen extends MangaParser {
 
     @Override
     protected void initUrlFilterList() {
-        filter.add(new UrlFilter("manben.com", "/(\\w+-\\w+)"));
-        filter.add(new UrlFilter("www.manben.com", "/(\\w+-\\w+)"));
+        filter.add(new UrlFilter("manben.com", "/([\\w-]+)"));
+        filter.add(new UrlFilter("www.manben.com", "/([\\w-]+)"));
     }
 
     @Override
@@ -102,7 +102,7 @@ public class ManBen extends MangaParser {
             }
         }
         String update = body.text(".chapter > .top > span");
-        String intro = body.text(".comicInfo > .info > .content");
+        String intro = body.text(".detailContent  > p");
         comic.setInfo(title, cover, update, intro, author, isFinish(html));
         return comic;
     }
