@@ -92,7 +92,7 @@ public class Vomicmh extends MangaParser {
     public Comic parseInfo(String html, Comic comic) throws UnsupportedEncodingException, JSONException {
         Node body = new Node(html);
         List<Node> list = body.list("div.detail > div > div");
-        String title = body.text("div.detail > div > div.text-lg").replace("&amp;", "&");
+        String title = body.text("div.detail > div > div > div").replace("&amp;", "&");
         String cover = "";
         String author = "";
         String update = "";
