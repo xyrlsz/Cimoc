@@ -17,7 +17,6 @@
             android:layout_height="match_parent"
             android:layout_marginEnd="10dp"
             fresco:cardCornerRadius="5dp"
-            android:backgroundTint="@color/transparent"
             >
             <com.facebook.drawee.view.SimpleDraweeView
                 android:id="@+id/item_header_comic_image"
