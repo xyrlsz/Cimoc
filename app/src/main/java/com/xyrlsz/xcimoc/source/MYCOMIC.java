@@ -112,10 +112,12 @@ public class MYCOMIC extends MangaParser {
         List<Chapter> list = new LinkedList<>();
         Node body = new Node(html);
         List<Node> chapterNodes = body.list(".grow > [x-cloak] > [x-data]");
-
+        List<Node> chapterTypes = body.list(".grow > [x-cloak] > [x-data] > [data-flux-subheading] > div");
         int i = 0;
 
-        for (Node chapterNode : chapterNodes) {
+        for (int k = 0; k < chapterTypes.size(); k++) {
+            String type = chapterTypes.get(k).text();
+            Node chapterNode = chapterNodes.get(k);
             String chaptersJson = StringUtils.match("chapters:\\s*(\\[.*?\\])", chapterNode.attr("x-data"), 1);
             try {
                 JSONArray chaptersData = new JSONArray(chaptersJson);
@@ -125,8 +127,7 @@ public class MYCOMIC extends MangaParser {
                     String title = chapter.getString("title");
                     String path = chapter.getString("id");
                     Long id = IdCreator.createChapterId(sourceComic, i++);
-                    list.add(new Chapter(id, sourceComic, title, path));
-
+                    list.add(new Chapter(id, sourceComic, title, path, type));
                 }
             } catch (JSONException e) {
                 throw new RuntimeException(e);

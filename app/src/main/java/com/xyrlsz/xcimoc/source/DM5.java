@@ -153,13 +153,22 @@ public class DM5 extends MangaParser {
     public List<Chapter> parseChapter(String html, Comic comic, Long sourceComic) {
         List<Chapter> list = new LinkedList<>();
         Node body = new Node(html);
-        int i = 0;
-        for (Node node : body.list("#chapterlistload > ul  li > a")) {
-            String title = StringUtils.split(node.text(), " ", 0);
-            String path = node.hrefWithSplit(0);
+        List<Node> chapterTypes = body.list(".detail-list-title > a");
+        List<Node> chapterGroups = body.list("#chapterlistload > ul");
 
-            list.add(new Chapter(null, sourceComic, title, path));
+        for (int i = 0; i < chapterGroups.size(); i++) {
+            String type = chapterTypes.get(i).text();
+            String num = chapterTypes.get(i).text("span");
+            type = type.replace(num, "").strip();
+            Node chapterGroup = chapterGroups.get(i);
+            for (Node node : chapterGroup.list("li > a")) {
+                String title = StringUtils.split(node.text(), " ", 0);
+                String path = node.hrefWithSplit(0);
+
+                list.add(new Chapter(null, sourceComic, title, path, type));
+            }
         }
+
         boolean isReverse = body.text("a.order").contains("正序");
         if (isReverse) {
             list = Lists.reverse(list);

@@ -13,8 +13,9 @@ import com.xyrlsz.xcimoc.soup.Node;
 import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
+import org.apache.commons.text.StringEscapeUtils;
+
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,19 +49,20 @@ public class Cartoonmad extends MangaParser {
     @Override
     public Request getSearchRequest(String keyword, int page) throws UnsupportedEncodingException {
         if (page != 1) return null;
-        String url = "https://www.cartoonmad.com/search.html";
+        String url = "https://www.cartoonmad.com/m/?act=7";
         RequestBody body = new FormBody.Builder()
-                .add("keyword", URLEncoder.encode(keyword, "BIG5"))
-                .add("searchtype", "all")
+                .add("keyword", keyword)
+                .add("x", "0")
+                .add("y", "0")
                 .build();
-        return new Request.Builder().url(url).post(body).addHeader("Referer", "https://www.cartoonmad.com/").build();
+        return new Request.Builder().url(url).post(body).addHeader("Referer", "https://www.cartoonmad.com/m/").build();
     }
 
     @Override
     public SearchIterator getSearchIterator(String html, int page) {
         // 正则表达式匹配漫画的链接、标题和封面图片
         Pattern pattern = Pattern.compile(
-                "<a href=comic/(\\d+)\\.html title=\"(.*?)\"><span class=\"covers\"></span><img src=\"(.*?)\"",
+                "<a href=/m/comic/(\\d+)\\.html title=\"(.*?)\"><span class=\"covers\"></span><img src=\"(.*?)\"",
                 Pattern.DOTALL
         );
         Matcher matcher = pattern.matcher(html);
@@ -106,6 +108,7 @@ public class Cartoonmad extends MangaParser {
         String author = "";
         Matcher mInro = Pattern.compile("<META name=\"description\" content=\"(.*?)\"").matcher(html);
         String intro = mInro.find() ? mInro.group(1) : "";
+        intro = StringEscapeUtils.unescapeHtml4(intro);
         boolean status = false;
         comic.setInfo(title, cover, update, intro, author, status);
         return comic;
@@ -114,7 +117,7 @@ public class Cartoonmad extends MangaParser {
     @Override
     public List<Chapter> parseChapter(String html, Comic comic, Long sourceComic) {
         List<Chapter> list = new LinkedList<>();
-        Matcher mChapter = Pattern.compile("<a href=(.*?) target=_blank>(.*?)<\\/a>&nbsp;").matcher(html);
+        Matcher mChapter = Pattern.compile("<a href=(.*?) target=_blank>(.*?)</a>&nbsp;").matcher(html);
         int i = 0;
         while (mChapter.find()) {
             String title = mChapter.group(2);
@@ -140,9 +143,9 @@ public class Cartoonmad extends MangaParser {
     @Override
     public List<ImageUrl> parseImages(String html, Chapter chapter) {
         List<ImageUrl> list = new ArrayList<>();
-        Matcher pageMatcher = Pattern.compile("<a class=onpage>.*<a class=pages href=(.*)\\d{3}\\.html>(.*?)<\\/a>").matcher(html);
+        Matcher pageMatcher = Pattern.compile("<a class=onpage>.*<a class=pages href=(.*)\\d{3}\\.html>(.*?)</a>").matcher(html);
         if (!pageMatcher.find()) return null;
-        int page = Integer.parseInt(pageMatcher.group(2));
+        int page = Integer.parseInt(Objects.requireNonNull(pageMatcher.group(2)));
         for (int i = 1; i <= page; ++i) {
             Long comicChapter = chapter.getId();
             Long id = IdCreator.createImageId(comicChapter, i);

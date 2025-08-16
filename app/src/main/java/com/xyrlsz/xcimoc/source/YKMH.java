@@ -131,13 +131,19 @@ public class YKMH extends MangaParser {
     public List<Chapter> parseChapter(String html, Comic comic, Long sourceComic) throws JSONException {
         List<Chapter> list = new LinkedList<>();
         Node body = new Node(html);
+        List<Node> types = body.list("div.comic-chapters > div > div > span.Title");
+        List<Node> groups = body.list("div.chapter-body");
         int i = 0;
-        for (Node node : body.list("div.chapter-warp ul.Drama > li > a")) {
-            String title = node.text();
+        for (int j = 0; j < types.size(); j++) {
+            String type = types.get(j).text();
+            Node group = groups.get(j);
+            for (Node node : group.list("div.chapter-warp ul.Drama > li > a")) {
+                String title = node.text();
 //            String path = StringUtils.split(node.href(), "/", 3);
-            String path = node.hrefWithSubString(1);
-            Long id = IdCreator.createChapterId(sourceComic, i++);
-            list.add(new Chapter(id, sourceComic, title, path));
+                String path = node.hrefWithSubString(1);
+                Long id = IdCreator.createChapterId(sourceComic, i++);
+                list.add(new Chapter(id, sourceComic, title, path, type));
+            }
         }
         return list;
     }
@@ -187,10 +193,6 @@ public class YKMH extends MangaParser {
         return getInfoRequest(cid);
     }
 
-    @Override
-    public String parseCheck(String html) {
-        return new Node(html).text("p.txtItme > span.date");
-    }
 
     @Override
     public String getTitle() {

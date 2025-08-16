@@ -203,7 +203,7 @@ dependencies {
 //    implementation 'com.iqiyi.xcrash:xcrash-android-lib:3.0.0'
     implementation 'com.github.houbb:opencc4j:1.8.1'
     implementation 'com.github.thegrizzlylabs:sardine-android:0.9'
-
+    implementation 'org.apache.commons:commons-text:1.14.0'
 //    implementation "androidx.documentfile:documentfile:1.1.0"
 
     // protobuf 依赖
