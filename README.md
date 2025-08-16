@@ -29,7 +29,7 @@ forked from https://github.com/Haleydu/Cimoc
 
 # 软件使用说明
 
-- 安装完成后，直接点击右上角的搜索，即可搜索到漫画
+- 安装完成后，直接点击右上角的搜索，即可搜索到漫画，需要手机安装[WebView组件](https://play.google.com/store/apps/details?id=com.google.android.webview)
 - 报毒问题已解决
 
 # 感谢以下的开源项目及作者
