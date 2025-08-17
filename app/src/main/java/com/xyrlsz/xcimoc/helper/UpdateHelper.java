@@ -13,7 +13,6 @@ import com.xyrlsz.xcimoc.source.BuKa;
 import com.xyrlsz.xcimoc.source.Cartoonmad;
 import com.xyrlsz.xcimoc.source.CopyMH;
 import com.xyrlsz.xcimoc.source.DM5;
-//import com.xyrlsz.xcimoc.source.Dmzj;
 import com.xyrlsz.xcimoc.source.DmzjV4;
 import com.xyrlsz.xcimoc.source.DongManManHua;
 import com.xyrlsz.xcimoc.source.DuManWu;
@@ -60,6 +59,9 @@ public class UpdateHelper {
         return ComicSourceTable;
     }
 
+    /**
+     * 初始化图源
+     */
     private static void initComicSourceTable() {
 
         if (ComicSourceTable.isEmpty()) {
@@ -69,22 +71,13 @@ public class UpdateHelper {
             ComicSourceTable.put(Cartoonmad.TYPE, Cartoonmad.getDefaultSource());
             ComicSourceTable.put(CopyMH.TYPE, CopyMH.getDefaultSource());
             ComicSourceTable.put(DM5.TYPE, DM5.getDefaultSource());
-//            ComicSourceTable.put(Dmzj.TYPE, Dmzj.getDefaultSource());
-//        ComicSourceHash.put(Dmzjv2.TYPE, Dmzjv2.getDefaultSource());
-//        ComicSourceHash.put(Dmzjv3.TYPE, Dmzjv3.getDefaultSource());
-//            ComicSourceTable.put(GuFeng.TYPE, GuFeng.getDefaultSource());
-//        ComicSourceHash.put(HHAAZZ.TYPE, HHAAZZ.getDefaultSource());
             ComicSourceTable.put(HotManga.TYPE, HotManga.getDefaultSource());
             ComicSourceTable.put(IKanman.TYPE, IKanman.getDefaultSource());
-//        ComicSourceHash.put(JMTT.TYPE, JMTT.getDefaultSource());
             ComicSourceTable.put(Mangakakalot.TYPE, Mangakakalot.getDefaultSource());
             ComicSourceTable.put(MangaBZ.TYPE, MangaBZ.getDefaultSource());
-//        ComicSourceHash.put(MangaNel.TYPE, MangaNel.getDefaultSource());
             ComicSourceTable.put(Manhuatai.TYPE, Manhuatai.getDefaultSource());
-//            ComicSourceTable.put(MiGu.TYPE, MiGu.getDefaultSource());
             ComicSourceTable.put(MYCOMIC.TYPE, MYCOMIC.getDefaultSource());
             ComicSourceTable.put(Tencent.TYPE, Tencent.getDefaultSource());
-//        ComicSourceHash.put(Webtoon.TYPE, Webtoon.getDefaultSource());
             ComicSourceTable.put(DongManManHua.TYPE, DongManManHua.getDefaultSource());
             ComicSourceTable.put(YKMH.TYPE, YKMH.getDefaultSource());
             ComicSourceTable.put(DuManWu.TYPE, DuManWu.getDefaultSource());
@@ -154,73 +147,7 @@ public class UpdateHelper {
         });
     }
 
-    /**
-     * 初始化图源
-     */
-  /*  private static void initSource(DaoSession session) {
-        initComicSourceTable();
-//        List<Source> list = new ArrayList<>(ComicSourceTable.values());
-//        list.add(IKanman.getDefaultSource());
-////        list.add(Dmzjv3.getDefaultSource());
-////        list.add(HHAAZZ.getDefaultSource());
-////        list.add(CCTuku.getDefaultSource());
-////        list.add(U17.getDefaultSource());
-//        list.add(DM5.getDefaultSource());
-////        list.add(Webtoon.getDefaultSource());
-//        //list.add(HHSSEE.getDefaultSource());
-////        list.add(MH57.getDefaultSource());
-////        list.add(MH50.getDefaultSource());
-////        list.add(Dmzjv2.getDefaultSource());
-////        list.add(MangaNel.getDefaultSource());
-//        list.add(Mangakakalot.getDefaultSource());
-////        list.add(PuFei.getDefaultSource());
-//        list.add(Cartoonmad.getDefaultSource());
-//        list.add(Animx2.getDefaultSource());
-////        list.add(MH517.getDefaultSource());
-////        list.add(BaiNian.getDefaultSource());
-//        list.add(MiGu.getDefaultSource());
-//        list.add(Tencent.getDefaultSource());
-//        list.add(BuKa.getDefaultSource());
-////        list.add(EHentai.getDefaultSource());
-////        list.add(QiManWu.getDefaultSource());
-////        list.add(Hhxxee.getDefaultSource());
-////        list.add(ChuiXue.getDefaultSource());
-////        list.add(BaiNian.getDefaultSource());
-////        list.add(TuHao.getDefaultSource());
-////        list.add(SixMH.getDefaultSource());
-//        list.add(MangaBZ.getDefaultSource());
-////        list.add(ManHuaDB.getDefaultSource());
-//        list.add(Manhuatai.getDefaultSource());
-////        list.add(GuFeng.getDefaultSource());
-////        list.add(CCMH.getDefaultSource());
-//        list.add(Manhuatai.getDefaultSource());
-////        list.add(MHLove.getDefaultSource());
-////        list.add(YYLS.getDefaultSource());
-////        list.add(JMTT.getDefaultSource());
-////        list.add(Ohmanhua.getDefaultSource());
-//        list.add(CopyMH.getDefaultSource());
-//        list.add(HotManga.getDefaultSource());
-//        list.add(DongManManHua.getDefaultSource());
-////        list.add(MH160.getDefaultSource());
-////        list.add(QiMiaoMH.getDefaultSource());
-//        list.add(YKMH.getDefaultSource());
-////        list.add(DmzjFix.getDefaultSource());
-//        list.add(Dmzj.getDefaultSource());
-//        list.add(Baozi.getDefaultSource());
-//        list.add(MYCOMIC.getDefaultSource());
-//        list.add(DuManWu.getDefaultSource());
-//        list.add(DuManWuOrg.getDefaultSource());
-//        list.add(Komiic.getDefaultSource());
-//        list.add(Manhuayu.getDefaultSource());
-//        list.add(GoDaManHua.getDefaultSource());
-//        list.add(TTKMH.getDefaultSource());
-//        list.add(Vomicmh.getDefaultSource());
-//        list.add(YYManHua.getDefaultSource());
-//        list.add(DmzjV4.getDefaultSource());
-//        session.getSourceDao().insertOrReplaceInTx(list);
 
-    }
-*/
     private static void updateChapterTable(final DaoSession session) {
         addChapterCountColumn(session.getDatabase());
     }
@@ -261,12 +188,6 @@ public class UpdateHelper {
         for (Source source : sourceList) {
             if (ComicSourceTable.containsKey(source.getType())) {
                 Source sourceToUpdate = ComicSourceTable.get(source.getType());
-//                if (sourceToUpdate != null && (!source.getTitle().equals(sourceToUpdate.getTitle()) ||
-//                        !source.getBaseUrl().equals(sourceToUpdate.getBaseUrl()))) {
-//                    source.setTitle(sourceToUpdate.getTitle());
-//                    source.setBaseUrl(sourceToUpdate.getBaseUrl());
-//                    sourceDao.update(source);
-//                }
                 if (sourceToUpdate != null) {
                     String title1 = source.getTitle();
                     String title2 = sourceToUpdate.getTitle();

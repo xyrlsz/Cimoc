@@ -65,23 +65,15 @@ public class ZaiManhuaSignUtils {
         String passwdMd5 = HashUtils.MD5(password);
         LoginWithPasswdMd5(context, callback, username, passwdMd5);
     }
+
     public static void LoginWithPasswdMd5(Context context, LoginCallback callback, String username, String passwordMd5) {
 
         String url = StringUtils.format("https://i.zaimanhua.com/lpi/v1/login/passwd?username=%s&passwd=%s", username, passwordMd5);
         Request request = new Request.Builder()
                 .url(url)
                 .addHeader("Referer", "https://i.zaimanhua.com/login")
-                .post(new RequestBody() {
-                    @Nullable
-                    @Override
-                    public MediaType contentType() {
-                        return null;
-                    }
-
-                    @Override
-                    public void writeTo(@NonNull BufferedSink bufferedSink) throws IOException {
-                    }
-                }).build();
+                .post(RequestBody.create("", null))// 空的请求体
+                .build();
         Objects.requireNonNull(App.getHttpClient()).newCall(request).enqueue(new Callback() {
 
             @Override
@@ -128,18 +120,7 @@ public class ZaiManhuaSignUtils {
                 .url("https://m.zaimanhua.com/lpi/v1/task/sign_in?_v=15")
                 .addHeader("Authorization", "Bearer " + token)
                 .addHeader("Referer", "https://m.zaimanhua.com/pages/signIn/index?from=app")
-                .post(new RequestBody() {
-                    @Nullable
-                    @Override
-                    public MediaType contentType() {
-                        return null;
-                    }
-
-                    @Override
-                    public void writeTo(@NonNull BufferedSink bufferedSink) throws IOException {
-
-                    }
-                })
+                .post(RequestBody.create("", null))// 空的请求体
                 .build();
 
         App.getHttpClient().newCall(request).enqueue(new Callback() {
