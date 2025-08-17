@@ -14,6 +14,7 @@ import com.xyrlsz.xcimoc.parser.JsonIterator;
 import com.xyrlsz.xcimoc.parser.MangaParser;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
+import com.xyrlsz.xcimoc.parser.UrlFilterWithCidQueryKey;
 import com.xyrlsz.xcimoc.utils.HintUtils;
 import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
@@ -75,6 +76,7 @@ public class ZaiManhua extends MangaParser {
     @Override
     protected void initUrlFilterList() {
         filter.add(new UrlFilter("zaimanhua.com"));
+        filter.add(new UrlFilterWithCidQueryKey("m.zaimanhua.com", "id"));
     }
 
     @Override
@@ -118,7 +120,7 @@ public class ZaiManhua extends MangaParser {
 
     @Override
     public String getUrl(String cid) {
-        return StringUtils.format("%s/details/%s", pcBaseUrl, cid);
+        return StringUtils.format("https://m.zaimanhua.com/pages/comic/detail?id=%s", cid);
     }
 
     @Override

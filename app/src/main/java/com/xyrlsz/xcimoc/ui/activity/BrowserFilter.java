@@ -36,6 +36,8 @@ import com.xyrlsz.xcimoc.utils.HintUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class BrowserFilter extends BaseActivity {
     public static final String URL_KEY = "url";
@@ -71,8 +73,6 @@ public class BrowserFilter extends BaseActivity {
         list.add(Cartoonmad.TYPE);
         list.add(CopyMH.TYPE);
         list.add(DM5.TYPE);
-//        list.add(Dmzj.TYPE);
-//        list.add(GuFeng.TYPE);
         list.add(HotManga.TYPE);
         list.add(IKanman.TYPE);
         list.add(Mangakakalot.TYPE);
@@ -124,7 +124,6 @@ public class BrowserFilter extends BaseActivity {
             if (uri != null) {
                 openReader(uri);
             } else {
-//                Toast.makeText(this, "url不合法", Toast.LENGTH_SHORT);
                 HintUtils.showToast(this, "url不合法");
             }
         }
@@ -138,9 +137,18 @@ public class BrowserFilter extends BaseActivity {
         //来自分享
         else if (Intent.ACTION_SEND.equals(action) && "text/plain".equals(type)) {
             try {
-                openReader(Uri.parse(intent.getStringExtra(Intent.EXTRA_TEXT).replace("https://m.ykmh.commanhua", "https://m.ykmh.com/manhua")));
+                // 使用正则表达式匹配URL
+                String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+                Pattern pattern = Pattern.compile("(https?://[\\w\\-./?#&=]+)");
+                Matcher matcher = null;
+                if (sharedText != null) {
+                    matcher = pattern.matcher(sharedText);
+                }
+                if (matcher != null && matcher.find()) {
+                    String url = matcher.group(1);
+                    openReader(Uri.parse(url));
+                }
             } catch (Exception ex) {
-//                Toast.makeText(this, "url不合法", Toast.LENGTH_SHORT);
                 HintUtils.showToast(this, "url不合法");
             }
         }

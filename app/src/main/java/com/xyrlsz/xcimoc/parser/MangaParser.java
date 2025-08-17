@@ -178,10 +178,12 @@ public abstract class MangaParser implements Parser {
                     path = path.substring(0, path.length() - 1);
                 }
                 String res = StringUtils.match(uf.Regex, path, uf.Group);
-                if (res != null && res.startsWith("/")) {
-                    res = res.substring(1);
+                if (res != null) {
+                    if (res.startsWith("/")) {
+                        res = res.substring(1);
+                    }
+                    return res;
                 }
-                return res;
             }
         }
         return null;
