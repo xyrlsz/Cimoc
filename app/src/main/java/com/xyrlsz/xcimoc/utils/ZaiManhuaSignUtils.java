@@ -63,7 +63,11 @@ public class ZaiManhuaSignUtils {
     public static void Login(Context context, LoginCallback callback, String username, String password) {
         // 密码md5加密
         String passwdMd5 = HashUtils.MD5(password);
-        String url = StringUtils.format("https://i.zaimanhua.com/lpi/v1/login/passwd?username=%s&passwd=%s", username, passwdMd5);
+        LoginWithPasswdMd5(context, callback, username, passwdMd5);
+    }
+    public static void LoginWithPasswdMd5(Context context, LoginCallback callback, String username, String passwordMd5) {
+
+        String url = StringUtils.format("https://i.zaimanhua.com/lpi/v1/login/passwd?username=%s&passwd=%s", username, passwordMd5);
         Request request = new Request.Builder()
                 .url(url)
                 .addHeader("Referer", "https://i.zaimanhua.com/login")
@@ -94,7 +98,7 @@ public class ZaiManhuaSignUtils {
                         editor.putString(ZAI_SHARED_TOKEN, token);
                         editor.putString(ZAI_SHARED_UID, uid);
                         editor.putString(ZAI_SHARED_USERNAME, username);
-                        editor.putString(ZAI_SHARED_PASSWD_MD5, passwdMd5);
+                        editor.putString(ZAI_SHARED_PASSWD_MD5, passwordMd5);
                         JwtManualParser jwtManualParser = new JwtManualParser(token);
                         JSONObject payload = jwtManualParser.getPayload();
                         long exp = payload.getLong("exp");

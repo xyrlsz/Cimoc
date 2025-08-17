@@ -18,6 +18,7 @@ import com.xyrlsz.xcimoc.utils.HintUtils;
 import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 import com.xyrlsz.xcimoc.utils.TimestampUtils;
+import com.xyrlsz.xcimoc.utils.ZaiManhuaSignUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,37 +44,30 @@ public class ZaiManhua extends MangaParser {
     String TOKEN = "";
     String UID = "";
     long EXP = 0;
+    String username = "";
+    String passwdMd5 = "";
     private SharedPreferences sharedPreferences;
 
     public ZaiManhua(Source source) {
         init(source);
         sharedPreferences = App.getAppContext().getSharedPreferences(Constants.ZAI_SHARED, MODE_PRIVATE);
         UID = sharedPreferences.getString(Constants.ZAI_SHARED_UID, "0");
-        TOKEN = sharedPreferences.getString(Constants.ZAI_SHARED_TOKEN, "");
-        EXP = sharedPreferences.getLong(Constants.ZAI_SHARED_EXP, 0);
+        username = sharedPreferences.getString(Constants.ZAI_SHARED_USERNAME, "");
+        passwdMd5 = sharedPreferences.getString(Constants.ZAI_SHARED_PASSWD_MD5, "");
     }
 
     public static Source getDefaultSource() {
         return new Source(null, DEFAULT_TITLE, TYPE, true, baseUrl);
     }
 
-    private String getUID() {
-        if (UID.isEmpty()) {
-            UID = sharedPreferences.getString(Constants.ZAI_SHARED_UID, "0");
-        }
-        return UID;
-    }
+
     private long getEXP() {
-        if (EXP == 0) {
-            EXP = sharedPreferences.getLong(Constants.ZAI_SHARED_EXP, 0);
-        }
+        EXP = sharedPreferences.getLong(Constants.ZAI_SHARED_EXP, 0);
         return EXP;
     }
 
     private String getTOKEN() {
-        if (TOKEN.isEmpty()) {
-            TOKEN = sharedPreferences.getString(Constants.ZAI_SHARED_TOKEN, "");
-        }
+        TOKEN = sharedPreferences.getString(Constants.ZAI_SHARED_TOKEN, "");
         return TOKEN;
     }
 
@@ -141,11 +135,28 @@ public class ZaiManhua extends MangaParser {
             });
         }
         long timestamp = System.currentTimeMillis() / 1000;
-        if (timestamp > getEXP()) {
+        if (timestamp > getEXP() && !getTOKEN().isEmpty()) {
             App.runOnMainThread(() -> {
                 HintUtils.showToast(App.getAppContext(), "再漫画登录过期，可能需要重新登录");
             });
+            ZaiManhuaSignUtils.LoginWithPasswdMd5(App.getAppContext(), new ZaiManhuaSignUtils.LoginCallback() {
+                @Override
+                public void onSuccess() {
+                    App.runOnMainThread(() -> {
+                        HintUtils.showToast(App.getAppContext(), "再漫画自动登录成功");
+                    });
+                }
+
+                @Override
+                public void onFail() {
+                    App.runOnMainThread(() -> {
+                        HintUtils.showToast(App.getAppContext(), "再漫画自动登录失败");
+                    });
+                }
+            }, username, passwdMd5);
+
         }
+
         try {
             JSONObject jsonObject = new JSONObject(html);
             JSONObject data = jsonObject.getJSONObject("data").getJSONObject("data");

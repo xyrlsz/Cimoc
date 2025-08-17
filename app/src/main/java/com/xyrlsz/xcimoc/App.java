@@ -227,29 +227,32 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         // 初始化WebDAV配置
         WebDavConf.init(getAppContext());
 
-        // 再漫画签到
+        // 再漫画检查登录与自动签到
         SharedPreferences zaiSharedPreferences = getAppContext().getSharedPreferences(Constants.ZAI_SHARED, Context.MODE_PRIVATE);
+        long timestamp = System.currentTimeMillis() / 1000;
+        long exp = zaiSharedPreferences.getLong(Constants.ZAI_SHARED_EXP, 0);
         boolean autoSign = zaiSharedPreferences.getBoolean(Constants.ZAI_SHARED_AUTO_SIGN, false);
-        if (autoSign) {
-            long timestamp = System.currentTimeMillis() / 1000;
-            SharedPreferences sharedPreferences = getSharedPreferences(Constants.ZAI_SHARED, Context.MODE_PRIVATE);
-            long exp = sharedPreferences.getLong(Constants.ZAI_SHARED_EXP, 0);
-            String username = zaiSharedPreferences.getString(Constants.ZAI_SHARED_USERNAME, "");
-            String passwordMd5 = zaiSharedPreferences.getString(Constants.ZAI_SHARED_PASSWD_MD5, "");
-            if (timestamp > exp) {
-                ZaiManhuaSignUtils.Login(this, new ZaiManhuaSignUtils.LoginCallback() {
-                    @Override
-                    public void onSuccess() {
-                        ZaiManhuaSignUtils.SignIn();
+        String username = zaiSharedPreferences.getString(Constants.ZAI_SHARED_USERNAME, "");
+        String passwordMd5 = zaiSharedPreferences.getString(Constants.ZAI_SHARED_PASSWD_MD5, "");
+        if (timestamp > exp) {
+            ZaiManhuaSignUtils.Login(this, new ZaiManhuaSignUtils.LoginCallback() {
+                @Override
+                public void onSuccess() {
+                    if (autoSign) {
+                        ZaiManhuaSignUtils.CheckSigned(isSigned -> {
+                            if (!isSigned) {
+                                ZaiManhuaSignUtils.SignIn();
+                            }
+                        });
                     }
+                }
 
-                    @Override
-                    public void onFail() {
+                @Override
+                public void onFail() {
 
-                    }
-                }, username, passwordMd5);
-                return;
-            }
+                }
+            }, username, passwordMd5);
+        } else if (autoSign) {
             ZaiManhuaSignUtils.CheckSigned(isSigned -> {
                 if (!isSigned) {
                     ZaiManhuaSignUtils.SignIn();
