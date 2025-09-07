@@ -214,14 +214,9 @@ public class FrescoUtils {
 
 
         DiskCacheConfig diskCacheConfig = DiskCacheConfig.newBuilder(context)
-                .setMaxCacheSize(cacheSizeInM*1024*1024)
+                .setMaxCacheSize((long) cacheSizeInM *1024*1024)
                 .setBaseDirectoryName(PHOTO_FRESCO)
-                .setBaseDirectoryPathSupplier(new Supplier<File>() {
-                    @Override
-                    public File get() {
-                        return context.getCacheDir();
-                    }
-                })
+                .setBaseDirectoryPathSupplier(context::getCacheDir)
                 .build();
         MyImageCacheStatsTracker imageCacheStatsTracker = new MyImageCacheStatsTracker();
         ImagePipelineConfig config = ImagePipelineConfig.newBuilder(context)

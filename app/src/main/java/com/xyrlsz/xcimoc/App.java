@@ -33,6 +33,7 @@ import com.xyrlsz.xcimoc.saf.CimocDocumentFile;
 import com.xyrlsz.xcimoc.ui.activity.MainActivity;
 import com.xyrlsz.xcimoc.ui.adapter.GridAdapter;
 import com.xyrlsz.xcimoc.utils.DocumentUtils;
+import com.xyrlsz.xcimoc.utils.FrescoUtils;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
 import com.xyrlsz.xcimoc.utils.ZaiManhuaSignUtils;
@@ -192,9 +193,9 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         DBOpenHelper helper = new DBOpenHelper(this, "cimoc.db");
         mDaoSession = new DaoMaster(helper.getWritableDatabase()).newSession(IdentityScopeType.None);
         UpdateHelper.update(mPreferenceManager, getDaoSession());
-        Fresco.initialize(this);
+        FrescoUtils.init(this, 1024);
         initPixels();
-
+        
         manager_wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         //获取栈顶Activity以及当前App上下文
         mApp = this;
