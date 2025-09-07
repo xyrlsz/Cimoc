@@ -16,6 +16,7 @@ import com.xyrlsz.xcimoc.rx.RxBus;
 import com.xyrlsz.xcimoc.rx.RxEvent;
 import com.xyrlsz.xcimoc.saf.CimocDocumentFile;
 import com.xyrlsz.xcimoc.ui.view.DetailView;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -157,7 +158,9 @@ public class DetailPresenter extends BasePresenter<DetailView> {
                 }, new Action1<Throwable>() {
                     @Override
                     public void call(Throwable throwable) {
+                        List<Chapter> cachedChapters = mChapterManager.getChapterList(IdCreator.createSourceComic(mComic));
                         mBaseView.onComicLoadSuccess(mComic);
+                        mBaseView.onChapterLoadSuccess(cachedChapters);
                         mBaseView.onParseError();
                     }
                 }));
