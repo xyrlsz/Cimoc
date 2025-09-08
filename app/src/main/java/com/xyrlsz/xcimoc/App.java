@@ -193,7 +193,7 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         DBOpenHelper helper = new DBOpenHelper(this, "cimoc.db");
         mDaoSession = new DaoMaster(helper.getWritableDatabase()).newSession(IdentityScopeType.None);
         UpdateHelper.update(mPreferenceManager, getDaoSession());
-        FrescoUtils.init(this, 1024);
+        FrescoUtils.init(this, 512);
         initPixels();
         
         manager_wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
