@@ -2,6 +2,7 @@ package com.xyrlsz.xcimoc.core;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.thegrizzlylabs.sardineandroid.Sardine;
 import com.thegrizzlylabs.sardineandroid.impl.OkHttpSardine;
@@ -10,6 +11,7 @@ import com.xyrlsz.xcimoc.Constants;
 import java.io.IOException;
 
 import rx.Observable;
+import rx.Subscriber;
 import rx.schedulers.Schedulers;
 
 public class WebDavConf {
@@ -36,7 +38,23 @@ public class WebDavConf {
                         }
                     })
                     .subscribeOn(Schedulers.io())
-                    .subscribe();
+                    .subscribe(new Subscriber<Void>() {
+                        @Override
+                        public void onCompleted() {
+                            Log.i("WebDavConf", "WebDav 目录检查/创建成功");
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            sardine = null;
+                            Log.e("WebDavConf", "WebDav 初始化失败: ", e);
+                        }
+
+                        @Override
+                        public void onNext(Void unused) {
+
+                        }
+                    });
         }
     }
 
