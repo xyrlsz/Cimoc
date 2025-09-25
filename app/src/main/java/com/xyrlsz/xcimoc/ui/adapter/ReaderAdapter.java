@@ -101,6 +101,7 @@ public class ReaderAdapter extends BaseAdapter<ImageUrl> {
         final DraweeView draweeView = ((ImageHolder) holder).draweeView;
 
         Headers currHeaders = imageUrl.getHeaders();
+        App.setHeaders(imageUrl.getHeaders());
         if (currHeaders != null) {
             Context context = App.getAppContext();
             ImagePipelineFactory mImagePipelineFactory = ImagePipelineFactoryBuilder
@@ -131,6 +132,14 @@ public class ReaderAdapter extends BaseAdapter<ImageUrl> {
                             ((PhotoDraweeView) draweeView).update(imageUrl.getId());
                         }
                     }
+
+                    @Override
+                    public void onFailure(String id, Throwable throwable) {
+                        imageUrl.setSuccess(false); // 标记加载失败
+                        throwable.printStackTrace(); // 打印异常信息
+                        // 或者使用 Log 输出
+                        android.util.Log.e("ReaderAdapter", "图片加载失败: " + id + " URL: " + imageUrl.getUrl(), throwable);
+                    }
                 });
                 break;
             case READER_STREAM:
@@ -146,6 +155,14 @@ public class ReaderAdapter extends BaseAdapter<ImageUrl> {
                             }
                             draweeView.setAspectRatio((float) imageInfo.getWidth() / imageInfo.getHeight());
                         }
+                    }
+
+                    @Override
+                    public void onFailure(String id, Throwable throwable) {
+                        imageUrl.setSuccess(false); // 标记加载失败
+                        throwable.printStackTrace(); // 打印异常信息
+                        // 或者使用 Log 输出
+                        android.util.Log.e("ReaderAdapter", "图片加载失败: " + id + " URL: " + imageUrl.getUrl(), throwable);
                     }
                 });
                 break;

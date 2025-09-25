@@ -13,19 +13,17 @@ import android.net.Uri;
 import android.os.Looper;
 import android.os.SystemClock;
 
+import androidx.annotation.NonNull;
+
 import com.facebook.common.logging.FLog;
 import com.facebook.imagepipeline.image.EncodedImage;
-import com.facebook.imagepipeline.producers.BaseNetworkFetcher;
 import com.facebook.imagepipeline.producers.BaseProducerContextCallbacks;
 import com.facebook.imagepipeline.producers.Consumer;
-import com.facebook.imagepipeline.producers.FetchState;
 import com.facebook.imagepipeline.producers.ProducerContext;
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.ui.widget.CustomToast;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.Executor;
 
 import okhttp3.CacheControl;
@@ -40,7 +38,7 @@ import okhttp3.ResponseBody;
  * Network fetcher that uses OkHttp 3 as a backend.
  */
 public class OkHttpNetworkFetcher extends
-        BaseNetworkFetcher<OkHttpNetworkFetcher.OkHttpNetworkFetchState> {
+        com.facebook.imagepipeline.backends.okhttp3.OkHttpNetworkFetcher {
 
     private static final String TAG = "OkHttpNetworkFetchProducer";
     private static final String QUEUE_TIME = "queue_time";
@@ -55,8 +53,9 @@ public class OkHttpNetworkFetcher extends
      * @param okHttpClient client to use
      */
     public OkHttpNetworkFetcher(OkHttpClient okHttpClient, Headers headers) {
+        super(okHttpClient);
         mOkHttpClient = okHttpClient;
-
+        mHeaders = headers;
         //修复打开仅WiFi联网功能后运行闪退的问题
         try {
             mCancellationExecutor = okHttpClient.dispatcher().executorService();
@@ -64,23 +63,23 @@ public class OkHttpNetworkFetcher extends
             CustomToast.showToast(App.getAppContext(), "网络连接失败，请检查网络！！", 2000);
         }
 
-        mHeaders = headers;
+
     }
 
+    @NonNull
     @Override
-    public OkHttpNetworkFetchState createFetchState(
-            Consumer<EncodedImage> consumer,
-            ProducerContext context) {
+    public OkHttpNetworkFetchState createFetchState(@NonNull Consumer<EncodedImage> consumer, @NonNull ProducerContext context) {
         return new OkHttpNetworkFetchState(consumer, context);
     }
 
     @Override
-    public void fetch(final OkHttpNetworkFetchState fetchState, final Callback callback) {
+    public void fetch(@NonNull OkHttpNetworkFetchState fetchState, @NonNull Callback callback) {
         fetchState.submitTime = SystemClock.elapsedRealtime();
+        Headers headers = App.getHeaders();
         final Uri uri = fetchState.getUri();
         Request request = new Request.Builder()
                 .cacheControl(new CacheControl.Builder().noStore().build())
-                .headers(mHeaders)
+                .headers(headers)
                 .url(uri.toString())
                 .get()
                 .build();
@@ -141,21 +140,6 @@ public class OkHttpNetworkFetcher extends
                 });
     }
 
-    @Override
-    public void onFetchCompletion(OkHttpNetworkFetchState fetchState, int byteSize) {
-        fetchState.fetchCompleteTime = SystemClock.elapsedRealtime();
-    }
-
-    @Override
-    public Map<String, String> getExtraMap(OkHttpNetworkFetchState fetchState, int byteSize) {
-        Map<String, String> extraMap = new HashMap<>(4);
-        extraMap.put(QUEUE_TIME, Long.toString(fetchState.responseTime - fetchState.submitTime));
-        extraMap.put(FETCH_TIME, Long.toString(fetchState.fetchCompleteTime - fetchState.responseTime));
-        extraMap.put(TOTAL_TIME, Long.toString(fetchState.fetchCompleteTime - fetchState.submitTime));
-        extraMap.put(IMAGE_SIZE, Integer.toString(byteSize));
-        return extraMap;
-    }
-
     /**
      * Handles exceptions.
      * <p>
@@ -171,15 +155,5 @@ public class OkHttpNetworkFetcher extends
         }
     }
 
-    public static class OkHttpNetworkFetchState extends FetchState {
-        public long submitTime;
-        public long responseTime;
-        public long fetchCompleteTime;
 
-        public OkHttpNetworkFetchState(
-                Consumer<EncodedImage> consumer,
-                ProducerContext producerContext) {
-            super(consumer, producerContext);
-        }
-    }
 }

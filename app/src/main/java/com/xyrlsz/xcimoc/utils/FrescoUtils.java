@@ -19,6 +19,7 @@ import com.facebook.drawee.backends.pipeline.PipelineDraweeController;
 import com.facebook.drawee.controller.BaseControllerListener;
 import com.facebook.drawee.generic.RoundingParams;
 import com.facebook.drawee.view.SimpleDraweeView;
+import com.facebook.imagepipeline.backends.okhttp3.OkHttpImagePipelineConfigFactory;
 import com.facebook.imagepipeline.cache.DefaultCacheKeyFactory;
 import com.facebook.imagepipeline.cache.ImageCacheStatsTracker;
 import com.facebook.imagepipeline.cache.MemoryCache;
@@ -30,8 +31,11 @@ import com.facebook.imagepipeline.core.ImagePipelineFactory;
 import com.facebook.imagepipeline.request.BasePostprocessor;
 import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
+import com.xyrlsz.xcimoc.App;
+import com.xyrlsz.xcimoc.fresco.OkHttpNetworkFetcher;
 
 import java.io.File;
+import java.util.Objects;
 import java.util.UUID;
 
 
@@ -219,12 +223,22 @@ public class FrescoUtils {
                 .setBaseDirectoryPathSupplier(context::getCacheDir)
                 .build();
         MyImageCacheStatsTracker imageCacheStatsTracker = new MyImageCacheStatsTracker();
-        ImagePipelineConfig config = ImagePipelineConfig.newBuilder(context)
+//        ImagePipelineConfig config = ImagePipelineConfig.newBuilder(context)
+//                .setMainDiskCacheConfig(diskCacheConfig)
+//                .setImageCacheStatsTracker(imageCacheStatsTracker)
+//                .setDownsampleEnabled(true)//Downsampling，它处理图片的速度比常规的裁剪更快，
+//                // 并且同时支持PNG，JPG以及WEP格式的图片，非常强大,与ResizeOptions配合使用
+//                .setBitmapsConfig(Bitmap.Config.RGB_565)
+//                .build();
+        OkHttpNetworkFetcher fetcher = new OkHttpNetworkFetcher(App.getHttpClient(), null);
+        ImagePipelineConfig config = OkHttpImagePipelineConfigFactory
+                .newBuilder(context, Objects.requireNonNull(App.getHttpClient()))
                 .setMainDiskCacheConfig(diskCacheConfig)
                 .setImageCacheStatsTracker(imageCacheStatsTracker)
                 .setDownsampleEnabled(true)//Downsampling，它处理图片的速度比常规的裁剪更快，
                 // 并且同时支持PNG，JPG以及WEP格式的图片，非常强大,与ResizeOptions配合使用
                 .setBitmapsConfig(Bitmap.Config.RGB_565)
+                .setNetworkFetcher(fetcher)
                 .build();
         Fresco.initialize(context, config);
     }
@@ -262,11 +276,15 @@ public class FrescoUtils {
         File localFile = null;
         if (!TextUtils.isEmpty(url)) {
             CacheKey cacheKey = DefaultCacheKeyFactory.getInstance().getEncodedCacheKey(ImageRequest.fromUri(url), null);
-            if (ImagePipelineFactory.getInstance().getMainFileCache().hasKey(cacheKey)) {
-                BinaryResource resource = ImagePipelineFactory.getInstance().getMainFileCache().getResource(cacheKey);
+            if (ImagePipelineFactory.getInstance()
+                    .getDiskCachesStoreSupplier().get().getMainFileCache().hasKey(cacheKey)) {
+                BinaryResource resource = ImagePipelineFactory.getInstance()
+                        .getDiskCachesStoreSupplier().get().getMainFileCache().getResource(cacheKey);
                 localFile = ((FileBinaryResource) resource).getFile();
-            } else if (ImagePipelineFactory.getInstance().getSmallImageFileCache().hasKey(cacheKey)) {
-                BinaryResource resource = ImagePipelineFactory.getInstance().getSmallImageFileCache().getResource(cacheKey);
+            } else if (ImagePipelineFactory.getInstance()
+                    .getDiskCachesStoreSupplier().get().getSmallImageFileCache().hasKey(cacheKey)) {
+                BinaryResource resource = ImagePipelineFactory.getInstance()
+                        .getDiskCachesStoreSupplier().get().getSmallImageFileCache().getResource(cacheKey);
                 localFile = ((FileBinaryResource) resource).getFile();
             }
         }
@@ -354,6 +372,8 @@ public class FrescoUtils {
         CacheKey cacheKey = DefaultCacheKeyFactory.getInstance()
                 .getEncodedCacheKey(imageRequest,null);
         return ImagePipelineFactory.getInstance()
+                .getDiskCachesStoreSupplier()
+                .get()
                 .getMainFileCache().hasKey(cacheKey);
     }
 

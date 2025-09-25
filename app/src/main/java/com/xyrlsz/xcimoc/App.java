@@ -17,7 +17,6 @@ import androidx.multidex.MultiDex;
 import androidx.multidex.MultiDexApplication;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.facebook.drawee.backends.pipeline.Fresco;
 import com.xyrlsz.xcimoc.component.AppGetter;
 import com.xyrlsz.xcimoc.core.Storage;
 import com.xyrlsz.xcimoc.core.WebDavConf;
@@ -51,6 +50,7 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import okhttp3.Headers;
 import okhttp3.OkHttpClient;
 
 /**
@@ -69,6 +69,7 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
     private static PreferenceManager mPreferenceManager;
     private static WifiManager manager_wifi;
     private static App mApp;
+    private static Headers mHeaders;
     // 默认Github源
     private static String UPDATE_CURRENT_URL = Constants.UPDATE_GITHUB_URL;
     private static boolean isNormalExited = false;
@@ -182,6 +183,17 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         App.isNormalExited = isNormalExited;
     }
 
+    public static Headers getHeaders() {
+        if (mHeaders == null) {
+            mHeaders = new Headers.Builder().build();
+        }
+        return mHeaders;
+    }
+
+    public static void setHeaders(Headers mHeaders) {
+        App.mHeaders = mHeaders;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -193,9 +205,8 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         DBOpenHelper helper = new DBOpenHelper(this, "cimoc.db");
         mDaoSession = new DaoMaster(helper.getWritableDatabase()).newSession(IdentityScopeType.None);
         UpdateHelper.update(mPreferenceManager, getDaoSession());
-        FrescoUtils.init(this, 512);
         initPixels();
-        
+
         manager_wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         //获取栈顶Activity以及当前App上下文
         mApp = this;
@@ -298,6 +309,7 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
 //
 //            }
 //        });
+        FrescoUtils.init(this, 512);
     }
 
     @Override
