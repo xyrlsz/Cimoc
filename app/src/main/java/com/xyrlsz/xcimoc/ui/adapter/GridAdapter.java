@@ -194,13 +194,33 @@ public class GridAdapter extends BaseAdapter<Object> {
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    public void filterByKeyword(String keyword,List<Object>original) {
+    public void filterByKeyword(String keyword, List<Object> original) {
         List<Object> temp = new ArrayList<>();
         for (Object O_comic : mDataSet) {
             MiniComic comic = (MiniComic) O_comic;
             String title = STConvertUtils.T2S(comic.getTitle()).toUpperCase();
             if (title.contains(STConvertUtils.T2S(keyword.toUpperCase()))) {
                 temp.add(comic);
+            }
+            original.add(comic);
+        }
+        mDataSet.clear();
+        mDataSet.addAll(temp);
+        notifyDataSetChanged();
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void filterByKeyword(String keyword, List<Object> original, boolean isCompleted, boolean isNotCompleted) {
+        List<Object> temp = new ArrayList<>();
+        for (Object O_comic : mDataSet) {
+            MiniComic comic = (MiniComic) O_comic;
+            String title = STConvertUtils.T2S(comic.getTitle()).toUpperCase();
+            if (title.contains(STConvertUtils.T2S(keyword.toUpperCase())) || keyword.isEmpty()) {
+                if (isCompleted && comic.isFinish()) {
+                    temp.add(comic);
+                } else if (isNotCompleted && !comic.isFinish()) {
+                    temp.add(comic);
+                }
             }
             original.add(comic);
         }

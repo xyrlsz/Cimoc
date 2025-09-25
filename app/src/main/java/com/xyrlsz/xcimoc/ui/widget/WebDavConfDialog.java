@@ -34,7 +34,7 @@ public class WebDavConfDialog extends Dialog {
 
     private void init(Context context, SubmitCallBack callBack) {
         sharedPreferences = context.getSharedPreferences(Constants.WEBDAV_SHARED, MODE_PRIVATE);
-        this.setContentView(R.layout.webdav_config_layout);
+        this.setContentView(R.layout.dialog_webdav_config);
         // Find views by ID
         urlEditText = findViewById(R.id.webdav_url);
         usernameEditText = findViewById(R.id.username);

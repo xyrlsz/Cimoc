@@ -3,7 +3,6 @@ package com.xyrlsz.xcimoc.ui.fragment;
 import static com.xyrlsz.xcimoc.ui.activity.BrowserFilter.URL_KEY;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
@@ -37,8 +36,9 @@ import com.xyrlsz.xcimoc.ui.fragment.recyclerview.grid.GridFragment;
 import com.xyrlsz.xcimoc.ui.fragment.recyclerview.grid.HistoryFragment;
 import com.xyrlsz.xcimoc.ui.fragment.recyclerview.grid.LocalFragment;
 import com.xyrlsz.xcimoc.ui.view.ComicView;
-import com.xyrlsz.xcimoc.ui.widget.InputDialog;
+import com.xyrlsz.xcimoc.ui.widget.ComicFilterDialog;
 import com.xyrlsz.xcimoc.utils.HintUtils;
+import com.xyrlsz.xcimoc.utils.ThemeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -163,9 +163,24 @@ public class ComicFragment extends BaseFragment implements ComicView {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.comic_filter:
-                showProgressDialog();
-                mTagList.clear();
-                mPresenter.loadTag();
+//                showProgressDialog();
+//                mTagList.clear();
+//                mPresenter.loadTag();
+                int theme = mPreference.getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_PINK);
+                ComicFilterDialog comicFilterDialog = new ComicFilterDialog(getContext(), ThemeUtils.getDialogThemeById(theme), new ComicFilterDialog.SubmitCallBack() {
+                    @Override
+                    public void OnClickCommit(String keyword, boolean isCompleted, boolean isNotCompleted) {
+                        GridFragment item = (GridFragment) mTabAdapter.getItem(mViewPager.getCurrentItem());
+                        item.filterByKeyword(keyword, isCompleted, isNotCompleted);
+                    }
+
+                    @Override
+                    public void OnClickCancel() {
+                        GridFragment item2 = (GridFragment) mTabAdapter.getItem(mViewPager.getCurrentItem());
+                        item2.cancelFilter();
+                    }
+                });
+                comicFilterDialog.show();
                 break;
             case R.id.comic_search:
                 Intent intent = new Intent(getActivity(), SearchActivity.class);
@@ -187,28 +202,28 @@ public class ComicFragment extends BaseFragment implements ComicView {
                 dialog.show();
                 break;
 
-            case R.id.comic_filter_by_keyword:
-                AlertDialog dialog1 = InputDialog.getInputDialog(getContext(), getString(R.string.comic_filter_by_keyword), getString(R.string.search_keyword_input), getString(R.string.dialog_positive), getString(R.string.dialog_negative), new InputDialog.OnItemClickListener() {
-
-                    @Override
-                    public void onPositiveClick(DialogInterface d, int which, String input) {
-                        GridFragment item = (GridFragment) mTabAdapter.getItem(mViewPager.getCurrentItem());
-                        item.filterByKeyword(input);
-                    }
-
-                    @Override
-                    public void onNegativeClick(DialogInterface d, int which) {
-                        d.cancel();
-                    }
-                });
-                dialog1.show();
-
-                break;
-
-            case R.id.comic_filter_by_keyword_cancel:
-                GridFragment item2 = (GridFragment) mTabAdapter.getItem(mViewPager.getCurrentItem());
-                item2.cancelFilter();
-                break;
+//            case R.id.comic_filter_by_keyword:
+//                AlertDialog dialog1 = InputDialog.getInputDialog(getContext(), getString(R.string.comic_filter_by_keyword), getString(R.string.search_keyword_input), getString(R.string.dialog_positive), getString(R.string.dialog_negative), new InputDialog.OnItemClickListener() {
+//
+//                    @Override
+//                    public void onPositiveClick(DialogInterface d, int which, String input) {
+//                        GridFragment item = (GridFragment) mTabAdapter.getItem(mViewPager.getCurrentItem());
+//                        item.filterByKeyword(input);
+//                    }
+//
+//                    @Override
+//                    public void onNegativeClick(DialogInterface d, int which) {
+//                        d.cancel();
+//                    }
+//                });
+//                dialog1.show();
+//
+//                break;
+//
+//            case R.id.comic_filter_by_keyword_cancel:
+//                GridFragment item2 = (GridFragment) mTabAdapter.getItem(mViewPager.getCurrentItem());
+//                item2.cancelFilter();
+//                break;
         }
         return super.onOptionsItemSelected(item);
     }

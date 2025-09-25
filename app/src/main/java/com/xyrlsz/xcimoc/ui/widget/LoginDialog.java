@@ -32,7 +32,7 @@ public class LoginDialog extends Dialog {
 
     private void init(Context context) {
 
-        this.setContentView(R.layout.login_dialog_layout);
+        this.setContentView(R.layout.dialog_login);
         // Find views by ID
         usernameEditText = findViewById(R.id.username);
         passwordEditText = findViewById(R.id.password);

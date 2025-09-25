@@ -8,9 +8,9 @@
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/comic_filter"
-        android:icon="@drawable/ic_filter_list_white_24dp"
+        android:icon="@drawable/ic_filter_white"
         android:title="@string/comic_filter"
-        app:showAsAction="never" />
+        app:showAsAction="ifRoom" />
 <!--    <item-->
 <!--        android:id="@+id/comic_bbs"-->
 <!--        android:icon="@drawable/ic_chat_bubble_white_24dp"-->
@@ -26,12 +26,12 @@
         android:title="@string/comic_open_use_url"
         app:showAsAction="never" />
 
-    <item
-        android:id="@+id/comic_filter_by_keyword"
-        android:title="@string/comic_filter_by_keyword"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/comic_filter_by_keyword_cancel"
-        android:title="@string/comic_filter_by_keyword_cancel"
-        app:showAsAction="never" />
+<!--    <item-->
+<!--        android:id="@+id/comic_filter_by_keyword"-->
+<!--        android:title="@string/comic_filter_by_keyword"-->
+<!--        app:showAsAction="never" />-->
+<!--    <item-->
+<!--        android:id="@+id/comic_filter_by_keyword_cancel"-->
+<!--        android:title="@string/comic_filter_by_keyword_cancel"-->
+<!--        app:showAsAction="never" />-->
 </menu>
