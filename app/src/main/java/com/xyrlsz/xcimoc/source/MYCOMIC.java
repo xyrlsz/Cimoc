@@ -171,14 +171,6 @@ public class MYCOMIC extends MangaParser {
     }
 
     @Override
-    public Headers getHeader(List<ImageUrl> list) {
-        Map<String, String> heads = new HashMap<>();
-        heads.put("referer", baseUrl.concat("/"));
-        return Headers.of(heads);
-    }
-
-
-    @Override
     public Request getCheckRequest(String cid) {
         return getInfoRequest(cid);
     }

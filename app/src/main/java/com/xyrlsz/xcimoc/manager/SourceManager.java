@@ -2,6 +2,7 @@ package com.xyrlsz.xcimoc.manager;
 
 import android.util.SparseArray;
 
+import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.component.AppGetter;
 import com.xyrlsz.xcimoc.model.Source;
 import com.xyrlsz.xcimoc.model.SourceDao;
@@ -217,7 +218,9 @@ public class SourceManager {
     public class HeaderGetter {
 
         public Headers getHeader(int type) {
-            return getParser(type).getHeader();
+            Headers headers = getParser(type).getHeader();
+            App.setHeaders(headers);
+            return headers;
         }
 
     }

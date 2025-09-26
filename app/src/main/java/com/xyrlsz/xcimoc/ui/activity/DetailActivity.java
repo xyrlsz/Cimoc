@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.facebook.imagepipeline.core.ImagePipelineFactory;
 import com.google.common.collect.Lists;
+import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.fresco.ControllerBuilderSupplierFactory;
 import com.xyrlsz.xcimoc.fresco.ImagePipelineFactoryBuilder;
@@ -45,6 +46,7 @@ import java.util.List;
 import java.util.Set;
 
 import butterknife.OnClick;
+import okhttp3.Headers;
 
 /**
  * Created by Hiroshi on 2016/7/2.
@@ -346,7 +348,9 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
                 comic.getIntro(), comic.getFinish(), comic.getUpdate(), comic.getLast(), isReverseOrder(comic));
 
         if (comic.getTitle() != null && comic.getCover() != null) {
-            mImagePipelineFactory = ImagePipelineFactoryBuilder.build(this, SourceManager.getInstance(this).getParser(comic.getSource()).getHeader(), false);
+            Headers headers = SourceManager.getInstance(this).getParser(comic.getSource()).getHeader();
+            App.setHeaders(headers);
+            mImagePipelineFactory = ImagePipelineFactoryBuilder.build(this, headers, false);
             mDetailAdapter.setControllerSupplier(ControllerBuilderSupplierFactory.get(this, mImagePipelineFactory));
 
             int resId = comic.getFavorite() != null ? R.drawable.ic_favorite_white_24dp : R.drawable.ic_favorite_border_white_24dp;
@@ -387,7 +391,9 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
                 comic.getIntro(), comic.getFinish(), comic.getUpdate(), comic.getLast(), isReverseOrder(comic));
 
         if (comic.getTitle() != null && comic.getCover() != null) {
-            mImagePipelineFactory = ImagePipelineFactoryBuilder.build(this, SourceManager.getInstance(this).getParser(comic.getSource()).getHeader(), false);
+            Headers headers =  SourceManager.getInstance(this).getParser(comic.getSource()).getHeader();
+            App.setHeaders(headers);
+            mImagePipelineFactory = ImagePipelineFactoryBuilder.build(this,  headers, false);
             mDetailAdapter.setControllerSupplier(ControllerBuilderSupplierFactory.get(this, mImagePipelineFactory));
 
             int resId = comic.getFavorite() != null ? R.drawable.ic_favorite_white_24dp : R.drawable.ic_favorite_border_white_24dp;
