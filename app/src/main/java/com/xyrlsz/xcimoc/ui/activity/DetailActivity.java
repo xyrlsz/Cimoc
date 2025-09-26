@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -36,6 +37,7 @@ import com.xyrlsz.xcimoc.ui.adapter.DetailAdapter;
 import com.xyrlsz.xcimoc.ui.view.DetailView;
 import com.xyrlsz.xcimoc.utils.STConvertUtils;
 import com.xyrlsz.xcimoc.utils.StringUtils;
+import com.xyrlsz.xcimoc.utils.ThemeUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -268,11 +270,19 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
             View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_selectable_text, null);
             TextView textViewTitle = dialogView.findViewById(R.id.textViewTitle);
             TextView textViewMessage = dialogView.findViewById(R.id.textViewMessage);
-
             textViewTitle.setText(STConvertUtils.convert(mDetailAdapter.title));
             textViewMessage.setText(mDetailAdapter.author + "\n\n" + STConvertUtils.convert(mDetailAdapter.intro));
             textViewMessage.setTextIsSelectable(true);
             textViewTitle.setTextIsSelectable(true);
+
+            if (ThemeUtils.isDarkMode(this)) {
+                textViewTitle.setTextColor(Color.WHITE);
+                textViewMessage.setTextColor(Color.WHITE);
+            } else {
+                textViewTitle.setTextColor(Color.BLACK);
+                textViewMessage.setTextColor(Color.BLACK);
+            }
+
             builder.setView(dialogView)
                     .setPositiveButton(R.string.dialog_close, null)
                     .show();
