@@ -13,10 +13,10 @@ import com.xyrlsz.xcimoc.source.BuKa;
 import com.xyrlsz.xcimoc.source.Cartoonmad;
 import com.xyrlsz.xcimoc.source.CopyMH;
 import com.xyrlsz.xcimoc.source.DM5;
-import com.xyrlsz.xcimoc.source.DmzjV4;
 import com.xyrlsz.xcimoc.source.DongManManHua;
 import com.xyrlsz.xcimoc.source.DuManWu;
 import com.xyrlsz.xcimoc.source.DuManWuOrg;
+import com.xyrlsz.xcimoc.source.GFMH;
 import com.xyrlsz.xcimoc.source.GoDaManHua;
 import com.xyrlsz.xcimoc.source.HotManga;
 import com.xyrlsz.xcimoc.source.IKanman;
@@ -185,14 +185,17 @@ public class SourceManager {
                 case YYManHua.TYPE:
                     parser = new YYManHua(source);
                     break;
-                case DmzjV4.TYPE:
-                    parser = new DmzjV4(source);
-                    break;
+//                case DmzjV4.TYPE:
+//                    parser = new DmzjV4(source);
+//                    break;
                 case ZaiManhua.TYPE:
                     parser = new ZaiManhua(source);
                     break;
                 case ManBen.TYPE:
                     parser = new ManBen(source);
+                    break;
+                case GFMH.TYPE:
+                    parser = new GFMH(source);
                     break;
                 default:
                     parser = new Null();

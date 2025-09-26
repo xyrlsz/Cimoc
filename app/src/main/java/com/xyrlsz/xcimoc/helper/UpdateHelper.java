@@ -13,10 +13,10 @@ import com.xyrlsz.xcimoc.source.BuKa;
 import com.xyrlsz.xcimoc.source.Cartoonmad;
 import com.xyrlsz.xcimoc.source.CopyMH;
 import com.xyrlsz.xcimoc.source.DM5;
-import com.xyrlsz.xcimoc.source.DmzjV4;
 import com.xyrlsz.xcimoc.source.DongManManHua;
 import com.xyrlsz.xcimoc.source.DuManWu;
 import com.xyrlsz.xcimoc.source.DuManWuOrg;
+import com.xyrlsz.xcimoc.source.GFMH;
 import com.xyrlsz.xcimoc.source.GoDaManHua;
 import com.xyrlsz.xcimoc.source.HotManga;
 import com.xyrlsz.xcimoc.source.IKanman;
@@ -88,9 +88,10 @@ public class UpdateHelper {
             ComicSourceTable.put(TTKMH.TYPE, TTKMH.getDefaultSource());
             ComicSourceTable.put(Vomicmh.TYPE, Vomicmh.getDefaultSource());
             ComicSourceTable.put(YYManHua.TYPE, YYManHua.getDefaultSource());
-            ComicSourceTable.put(DmzjV4.TYPE, DmzjV4.getDefaultSource());
+//            ComicSourceTable.put(DmzjV4.TYPE, DmzjV4.getDefaultSource());
             ComicSourceTable.put(ZaiManhua.TYPE, ZaiManhua.getDefaultSource());
             ComicSourceTable.put(ManBen.TYPE, ManBen.getDefaultSource());
+            ComicSourceTable.put(GFMH.TYPE, GFMH.getDefaultSource());
         }
     }
 

@@ -33,6 +33,10 @@ public abstract class MangaParser implements Parser {
     private boolean parseImagesUseWebParser = false;
     private boolean parseImagesLazyUseWebParser = false;
 
+    public static Source getDefaultSource() {
+        return new Source(null, null, -100, true, null);
+    }
+
     protected void init(Source source, Category category) {
         mTitle = source.getTitle();
         mCategory = category;
