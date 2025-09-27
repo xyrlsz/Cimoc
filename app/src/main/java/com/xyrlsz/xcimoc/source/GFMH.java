@@ -48,10 +48,12 @@ public class GFMH extends MangaParser {
     }
 
     @Override
-    public Request getSearchRequest(String keyword, int page) throws UnsupportedEncodingException, Exception {
+    public Request getSearchRequest(String keyword, int page) throws Exception {
         if (page == 1) {
             String url = baseUrl + "/index.php/search?key=" + keyword;
-            return new Request.Builder().url(url).build();
+            return new Request.Builder()
+                    .addHeader("user-agent", "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36")
+                    .url(url).build();
         }
         return null;
     }
@@ -63,7 +65,7 @@ public class GFMH extends MangaParser {
             @Override
             protected Comic parse(Node node) {
                 String cid = node.href("div > a").substring(1).replace(".html", "");
-                String cover = node.attr("div.img_span > img", "data-original");
+                String cover = node.attr(".img_span > a > img", "data-original");
                 String title = node.text("div > a > h3");
                 return new Comic(TYPE, cid, title, cover, "", "");
             }

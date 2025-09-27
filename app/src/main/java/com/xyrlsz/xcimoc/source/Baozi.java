@@ -141,7 +141,7 @@ public class Baozi extends MangaParser {
             Long comicChapter = chapter.getId();
             Long id = IdCreator.createImageId(comicChapter, i);
             String imgUrl = imageNodes.get(i - 1).src("img");
-            list.add(new ImageUrl(id, comicChapter, i, imgUrl, false));
+            list.add(new ImageUrl(id, comicChapter, i, imgUrl, false, getHeader()));
         }
 
         return list;
@@ -155,6 +155,6 @@ public class Baozi extends MangaParser {
 
     @Override
     public Headers getHeader() {
-        return Headers.of("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36");
+        return Headers.of("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36", "Referer", baseUrl);
     }
 }

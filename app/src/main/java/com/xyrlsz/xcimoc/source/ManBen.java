@@ -151,7 +151,7 @@ public class ManBen extends MangaParser {
             Long comicChapter = chapter.getId();
             Long id = IdCreator.createImageId(comicChapter, i);
             String imgUrl = imageNodes.get(i - 1).attr("data-src");
-            list.add(new ImageUrl(id, comicChapter, i, imgUrl, false));
+            list.add(new ImageUrl(id, comicChapter, i, imgUrl, false, getHeader()));
         }
         return list;
     }

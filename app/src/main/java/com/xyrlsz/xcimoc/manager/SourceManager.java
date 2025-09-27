@@ -128,17 +128,17 @@ public class SourceManager {
                 case Cartoonmad.TYPE:
                     parser = new Cartoonmad(source);
                     break;
-                case Animx2.TYPE:
-                    parser = new Animx2(source);
-                    break;
+//                case Animx2.TYPE:
+//                    parser = new Animx2(source);
+//                    break;
                 case Manhuatai.TYPE:
                     parser = new Manhuatai(source);
                     break;
 
                 //haleydu
-                case Mangakakalot.TYPE:
-                    parser = new Mangakakalot(source);
-                    break;
+//                case Mangakakalot.TYPE:
+//                    parser = new Mangakakalot(source);
+//                    break;
                 case CopyMH.TYPE:
                     parser = new CopyMH(source);
                     break;

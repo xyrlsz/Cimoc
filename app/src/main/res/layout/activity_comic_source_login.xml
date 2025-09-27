@@ -32,12 +32,14 @@
                     android:layout_marginBottom="10dp"
                     android:text="@string/comic_login_dmzj"
                     android:textColor="?attr/colorPrimary"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    android:visibility="gone" />
 
                 <com.xyrlsz.xcimoc.ui.widget.Option
                     android:id="@+id/comic_login_dmzj_login"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:visibility="gone"
                     app:summary="@string/no_login"
                     app:title="@string/login">
 

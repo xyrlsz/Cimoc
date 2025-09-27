@@ -157,7 +157,7 @@ public class MYCOMIC extends MangaParser {
             if (imgUrl.isEmpty()) {
                 imgUrl = imageNodes.get(i - 1).attr("data-src");
             }
-            list.add(new ImageUrl(id, comicChapter, i, imgUrl, false));
+            list.add(new ImageUrl(id, comicChapter, i, imgUrl, false, getHeader()));
         }
 
         return list;

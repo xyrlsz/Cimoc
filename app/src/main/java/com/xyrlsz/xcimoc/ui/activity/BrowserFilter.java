@@ -67,7 +67,7 @@ public class BrowserFilter extends BaseActivity {
 
     private List<Integer> registUrlListener() {
         List<Integer> list = new ArrayList<>();
-        list.add(Animx2.TYPE);
+//        list.add(Animx2.TYPE);
         list.add(Baozi.TYPE);
         list.add(BuKa.TYPE);
         list.add(Cartoonmad.TYPE);
@@ -75,7 +75,7 @@ public class BrowserFilter extends BaseActivity {
         list.add(DM5.TYPE);
         list.add(HotManga.TYPE);
         list.add(IKanman.TYPE);
-        list.add(Mangakakalot.TYPE);
+//        list.add(Mangakakalot.TYPE);
         list.add(MangaBZ.TYPE);
         list.add(Manhuatai.TYPE);
         list.add(MYCOMIC.TYPE);

@@ -2,6 +2,10 @@ package com.xyrlsz.xcimoc.ui.activity;
 
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
@@ -41,6 +45,16 @@ public abstract class CoordinatorActivity extends BackActivity implements
             mRecyclerView.addItemDecoration(adapter.getItemDecoration());
         }
         mRecyclerView.setAdapter(adapter);
+        ViewCompat.setOnApplyWindowInsetsListener(mLayoutView, (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(
+                    v.getPaddingLeft(),
+                    v.getPaddingTop(),
+                    v.getPaddingRight(),
+                    systemBars.bottom
+            );
+            return insets;
+        });
         initActionButton();
     }
 

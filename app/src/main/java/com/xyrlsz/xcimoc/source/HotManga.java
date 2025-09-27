@@ -204,7 +204,7 @@ public class HotManga extends MangaParser {
                 Long id = IdCreator.createImageId(comicChapter, i);
                 String url = array.getJSONObject(i).getString("url").replace("m_read", "kb_m_read_large");
                 url = url.replace("c800x.jpg", "c1500x.jpg");
-                list.add(new ImageUrl(id, comicChapter, i + 1, url, false));
+                list.add(new ImageUrl(id, comicChapter, i + 1, url, false, getHeader()));
             }
         } catch (Exception e) {
             e.printStackTrace();

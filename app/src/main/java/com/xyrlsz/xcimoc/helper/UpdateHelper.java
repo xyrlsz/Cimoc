@@ -65,7 +65,7 @@ public class UpdateHelper {
     private static void initComicSourceTable() {
 
         if (ComicSourceTable.isEmpty()) {
-            ComicSourceTable.put(Animx2.TYPE, Animx2.getDefaultSource());
+//            ComicSourceTable.put(Animx2.TYPE, Animx2.getDefaultSource());
             ComicSourceTable.put(Baozi.TYPE, Baozi.getDefaultSource());
             ComicSourceTable.put(BuKa.TYPE, BuKa.getDefaultSource());
             ComicSourceTable.put(Cartoonmad.TYPE, Cartoonmad.getDefaultSource());
@@ -73,7 +73,7 @@ public class UpdateHelper {
             ComicSourceTable.put(DM5.TYPE, DM5.getDefaultSource());
             ComicSourceTable.put(HotManga.TYPE, HotManga.getDefaultSource());
             ComicSourceTable.put(IKanman.TYPE, IKanman.getDefaultSource());
-            ComicSourceTable.put(Mangakakalot.TYPE, Mangakakalot.getDefaultSource());
+//            ComicSourceTable.put(Mangakakalot.TYPE, Mangakakalot.getDefaultSource());
             ComicSourceTable.put(MangaBZ.TYPE, MangaBZ.getDefaultSource());
             ComicSourceTable.put(Manhuatai.TYPE, Manhuatai.getDefaultSource());
             ComicSourceTable.put(MYCOMIC.TYPE, MYCOMIC.getDefaultSource());

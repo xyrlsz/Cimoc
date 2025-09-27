@@ -154,7 +154,7 @@ public class MangaBZ extends MangaParser {
 
                 Long comicChapter = chapter.getId();
                 Long id = IdCreator.createImageId(comicChapter, i);
-                list.add(new ImageUrl(id, comicChapter, i + 1, url, true));
+                list.add(new ImageUrl(id, comicChapter, i + 1, url, true, getHeader()));
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -34,7 +34,7 @@ public class IKanman extends MangaParser {
     public static final int TYPE = 0;
     public static final String DEFAULT_TITLE = "漫画柜";
 
-    private String referer = "";
+    private String referer = "https://tw.manhuagui.com/";
 
     public IKanman(Source source) {
         init(source);
@@ -168,7 +168,7 @@ public class IKanman extends MangaParser {
                     Long comicChapter = chapter.getId();
                     Long id = IdCreator.createImageId(comicChapter, i);
                     String url = StringUtils.format("https://i.hamreus.com%s%s?e=%s&m=%s", path, array.getString(i), e, m);
-                    list.add(new ImageUrl(id, comicChapter, i + 1, url, false));
+                    list.add(new ImageUrl(id, comicChapter, i + 1, url, false, getHeader()));
                 }
             } catch (Exception e) {
                 e.printStackTrace();
