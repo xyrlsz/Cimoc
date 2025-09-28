@@ -1,15 +1,16 @@
 package com.xyrlsz.xcimoc.ui.activity;
 
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import android.view.View;
+import android.widget.FrameLayout;
 
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import android.view.View;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.ui.adapter.BaseAdapter;
 
@@ -29,7 +30,10 @@ public abstract class CoordinatorActivity extends BackActivity implements
     @BindView(R.id.coordinator_recycler_view)
     RecyclerView mRecyclerView;
     @BindView(R.id.coordinator_layout)
-    CoordinatorLayout mLayoutView;
+    CoordinatorLayout mCoordinatorLayout;
+
+    @BindView(R.id.coordinator_activity)
+    FrameLayout mLayoutView;
 
     @Override
     protected void initView() {
@@ -45,7 +49,7 @@ public abstract class CoordinatorActivity extends BackActivity implements
             mRecyclerView.addItemDecoration(adapter.getItemDecoration());
         }
         mRecyclerView.setAdapter(adapter);
-        ViewCompat.setOnApplyWindowInsetsListener(mLayoutView, (v, insets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(mCoordinatorLayout, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(
                     v.getPaddingLeft(),
