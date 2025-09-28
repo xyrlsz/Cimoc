@@ -8,7 +8,6 @@ import com.xyrlsz.xcimoc.model.Source;
 import com.xyrlsz.xcimoc.model.SourceDao;
 import com.xyrlsz.xcimoc.model.SourceDao.Properties;
 import com.xyrlsz.xcimoc.parser.MangaParser;
-import com.xyrlsz.xcimoc.source.Animx2;
 import com.xyrlsz.xcimoc.source.Baozi;
 import com.xyrlsz.xcimoc.source.BuKa;
 import com.xyrlsz.xcimoc.source.Cartoonmad;
@@ -25,8 +24,8 @@ import com.xyrlsz.xcimoc.source.Komiic;
 import com.xyrlsz.xcimoc.source.Locality;
 import com.xyrlsz.xcimoc.source.MYCOMIC;
 import com.xyrlsz.xcimoc.source.ManBen;
+import com.xyrlsz.xcimoc.source.ManWa;
 import com.xyrlsz.xcimoc.source.MangaBZ;
-import com.xyrlsz.xcimoc.source.Mangakakalot;
 import com.xyrlsz.xcimoc.source.Manhuatai;
 import com.xyrlsz.xcimoc.source.Manhuayu;
 import com.xyrlsz.xcimoc.source.Null;
@@ -197,6 +196,9 @@ public class SourceManager {
                     break;
                 case GFMH.TYPE:
                     parser = new GFMH(source);
+                    break;
+                case ManWa.TYPE:
+                    parser = new ManWa(source);
                     break;
                 default:
                     parser = new Null();

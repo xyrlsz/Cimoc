@@ -6,7 +6,6 @@ import android.os.Bundle;
 
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.manager.SourceManager;
-import com.xyrlsz.xcimoc.source.Animx2;
 import com.xyrlsz.xcimoc.source.Baozi;
 import com.xyrlsz.xcimoc.source.BuKa;
 import com.xyrlsz.xcimoc.source.Cartoonmad;
@@ -22,8 +21,8 @@ import com.xyrlsz.xcimoc.source.IKanman;
 import com.xyrlsz.xcimoc.source.Komiic;
 import com.xyrlsz.xcimoc.source.MYCOMIC;
 import com.xyrlsz.xcimoc.source.ManBen;
+import com.xyrlsz.xcimoc.source.ManWa;
 import com.xyrlsz.xcimoc.source.MangaBZ;
-import com.xyrlsz.xcimoc.source.Mangakakalot;
 import com.xyrlsz.xcimoc.source.Manhuatai;
 import com.xyrlsz.xcimoc.source.Manhuayu;
 import com.xyrlsz.xcimoc.source.TTKMH;
@@ -94,6 +93,7 @@ public class BrowserFilter extends BaseActivity {
         list.add(ZaiManhua.TYPE);
         list.add(ManBen.TYPE);
         list.add(GFMH.TYPE);
+        list.add(ManWa.TYPE);
         return list;
     }
 
