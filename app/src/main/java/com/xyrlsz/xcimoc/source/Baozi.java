@@ -19,6 +19,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import okhttp3.Headers;
 import okhttp3.Request;
@@ -141,6 +143,14 @@ public class Baozi extends MangaParser {
             Long comicChapter = chapter.getId();
             Long id = IdCreator.createImageId(comicChapter, i);
             String imgUrl = imageNodes.get(i - 1).src("img");
+            String regex = "^(https?://)?([^/\\s:]+)(:\\d+)?";
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(imgUrl);
+            String domain = "";
+            if (matcher.find()) {
+                domain = matcher.group(2);
+            }
+            imgUrl = imgUrl.replace(domain, "as-rsa1-usla.baozicdn.com");
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false, getHeader()));
         }
 
