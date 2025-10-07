@@ -3,9 +3,8 @@ package com.xyrlsz.xcimoc.core;
 import android.content.ContentResolver;
 import android.util.Pair;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.Tag;
@@ -17,6 +16,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -306,10 +306,11 @@ public class Backup {
 
                 String jsonString = readBackupFile(resolver, root, filename);
 
-                //将jsonStr转为Map
-                Map<String, ?> entries = JSON.parseObject(
-                        jsonString, new TypeReference<Map<String, ?>>() {
-                        });
+                // 将jsonStr转为Map
+                Gson gson = new Gson();
+                Type type = new TypeToken<Map<String, Object>>(){}.getType();
+                Map<String, Object> entries = gson.fromJson(jsonString, type);
+
                 if (filename.endsWith(SUFFIX_CSBF)) {
                     for (Map.Entry entry : entries.entrySet()) {
                         App.getPreferenceManager().putObject(entry.getKey().toString(), entry.getValue());

@@ -196,7 +196,9 @@ dependencies {
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'com.google.code.gson:gson:2.13.2'
     // fastjson 1.2.83 是最后一个支持 Android 4.0 及以下版本的版本
-    implementation 'com.alibaba:fastjson:1.2.83'
+//    implementation 'com.alibaba:fastjson:1.2.83'
+
+    implementation 'com.google.code.gson:gson:2.13.2'
     implementation "androidx.core:core-ktx:1.17.0"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.2.0"
 //    implementation 'com.google.firebase:firebase-analytics:19.0.0'
