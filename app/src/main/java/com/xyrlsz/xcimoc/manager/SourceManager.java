@@ -22,6 +22,7 @@ import com.xyrlsz.xcimoc.source.HotManga;
 import com.xyrlsz.xcimoc.source.IKanman;
 import com.xyrlsz.xcimoc.source.Komiic;
 import com.xyrlsz.xcimoc.source.Locality;
+import com.xyrlsz.xcimoc.source.MH5;
 import com.xyrlsz.xcimoc.source.MYCOMIC;
 import com.xyrlsz.xcimoc.source.ManBen;
 import com.xyrlsz.xcimoc.source.ManWa;
@@ -199,6 +200,9 @@ public class SourceManager {
                     break;
                 case ManWa.TYPE:
                     parser = new ManWa(source);
+                    break;
+                case MH5.TYPE:
+                    parser = new MH5(source);
                     break;
                 default:
                     parser = new Null();

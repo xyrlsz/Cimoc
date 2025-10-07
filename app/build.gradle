@@ -172,8 +172,8 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
     implementation 'com.google.android.material:material:1.13.0'
     implementation 'com.jakewharton:butterknife:10.2.3'
-    implementation 'androidx.activity:activity-ktx:1.11.0'
     annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.3'
+    implementation 'androidx.activity:activity-ktx:1.11.0'
     implementation 'org.greenrobot:greendao:3.3.0'
     implementation 'com.squareup.okhttp3:okhttp:5.1.0'
     // noinspection GradleDependency : fresco 3.0.0 - 3.6.0 似乎有问题 以后再试试3.7以上的版本

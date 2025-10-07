@@ -19,6 +19,7 @@ import com.xyrlsz.xcimoc.source.GoDaManHua;
 import com.xyrlsz.xcimoc.source.HotManga;
 import com.xyrlsz.xcimoc.source.IKanman;
 import com.xyrlsz.xcimoc.source.Komiic;
+import com.xyrlsz.xcimoc.source.MH5;
 import com.xyrlsz.xcimoc.source.MYCOMIC;
 import com.xyrlsz.xcimoc.source.ManBen;
 import com.xyrlsz.xcimoc.source.ManWa;
@@ -94,6 +95,7 @@ public class BrowserFilter extends BaseActivity {
         list.add(ManBen.TYPE);
         list.add(GFMH.TYPE);
         list.add(ManWa.TYPE);
+        list.add(MH5.TYPE);
         return list;
     }
 

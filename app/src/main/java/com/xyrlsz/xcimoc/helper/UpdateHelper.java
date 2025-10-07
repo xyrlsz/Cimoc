@@ -21,6 +21,7 @@ import com.xyrlsz.xcimoc.source.GoDaManHua;
 import com.xyrlsz.xcimoc.source.HotManga;
 import com.xyrlsz.xcimoc.source.IKanman;
 import com.xyrlsz.xcimoc.source.Komiic;
+import com.xyrlsz.xcimoc.source.MH5;
 import com.xyrlsz.xcimoc.source.MYCOMIC;
 import com.xyrlsz.xcimoc.source.ManBen;
 import com.xyrlsz.xcimoc.source.ManWa;
@@ -94,6 +95,7 @@ public class UpdateHelper {
             ComicSourceTable.put(ManBen.TYPE, ManBen.getDefaultSource());
             ComicSourceTable.put(GFMH.TYPE, GFMH.getDefaultSource());
             ComicSourceTable.put(ManWa.TYPE,ManWa.getDefaultSource());
+            ComicSourceTable.put(MH5.TYPE, MH5.getDefaultSource());
         }
     }
 

@@ -1,5 +1,6 @@
 package com.xyrlsz.xcimoc.source;
 
+import com.google.common.collect.Lists;
 import com.xyrlsz.xcimoc.core.Manga;
 import com.xyrlsz.xcimoc.model.Chapter;
 import com.xyrlsz.xcimoc.model.Comic;
@@ -23,14 +24,13 @@ import java.util.List;
 import okhttp3.Headers;
 import okhttp3.Request;
 
-public class ManWa extends MangaParser {
-    public static final int TYPE = 115;
-    public static final String DEFAULT_TITLE = "漫蛙";
-    private static final String baseUrl = "https://manwawang.com";
-    private static final String picBaseUrl = "https://img1.baipiaoguai.org";
+public class MH5 extends MangaParser {
+    public static final int TYPE = 116;
+    public static final String DEFAULT_TITLE = "漫画屋";
+    private static final String baseUrl = "https://mh5.app";
     private static final String UA = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36";
 
-    public ManWa(Source source) {
+    public MH5(Source source) {
         init(source);
         setParseImagesUseWebParser(true);
     }
@@ -44,7 +44,7 @@ public class ManWa extends MangaParser {
         if (page != 1) {
             return null;
         }
-        String url = baseUrl + "/search?key=" + keyword;
+        String url = baseUrl + "/index.php/search?key=" + keyword;
         return new Request.Builder()
                 .url(url)
                 .addHeader("user-agent", UA)
@@ -54,30 +54,31 @@ public class ManWa extends MangaParser {
     @Override
     public SearchIterator getSearchIterator(String html, int page) throws JSONException {
         Node body = new Node(html);
-        List<Node> resList = body.list(".manga-i-list-item");
+        List<Node> resList = body.list("ul.list-comic-book > li");
         if (resList.isEmpty()) {
             return null;
         }
         return new NodeIterator(resList) {
             @Override
             protected Comic parse(Node node) {
-                String title = node.text(".manga-i-list-title");
-                String cover = node.src(".manga-i-cover");
-                String cid = node.href("a").replace("/comic/", "")
+                String title = node.text(".comic-info > h2");
+                String cover = node.attr(".comic-book > img", "data-src");
+                String cid = node.href("a")
                         .replace("/", "");
-                return new Comic(TYPE, cid, title, cover, "", "");
+                String update = node.text(".comic-book > p.heat");
+                return new Comic(TYPE, cid, title, cover, update, "");
             }
         };
     }
 
     @Override
     public String getUrl(String cid) {
-        return baseUrl + "/comic/" + cid;
+        return baseUrl + "/" + cid;
     }
 
     @Override
     protected void initUrlFilterList() {
-        filter.add(new UrlFilter("manwawang.com"));
+        filter.add(new UrlFilter("mh5.app", "/([a-zA-Z0-9]+)"));
     }
 
     @Override
@@ -91,17 +92,12 @@ public class ManWa extends MangaParser {
     @Override
     public Comic parseInfo(String html, Comic comic) throws UnsupportedEncodingException, JSONException {
         Node body = new Node(html);
-        String title = body.text(".detail-main-title");
-        String cover = body.src(".detail-bar-img");
-        List<Node> infoList = body.list(".detail-main-subtitle > span");
-        String author = "";
-        for (Node info : infoList) {
-            if (info.text().contains("作者")) {
-                author = info.text().split("：")[1].strip();
-            }
-        }
-        String intro = body.text(".detail-main-content");
-        comic.setInfo(title, cover, "", intro, author, isFinish(html));
+        String title = body.text(".detail-title");
+        String cover = body.attr(".banner-img > img", "data-src");
+        String author = body.text("p.author");
+        String intro = body.text(".detail-desc");
+        String update = body.text(".detail-info-btips .tips:nth-child(1) b");
+        comic.setInfo(title, cover, update, intro, author, isFinish(html));
         return comic;
     }
 
@@ -110,7 +106,7 @@ public class ManWa extends MangaParser {
         List<Chapter> list = new LinkedList<>();
         Node body = new Node(html);
         int i = 0;
-        List<Node> chapterNodes = body.list(".detail-list > .detail-list-item > a");
+        List<Node> chapterNodes = Lists.reverse(body.list(".chapter-list > .item > a"));
         for (Node node : chapterNodes) {
             String title = node.text();
             String path = node.href();
@@ -133,11 +129,11 @@ public class ManWa extends MangaParser {
     public List<ImageUrl> parseImages(String html, Chapter chapter) throws Manga.NetworkErrorException, JSONException {
         List<ImageUrl> list = new ArrayList<>();
         Node body = new Node(html);
-        List<Node> imageNodes = body.list("#chapterPic > img");
+        List<Node> imageNodes = body.list("img.lazy-read");
         for (int i = 1; i <= imageNodes.size(); i++) {
             Long comicChapter = chapter.getId();
             Long id = IdCreator.createImageId(comicChapter, i);
-            String imgUrl = picBaseUrl + imageNodes.get(i - 1).attr("data-src");
+            String imgUrl = imageNodes.get(i - 1).attr("data-src");
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false, getHeader()));
         }
         return list;
