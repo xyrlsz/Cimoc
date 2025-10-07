@@ -13,6 +13,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.ColorRes;
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.ViewPager;
 
@@ -166,20 +167,7 @@ public class ComicFragment extends BaseFragment implements ComicView {
 //                showProgressDialog();
 //                mTagList.clear();
 //                mPresenter.loadTag();
-                int theme = mPreference.getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_ORANGE);
-                ComicFilterDialog comicFilterDialog = new ComicFilterDialog(getContext(), ThemeUtils.getDialogThemeById(theme), new ComicFilterDialog.SubmitCallBack() {
-                    @Override
-                    public void OnClickCommit(String keyword, boolean isCompleted, boolean isNotCompleted) {
-                        GridFragment item = (GridFragment) mTabAdapter.getItem(mViewPager.getCurrentItem());
-                        item.filterByKeyword(keyword, isCompleted, isNotCompleted);
-                    }
-
-                    @Override
-                    public void OnClickCancel() {
-                        GridFragment item2 = (GridFragment) mTabAdapter.getItem(mViewPager.getCurrentItem());
-                        item2.cancelFilter();
-                    }
-                });
+                ComicFilterDialog comicFilterDialog = getComicFilterDialog();
                 comicFilterDialog.show();
                 break;
             case R.id.comic_search:
@@ -226,6 +214,25 @@ public class ComicFragment extends BaseFragment implements ComicView {
 //                break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @NonNull
+    private ComicFilterDialog getComicFilterDialog() {
+        int theme = ThemeUtils.getThemeId();
+        ComicFilterDialog comicFilterDialog = new ComicFilterDialog(getContext(), ThemeUtils.getDialogThemeById(theme), new ComicFilterDialog.SubmitCallBack() {
+            @Override
+            public void OnClickCommit(String keyword, boolean isCompleted, boolean isNotCompleted) {
+                GridFragment item = (GridFragment) mTabAdapter.getItem(mViewPager.getCurrentItem());
+                item.filterByKeyword(keyword, isCompleted, isNotCompleted);
+            }
+
+            @Override
+            public void OnClickCancel() {
+                GridFragment item2 = (GridFragment) mTabAdapter.getItem(mViewPager.getCurrentItem());
+                item2.cancelFilter();
+            }
+        });
+        return comicFilterDialog;
     }
 
     private AlertDialog getAlertDialog() {

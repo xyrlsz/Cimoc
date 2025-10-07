@@ -110,4 +110,8 @@ public class ThemeUtils {
 
     }
 
+    public static int getThemeId() {
+        return App.getPreferenceManager().getInt(PreferenceManager.PREF_OTHER_THEME, THEME_ORANGE);
+    }
+
 }

@@ -31,7 +31,6 @@ import androidx.annotation.NonNull;
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.Constants;
 import com.xyrlsz.xcimoc.R;
-import com.xyrlsz.xcimoc.manager.PreferenceManager;
 import com.xyrlsz.xcimoc.ui.view.ComicSourceLoginView;
 import com.xyrlsz.xcimoc.ui.widget.LoginDialog;
 import com.xyrlsz.xcimoc.ui.widget.Option;
@@ -204,7 +203,7 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
     @OnClick(R.id.comic_login_dmzj_login)
     void onDmzjLoginClick() {
 
-        int theme = mPreference.getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_ORANGE);
+        int theme = ThemeUtils.getThemeId();
         LoginDialog loginDialog = new LoginDialog(this, ThemeUtils.getDialogThemeById(theme));
         loginDialog.setOnLoginListener((username, password) -> {
             if (username.isEmpty() || password.isEmpty()) {
@@ -295,7 +294,7 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
     @OnClick(R.id.comic_login_komiic_login)
     void onKomiicLoginClick() {
 
-        int theme = mPreference.getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_ORANGE);
+        int theme = ThemeUtils.getThemeId();
         LoginDialog loginDialog = new LoginDialog(this, ThemeUtils.getDialogThemeById(theme));
         loginDialog.setOnLoginListener((username, password) -> {
             if (username.isEmpty() || password.isEmpty()) {
@@ -395,7 +394,7 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
     // vomicmh漫
     @OnClick(R.id.comic_login_vomicmh_login)
     void onVoMiCMHLoginClick() {
-        int theme = mPreference.getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_ORANGE);
+        int theme = ThemeUtils.getThemeId();
         LoginDialog loginDialog = new LoginDialog(this, ThemeUtils.getDialogThemeById(theme));
         loginDialog.setOnLoginListener((username, password) -> {
             if (username.isEmpty() || password.isEmpty()) {
@@ -473,7 +472,7 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
     // 再漫画
     @OnClick(R.id.comic_login_zai_login)
     void onZaiLoginClick() {
-        int theme = mPreference.getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_ORANGE);
+        int theme = ThemeUtils.getThemeId();
         LoginDialog loginDialog = new LoginDialog(this, ThemeUtils.getDialogThemeById(theme));
         loginDialog.setOnLoginListener((username, password) -> {
             if (username.isEmpty() || password.isEmpty()) {
