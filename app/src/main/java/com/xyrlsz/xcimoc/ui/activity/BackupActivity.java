@@ -151,7 +151,7 @@ public class BackupActivity extends BackActivity implements BackupView {
 
     @OnClick(R.id.backup_cloud_config)
     void onWebDavConfClick() {
-        int theme = mPreference.getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_PINK);
+        int theme = mPreference.getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_ORANGE);
         WebDavConfDialog dialog = new WebDavConfDialog(this, ThemeUtils.getDialogThemeById(theme), new WebDavConfDialog.SubmitCallBack() {
             @Override
             public void onSuccess() {

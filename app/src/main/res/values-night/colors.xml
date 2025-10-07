@@ -24,6 +24,10 @@
     <color name="colorPrimaryBrown">#6E5753</color>
     <color name="colorPrimaryBrownDark">#4B3030</color>
 
+    <color name="colorPrimaryOrange">#E99100</color>
+    <color name="colorPrimaryOrangeDark">#B97300</color>
+
+
     <color name="colorBackground">#121212</color>  
 
 </resources>

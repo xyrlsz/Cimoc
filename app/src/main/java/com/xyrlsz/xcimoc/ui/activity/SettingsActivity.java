@@ -165,7 +165,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         mOtherLaunch.bindPreference(getSupportFragmentManager(), PreferenceManager.PREF_OTHER_LAUNCH,
                 PreferenceManager.HOME_FAVORITE, R.array.launch_items, DIALOG_REQUEST_OTHER_LAUNCH);
         mOtherTheme.bindPreference(getSupportFragmentManager(), PreferenceManager.PREF_OTHER_THEME,
-                ThemeUtils.THEME_PINK, R.array.theme_items, DIALOG_REQUEST_OTHER_THEME);
+                ThemeUtils.THEME_ORANGE, R.array.theme_items, DIALOG_REQUEST_OTHER_THEME);
         mOtherDarkMod.bindPreference(getSupportFragmentManager(), PreferenceManager.PREF_OTHER_DARK_MOD, PreferenceManager.DARK_MODE_FALLOW_SYSTEM, R.array.dark_mod_items, DIALOG_REQUEST_OTHER_DARK_MOD);
         mReaderScaleFactor.bindPreference(getSupportFragmentManager(), PreferenceManager.PREF_READER_SCALE_FACTOR, 200,
                 R.string.settings_reader_scale_factor, DIALOG_REQUEST_READER_SCALE_FACTOR);

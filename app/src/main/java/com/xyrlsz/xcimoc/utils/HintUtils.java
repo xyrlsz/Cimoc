@@ -17,7 +17,7 @@ public class HintUtils {
     public static void showSnackbar(View layout, String msg) {
         if (layout != null && layout.isShown()) {
             Snackbar snackbar = Snackbar.make(layout, msg, Snackbar.LENGTH_SHORT);
-            int theme = App.getPreferenceManager().getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_PINK);
+            int theme = App.getPreferenceManager().getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_ORANGE);
             snackbar.setBackgroundTint(App.getAppContext().getResources().getColor(ThemeUtils.getThemeColorById(theme)));
             snackbar.show();
         }

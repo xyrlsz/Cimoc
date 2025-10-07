@@ -1,4 +1,4 @@
-<img src="./screenshot/xcimoc.png" width="180">
+<img src="./screenshot/icon02.png" width="180">
 
 # 应用简介
 

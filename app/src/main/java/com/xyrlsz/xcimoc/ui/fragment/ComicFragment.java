@@ -166,7 +166,7 @@ public class ComicFragment extends BaseFragment implements ComicView {
 //                showProgressDialog();
 //                mTagList.clear();
 //                mPresenter.loadTag();
-                int theme = mPreference.getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_PINK);
+                int theme = mPreference.getInt(PreferenceManager.PREF_OTHER_THEME, ThemeUtils.THEME_ORANGE);
                 ComicFilterDialog comicFilterDialog = new ComicFilterDialog(getContext(), ThemeUtils.getDialogThemeById(theme), new ComicFilterDialog.SubmitCallBack() {
                     @Override
                     public void OnClickCommit(String keyword, boolean isCompleted, boolean isNotCompleted) {

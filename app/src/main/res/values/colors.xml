@@ -22,6 +22,9 @@
     <color name="colorPrimaryBrown">#795548</color>
     <color name="colorPrimaryBrownDark">#5D4037</color>
 
+    <color name="colorPrimaryOrange">#FF9F00</color>
+    <color name="colorPrimaryOrangeDark">#FF8A00</color>
+
     <color name="colorPrimaryBlack">#FF212121</color>
 
     <color name="transparent">#00000000</color>

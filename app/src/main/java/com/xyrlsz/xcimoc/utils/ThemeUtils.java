@@ -20,6 +20,7 @@ public class ThemeUtils {
     public static final int THEME_PURPLE = 3;
     public static final int THEME_BLUE = 4;
     public static final int THEME_BROWN = 5;
+    public static final int THEME_ORANGE = 6;
 
     public static int getResourceId(Context context, int attr) {
         TypedValue typedValue = new TypedValue();
@@ -30,6 +31,8 @@ public class ThemeUtils {
     public static int getThemeById(int id) {
         switch (id) {
             default:
+            case THEME_ORANGE:
+                return R.style.AppThemeOrange;
             case THEME_PINK:
                 return R.style.AppThemePink;
             case THEME_GREY:
@@ -42,12 +45,15 @@ public class ThemeUtils {
                 return R.style.AppThemeBlue;
             case THEME_BROWN:
                 return R.style.AppThemeBrown;
+
         }
     }
 
     public static int getDialogThemeById(int id) {
         switch (id) {
             default:
+            case THEME_ORANGE:
+                return R.style.DialogThemeOrange;
             case THEME_PINK:
                 return R.style.DialogThemePink;
             case THEME_GREY:
@@ -60,12 +66,15 @@ public class ThemeUtils {
                 return R.style.DialogThemeBlue;
             case THEME_BROWN:
                 return R.style.DialogThemeBrown;
+
         }
     }
 
     public static int getThemeColorById(int id) {
         switch (id) {
             default:
+            case THEME_ORANGE:
+                return R.color.colorPrimaryOrange;
             case THEME_PINK:
                 return R.color.colorPrimaryPink;
             case THEME_GREY:
