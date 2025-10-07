@@ -42,6 +42,9 @@ public class ComicFilterDialog extends Dialog {
             if (StringUtils.isEmpty(keyword) && !isCompleted && !isNotCompleted) {
                 callBack.OnClickCancel();
                 dismiss();
+            } else if (!isCompleted && !isNotCompleted) {
+                 isCompleted = true;
+                 isNotCompleted = true;
             }
             callBack.OnClickCommit(keyword, isCompleted, isNotCompleted);
             dismiss();
