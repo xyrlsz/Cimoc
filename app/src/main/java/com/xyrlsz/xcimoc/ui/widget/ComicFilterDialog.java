@@ -34,6 +34,8 @@ public class ComicFilterDialog extends Dialog {
         this.setContentView(R.layout.dialog_comic_filter);
         // Find views by ID
         ButterKnife.bind(this);
+        isCompletedCheckBox.setChecked(true);
+        isNotCompletedCheckBox.setChecked(true);
         // Set up click listeners
         commitButton.setOnClickListener(v -> {
             String keyword = keywordEditText.getText().toString().trim();
