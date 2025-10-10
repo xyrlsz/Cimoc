@@ -150,7 +150,9 @@ public class Baozi extends MangaParser {
             if (matcher.find()) {
                 domain = matcher.group(2);
             }
-            imgUrl = imgUrl.replace(domain, "as-rsa1-usla.baozicdn.com");
+            if (domain != null) {
+                imgUrl = imgUrl.replace(domain, "as-rsa1-usla.baozicdn.com");
+            }
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false, getHeader()));
         }
 
