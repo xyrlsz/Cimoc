@@ -10,6 +10,10 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -40,6 +44,8 @@ public class ChapterActivity extends BackActivity implements BaseAdapter.OnItemC
 
     @BindView(R.id.chapter_recycler_view)
     RecyclerView mRecyclerView;
+    @BindView(R.id.chapter_coordinator_layout)
+    CoordinatorLayout mCoordinatorLayout;
 
     private ChapterAdapter mChapterAdapter;
     private boolean isAscendMode;
@@ -63,6 +69,16 @@ public class ChapterActivity extends BackActivity implements BaseAdapter.OnItemC
         mRecyclerView.setItemAnimator(null);
         mRecyclerView.setAdapter(mChapterAdapter);
         switchMode();
+        ViewCompat.setOnApplyWindowInsetsListener(mCoordinatorLayout, (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(
+                    v.getPaddingLeft(),
+                    v.getPaddingTop(),
+                    v.getPaddingRight(),
+                    systemBars.bottom
+            );
+            return insets;
+        });
     }
 
     private void switchMode() {
