@@ -29,14 +29,19 @@ import java.util.Map;
 import okhttp3.Headers;
 import okhttp3.Request;
 
+/**
+ * 拷贝漫画
+ * <a href="https://github.com/venera-app/venera-configs/blob/main/copy_manga.js">...</a>
+ */
+
 public class CopyMH extends MangaParser {
     public static final int TYPE = 26;
     public static final String DEFAULT_TITLE = "拷贝漫画";
     public static final String website = "https://www.2025copy.com";
     public static final String apiBaseUrl = "https://api.copy2000.online";
-    String device = CopyMangaHeaderBuilder.generateDevice();
-    String deviceInfo = CopyMangaHeaderBuilder.generateDeviceInfo();
-    String pseudoId = CopyMangaHeaderBuilder.generatePseudoId();
+    private final String device = CopyMangaHeaderBuilder.generateDevice();
+    private final String deviceInfo = CopyMangaHeaderBuilder.generateDeviceInfo();
+    private final String pseudoId = CopyMangaHeaderBuilder.generatePseudoId();
 
     public CopyMH(Source source) {
         init(source);
@@ -50,19 +55,17 @@ public class CopyMH extends MangaParser {
     public Request getSearchRequest(String keyword, int page) {
         String url = "";
         if (page == 1) {
-            //            JChineseConvertor jChineseConvertor = JChineseConvertor.getInstance();
-            //            keyword = jChineseConvertor.s2t(keyword);
-
             url = StringUtils.format(
                     "%s/api/v3/search/comic?platform=1&q=%s&limit=30&offset=0&q_type&_update=true&format=json", apiBaseUrl,
                     keyword);
             return new Request.Builder()
                     .url(url)
-                    .addHeader("User-Agent",
-                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like "
-                                    + "Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
-                    .addHeader("version", "2025.05.09")
-                    .addHeader("platform", "1")
+//                    .addHeader("User-Agent",
+//                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like "
+//                                    + "Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
+//                    .addHeader("version", "2025.05.09")
+//                    .addHeader("platform", "1")
+                    .headers(getHeader())
                     .build();
         }
         return null;
@@ -90,8 +93,6 @@ public class CopyMH extends MangaParser {
                 @Override
                 protected Comic parse(JSONObject object) {
                     try {
-                        //                        JChineseConvertor jChineseConvertor =
-                        //                        JChineseConvertor.getInstance();
                         String cid = object.getString("path_word");
                         String title = object.getString("name");
                         String cover = object.getString("cover");
@@ -112,34 +113,33 @@ public class CopyMH extends MangaParser {
 
     @Override
     public Request getInfoRequest(String cid) {
-//        String url = StringUtils.format("%s/api/v3/comic2/%s", website, cid);
-//        return new Request.Builder()
-//                .url(url)
-//                .addHeader("User-Agent",
-//                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
-//                                + "Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
-//                .build();
         String url = StringUtils.format("%s/api/v3/comic2/%s?in_mainland=true&request_id=&platform=3", apiBaseUrl, cid);
         return new Request.Builder()
                 .url(url)
-//                .addHeader("User-Agent",
-//                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
-//                                + "Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
                 .headers(getHeader())
                 .build();
     }
 
     @Override
     public Comic parseInfo(String html, Comic comic) {
-        JSONObject body = null;
         try {
+            JSONObject body;
             JSONObject comicInfo = new JSONObject(html).getJSONObject("results");
             body = comicInfo.getJSONObject("comic");
             String cover = body.getString("cover");
             String intro = body.getString("brief");
             String title = body.getString("name");
             String update = body.getString("datetime_updated");
-            String author = ((JSONObject) body.getJSONArray("author").get(0)).getString("name");
+//            String author = ((JSONObject) body.getJSONArray("author").get(0)).getString("name");
+            StringBuilder authorBuilder = new StringBuilder();
+            for (int i = 0; i < body.getJSONArray("author").length(); ++i) {
+                authorBuilder.append(((JSONObject) body.getJSONArray("author").get(i)).getString("name"));
+                if (i < body.getJSONArray("author").length() - 1) {
+                    authorBuilder.append(", ");
+                }
+            }
+            String author = authorBuilder.toString();
+
             // 连载状态
             boolean finish = body.getJSONObject("status").getInt("value") != 0;
             comic.note = comicInfo.getJSONObject("groups");
@@ -157,9 +157,6 @@ public class CopyMH extends MangaParser {
                 "%s/api/v3/comic/%s/group/default/chapters?limit=100&offset=0&in_mainland=true&request_id=", apiBaseUrl, cid);
         return new Request.Builder()
                 .url(url)
-//                .addHeader("User-Agent",
-//                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
-//                                + "Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
                 .headers(getHeader())
                 .build();
     }
@@ -190,9 +187,6 @@ public class CopyMH extends MangaParser {
                 Request request =
                         new Request.Builder()
                                 .url(url)
-//                                .addHeader("User-Agent",
-//                                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, "
-//                                                + "like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
                                 .headers(getHeader())
                                 .build();
                 html = getResponseBody(App.getHttpClient(), request);
@@ -221,9 +215,6 @@ public class CopyMH extends MangaParser {
         String url = StringUtils.format("%s/api/v3/comic/%s/chapter2/%s?in_mainland=true&request_id=", apiBaseUrl, cid, path);
         return new Request.Builder()
                 .url(url)
-//                .addHeader("User-Agent",
-//                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
-//                                + "Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
                 .headers(getHeader())
                 .build();
     }
@@ -295,18 +286,13 @@ public class CopyMH extends MangaParser {
 
     @Override
     public Headers getHeader() {
-//        return Headers.of("User-Agent",
-//                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
-//                        + "Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0");
-
-        CopyMangaHeaderBuilder builder = new CopyMangaHeaderBuilder(null, deviceInfo, device, pseudoId);
-        Map<String, String> headers = new HashMap<>();
+        CopyMangaHeaderBuilder builder =
+                new CopyMangaHeaderBuilder(null, deviceInfo, device, pseudoId);
         try {
-            headers = builder.build();
+            return builder.genHeaders();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return Headers.of(headers);
-
+       return Headers.of();
     }
 }

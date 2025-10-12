@@ -8,6 +8,13 @@ import java.util.*;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+import okhttp3.Headers;
+
+/**
+ * 拷贝漫画
+ * <a href="https://github.com/venera-app/venera-configs/blob/main/copy_manga.js">...</a>
+ */
+
 public class CopyMangaHeaderBuilder {
 
     // 固定参数
@@ -38,7 +45,6 @@ public class CopyMangaHeaderBuilder {
         this.copyRegion = copyRegion != null ? copyRegion : REGION;
     }
 
-    /** 生成最终的 Headers */
     public Map<String, String> build() throws Exception {
         Map<String, String> headers = new HashMap<>();
 
@@ -74,6 +80,14 @@ public class CopyMangaHeaderBuilder {
         return headers;
     }
 
+    public Headers genHeaders() throws Exception {
+        try {
+            Map<String, String> headers = build();
+            return Headers.of(headers);
+        } catch (Exception e) {
+            throw new Exception("生成 Headers 失败", e);
+        }
+    }
     /** HMAC-SHA256 签名并输出十六进制字符串 */
     private static String hmacSHA256Hex(byte[] key, byte[] message) throws Exception {
         try {
@@ -100,7 +114,7 @@ public class CopyMangaHeaderBuilder {
         return randomInt(1000000, 9999999) + "V-" + randomInt(1000, 9999);
     }
 
-    /** 随机生成 device - 修正版，与JS逻辑完全一致 */
+    /** 随机生成 device */
     @SuppressLint("DefaultLocale")
     public static String generateDevice() {
         Random r = new Random();
@@ -129,25 +143,5 @@ public class CopyMangaHeaderBuilder {
 
     private static int randomInt(int min, int max) {
         return new Random().nextInt(max - min + 1) + min;
-    }
-
-    // 示例使用
-    public static void main(String[] args) throws Exception {
-        String token = ""; // 如果有 token 就填
-        String deviceInfo = generateDeviceInfo();
-        String device = generateDevice();
-        String pseudoId = generatePseudoId();
-
-        CopyMangaHeaderBuilder builder = new CopyMangaHeaderBuilder(token, deviceInfo, device, pseudoId);
-        Map<String, String> headers = builder.build();
-
-        System.out.println("Generated Headers:");
-        headers.forEach((k, v) -> System.out.println(k + ": " + v));
-
-        // 测试生成多个设备信息
-        System.out.println("\nTest multiple device info generation:");
-        for (int i = 0; i < 5; i++) {
-            System.out.println("Device: " + generateDevice());
-        }
     }
 }

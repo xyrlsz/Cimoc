@@ -44,8 +44,6 @@ public class HotManga extends MangaParser {
     public Request getSearchRequest(String keyword, int page) {
         String url = "";
         if (page == 1) {
-//            JChineseConvertor jChineseConvertor = JChineseConvertor.getInstance();
-//            keyword = jChineseConvertor.s2t(keyword);
             url = StringUtils.format("%s/api/v3/search/comic?platform=1&limit=30&offset=0&q=%s", website, keyword);
             return new Request.Builder()
                     .url(url)
@@ -111,13 +109,18 @@ public class HotManga extends MangaParser {
             String intro = body.getString("brief");
             String title = body.getString("name");
             String update = body.getString("datetime_updated");
-            String author = ((JSONObject) body.getJSONArray("author").get(0)).getString("name");
+//            String author = ((JSONObject) body.getJSONArray("author").get(0)).getString("name");
+            StringBuilder authorBuilder = new StringBuilder();
+            for (int i = 0; i < body.getJSONArray("author").length(); ++i) {
+                authorBuilder.append(((JSONObject) body.getJSONArray("author").get(i)).getString("name"));
+                if (i < body.getJSONArray("author").length() - 1) {
+                    authorBuilder.append(", ");
+                }
+            }
+            String author = authorBuilder.toString();
             // 连载状态
             boolean finish = body.getJSONObject("status").getInt("value") != 0;
-            JSONObject group = comicInfo.getJSONObject("groups");
-            comic.note = group;
-
-
+            comic.note = comicInfo.getJSONObject("groups");
             comic.setInfo(title, cover, update, intro, author, finish);
         } catch (JSONException e) {
             e.printStackTrace();
