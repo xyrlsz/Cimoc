@@ -1,5 +1,7 @@
 package com.xyrlsz.xcimoc.core;
 
+import android.util.Pair;
+
 import com.github.houbb.opencc4j.util.ZhConverterUtil;
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.manager.ChapterManager;
@@ -21,6 +23,7 @@ import org.json.JSONObject;
 import java.io.InterruptedIOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -229,7 +232,7 @@ public class Manga {
                         } else {
                             html = getResponseBody(App.getHttpClient(), request);
                             list = parser.parseImages(html, chapter);
-                            if (list == null || list.size() == 0) {
+                            if (list == null || list.isEmpty()) {
                                 list = parser.parseImages(html);
                             }
 //                        if (!list.isEmpty()) {
@@ -265,13 +268,13 @@ public class Manga {
             }
             Request request = parser.getImagesRequest(cid, path);
             if (!parser.isParseImagesUseWebParser()) {
-                response = App.getHttpClient().newCall(request).execute();
+                response = Objects.requireNonNull(App.getHttpClient()).newCall(request).execute();
                 if (response.isSuccessful()) {
                     List<Chapter> chapter = mChapterManager.getChapter(path, title);
-                    if (chapter != null && chapter.size() >= 1) {
+                    if (chapter != null && !chapter.isEmpty()) {
                         list.addAll(parser.parseImages(response.body().string(), chapter.get(0)));
                     }
-                    if (list.size() == 0) {
+                    if (list.isEmpty()) {
                         list.addAll(parser.parseImages(response.body().string()));
                     }
 //                mongo.InsertComicChapter(source, cid, path, list);
@@ -283,10 +286,10 @@ public class Manga {
 
                 String html = webParser.getHtmlStrSync();
                 List<Chapter> chapter = mChapterManager.getChapter(path, title);
-                if (chapter != null && chapter.size() >= 1) {
+                if (chapter != null && !chapter.isEmpty()) {
                     list.addAll(parser.parseImages(html, chapter.get(0)));
                 }
-                if (list.size() == 0) {
+                if (list.isEmpty()) {
                     list.addAll(parser.parseImages(html));
                 }
             }
@@ -307,11 +310,11 @@ public class Manga {
         Response response = null;
         try {
             Request request = parser.getLazyRequest(url);
-            response = App.getHttpClient().newCall(request).execute();
+            response = Objects.requireNonNull(App.getHttpClient()).newCall(request).execute();
             if (response.isSuccessful()) {
                 if (parser.isParseImagesLazyUseWebParser()) {
                     WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
-                    return  parser.parseLazy(webParser.getHtmlStrSync(), url);
+                    return parser.parseLazy(webParser.getHtmlStrSync(), url);
                 }
                 return parser.parseLazy(response.body().string(), url);
             } else {
@@ -339,7 +342,7 @@ public class Manga {
                     if (parser.isParseImagesLazyUseWebParser()) {
                         WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
                         newUrl = parser.parseLazy(webParser.getHtmlStrSync(), url);
-                    }else{
+                    } else {
                         newUrl = parser.parseLazy(getResponseBody(App.getHttpClient(), request), url);
                     }
                 } catch (Exception e) {
@@ -404,10 +407,17 @@ public class Manga {
                                 }
 
                                 String update = parser.parseCheck(getResponseBody(client, request));
-                                if ((c.getUpdate() != null && update != null && !c.getUpdate().equals(update))
-                                        || (update == null && parser.checkUpdateByChapterCount(getResponseBody(client, request), c))) {
+                                Pair<Boolean, Integer> checkRes = new Pair<>(false, 0);
+                                if (update == null || update.isEmpty()) {
+                                    checkRes = parser.checkUpdateByChapterCount(getResponseBody(client, request), c);
+                                }
+                                if ((c.getUpdate() != null && update != null && !update.isEmpty() && !c.getUpdate().equals(update))
+                                        || checkRes.first) {
                                     c.setFavorite(System.currentTimeMillis());
                                     c.setUpdate(update);
+                                    if (checkRes.first) {
+                                        c.setChapterCount(checkRes.second);
+                                    }
                                     c.setHighlight(true);
                                     return c;  // 返回更新后的 Comic
                                 }
@@ -468,7 +478,7 @@ public class Manga {
                 String body = new String(bodybytes);
                 Matcher m = Pattern.compile("charset=([\\w\\-]+)").matcher(body);
                 if (m.find()) {
-                    body = new String(bodybytes, m.group(1));
+                    body = new String(bodybytes, Objects.requireNonNull(m.group(1)));
                 }
                 return body;
             } else if (retry)

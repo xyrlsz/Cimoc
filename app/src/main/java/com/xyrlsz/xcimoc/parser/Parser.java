@@ -1,6 +1,7 @@
 package com.xyrlsz.xcimoc.parser;
 
 import android.net.Uri;
+import android.util.Pair;
 
 import com.xyrlsz.xcimoc.core.Manga;
 import com.xyrlsz.xcimoc.model.Chapter;
@@ -128,7 +129,7 @@ public interface Parser {
     /// @param html 页面源代码
     String parseCheck(String html);
 
-    boolean checkUpdateByChapterCount(String html,Comic comic);
+    Pair<Boolean, Integer> checkUpdateByChapterCount(String html, Comic comic);
 
     /**
      * 获取漫画分类

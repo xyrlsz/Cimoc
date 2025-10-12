@@ -1,6 +1,7 @@
 package com.xyrlsz.xcimoc.parser;
 
 import android.net.Uri;
+import android.util.Pair;
 
 import com.xyrlsz.xcimoc.core.Manga;
 import com.xyrlsz.xcimoc.model.Chapter;
@@ -91,18 +92,18 @@ public abstract class MangaParser implements Parser {
     }
 
     @Override
-    public boolean checkUpdateByChapterCount(String html, Comic comic) {
+    public Pair<Boolean, Integer> checkUpdateByChapterCount(String html, Comic comic) {
         try {
             Long sourceComic = IdCreator.createSourceComic(comic);
             List<Chapter> list = parseChapter(html, comic, sourceComic);
             if (list == null) {
                 list = parseChapter(html);
             }
-            return comic.getChapterCount() < list.size();
+            return new Pair<>((comic.getChapterCount() < list.size()), list.size());
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return false;
+        return new Pair<>(false, comic.getChapterCount());
     }
 
     @Override
