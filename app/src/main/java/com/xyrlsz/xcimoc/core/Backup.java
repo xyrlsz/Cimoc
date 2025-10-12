@@ -3,8 +3,9 @@ package com.xyrlsz.xcimoc.core;
 import android.content.ContentResolver;
 import android.util.Pair;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.Tag;
@@ -16,7 +17,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -273,20 +273,22 @@ public class Backup {
             }
         }).subscribeOn(Schedulers.io());
     }
+
     public static Observable<Integer> deleteBackup(final CimocDocumentFile root, final String filename) {
         return Observable.create(new Observable.OnSubscribe<Integer>() {
             @Override
             public void call(Subscriber<? super Integer> subscriber) {
                 CimocDocumentFile dir = DocumentUtils.getOrCreateSubDirectory(root, BACKUP);
-                if(dir!=null){
+                if (dir != null) {
                     CimocDocumentFile file = dir.findFile(filename);
-                    if(file!=null) file.delete();
+                    if (file != null) file.delete();
                 }
                 subscriber.onNext(1);
                 subscriber.onCompleted();
             }
         }).subscribeOn(Schedulers.io());
     }
+
     public static Observable<Integer> clearBackup(final CimocDocumentFile root) {
         return Observable.create(new Observable.OnSubscribe<Integer>() {
             @Override
@@ -307,10 +309,9 @@ public class Backup {
                 String jsonString = readBackupFile(resolver, root, filename);
 
                 // 将jsonStr转为Map
-                Gson gson = new Gson();
-                Type type = new TypeToken<Map<String, Object>>(){}.getType();
-                Map<String, Object> entries = gson.fromJson(jsonString, type);
-
+                Map<String, ?> entries = JSON.parseObject(
+                        jsonString, new TypeReference<Map<String, ?>>() {
+                        });
                 if (filename.endsWith(SUFFIX_CSBF)) {
                     for (Map.Entry entry : entries.entrySet()) {
                         App.getPreferenceManager().putObject(entry.getKey().toString(), entry.getValue());
