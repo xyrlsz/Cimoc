@@ -18,10 +18,13 @@ import com.xyrlsz.xcimoc.core.Download;
 import com.xyrlsz.xcimoc.core.Manga;
 import com.xyrlsz.xcimoc.global.Extra;
 import com.xyrlsz.xcimoc.manager.ChapterManager;
+import com.xyrlsz.xcimoc.manager.ComicManager;
 import com.xyrlsz.xcimoc.manager.PreferenceManager;
 import com.xyrlsz.xcimoc.manager.SourceManager;
 import com.xyrlsz.xcimoc.manager.TaskManager;
 import com.xyrlsz.xcimoc.misc.NotificationWrapper;
+import com.xyrlsz.xcimoc.model.Chapter;
+import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.ImageUrl;
 import com.xyrlsz.xcimoc.model.Task;
 import com.xyrlsz.xcimoc.parser.MangaParser;
@@ -29,6 +32,7 @@ import com.xyrlsz.xcimoc.rx.RxBus;
 import com.xyrlsz.xcimoc.rx.RxEvent;
 import com.xyrlsz.xcimoc.saf.CimocDocumentFile;
 import com.xyrlsz.xcimoc.utils.DocumentUtils;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.JMTTUtil;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
@@ -36,7 +40,9 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -62,6 +68,7 @@ public class DownloadService extends Service implements AppGetter {
     private NotificationWrapper mNotification;
     private TaskManager mTaskManager;
     private SourceManager mSourceManager;
+    private ComicManager mComicManager;
     private ChapterManager mChapterManager;
     private ContentResolver mContentResolver;
 
@@ -99,6 +106,7 @@ public class DownloadService extends Service implements AppGetter {
         mSourceManager = SourceManager.getInstance(this);
         mContentResolver = getContentResolver();
         mChapterManager = ChapterManager.getInstance(this);
+        mComicManager = ComicManager.getInstance(this);
     }
 
     @Override
@@ -229,6 +237,30 @@ public class DownloadService extends Service implements AppGetter {
             }
 
             completeDownload(mTask.getId());
+            Comic comic = mComicManager.load(mTask.getSource(), mTask.getCid());
+            List<Chapter> chapterList = mChapterManager.getChapterList(IdCreator.createSourceComic(comic));
+            updateChapterList(chapterList);
+        }
+
+        private void updateChapterList(List<Chapter> list) {
+            Map<String, Task> map = new HashMap<>();
+            Comic comic = mComicManager.load(mTask.getSource(), mTask.getCid());
+            for (Task task : mTaskManager.list(comic.getId())) {
+                map.put(task.getPath(), task);
+            }
+            if (!map.isEmpty()) {
+                for (Chapter chapter : list) {
+                    Task task = map.get(chapter.getPath());
+                    if (task != null) {
+                        chapter.setDownload(true);
+                        chapter.setCount(task.getProgress());
+                        chapter.setComplete(task.isFinish());
+                        mChapterManager.update(chapter);
+                    }
+                }
+            }
+            comic.setChapterCount(list.size());
+            mComicManager.update(comic);
         }
 
         private boolean RequestAndWrite(CimocDocumentFile parent, Request request, int num, String url) throws InterruptedIOException {
