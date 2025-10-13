@@ -312,6 +312,36 @@ public class Backup {
                 Map<String, ?> entries = JSON.parseObject(
                         jsonString, new TypeReference<Map<String, ?>>() {
                         });
+
+//                Gson gson = new Gson();
+//                JsonObject jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+//                Map<String, Object> entries = new HashMap<>();
+//
+//                for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
+//                    JsonElement el = entry.getValue();
+//                    if (el.isJsonPrimitive()) {
+//                        JsonPrimitive prim = el.getAsJsonPrimitive();
+//                        if (prim.isNumber()) {
+//                            BigDecimal bd = prim.getAsBigDecimal();
+//                            if (bd.scale() <= 0) {
+//                                entries.put(entry.getKey(), bd.longValue());
+//                            } else {
+//                                entries.put(entry.getKey(), bd.doubleValue());
+//                            }
+//                        } else if (prim.isBoolean()) {
+//                            entries.put(entry.getKey(), prim.getAsBoolean());
+//                        } else {
+//                            entries.put(entry.getKey(), prim.getAsString());
+//                        }
+//                    } else if (el.isJsonObject()) {
+//                        entries.put(entry.getKey(), gson.fromJson(el, Map.class));
+//                    } else if (el.isJsonArray()) {
+//                        entries.put(entry.getKey(), gson.fromJson(el, List.class));
+//                    } else if (el.isJsonNull()) {
+//                        entries.put(entry.getKey(), null);
+//                    }
+//                }
+
                 if (filename.endsWith(SUFFIX_CSBF)) {
                     for (Map.Entry entry : entries.entrySet()) {
                         App.getPreferenceManager().putObject(entry.getKey().toString(), entry.getValue());
