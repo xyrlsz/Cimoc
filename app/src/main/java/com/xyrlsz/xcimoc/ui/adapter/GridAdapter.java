@@ -42,7 +42,7 @@ public class GridAdapter extends BaseAdapter<Object> {
     private ControllerBuilderProvider mProvider;
     private SourceManager.TitleGetter mTitleGetter;
     private boolean symbol = false;
-
+    private List<Object> originalComics = new ArrayList<>();
 
     public GridAdapter(Context context, List<Object> list) {
         super(context, list);
@@ -194,15 +194,17 @@ public class GridAdapter extends BaseAdapter<Object> {
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    public void filterByKeyword(String keyword, List<Object> original) {
+    public void filterByKeyword(String keyword) {
         List<Object> temp = new ArrayList<>();
+        if(originalComics.isEmpty()){
+            originalComics.addAll(mDataSet);
+        }
         for (Object O_comic : mDataSet) {
             MiniComic comic = (MiniComic) O_comic;
             String title = STConvertUtils.T2S(comic.getTitle()).toUpperCase();
             if (title.contains(STConvertUtils.T2S(keyword.toUpperCase()))) {
                 temp.add(comic);
             }
-            original.add(comic);
         }
         mDataSet.clear();
         mDataSet.addAll(temp);
@@ -210,8 +212,11 @@ public class GridAdapter extends BaseAdapter<Object> {
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    public void filterByKeyword(String keyword, List<Object> original, boolean isCompleted, boolean isNotCompleted) {
+    public void filterByKeyword(String keyword, boolean isCompleted, boolean isNotCompleted) {
         List<Object> temp = new ArrayList<>();
+        if(originalComics.isEmpty()){
+            originalComics.addAll(mDataSet);
+        }
         for (Object O_comic : mDataSet) {
             MiniComic comic = (MiniComic) O_comic;
             String title = STConvertUtils.T2S(comic.getTitle()).toUpperCase();
@@ -222,15 +227,14 @@ public class GridAdapter extends BaseAdapter<Object> {
                     temp.add(comic);
                 }
             }
-            original.add(comic);
         }
         mDataSet.clear();
         mDataSet.addAll(temp);
         notifyDataSetChanged();
     }
 
-    public void cancelFilter(List<Object> original) {
-        if (original == null || original.isEmpty()) {
+    public void cancelFilter() {
+        if (originalComics == null || originalComics.isEmpty()) {
             return; // 如果 original 为 null 或空，直接返回，不修改 mDataSet
         }
 
@@ -239,7 +243,7 @@ public class GridAdapter extends BaseAdapter<Object> {
         }
 
         mDataSet.clear();          // 清空旧数据
-        mDataSet.addAll(original); // 添加新数据
+        mDataSet.addAll(originalComics); // 添加新数据
         notifyDataSetChanged();    // 通知 Adapter 刷新
     }
 

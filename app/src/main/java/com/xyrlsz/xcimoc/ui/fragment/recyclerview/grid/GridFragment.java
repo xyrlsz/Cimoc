@@ -44,11 +44,6 @@ public abstract class GridFragment extends RecyclerViewFragment implements GridV
     protected long mSavedId = -1;
     @BindView(R.id.grid_action_button)
     FloatingActionButton mActionButton;
-    private List<Object> comics = new ArrayList<>();
-
-    public List<Object> getComics() {
-        return comics;
-    }
 
     @Override
     protected BaseAdapter initAdapter() {
@@ -125,8 +120,7 @@ public abstract class GridFragment extends RecyclerViewFragment implements GridV
 
     @Override
     public void filterByKeyword(String keyword) {
-        comics.clear();
-        mGridAdapter.filterByKeyword(keyword, comics);
+        mGridAdapter.filterByKeyword(keyword);
     }
 
     @Override
@@ -135,14 +129,12 @@ public abstract class GridFragment extends RecyclerViewFragment implements GridV
             cancelFilter();
             return;
         }
-        comics.clear();
-        mGridAdapter.filterByKeyword(keyword, comics, isCompleted, isNotCompleted);
+        mGridAdapter.filterByKeyword(keyword, isCompleted, isNotCompleted);
     }
 
     @Override
     public void cancelFilter() {
-        mGridAdapter.cancelFilter(comics);
-        comics.clear();
+        mGridAdapter.cancelFilter();
     }
 
     @Override
