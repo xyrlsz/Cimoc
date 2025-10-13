@@ -14,6 +14,7 @@ import android.widget.ImageButton;
 import com.xyrlsz.xcimoc.Constants;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.core.WebDavConf;
+import com.xyrlsz.xcimoc.utils.ThemeUtils;
 
 public class WebDavConfDialog extends Dialog {
     private EditText urlEditText;
@@ -21,11 +22,11 @@ public class WebDavConfDialog extends Dialog {
     private EditText passwordEditText;
 
     private ImageButton togglePasswordButton;
-    private boolean isPasswordVisible = false;
+    private boolean isPasswordInvisible = true;
     private Button btCommit;
 
     private SharedPreferences sharedPreferences;
-
+    private Context mContext;
 
     public WebDavConfDialog(Context context, int themeResId, SubmitCallBack callBack) {
         super(context, themeResId);
@@ -33,6 +34,7 @@ public class WebDavConfDialog extends Dialog {
     }
 
     private void init(Context context, SubmitCallBack callBack) {
+        this.mContext = context;
         sharedPreferences = context.getSharedPreferences(Constants.WEBDAV_SHARED, MODE_PRIVATE);
         this.setContentView(R.layout.dialog_webdav_config);
         // Find views by ID
@@ -41,7 +43,7 @@ public class WebDavConfDialog extends Dialog {
         passwordEditText = findViewById(R.id.password);
         btCommit = findViewById(R.id.commit_button);
         togglePasswordButton = findViewById(R.id.ib_is_show_passwd);
-
+        changeTogglePassword();
         togglePasswordButton.setOnClickListener(
                 view -> togglePasswordVisibility()
         );
@@ -75,17 +77,30 @@ public class WebDavConfDialog extends Dialog {
 
     }
 
-    private void togglePasswordVisibility() {
-        if (isPasswordVisible) {
+    private void changeTogglePassword() {
+        if (isPasswordInvisible) {
             passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-            togglePasswordButton.setImageResource(R.drawable.eye_close);
+            if (ThemeUtils.isDarkMode(mContext)) {
+                togglePasswordButton.setImageResource(R.drawable.eye_close_white);
+            } else {
+                togglePasswordButton.setImageResource(R.drawable.eye_close);
+            }
         } else {
             passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-            togglePasswordButton.setImageResource(R.drawable.eye);
+            if (ThemeUtils.isDarkMode(mContext)) {
+                togglePasswordButton.setImageResource(R.drawable.eye_white);
+            } else {
+                togglePasswordButton.setImageResource(R.drawable.eye);
+            }
         }
-        isPasswordVisible = !isPasswordVisible;
+    }
+
+    private void togglePasswordVisibility() {
+        isPasswordInvisible = !isPasswordInvisible;
+        changeTogglePassword();
         passwordEditText.setSelection(passwordEditText.getText().length());
     }
+
 
     public interface SubmitCallBack {
         void onSuccess();

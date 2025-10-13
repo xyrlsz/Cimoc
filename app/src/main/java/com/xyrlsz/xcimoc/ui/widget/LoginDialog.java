@@ -8,6 +8,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 
 import com.xyrlsz.xcimoc.R;
+import com.xyrlsz.xcimoc.utils.ThemeUtils;
 
 public class LoginDialog extends Dialog {
     private EditText usernameEditText;
@@ -15,10 +16,11 @@ public class LoginDialog extends Dialog {
     private Button loginButton;
     private Button registerButton;
     private ImageButton togglePasswordButton;
-    private boolean isPasswordVisible = false;
+    private boolean isPasswordInvisible = true;
     // 设置登录和注册的监听器
     private OnLoginListener loginListener;
     private OnRegisterListener registerListener;
+    private Context mContext;
 
     public LoginDialog(Context context) {
         super(context);
@@ -31,7 +33,7 @@ public class LoginDialog extends Dialog {
     }
 
     private void init(Context context) {
-
+        this.mContext = context;
         this.setContentView(R.layout.dialog_login);
         // Find views by ID
         usernameEditText = findViewById(R.id.username);
@@ -39,7 +41,7 @@ public class LoginDialog extends Dialog {
         loginButton = findViewById(R.id.login_button);
         registerButton = findViewById(R.id.register_button);
         togglePasswordButton = findViewById(R.id.ib_is_show_passwd);
-
+        changeTogglePassword();
         togglePasswordButton.setOnClickListener(
                 view -> togglePasswordVisibility()
         );
@@ -64,15 +66,27 @@ public class LoginDialog extends Dialog {
         });
     }
 
-    private void togglePasswordVisibility() {
-        if (isPasswordVisible) {
+    private void changeTogglePassword() {
+        if (isPasswordInvisible) {
             passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-            togglePasswordButton.setImageResource(R.drawable.eye_close);
+            if (ThemeUtils.isDarkMode(mContext)) {
+                togglePasswordButton.setImageResource(R.drawable.eye_close_white);
+            } else {
+                togglePasswordButton.setImageResource(R.drawable.eye_close);
+            }
         } else {
             passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-            togglePasswordButton.setImageResource(R.drawable.eye);
+            if (ThemeUtils.isDarkMode(mContext)) {
+                togglePasswordButton.setImageResource(R.drawable.eye_white);
+            } else {
+                togglePasswordButton.setImageResource(R.drawable.eye);
+            }
         }
-        isPasswordVisible = !isPasswordVisible;
+    }
+
+    private void togglePasswordVisibility() {
+        isPasswordInvisible = !isPasswordInvisible;
+        changeTogglePassword();
         passwordEditText.setSelection(passwordEditText.getText().length());
     }
 
