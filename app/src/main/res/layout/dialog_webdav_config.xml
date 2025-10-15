@@ -71,6 +71,7 @@
             android:minHeight="48dp"
             android:autofillHints="password"
             android:background="@color/transparent"
+            android:layout_toStartOf="@id/ib_is_show_passwd"
             android:hint="@string/password"
             android:inputType="textPassword" />
 
