@@ -42,7 +42,6 @@ public class GridAdapter extends BaseAdapter<Object> {
     private ControllerBuilderProvider mProvider;
     private SourceManager.TitleGetter mTitleGetter;
     private boolean symbol = false;
-    private List<Object> originalComics = new ArrayList<>();
 
     public GridAdapter(Context context, List<Object> list) {
         super(context, list);
@@ -196,8 +195,10 @@ public class GridAdapter extends BaseAdapter<Object> {
     @SuppressLint("NotifyDataSetChanged")
     public void filterByKeyword(String keyword) {
         List<Object> temp = new ArrayList<>();
-        if(originalComics.isEmpty()){
-            originalComics.addAll(mDataSet);
+        if(mOriginalData.isEmpty()){
+            mOriginalData.addAll(mDataSet);
+        } else if(mDataSet.isEmpty()){
+            mDataSet.addAll(mOriginalData);
         }
         for (Object O_comic : mDataSet) {
             MiniComic comic = (MiniComic) O_comic;
@@ -214,8 +215,10 @@ public class GridAdapter extends BaseAdapter<Object> {
     @SuppressLint("NotifyDataSetChanged")
     public void filterByKeyword(String keyword, boolean isCompleted, boolean isNotCompleted) {
         List<Object> temp = new ArrayList<>();
-        if(originalComics.isEmpty()){
-            originalComics.addAll(mDataSet);
+        if(mOriginalData.isEmpty()){
+            mOriginalData.addAll(mDataSet);
+        } else if(mDataSet.isEmpty()){
+            mDataSet.addAll(mOriginalData);
         }
         for (Object O_comic : mDataSet) {
             MiniComic comic = (MiniComic) O_comic;
@@ -234,7 +237,7 @@ public class GridAdapter extends BaseAdapter<Object> {
     }
 
     public void cancelFilter() {
-        if (originalComics == null || originalComics.isEmpty()) {
+        if (mOriginalData == null || mOriginalData.isEmpty()) {
             return; // 如果 original 为 null 或空，直接返回，不修改 mDataSet
         }
 
@@ -243,7 +246,7 @@ public class GridAdapter extends BaseAdapter<Object> {
         }
 
         mDataSet.clear();          // 清空旧数据
-        mDataSet.addAll(originalComics); // 添加新数据
+        mDataSet.addAll(mOriginalData); // 添加新数据
         notifyDataSetChanged();    // 通知 Adapter 刷新
     }
 

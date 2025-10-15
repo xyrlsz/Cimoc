@@ -7,6 +7,7 @@ import android.view.View;
 
 import com.xyrlsz.xcimoc.global.FastClick;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -21,7 +22,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
     Context mContext;
     List<T> mDataSet;
     LayoutInflater mInflater;
-
+    List<T> mOriginalData = new ArrayList<>();
     private OnItemClickListener mClickListener;
     private OnItemLongClickListener mLongClickListener;
 
@@ -33,12 +34,14 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
 
     public void add(T data) {
         if (mDataSet.add(data)) {
+            mOriginalData.add(data);
             notifyItemInserted(mDataSet.size());
         }
     }
 
     public void add(int location, T data) {
         mDataSet.add(location, data);
+        mOriginalData.add(location,data);
         notifyItemInserted(location);
     }
 
@@ -48,6 +51,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
 
     public void addAll(int location, Collection<T> collection) {
         if (mDataSet.addAll(location, collection)) {
+            mOriginalData.addAll(location,collection);
             notifyItemRangeInserted(location, location + collection.size());
         }
     }
@@ -67,11 +71,13 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
 
     public void remove(int position) {
         mDataSet.remove(position);
+        mOriginalData.remove(position);
         notifyItemRemoved(position);
     }
 
     public void removeAll(Collection<T> collection) {
         mDataSet.removeAll(collection);
+        mOriginalData.remove(collection);
         notifyDataSetChanged();
     }
 
@@ -81,11 +87,13 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
 
     public void reverse() {
         Collections.reverse(mDataSet);
+        Collections.reverse(mOriginalData);
         notifyDataSetChanged();
     }
 
     public void clear() {
         mDataSet.clear();
+        mOriginalData.clear();
         notifyDataSetChanged();
     }
 
@@ -96,6 +104,8 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
     public void setData(Collection<T> collection) {
         mDataSet.clear();
         mDataSet.addAll(collection);
+        mOriginalData.clear();
+        mOriginalData.addAll(collection);
         notifyDataSetChanged();
     }
 
