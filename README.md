@@ -53,7 +53,7 @@ forked from https://github.com/Haleydu/Cimoc
 
 # 应用截图
 
-<img src="./screenshot/02.png" width="250">
+<img src="./screenshot/03.png" width="250">
 
 # 增加图源（欢迎pr）
 
