@@ -1,17 +1,20 @@
 package com.xyrlsz.xcimoc.core;
 
 import android.content.ContentResolver;
+import android.net.Uri;
 import android.util.Pair;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.google.gson.Gson;
 import com.xyrlsz.xcimoc.App;
+import com.xyrlsz.xcimoc.manager.PreferenceManager;
 import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.Tag;
 import com.xyrlsz.xcimoc.saf.CimocDocumentFile;
 import com.xyrlsz.xcimoc.utils.DocumentUtils;
 import com.xyrlsz.xcimoc.utils.StringUtils;
+import com.xyrlsz.xcimoc.utils.UriUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -344,6 +347,13 @@ public class Backup {
 
                 if (filename.endsWith(SUFFIX_CSBF)) {
                     for (Map.Entry entry : entries.entrySet()) {
+                        if(entry.getKey().toString().equals(PreferenceManager.PREF_OTHER_STORAGE)){
+                            String path = UriUtils.convertContentToFileUri(Uri.parse(entry.getValue().toString()));
+                            assert path != null;
+                            if(path.contains("content://")){
+                                 continue;
+                            }
+                        }
                         App.getPreferenceManager().putObject(entry.getKey().toString(), entry.getValue());
                     }
                 }
