@@ -1,13 +1,19 @@
 package com.xyrlsz.xcimoc.utils;
 
+import static android.content.Context.MODE_PRIVATE;
+import static com.xyrlsz.xcimoc.Constants.KOMIIC_SHARED;
 import static com.xyrlsz.xcimoc.Constants.KOMIIC_SHARED_COOKIES;
 import static com.xyrlsz.xcimoc.Constants.KOMIIC_SHARED_EXPIRED;
+import static com.xyrlsz.xcimoc.Constants.KOMIIC_SHARED_PASSWD;
+import static com.xyrlsz.xcimoc.Constants.KOMIIC_SHARED_USERNAME;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.view.View;
 
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.Constants;
+import com.xyrlsz.xcimoc.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,18 +39,81 @@ import okhttp3.Response;
 
 public class KomiicUtils {
     public static boolean checkExpired() {
-        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.KOMIIC_SHARED, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.KOMIIC_SHARED, MODE_PRIVATE);
         String username = sharedPreferences.getString(Constants.KOMIIC_SHARED_USERNAME, "");
-        Long expired = sharedPreferences.getLong(Constants.KOMIIC_SHARED_EXPIRED, -1L);
+        long expired = sharedPreferences.getLong(Constants.KOMIIC_SHARED_EXPIRED, -1L);
         if (!username.isEmpty() && expired != -1L) {
-            Long now = System.currentTimeMillis() / 1000;
+            long now = System.currentTimeMillis() / 1000;
             return now >= expired;
         }
         return false;
     }
+    public static void login(Context context, String username,String password){
+        login(context, username, password, new OnLoginListener() {
+            @Override
+            public void onSuccess() {
 
-    public static void refresh() {
-        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.KOMIIC_SHARED, Context.MODE_PRIVATE);
+            }
+
+            @Override
+            public void onFail() {
+                HintUtils.showToast(context,"Komiic 自动登录失败，请重新登录");
+            }
+        });
+    }
+    public static void login(Context context, String username,String password ,OnLoginListener listener){
+        MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
+        String json = "{\"email\":\"" + username + "\", \"password\":\"" + password + "\"}";
+        RequestBody body = RequestBody.create(mediaType, json);
+        Request request = new Request.Builder()
+                .url("https://komiic.com/api/login")
+                .addHeader("referer", "https://komiic.com/login")
+                .addHeader("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0")
+                .post(body)
+                .build();
+
+        Objects.requireNonNull(App.getHttpClient()).newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                listener.onFail();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                List<String> cookies = response.headers("Set-Cookie");
+                if (response.isSuccessful() && response.body() != null && !cookies.isEmpty()) {
+                    Set<String> set = new HashSet<>();
+                    for (String s : cookies) {
+                        List<String> tmp = Arrays.asList(s.split("; "));
+                        set.addAll(tmp);
+                    }
+                    Long expired = -1L;
+                    try {
+                        JSONObject data = new JSONObject(response.body().string());
+                        String date = data.getString("expire");
+                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+                        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                        expired = KomiicUtils.toTimestamp(date);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    String cookieStr = String.join("; ", set);
+                    SharedPreferences sharedPreferences = context.getSharedPreferences(KOMIIC_SHARED, MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString(KOMIIC_SHARED_COOKIES, cookieStr);
+                    editor.putString(KOMIIC_SHARED_USERNAME, username);
+                    editor.putString(KOMIIC_SHARED_PASSWD, password);
+                    editor.putLong(KOMIIC_SHARED_EXPIRED, expired);
+                    editor.apply();
+                    listener.onSuccess();
+                }else {
+                    listener.onFail();
+                }
+            }
+        });
+    }
+    public static void refresh(Context context) {
+        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.KOMIIC_SHARED, MODE_PRIVATE);
         String cookies = sharedPreferences.getString(KOMIIC_SHARED_COOKIES, "");
         Request request = new Request.Builder()
                 .url("https://komiic.com/auth/refresh")
@@ -59,13 +128,15 @@ public class KomiicUtils {
             Objects.requireNonNull(App.getHttpClient()).newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
-
+                    String username = sharedPreferences.getString(KOMIIC_SHARED_USERNAME,"");
+                    String password = sharedPreferences.getString(KOMIIC_SHARED_PASSWD,"");
+                    login(context,username,password);
                 }
 
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
                     List<String> cookies = response.headers("Set-Cookie");
-                    if (response.isSuccessful() && response.body() != null && !cookies.isEmpty()) {
+                    if (response.isSuccessful() && !cookies.isEmpty()) {
                         Set<String> set = new HashSet<>();
                         for (String s : cookies) {
                             List<String> tmp = Arrays.asList(s.split("; "));
@@ -80,11 +151,15 @@ public class KomiicUtils {
                             e.printStackTrace();
                         }
                         String cookieStr = String.join("; ", set);
-                        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.KOMIIC_SHARED, Context.MODE_PRIVATE);
+                        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.KOMIIC_SHARED, MODE_PRIVATE);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
                         editor.putString(KOMIIC_SHARED_COOKIES, cookieStr);
                         editor.putLong(KOMIIC_SHARED_EXPIRED, expired);
                         editor.apply();
+                    }else{
+                        String username = sharedPreferences.getString(KOMIIC_SHARED_USERNAME,"");
+                        String password = sharedPreferences.getString(KOMIIC_SHARED_PASSWD,"");
+                        login(context,username,password);
                     }
                 }
             });
@@ -107,7 +182,7 @@ public class KomiicUtils {
     }
 
     public static void getImageLimit(UpdateImageLimitCallback callback) {
-        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.KOMIIC_SHARED, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.KOMIIC_SHARED, MODE_PRIVATE);
         String cookies = sharedPreferences.getString(KOMIIC_SHARED_COOKIES, "");
         getImageLimit(cookies, callback);
     }
@@ -193,7 +268,7 @@ public class KomiicUtils {
     }
 
     public static boolean checkIsOverImgLimit() {
-        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.KOMIIC_SHARED, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.KOMIIC_SHARED, MODE_PRIVATE);
         String cookies = sharedPreferences.getString(KOMIIC_SHARED_COOKIES, "");
         return checkImgLimit(cookies);
     }
@@ -218,5 +293,10 @@ public class KomiicUtils {
 
     public interface UpdateImageLimitCallback {
         void onSuccess(int result);
+    }
+
+    public interface OnLoginListener {
+        void onSuccess();
+        void onFail();
     }
 }

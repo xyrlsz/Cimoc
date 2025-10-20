@@ -45,13 +45,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.TimeZone;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -303,69 +301,94 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
                 return;
             }
             onStartLogin();
-            MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
-            String json = "{\"email\":\"" + username + "\", \"password\":\"" + password + "\"}";
-            RequestBody body = RequestBody.create(mediaType, json);
-            Request request = new Request.Builder()
-                    .url("https://komiic.com/api/login")
-                    .addHeader("referer", "https://komiic.com/login")
-                    .addHeader("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0")
-                    .post(body)
-                    .build();
+//            MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
+//            String json = "{\"email\":\"" + username + "\", \"password\":\"" + password + "\"}";
+//            RequestBody body = RequestBody.create(mediaType, json);
+//            Request request = new Request.Builder()
+//                    .url("https://komiic.com/api/login")
+//                    .addHeader("referer", "https://komiic.com/login")
+//                    .addHeader("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0")
+//                    .post(body)
+//                    .build();
+//
+//            Objects.requireNonNull(App.getHttpClient()).newCall(request).enqueue(new Callback() {
+//                @Override
+//                public void onFailure(Call call, IOException e) {
+//                    onLoginFail();
+//                }
+//
+//                @Override
+//                public void onResponse(Call call, Response response) throws IOException {
+//                    List<String> cookies = response.headers("Set-Cookie");
+//                    if (response.isSuccessful() && !cookies.isEmpty()) {
+//                        Set<String> set = new HashSet<>();
+//                        for (String s : cookies) {
+//                            List<String> tmp = Arrays.asList(s.split("; "));
+//                            set.addAll(tmp);
+//                        }
+//                        Long expired = -1L;
+//                        try {
+//                            JSONObject data = new JSONObject(response.body().string());
+//                            String date = data.getString("expire");
+//                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+//                            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+//                            expired = KomiicUtils.toTimestamp(date);
+//                        } catch (JSONException e) {
+//                            e.printStackTrace();
+//                        }
+//                        String cookieStr = String.join("; ", set);
+//                        SharedPreferences sharedPreferences = getSharedPreferences(KOMIIC_SHARED, MODE_PRIVATE);
+//                        SharedPreferences.Editor editor = sharedPreferences.edit();
+//                        editor.putString(KOMIIC_SHARED_COOKIES, cookieStr);
+//                        editor.putString(KOMIIC_SHARED_USERNAME, username);
+//                        editor.putString(KOMIIC_SHARED_PASSWD, password);
+//                        editor.putLong(KOMIIC_SHARED_EXPIRED, expired);
+//                        editor.apply();
+//                        runOnUiThread(() -> {
+//                            mkomiicLogin.setSummary(username);
+//                            mkomiicLogin.setTitle(getString(R.string.logined));
+//                            KomiicUtils.getImageLimit(result -> mKomiicLogout.post(() -> {
+//                                mkomiicLogin.setSummary(username + "\n" + getString(R.string.settings_komiic_img_limit_summary) + result);
+//                                CharSequence tmp = mkomiicLogin.getSummary();
+//                                KomiicUtils.getImageLimit("", res -> mKomiicLogout.post(() -> {
+//                                    mkomiicLogin.setSummary(tmp + "\n" + getString(R.string.empty_account_limit) + res);
+//                                }));
+//                            }));
+//                            mKomiicLogout.setVisibility(View.VISIBLE);
+//                        });
+//                        onLoginSuccess();
+//                    } else {
+//                        onLoginFail();
+//                    }
+//                    loginDialog.dismiss();
+//                }
+//            });
 
-            Objects.requireNonNull(App.getHttpClient()).newCall(request).enqueue(new Callback() {
+            KomiicUtils.login(getApplicationContext(), username, password, new KomiicUtils.OnLoginListener() {
                 @Override
-                public void onFailure(Call call, IOException e) {
-                    onLoginFail();
+                public void onSuccess() {
+                    runOnUiThread(() -> {
+                        mkomiicLogin.setSummary(username);
+                        mkomiicLogin.setTitle(getString(R.string.logined));
+                        KomiicUtils.getImageLimit(result -> mKomiicLogout.post(() -> {
+                            mkomiicLogin.setSummary(username + "\n" + getString(R.string.settings_komiic_img_limit_summary) + result);
+                            CharSequence tmp = mkomiicLogin.getSummary();
+                            KomiicUtils.getImageLimit("", res -> mKomiicLogout.post(() -> {
+                                mkomiicLogin.setSummary(tmp + "\n" + getString(R.string.empty_account_limit) + res);
+                            }));
+                        }));
+                        mKomiicLogout.setVisibility(View.VISIBLE);
+                    });
+                    onLoginSuccess();
+                    loginDialog.dismiss();
                 }
 
                 @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    List<String> cookies = response.headers("Set-Cookie");
-                    if (response.isSuccessful() && response.body() != null && !cookies.isEmpty()) {
-                        Set<String> set = new HashSet<>();
-                        for (String s : cookies) {
-                            List<String> tmp = Arrays.asList(s.split("; "));
-                            set.addAll(tmp);
-                        }
-                        Long expired = -1L;
-                        try {
-                            JSONObject data = new JSONObject(response.body().string());
-                            String date = data.getString("expire");
-                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-                            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-                            expired = KomiicUtils.toTimestamp(date);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        String cookieStr = String.join("; ", set);
-                        SharedPreferences sharedPreferences = getSharedPreferences(KOMIIC_SHARED, MODE_PRIVATE);
-                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putString(KOMIIC_SHARED_COOKIES, cookieStr);
-                        editor.putString(KOMIIC_SHARED_USERNAME, username);
-                        editor.putLong(KOMIIC_SHARED_EXPIRED, expired);
-                        editor.apply();
-                        runOnUiThread(() -> {
-                            mkomiicLogin.setSummary(username);
-                            mkomiicLogin.setTitle(getString(R.string.logined));
-                            KomiicUtils.getImageLimit(result -> mKomiicLogout.post(() -> {
-                                mkomiicLogin.setSummary(username + "\n" + getString(R.string.settings_komiic_img_limit_summary) + result);
-                                CharSequence tmp = mkomiicLogin.getSummary();
-                                KomiicUtils.getImageLimit("", res -> mKomiicLogout.post(() -> {
-                                    mkomiicLogin.setSummary(tmp + "\n" + getString(R.string.empty_account_limit) + res);
-                                }));
-                            }));
-                            mKomiicLogout.setVisibility(View.VISIBLE);
-                        });
-                        onLoginSuccess();
-                    } else {
-                        onLoginFail();
-                    }
+                public void onFail() {
+                    onLoginFail();
                     loginDialog.dismiss();
                 }
             });
-
-
         });
         loginDialog.setOnRegisterListener(() -> {
             String url = "https://komiic.com/register";
@@ -374,8 +397,6 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
             startActivity(intent);
         });
         loginDialog.show();
-
-
     }
 
     @OnClick(R.id.comic_login_komiic_logout)

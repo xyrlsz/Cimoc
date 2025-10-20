@@ -50,7 +50,7 @@ public class Komiic extends MangaParser {
     public Komiic(Source source) {
         init(source);
         if (KomiicUtils.checkExpired()) {
-            KomiicUtils.refresh();
+            KomiicUtils.refresh(App.getAppContext());
         }
     }
 
@@ -230,7 +230,7 @@ public class Komiic extends MangaParser {
                 .getSharedPreferences(Constants.KOMIIC_SHARED, Context.MODE_PRIVATE)
                 .getString(Constants.KOMIIC_SHARED_COOKIES, "");
         if (KomiicUtils.checkExpired()) {
-            KomiicUtils.refresh();
+            KomiicUtils.refresh(App.getAppContext());
             _cookies = "";
         }
         if (KomiicUtils.checkIsOverImgLimit()) {

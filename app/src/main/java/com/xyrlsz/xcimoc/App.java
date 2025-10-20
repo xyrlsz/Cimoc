@@ -33,6 +33,7 @@ import com.xyrlsz.xcimoc.ui.activity.MainActivity;
 import com.xyrlsz.xcimoc.ui.adapter.GridAdapter;
 import com.xyrlsz.xcimoc.utils.DocumentUtils;
 import com.xyrlsz.xcimoc.utils.FrescoUtils;
+import com.xyrlsz.xcimoc.utils.KomiicUtils;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
 import com.xyrlsz.xcimoc.utils.ZaiManhuaSignUtils;
@@ -270,6 +271,11 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
                     ZaiManhuaSignUtils.SignIn();
                 }
             });
+        }
+
+        // komiic 自动刷新token
+        if(KomiicUtils.checkExpired()){
+            KomiicUtils.refresh(this);
         }
 
 //        this.registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
