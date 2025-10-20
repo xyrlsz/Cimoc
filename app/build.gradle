@@ -139,7 +139,7 @@ android {
 }
 protobuf {
     protoc {
-        artifact = 'com.google.protobuf:protoc:3.25.1' // 使用与依赖相同的版本
+        artifact = 'com.google.protobuf:protoc:4.33.0' // 使用与依赖相同的版本
     }
 
     generateProtoTasks {
@@ -209,8 +209,8 @@ dependencies {
 
 
     // protobuf 依赖
-    implementation 'com.google.protobuf:protobuf-javalite:4.32.1'
-    implementation 'com.google.protobuf:protobuf-kotlin-lite:4.32.1'
+    implementation 'com.google.protobuf:protobuf-javalite:4.33.0'
+    implementation 'com.google.protobuf:protobuf-kotlin-lite:4.33.0'
 
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
 
