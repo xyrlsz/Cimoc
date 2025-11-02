@@ -18,6 +18,7 @@ import androidx.multidex.MultiDexApplication;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.xyrlsz.xcimoc.component.AppGetter;
+import com.xyrlsz.xcimoc.core.DisabledOkHttpClient;
 import com.xyrlsz.xcimoc.core.Storage;
 import com.xyrlsz.xcimoc.core.WebDavConf;
 import com.xyrlsz.xcimoc.fresco.ControllerBuilderProvider;
@@ -33,6 +34,7 @@ import com.xyrlsz.xcimoc.ui.activity.MainActivity;
 import com.xyrlsz.xcimoc.ui.adapter.GridAdapter;
 import com.xyrlsz.xcimoc.utils.DocumentUtils;
 import com.xyrlsz.xcimoc.utils.FrescoUtils;
+import com.xyrlsz.xcimoc.utils.HintUtils;
 import com.xyrlsz.xcimoc.utils.KomiicUtils;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
@@ -111,11 +113,11 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
 
     public static OkHttpClient getHttpClient() {
 
-        //OkHttpClient返回null实现"仅WiFi联网"，后面要注意空指针处理
-        if (!manager_wifi.isWifiEnabled() && mPreferenceManager.getBoolean(PreferenceManager.PREF_OTHER_CONNECT_ONLY_WIFI, false)) {
-            return null;
+        // 仅WiFi联网
+        boolean onlyWifi = mPreferenceManager.getBoolean(PreferenceManager.PREF_OTHER_CONNECT_ONLY_WIFI, false);
+        if (!manager_wifi.isWifiEnabled() && onlyWifi) {
+            return new DisabledOkHttpClient();
         }
-
         if (mHttpClient == null) {
 
             // 3.OkHttp访问https的Client实例
@@ -274,7 +276,7 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         }
 
         // komiic 自动刷新token
-        if(KomiicUtils.checkExpired()){
+        if (KomiicUtils.checkExpired()) {
             KomiicUtils.refresh(this);
         }
 
