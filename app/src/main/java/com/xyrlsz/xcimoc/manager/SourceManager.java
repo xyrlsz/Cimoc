@@ -15,6 +15,7 @@ import com.xyrlsz.xcimoc.source.CopyMH;
 import com.xyrlsz.xcimoc.source.DM5;
 import com.xyrlsz.xcimoc.source.DongManManHua;
 import com.xyrlsz.xcimoc.source.DuManWu;
+import com.xyrlsz.xcimoc.source.DuManWuApp;
 import com.xyrlsz.xcimoc.source.DuManWuOrg;
 import com.xyrlsz.xcimoc.source.GFMH;
 import com.xyrlsz.xcimoc.source.GoDaManHua;
@@ -203,6 +204,9 @@ public class SourceManager {
                     break;
                 case MH5.TYPE:
                     parser = new MH5(source);
+                    break;
+                case DuManWuApp.TYPE:
+                    parser = new DuManWuApp(source);
                     break;
                 default:
                     parser = new Null();

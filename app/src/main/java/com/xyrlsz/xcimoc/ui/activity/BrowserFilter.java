@@ -13,6 +13,7 @@ import com.xyrlsz.xcimoc.source.CopyMH;
 import com.xyrlsz.xcimoc.source.DM5;
 import com.xyrlsz.xcimoc.source.DongManManHua;
 import com.xyrlsz.xcimoc.source.DuManWu;
+import com.xyrlsz.xcimoc.source.DuManWuApp;
 import com.xyrlsz.xcimoc.source.DuManWuOrg;
 import com.xyrlsz.xcimoc.source.GFMH;
 import com.xyrlsz.xcimoc.source.GoDaManHua;
@@ -96,6 +97,7 @@ public class BrowserFilter extends BaseActivity {
         list.add(GFMH.TYPE);
         list.add(ManWa.TYPE);
         list.add(MH5.TYPE);
+        list.add(DuManWuApp.TYPE);
         return list;
     }
 
