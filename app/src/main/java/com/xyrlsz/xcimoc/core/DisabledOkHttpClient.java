@@ -1,9 +1,12 @@
 package com.xyrlsz.xcimoc.core;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.io.IOException;
 
+import kotlin.jvm.functions.Function0;
+import kotlin.reflect.KClass;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -12,9 +15,34 @@ import okhttp3.Response;
 import okio.Timeout;
 
 public class DisabledOkHttpClient extends OkHttpClient {
+    @NonNull
     @Override
-    public Call newCall(Request request) {
+    public Call newCall(@NonNull Request request) {
         return new Call() {
+            @NonNull
+            @Override
+            public <T> T tag(@NonNull Class<T> aClass, @NonNull Function0<? extends T> function0) {
+                return null;
+            }
+
+            @NonNull
+            @Override
+            public <T> T tag(@NonNull KClass<T> kClass, @NonNull Function0<? extends T> function0) {
+                return null;
+            }
+
+            @Nullable
+            @Override
+            public <T> T tag(@NonNull Class<? extends T> aClass) {
+                return null;
+            }
+
+            @Nullable
+            @Override
+            public <T> T tag(@NonNull KClass<T> kClass) {
+                return null;
+            }
+
             @NonNull
             @Override
             public Call clone() {

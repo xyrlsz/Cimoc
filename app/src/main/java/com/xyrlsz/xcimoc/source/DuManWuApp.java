@@ -219,15 +219,11 @@ public class DuManWuApp extends MangaParser {
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");
             byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
             byte[] digest = messageDigest.digest(bytes);
-            StringBuilder hexString = new StringBuilder();
+            StringBuilder md5Encrypt = new StringBuilder();
             for (byte b : digest) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) {
-                    hexString.append('0');
-                }
-                hexString.append(hex);
+                md5Encrypt.append(String.format("%02x", b));
             }
-            return hexString.toString();
+            return md5Encrypt.toString();
         } catch (Exception e) {
             return "";
         }
