@@ -198,7 +198,7 @@ dependencies {
     implementation 'com.alibaba.fastjson2:fastjson2:2.0.60.android5'
     implementation 'com.google.code.gson:gson:2.13.2'
     implementation "androidx.core:core-ktx:1.17.0"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.2.20"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.2.21"
 
     implementation 'com.king.app:app-updater:1.0.8-androidx'
     implementation 'com.king.app:app-dialog:1.0.8-androidx'
