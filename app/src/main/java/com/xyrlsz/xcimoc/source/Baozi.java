@@ -127,22 +127,24 @@ public class Baozi extends MangaParser {
         return list;
     }
 
-
     @Override
     public Request getImagesRequest(String cid, String path) {
-        String url = StringUtils.format("%s/comic/chapter/%s/0_%s.html", baseUrl, cid, path);
-        return new Request.Builder().url(url).build();
+        String url = StringUtils.format("https://appcn.baozimh.com/baozimhapp/comic/chapter/%s/0_%s.html", cid, path);
+        return new Request.Builder()
+                .addHeader("referer", "https://appcn.baozimh.com/")
+                .addHeader("user-agent", "baozimh_android/1.0.29/cn/adset")
+                .url(url).build();
     }
 
     @Override
     public List<ImageUrl> parseImages(String html, Chapter chapter) {
         List<ImageUrl> list = new ArrayList<>();
         Node body = new Node(html);
-        List<Node> imageNodes = body.list("amp-img > noscript");
+        List<Node> imageNodes = body.list(".comic-contain > .chapter-img");
         for (int i = 1; i <= imageNodes.size(); i++) {
             Long comicChapter = chapter.getId();
             Long id = IdCreator.createImageId(comicChapter, i);
-            String imgUrl = imageNodes.get(i - 1).src("img");
+            String imgUrl = imageNodes.get(i - 1).attr(".comic-contain__item", "data-src");
             String regex = "^(https?://)?([^/\\s:]+)(:\\d+)?";
             Pattern pattern = Pattern.compile(regex);
             Matcher matcher = pattern.matcher(imgUrl);
@@ -151,7 +153,7 @@ public class Baozi extends MangaParser {
                 domain = matcher.group(2);
             }
             if (domain != null) {
-                imgUrl = imgUrl.replace(domain, "as-rsa1-usla.baozicdn.com");
+                imgUrl = imgUrl.replace(domain, "as.baozimh.com");
             }
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false, getHeader()));
         }
