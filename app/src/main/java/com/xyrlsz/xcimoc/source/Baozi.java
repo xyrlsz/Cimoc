@@ -144,7 +144,7 @@ public class Baozi extends MangaParser {
         for (int i = 1; i <= imageNodes.size(); i++) {
             Long comicChapter = chapter.getId();
             Long id = IdCreator.createImageId(comicChapter, i);
-            String imgUrl = imageNodes.get(i - 1).attr(".comic-contain__item", "data-src");
+            String imgUrl = imageNodes.get(i - 1).attr(".comic-contain__item", "data-src").replace("/w640/", "/");
             String regex = "^(https?://)?([^/\\s:]+)(:\\d+)?";
             Pattern pattern = Pattern.compile(regex);
             Matcher matcher = pattern.matcher(imgUrl);
@@ -152,7 +152,7 @@ public class Baozi extends MangaParser {
             if (matcher.find()) {
                 domain = matcher.group(2);
             }
-            if (domain != null) {
+            if (domain != null && !domain.isEmpty()) {
                 imgUrl = imgUrl.replace(domain, "as.baozimh.com");
             }
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false, getHeader()));
