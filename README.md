@@ -9,8 +9,7 @@ forked from https://github.com/Haleydu/Cimoc
 
 # 下载
 
-可以前往项目的[Action](https://github.com/xyrlsz/Cimoc/actions)
-处或者[Release](https://github.com/xyrlsz/Cimoc/releases)处下载。
+可以前往项目的[Release](https://github.com/xyrlsz/Cimoc/releases)处或者[Action](https://github.com/xyrlsz/Cimoc/actions)处下载（不建议从Action下载）。
 
 # 漫画源
 
@@ -26,6 +25,7 @@ forked from https://github.com/Haleydu/Cimoc
 - 本地漫画（Local Reader）
 - 本地备份恢复（Local Backup）
 - WebDav云备份功能(WebDav Backup)
+- 下载漫画后导出漫画（Export Manga）
 
 # 软件使用说明
 
@@ -43,10 +43,7 @@ forked from https://github.com/Haleydu/Cimoc
 - [DiscreteSeekBar](https://github.com/AnderWeb/discreteSeekBar)
 - [RxJava](https://github.com/ReactiveX/RxJava)
 - [RxAndroid](https://github.com/ReactiveX/RxAndroid)
-- [RecyclerViewPager](https://github.com/lsjwzh/RecyclerViewPager)
-- [PhotoDraweeView](https://github.com/ongakuer/PhotoDraweeView)
 - [Rhino](https://github.com/mozilla/rhino)
-- [BlazingChain](https://github.com/tommyettinger/BlazingChain)
 - [AppUpdater](https://gitee.com/jenly1314/AppUpdater)
 - [Opencc4j](https://github.com/houbb/opencc4j)
 - [sardine-android](https://github.com/thegrizzlylabs/sardine-android)
@@ -81,7 +78,7 @@ forked from https://github.com/Haleydu/Cimoc
 
 # 软件服务器
 
-- 该软件不再需要服务器，完全单机
+- 该软件不需要服务器，完全单机
 
 # 关于淘宝售卖和会员破解
 
