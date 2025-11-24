@@ -69,6 +69,8 @@ import okhttp3.Headers;
 public abstract class ReaderActivity extends BaseActivity implements OnTapGestureListener,
         OnProgressChangeListener, OnLazyLoadListener, ReaderView {
 
+    private final boolean[] JoyLock = {false, false};
+    private final int[] JoyEvent = {7, 8};
     protected PreCacheLayoutManager mLayoutManager;
     protected ReaderAdapter mReaderAdapter;
     protected ImagePipelineFactory mImagePipelineFactory;
@@ -89,6 +91,17 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
     TextView mChapterPage;
     @BindView(R.id.reader_battery)
     TextView mBatteryText;
+    private final BroadcastReceiver batteryReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())) {
+                int level = intent.getIntExtra("level", 0);
+                int scale = intent.getIntExtra("scale", 100);
+                String text = (level * 100 / scale) + "%";
+                mBatteryText.setText(text);
+            }
+        }
+    };
     @BindView(R.id.reader_progress_layout)
     View mProgressLayout;
     @BindView(R.id.reader_back_layout)
@@ -104,27 +117,13 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
     @BindView(R.id.reader_box)
     RelativeLayout mReaderBox;
     private boolean isSavingPicture = false;
-
     private boolean mHideInfo;
     private boolean mHideNav;
     private boolean mShowTopbar;
     private int[] mClickArray;
     private int[] mLongClickArray;
-    private final BroadcastReceiver batteryReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())) {
-                int level = intent.getIntExtra("level", 0);
-                int scale = intent.getIntExtra("scale", 100);
-                String text = (level * 100 / scale) + "%";
-                mBatteryText.setText(text);
-            }
-        }
-    };
     private int _source;
     private boolean _local;
-    private final boolean[] JoyLock = {false, false};
-    private final int[] JoyEvent = {7, 8};
     private float mControllerTrigThreshold = 0.3f;
 
     public static Intent createIntent(Context context, long id, List<Chapter> list, int mode) {
@@ -243,9 +242,15 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
         mReaderAdapter.setScaleFactor(mPreference.getInt(PreferenceManager.PREF_READER_SCALE_FACTOR, 200) * 0.01f);
         mReaderAdapter.setDoubleTap(!mPreference.getBoolean(PreferenceManager.PREF_READER_BAN_DOUBLE_CLICK, false));
         mReaderAdapter.setVertical(turn == PreferenceManager.READER_TURN_ATB);
-        mReaderAdapter.setPaging(mPreference.getBoolean(PreferenceManager.PREF_READER_PAGING, false));
+        // 卷纸模式不设置自动切割大图
+        if (App.getPreferenceManager().getInt(PreferenceManager.PREF_READER_MODE, PreferenceManager.READER_MODE_PAGE) == PreferenceManager.READER_MODE_STREAM) {
+            mReaderAdapter.setPaging(false);
+            mReaderAdapter.setPagingReverse(false);
+        } else {
+            mReaderAdapter.setPaging(mPreference.getBoolean(PreferenceManager.PREF_READER_PAGING, false));
+            mReaderAdapter.setPagingReverse(mPreference.getBoolean(PreferenceManager.PREF_READER_PAGING_REVERSE, false));
+        }
         mReaderAdapter.setCloseAutoResizeImage(mPreference.getBoolean(PreferenceManager.PREF_READER_CLOSEAUTORESIZEIMAGE, false));
-        mReaderAdapter.setPagingReverse(mPreference.getBoolean(PreferenceManager.PREF_READER_PAGING_REVERSE, false));
         mReaderAdapter.setWhiteEdge(mPreference.getBoolean(PreferenceManager.PREF_READER_WHITE_EDGE, false));
         mReaderAdapter.setBanTurn(mPreference.getBoolean(PreferenceManager.PREF_READER_PAGE_BAN_TURN, false));
     }
