@@ -414,7 +414,7 @@ public class ComicUtils {
                         .append("<navLabel><text>").append(chapter.getTitle()).append("</text></navLabel>\n")
                         .append("<content src=\"").append(chapterId).append(".xhtml\"/>\n")
                         .append("</navPoint>\n");
-                chapterIndex++;
+//                chapterIndex++;
                 String chapterFileName = "OEBPS/" + chapterId + ".xhtml";
 
                 StringBuilder html = new StringBuilder();
