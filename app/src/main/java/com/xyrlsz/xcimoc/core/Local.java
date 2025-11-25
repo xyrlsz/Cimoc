@@ -160,7 +160,8 @@ public class Local {
     }
 
     private static Pair<Comic, ArrayList<Task>> merge(CimocDocumentFile dir, List<ScanInfo> list1, List<ScanInfo> list2) {
-        Pair<Comic, ArrayList<Task>> pair = Pair.create(buildComic(dir, list1.get(0).cover), new ArrayList<Task>());
+        String cover = findCover(dir);
+        Pair<Comic, ArrayList<Task>> pair = cover != null ? Pair.create(buildComic(dir, cover), new ArrayList<>()) : Pair.create(buildComic(dir, list1.get(0).cover), new ArrayList<>());
         for (ScanInfo info : list1) {
             pair.second.add(buildTask(info.dir, info.count, false));
         }
@@ -178,6 +179,18 @@ public class Local {
         }
     }
 
+    private static String findCover(CimocDocumentFile dir) {
+        for (CimocDocumentFile file : dir.listFiles()) {
+            if (file.isFile()) {
+                String name = file.getName().toLowerCase();
+                if (name.equals("cover.jpg") || name.equals("cover.png") || name.equals("cover.jpeg") || name.startsWith("cover.")) {
+                    return file.getUri().toString();
+                }
+            }
+        }
+        return null;
+    }
+
     private static class ScanInfo {
         CimocDocumentFile dir = null;
         String cover = null;
@@ -187,5 +200,4 @@ public class Local {
             this.dir = dir;
         }
     }
-
 }
