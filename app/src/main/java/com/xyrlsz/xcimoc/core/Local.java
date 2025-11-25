@@ -139,7 +139,11 @@ public class Local {
 
     private static boolean isNameChapter(CimocDocumentFile file) {
         if (chapterPattern == null) {
-            chapterPattern = Pattern.compile("^[^(\\[]{0,5}[0-9]+|[0-9]+.{0,5}$");
+            if (Character.isDigit(file.getName().charAt(0))) {
+                chapterPattern = Pattern.compile("^\\d+(-.+)?$");
+            } else {
+                chapterPattern = Pattern.compile("^[^(\\[]{0,5}[0-9]+|[0-9]+.{0,5}$");
+            }
         }
         Matcher matcher = chapterPattern.matcher(file.getName());
         return matcher.find() && ((float) matcher.group().length() / file.getName().length() > 0.8);
