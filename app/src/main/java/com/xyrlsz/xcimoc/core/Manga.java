@@ -167,11 +167,23 @@ public class Manga {
                                 Thread.sleep(random.nextInt(200));
                             }
                         } else if (searchType == SEARCH_AUTHOR) {
-                            if (comic != null
-                                    && (indexOfIgnoreCase(comic.getAuthor(), keyword, stSame)
-                                    || (!strictSearch))) {
-                                subscriber.onNext(comic);
-                                Thread.sleep(random.nextInt(200));
+                            if (comic != null) {
+                                String[] separators = {",", "、", "，", "；", " "};
+                                boolean findAuthor = false;
+                                for (String separator : separators) {
+                                    String[] keywords = keyword.strip().split(separator);
+                                    for (String key : keywords) {
+                                        if (indexOfIgnoreCase(comic.getAuthor().strip(), key.strip(), stSame)) {
+                                            findAuthor = true;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                if (findAuthor || (!strictSearch)) {
+                                    subscriber.onNext(comic);
+                                    Thread.sleep(random.nextInt(200));
+                                }
                             }
                         }
                     }
