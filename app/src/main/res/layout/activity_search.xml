@@ -49,14 +49,13 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
                 android:layout_marginStart="20dp"
                 android:layout_marginTop="120dp">
+
                 <androidx.appcompat.widget.AppCompatCheckBox
                     android:id="@+id/search_strict_checkbox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="true"
                     android:checked="true"
                     android:text="@string/search_strict"
@@ -68,12 +67,21 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="5dp"
-                    android:layout_toRightOf="@id/search_strict_checkbox"
-                    android:checked="true"
                     android:layout_toEndOf="@id/search_strict_checkbox"
-                    android:layout_marginLeft="5dp"
+                    android:checked="true"
                     android:text="@string/search_STSame"
                     android:textColor="@color/white"
+                    android:textSize="14sp" />
+
+                <Spinner
+                    android:id="@+id/search_type_spinner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_toEndOf="@id/search_STSame_checkbox"
+                    android:spinnerMode="dropdown"
+                    android:textColor="@color/white"
+                    android:layout_alignBaseline="@id/search_strict_checkbox"
                     android:textSize="14sp" />
             </RelativeLayout>
 

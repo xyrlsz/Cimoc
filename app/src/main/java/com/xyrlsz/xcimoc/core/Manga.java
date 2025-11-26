@@ -1,5 +1,8 @@
 package com.xyrlsz.xcimoc.core;
 
+import static com.xyrlsz.xcimoc.ui.activity.SearchActivity.SEARCH_AUTHOR;
+import static com.xyrlsz.xcimoc.ui.activity.SearchActivity.SEARCH_TITLE;
+
 import android.util.Pair;
 
 import com.github.houbb.opencc4j.util.ZhConverterUtil;
@@ -134,6 +137,51 @@ public class Manga {
         }).subscribeOn(Schedulers.io());
     }
 
+    public static Observable<Comic> getSearchResult(final MangaParser parser, final String keyword, final int page, final boolean strictSearch, final boolean stSame, final int searchType) {
+        return Observable.create(new Observable.OnSubscribe<Comic>() {
+            @Override
+            public void call(Subscriber<? super Comic> subscriber) {
+                try {
+                    Request request = parser.getSearchRequest(keyword, page);
+                    Random random = new Random();
+                    String html;
+                    if (parser.isGetSearchUseWebParser()) {
+                        WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
+                        html = webParser.getHtmlStrSync();
+                    } else {
+                        html = getResponseBody(App.getHttpClient(), request);
+                    }
+                    SearchIterator iterator = parser.getSearchIterator(html, page);
+                    if (iterator == null || iterator.empty()) {
+                        throw new Exception();
+                    }
+                    while (iterator.hasNext()) {
+                        Comic comic = iterator.next();
+//                        if (comic != null && (comic.getTitle().indexOf(keyword) != -1 || comic.getAuthor().indexOf(keyword) != -1)) {
+
+                        if (searchType == SEARCH_TITLE) {
+                            if (comic != null
+                                    && (indexOfIgnoreCase(comic.getTitle(), keyword, stSame)
+                                    || (!strictSearch))) {
+                                subscriber.onNext(comic);
+                                Thread.sleep(random.nextInt(200));
+                            }
+                        } else if (searchType == SEARCH_AUTHOR) {
+                            if (comic != null
+                                    && (indexOfIgnoreCase(comic.getAuthor(), keyword, stSame)
+                                    || (!strictSearch))) {
+                                subscriber.onNext(comic);
+                                Thread.sleep(random.nextInt(200));
+                            }
+                        }
+                    }
+                    subscriber.onCompleted();
+                } catch (Exception e) {
+                    subscriber.onError(e);
+                }
+            }
+        }).subscribeOn(Schedulers.io());
+    }
 
     public static Observable<List<Chapter>> getComicInfo(final MangaParser parser, final Comic comic) {
         return Observable.create(new Observable.OnSubscribe<List<Chapter>>() {

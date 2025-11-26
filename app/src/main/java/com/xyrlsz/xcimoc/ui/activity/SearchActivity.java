@@ -1,11 +1,6 @@
 package com.xyrlsz.xcimoc.ui.activity;
 
 import android.os.Bundle;
-
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.textfield.TextInputLayout;
-import androidx.appcompat.widget.AppCompatAutoCompleteTextView;
-import androidx.appcompat.widget.AppCompatCheckBox;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
@@ -16,6 +11,12 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import androidx.appcompat.widget.AppCompatAutoCompleteTextView;
+import androidx.appcompat.widget.AppCompatCheckBox;
+import androidx.appcompat.widget.AppCompatSpinner;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.textfield.TextInputLayout;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.manager.PreferenceManager;
 import com.xyrlsz.xcimoc.misc.Switcher;
@@ -41,8 +42,9 @@ import butterknife.OnClick;
 
 public class SearchActivity extends BackActivity implements SearchView, TextView.OnEditorActionListener {
 
+    public static final int SEARCH_TITLE = 0;
+    public static final int SEARCH_AUTHOR = 1;
     private final static int DIALOG_REQUEST_SOURCE = 0;
-
     @BindView(R.id.search_text_layout)
     TextInputLayout mInputLayout;
     @BindView(R.id.search_keyword_input)
@@ -53,7 +55,8 @@ public class SearchActivity extends BackActivity implements SearchView, TextView
     AppCompatCheckBox mStrictCheckBox;
     @BindView(R.id.search_STSame_checkbox)
     AppCompatCheckBox mSTSameCheckBox;
-
+    @BindView(R.id.search_type_spinner)
+    AppCompatSpinner mTypeSpinner;
     private ArrayAdapter<String> mArrayAdapter;
 
     private SearchPresenter mPresenter;
@@ -103,6 +106,9 @@ public class SearchActivity extends BackActivity implements SearchView, TextView
             mArrayAdapter = new AutoCompleteAdapter(this);
             mEditText.setAdapter(mArrayAdapter);
         }
+        String[] searchTypes = getResources().getStringArray(R.array.search_type_items);
+        mTypeSpinner.setAdapter(new ArrayAdapter<>(this, R.layout.custom_spinner_item, searchTypes));
+        mTypeSpinner.setSelection(SEARCH_TITLE);
     }
 
     @Override
@@ -180,7 +186,7 @@ public class SearchActivity extends BackActivity implements SearchView, TextView
                 HintUtils.showToast(this, R.string.search_source_none);
             } else {
                 startActivity(ResultActivity.createIntent(this, keyword, strictSearch, stSame,
-                        CollectionUtils.unbox(list), ResultActivity.LAUNCH_MODE_SEARCH));
+                        CollectionUtils.unbox(list), ResultActivity.LAUNCH_MODE_SEARCH, mTypeSpinner.getSelectedItemPosition()));
             }
         }
     }

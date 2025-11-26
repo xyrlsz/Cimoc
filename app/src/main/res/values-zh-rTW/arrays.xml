@@ -58,4 +58,8 @@
         <item>重新加載圖片</item>
         <item>切換夜間模式</item>
     </string-array>
+    <string-array name="search_type_items">
+        <item>標題</item>
+        <item>作者</item>
+    </string-array>
 </resources>

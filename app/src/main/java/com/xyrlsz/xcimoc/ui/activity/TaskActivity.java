@@ -1,5 +1,8 @@
 package com.xyrlsz.xcimoc.ui.activity;
 
+import static com.xyrlsz.xcimoc.ui.activity.SearchActivity.SEARCH_AUTHOR;
+import static com.xyrlsz.xcimoc.ui.activity.SearchActivity.SEARCH_TITLE;
+
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -214,7 +217,7 @@ public class TaskActivity extends CoordinatorActivity implements TaskView {
                 case R.id.detail_search_title:
                     if (!StringUtils.isEmpty(mPresenter.getComic().getTitle())) {
                         Intent intent2 = ResultActivity.createIntent(this, mPresenter.getComic().getTitle(),
-                                null, ResultActivity.LAUNCH_MODE_SEARCH);
+                                null, ResultActivity.LAUNCH_MODE_SEARCH, SEARCH_TITLE);
                         startActivity(intent2);
                     } else {
                         showSnackbar(R.string.common_keyword_empty);
@@ -223,7 +226,7 @@ public class TaskActivity extends CoordinatorActivity implements TaskView {
                 case R.id.detail_search_author:
                     if (!StringUtils.isEmpty(mPresenter.getComic().getAuthor())) {
                         Intent intent3 = ResultActivity.createIntent(this, mPresenter.getComic().getAuthor(),
-                                null, ResultActivity.LAUNCH_MODE_SEARCH);
+                                null, ResultActivity.LAUNCH_MODE_SEARCH, SEARCH_AUTHOR);
                         startActivity(intent3);
                     } else {
                         showSnackbar(R.string.common_keyword_empty);

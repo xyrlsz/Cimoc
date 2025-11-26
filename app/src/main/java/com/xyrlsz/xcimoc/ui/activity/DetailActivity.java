@@ -1,5 +1,7 @@
 package com.xyrlsz.xcimoc.ui.activity;
 
+import static com.xyrlsz.xcimoc.ui.activity.SearchActivity.SEARCH_AUTHOR;
+import static com.xyrlsz.xcimoc.ui.activity.SearchActivity.SEARCH_TITLE;
 import static com.xyrlsz.xcimoc.utils.interpretationUtils.isReverseOrder;
 
 import android.annotation.SuppressLint;
@@ -167,7 +169,7 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
 //                            FirebaseAnalytics mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 //                            mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SEARCH, bundle);
 //                        }
-                        intent = ResultActivity.createIntent(this, mPresenter.getComic().getTitle(), null, ResultActivity.LAUNCH_MODE_SEARCH);
+                        intent = ResultActivity.createIntent(this, mPresenter.getComic().getTitle(), null, ResultActivity.LAUNCH_MODE_SEARCH, SEARCH_TITLE);
                         startActivity(intent);
                     } else {
                         showSnackbar(R.string.common_keyword_empty);
@@ -175,7 +177,7 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
                     break;
                 case R.id.detail_search_author:
                     if (!StringUtils.isEmpty(mPresenter.getComic().getAuthor())) {
-                        intent = ResultActivity.createIntent(this, mPresenter.getComic().getAuthor(), null, ResultActivity.LAUNCH_MODE_SEARCH);
+                        intent = ResultActivity.createIntent(this, mPresenter.getComic().getAuthor(), null, ResultActivity.LAUNCH_MODE_SEARCH, SEARCH_AUTHOR);
                         startActivity(intent);
                     } else {
                         showSnackbar(R.string.common_keyword_empty);
@@ -391,9 +393,9 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
                 comic.getIntro(), comic.getFinish(), comic.getUpdate(), comic.getLast(), isReverseOrder(comic));
 
         if (comic.getTitle() != null && comic.getCover() != null) {
-            Headers headers =  SourceManager.getInstance(this).getParser(comic.getSource()).getHeader();
+            Headers headers = SourceManager.getInstance(this).getParser(comic.getSource()).getHeader();
             App.setHeaders(headers);
-            mImagePipelineFactory = ImagePipelineFactoryBuilder.build(this,  headers, false);
+            mImagePipelineFactory = ImagePipelineFactoryBuilder.build(this, headers, false);
             mDetailAdapter.setControllerSupplier(ControllerBuilderSupplierFactory.get(this, mImagePipelineFactory));
 
             int resId = comic.getFavorite() != null ? R.drawable.ic_favorite_white_24dp : R.drawable.ic_favorite_border_white_24dp;

@@ -1,15 +1,16 @@
 package com.xyrlsz.xcimoc.ui.activity;
 
+import static com.xyrlsz.xcimoc.ui.activity.SearchActivity.SEARCH_TITLE;
+
 import android.content.Context;
 import android.content.Intent;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.util.SparseArray;
 import android.view.View;
 import android.widget.FrameLayout;
 
-//import com.google.firebase.analytics.FirebaseAnalytics;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.fresco.ControllerBuilderProvider;
 import com.xyrlsz.xcimoc.global.Extra;
@@ -41,6 +42,12 @@ public class ResultActivity extends BackActivity implements ResultView, BaseAdap
      * Extra: 格式 图源
      */
     public static final int LAUNCH_MODE_CATEGORY = 1;
+    // 建个Map把漫源搜索的上一个请求的url存下来，最后利用Activity生命周期清掉
+    //
+    // 解决重复加载列表问题思路：
+    // 在新的一次请求（上拉加载）前检查新Url与上一次请求的是否一致。
+    // 一致则返回空请求，达到阻断请求的目的；不一致则更新Map中存的Url，Map中不存在则新建
+    public static SparseArray<String> searchUrls = new SparseArray<>();
     @BindView(R.id.result_recycler_view)
     RecyclerView mRecyclerView;
     @BindView(R.id.result_layout)
@@ -49,42 +56,54 @@ public class ResultActivity extends BackActivity implements ResultView, BaseAdap
     private LinearLayoutManager mLayoutManager;
     private ResultPresenter mPresenter;
     private ControllerBuilderProvider mProvider;
-    private int type;
+    private int resultMode;
 
-    public static Intent createIntent(Context context, String keyword, int source, int type) {
-        return createIntent(context, keyword, new int[]{source}, type);
+    public static Intent createIntent(Context context, String keyword, int source, int resultMode) {
+        return createIntent(context, keyword, new int[]{source}, resultMode);
     }
 
-    public static Intent createIntent(Context context, String keyword, int[] array, int type) {
+    public static Intent createIntent(Context context, String keyword, int[] array, int resultMode) {
         Intent intent = new Intent(context, ResultActivity.class);
-        intent.putExtra(Extra.EXTRA_MODE, type);
+        intent.putExtra(Extra.EXTRA_MODE, resultMode);
         intent.putExtra(Extra.EXTRA_SOURCE, array);
         intent.putExtra(Extra.EXTRA_KEYWORD, keyword);
 //        intent.putExtra(Extra.EXTRA_STRICT, true);
         return intent;
     }
 
-    public static Intent createIntent(Context context, String keyword, boolean strictSearch, int[] array, int type) {
-        Intent intent = createIntent(context, keyword, array, type);
+    public static Intent createIntent(Context context, String keyword, int[] array, int resultMode, int searchType) {
+        Intent intent = new Intent(context, ResultActivity.class);
+        intent.putExtra(Extra.EXTRA_MODE, resultMode);
+        intent.putExtra(Extra.EXTRA_SOURCE, array);
+        intent.putExtra(Extra.EXTRA_KEYWORD, keyword);
+//        intent.putExtra(Extra.EXTRA_STRICT, true);
+        intent.putExtra(Extra.EXTRA_SEARCH_TYPE, searchType);
+        return intent;
+    }
+
+    public static Intent createIntent(Context context, String keyword, boolean strictSearch, int[] array, int resultMode) {
+        Intent intent = createIntent(context, keyword, array, resultMode);
 //        intent.putExtra(Extra.EXTRA_MODE, type);
 //        intent.putExtra(Extra.EXTRA_SOURCE, array);
 //        intent.putExtra(Extra.EXTRA_KEYWORD, keyword);
         intent.putExtra(Extra.EXTRA_STRICT, strictSearch);
         return intent;
     }
-    public static Intent createIntent(Context context, String keyword, boolean strictSearch, boolean stSame, int[] array, int type) {
-        Intent intent = createIntent(context, keyword, array, type);
+
+    public static Intent createIntent(Context context, String keyword, boolean strictSearch, boolean stSame, int[] array, int resultMode) {
+        Intent intent = createIntent(context, keyword, array, resultMode);
         intent.putExtra(Extra.EXTRA_STRICT, strictSearch);
         intent.putExtra(Extra.EXTAR_STSAME, stSame);
         return intent;
     }
 
-    // 建个Map把漫源搜索的上一个请求的url存下来，最后利用Activity生命周期清掉
-    //
-    // 解决重复加载列表问题思路：
-    // 在新的一次请求（上拉加载）前检查新Url与上一次请求的是否一致。
-    // 一致则返回空请求，达到阻断请求的目的；不一致则更新Map中存的Url，Map中不存在则新建
-    public static SparseArray<String> searchUrls = new SparseArray<>();
+    public static Intent createIntent(Context context, String keyword, boolean strictSearch, boolean stSame, int[] array, int resultMode, int searchType) {
+        Intent intent = createIntent(context, keyword, array, resultMode);
+        intent.putExtra(Extra.EXTRA_STRICT, strictSearch);
+        intent.putExtra(Extra.EXTAR_STSAME, stSame);
+        intent.putExtra(Extra.EXTRA_SEARCH_TYPE, searchType);
+        return intent;
+    }
 
     @Override
     protected BasePresenter initPresenter() {
@@ -92,7 +111,8 @@ public class ResultActivity extends BackActivity implements ResultView, BaseAdap
         int[] source = getIntent().getIntArrayExtra(Extra.EXTRA_SOURCE);
         boolean strictSearch = getIntent().getBooleanExtra(Extra.EXTRA_STRICT, true);
         boolean stSameSearch = getIntent().getBooleanExtra(Extra.EXTAR_STSAME, true);
-        mPresenter = new ResultPresenter(source, keyword, strictSearch, stSameSearch);
+        int searchType = getIntent().getIntExtra(Extra.EXTRA_SEARCH_TYPE, SEARCH_TITLE);
+        mPresenter = new ResultPresenter(source, keyword, strictSearch, stSameSearch, searchType);
         mPresenter.attachView(this);
         return mPresenter;
     }
@@ -134,7 +154,7 @@ public class ResultActivity extends BackActivity implements ResultView, BaseAdap
 
     @Override
     protected void initData() {
-        type = getIntent().getIntExtra(Extra.EXTRA_MODE, -1);
+        resultMode = getIntent().getIntExtra(Extra.EXTRA_MODE, -1);
         load();
     }
 
@@ -147,7 +167,7 @@ public class ResultActivity extends BackActivity implements ResultView, BaseAdap
     }
 
     private void load() {
-        switch (type) {
+        switch (resultMode) {
             case LAUNCH_MODE_SEARCH:
                 mPresenter.loadSearch();
                 break;
