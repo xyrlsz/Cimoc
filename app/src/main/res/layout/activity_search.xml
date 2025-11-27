@@ -81,6 +81,7 @@
                     android:layout_toEndOf="@id/search_STSame_checkbox"
                     android:spinnerMode="dropdown"
                     android:textColor="@color/white"
+                    app:backgroundTint="@color/black"
                     android:layout_alignBaseline="@id/search_strict_checkbox"
                     android:textSize="14sp" />
             </RelativeLayout>

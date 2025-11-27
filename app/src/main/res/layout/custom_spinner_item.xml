@@ -2,9 +2,10 @@
     android:id="@android:id/text1"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:color/transparent"
+    android:background="?attr/colorPrimary"
     android:ellipsize="marquee"
     android:gravity="center_vertical"
     android:padding="8dp"
     android:singleLine="true"
+    android:textColor="@color/white"
     android:textSize="14sp" />
