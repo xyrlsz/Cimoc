@@ -276,7 +276,7 @@ public class ComicUtils {
             int chapterIndex = 1;
             int sizeDigits = String.valueOf(chapterList.size()).length();
             for (Chapter chapter : chapterList) {
-                String chapterDir = String.format("chapter_%0" + sizeDigits + "d_%s/", chapterIndex, sanitizeFileName(chapter.getTitle()));
+                String chapterDir = String.format("%0" + sizeDigits + "d_%s/", chapterIndex, sanitizeFileName(chapter.getTitle()));
                 List<ImageUrl> imageUrls = Download.images(App.getApp().getDocumentFile(), comic, chapter,
                                 sourceManager.getParser(comic.getSource()).getTitle())
                         .toBlocking().first();
