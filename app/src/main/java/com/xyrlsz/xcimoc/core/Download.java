@@ -224,8 +224,8 @@ public class Download {
     public static CimocDocumentFile getChapterDir(CimocDocumentFile root, Comic comic, Chapter chapter, String title) {
         CimocDocumentFile result = DocumentUtils.findFile(root, DOWNLOAD,
                 String.valueOf(comic.getSource()),
-                comic.getCid().replaceAll("[:/(\\\\)(\\?)<>\"(\\|)(\\.)]", ""),
-                DecryptionUtils.urlDecrypt(chapter.getPath().replaceAll("[:/(\\\\)(\\?)<>\"(\\|)(\\.)]", "-"))
+                comic.getCid().replaceAll("[:/\\\\?<>\"|.]", ""),
+                DecryptionUtils.urlDecrypt(chapter.getPath().replaceAll("[:/\\\\?<>\"|.]", "-"))
         );
         if (result == null) {
             result = DocumentUtils.findFile(root, DOWNLOAD, title, comic.getTitle(), chapter.getTitle());
@@ -233,30 +233,58 @@ public class Download {
         return result;
     }
 
+    //    public static Observable<List<ImageUrl>> images(final CimocDocumentFile root, final Comic comic, final Chapter chapter, final String title) {
+//        return Observable.create((Observable.OnSubscribe<List<ImageUrl>>) subscriber -> {
+//            CimocDocumentFile dir = getChapterDir(root, comic, chapter, title);
+//            List<CimocDocumentFile> files = dir.listFiles(file -> !file.getName().endsWith("cdif"), new Comparator<CimocDocumentFile>() {
+//                @Override
+//                public int compare(CimocDocumentFile lhs, CimocDocumentFile rhs) {
+//                    return lhs.getName().compareTo(rhs.getName());
+//                }
+//            });
+//
+//            List<ImageUrl> list = Storage.buildImageUrlFromDocumentFile(files, chapter.getPath(), chapter.getCount(),chapter);
+//            if (list.size() != 0) {
+//                subscriber.onNext(list);
+//                subscriber.onCompleted();
+//            } else {
+//                subscriber.onError(new Exception());
+//            }
+//        }).subscribeOn(Schedulers.io());
+//    }
     public static Observable<List<ImageUrl>> images(final CimocDocumentFile root, final Comic comic, final Chapter chapter, final String title) {
-        return Observable.create(new Observable.OnSubscribe<List<ImageUrl>>() {
-            @Override
-            public void call(Subscriber<? super List<ImageUrl>> subscriber) {
+        return Observable.create((Observable.OnSubscribe<List<ImageUrl>>) subscriber -> {
+            try {
                 CimocDocumentFile dir = getChapterDir(root, comic, chapter, title);
-                List<CimocDocumentFile> files = dir.listFiles(new CimocDocumentFile.DocumentFileFilter() {
-                    @Override
-                    public boolean call(CimocDocumentFile file) {
-                        return !file.getName().endsWith("cdif");
-                    }
-                }, new Comparator<CimocDocumentFile>() {
+
+                // Check if directory is null or doesn't exist
+                if (dir == null || !dir.exists()) {
+                    subscriber.onError(new Exception("Chapter directory not found"));
+                    return;
+                }
+
+                List<CimocDocumentFile> files = dir.listFiles(file -> !file.getName().endsWith("cdif"), new Comparator<CimocDocumentFile>() {
                     @Override
                     public int compare(CimocDocumentFile lhs, CimocDocumentFile rhs) {
                         return lhs.getName().compareTo(rhs.getName());
                     }
                 });
 
-                List<ImageUrl> list = Storage.buildImageUrlFromDocumentFile(files, chapter.getPath(), chapter.getCount(),chapter);
-                if (list.size() != 0) {
+                // Check if files list is null (in case listFiles() returns null)
+                if (files == null) {
+                    subscriber.onError(new Exception("Failed to list files in directory"));
+                    return;
+                }
+
+                List<ImageUrl> list = Storage.buildImageUrlFromDocumentFile(files, chapter.getPath(), chapter.getCount(), chapter);
+                if (!list.isEmpty()) {
                     subscriber.onNext(list);
                     subscriber.onCompleted();
                 } else {
-                    subscriber.onError(new Exception());
+                    subscriber.onError(new Exception("No valid images found"));
                 }
+            } catch (Exception e) {
+                subscriber.onError(e);
             }
         }).subscribeOn(Schedulers.io());
     }

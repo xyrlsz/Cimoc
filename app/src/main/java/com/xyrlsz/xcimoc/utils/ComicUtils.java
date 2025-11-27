@@ -104,10 +104,6 @@ public class ComicUtils {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 ResponseBody body = response.body();
-                if (body == null) {
-                    callback.onFailure("封面响应体为空");
-                    return;
-                }
                 byte[] coverBytes = body.bytes();
 
                 switch (type) {
@@ -140,7 +136,15 @@ public class ComicUtils {
             callback.onFailure("无法创建 simple 目录");
             return;
         }
-
+        CimocDocumentFile nomediaFile = DocumentUtils.findFile(typeRoot, ".nomedia");
+        if (nomediaFile == null || !nomediaFile.exists()) {
+            // 创建 .nomedia 文件
+            CimocDocumentFile newNomedia = typeRoot.createFile(".nomedia");
+            if (newNomedia == null) {
+                // 如果创建失败可以记录日志，但不应该阻止后续流程
+                Log.w("Nomedia", "无法在 simple 目录创建 .nomedia 文件");
+            }
+        }
         String sanitizedTitle = sanitizeFileName(comic.getTitle());
         CimocDocumentFile comicRoot = DocumentUtils.getOrCreateSubDirectory(typeRoot, sanitizedTitle);
         if (comicRoot == null) {
@@ -216,7 +220,7 @@ public class ComicUtils {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(results -> {
-                    boolean allSuccess = false;
+                    boolean allSuccess;
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                         allSuccess = results.stream().allMatch(r -> r);
                     } else {
@@ -235,6 +239,7 @@ public class ComicUtils {
                     }
                 }, throwable -> {
                     callback.onFailure("导出过程中发生异常: " + throwable.getMessage());
+                    throwable.printStackTrace();
                 });
     }
 
@@ -296,7 +301,11 @@ public class ComicUtils {
                         } else if (url.startsWith("content://")) {
                             is = context.getContentResolver().openInputStream(uri);
                             CimocDocumentFile file = CimocDocumentFile.fromSubTreeUri(context, uri);
-                            imgName += file.getName();
+                            if (file != null) {
+                                imgName += file.getName();
+                            } else {
+                                imgName += uri.getLastPathSegment();
+                            }
                         } else {
                             callback.onFailure("不支持的 URL: " + url);
                             return;
@@ -426,10 +435,10 @@ public class ComicUtils {
                 for (ImageUrl imageUrl : imageUrls) {
                     Uri uri = Uri.parse(imageUrl.getUrl());
                     InputStream is;
-                    String imgFileName = String.format("images/%s_%d.jpg", chapterId, imgIndex);
+                    String imgFileName = StringUtils.format("images/%s_%d.jpg", chapterId, imgIndex);
 
                     if (imageUrl.getUrl().startsWith("file://")) {
-                        is = new FileInputStream(new File(uri.getPath()));
+                        is = new FileInputStream(Objects.requireNonNull(uri.getPath()));
                     } else if (imageUrl.getUrl().startsWith("content://")) {
                         is = context.getContentResolver().openInputStream(uri);
                     } else {
@@ -535,7 +544,7 @@ public class ComicUtils {
 
             // 可选：将封面作为第一张图插入
             if (cover != null && cover.length > 0) {
-                String fileName = String.format("%06d_cover.jpg", imageIndex++);
+                String fileName = StringUtils.format("%06d_cover.jpg", imageIndex++);
                 zos.putNextEntry(new ZipEntry(fileName));
                 zos.write(cover);
                 zos.closeEntry();
@@ -559,7 +568,7 @@ public class ComicUtils {
 
                     try {
                         if (url.startsWith("file://")) {
-                            File f = new File(uri.getPath());
+                            File f = new File(Objects.requireNonNull(uri.getPath()));
                             is = new FileInputStream(f);
                         } else if (url.startsWith("content://")) {
                             is = context.getContentResolver().openInputStream(uri);
@@ -571,7 +580,7 @@ public class ComicUtils {
 
                         if (is != null) {
                             String imgExt = getImageExtensionFromUri(context, uri);
-                            String fileName = String.format("%06d%s", imageIndex++, imgExt);
+                            String fileName = StringUtils.format("%06d%s", imageIndex++, imgExt);
                             zos.putNextEntry(new ZipEntry(fileName));
 
                             byte[] buffer = new byte[4096];
