@@ -10,10 +10,10 @@
         android:icon="@drawable/ic_file_download_white_24dp"
         android:title="@string/detail_download"
         app:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/detail_tag"
-        android:title="@string/detail_tag"
-        app:showAsAction="never" />
+<!--    <item-->
+<!--        android:id="@+id/detail_tag"-->
+<!--        android:title="@string/detail_tag"-->
+<!--        app:showAsAction="never" />-->
     <item
         android:id="@+id/detail_search_title"
         android:icon="@drawable/ic_search_white_24dp"

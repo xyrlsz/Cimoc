@@ -151,14 +151,14 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
                         startActivityForResult(intent, REQUEST_CODE_DOWNLOAD);
                     }
                     break;
-                case R.id.detail_tag:
-                    if (mPresenter.getComic().getFavorite() != null) {
-                        intent = TagEditorActivity.createIntent(this, mPresenter.getComic().getId());
-                        startActivity(intent);
-                    } else {
-                        showSnackbar(R.string.detail_tag_favorite);
-                    }
-                    break;
+//                case R.id.detail_tag:
+//                    if (mPresenter.getComic().getFavorite() != null) {
+//                        intent = TagEditorActivity.createIntent(this, mPresenter.getComic().getId());
+//                        startActivity(intent);
+//                    } else {
+//                        showSnackbar(R.string.detail_tag_favorite);
+//                    }
+//                    break;
                 case R.id.detail_search_title:
                     if (!StringUtils.isEmpty(mPresenter.getComic().getTitle())) {
 //                        if(App.getPreferenceManager().getBoolean(PreferenceManager.PREF_OTHER_FIREBASE_EVENT, true)) {
