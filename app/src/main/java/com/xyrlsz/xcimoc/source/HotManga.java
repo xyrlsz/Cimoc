@@ -76,7 +76,14 @@ public class HotManga extends MangaParser {
                         String cid = object.getString("path_word");
                         String title = jChineseConvertor.t2s(object.getString("name"));
                         String cover = object.getString("cover");
-                        String author = object.getJSONArray("author").getJSONObject(0).getString("name").trim();
+                        String author = "";
+                        for (int i = 0; i < object.getJSONArray("author").length(); ++i) {
+                            author += object.getJSONArray("author").getJSONObject(i).getString("name").trim();
+                            if (i < object.getJSONArray("author").length() - 1) {
+                                author += ",";
+                            }
+                        }
+//                        String author = object.getJSONArray("author").getJSONObject(0).getString("name").trim();
                         return new Comic(TYPE, cid, title, cover, null, author);
                     } catch (Exception e) {
                         e.printStackTrace();
