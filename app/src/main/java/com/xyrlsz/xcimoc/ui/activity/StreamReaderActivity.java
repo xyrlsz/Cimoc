@@ -1,8 +1,8 @@
 package com.xyrlsz.xcimoc.ui.activity;
 
 import android.graphics.Point;
-import androidx.recyclerview.widget.RecyclerView;
 
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.manager.PreferenceManager;
@@ -27,6 +27,10 @@ public class StreamReaderActivity extends ReaderActivity {
         mLoadPrev = mPreference.getBoolean(PreferenceManager.PREF_READER_STREAM_LOAD_PREV, false);
         mLoadNext = mPreference.getBoolean(PreferenceManager.PREF_READER_STREAM_LOAD_NEXT, true);
         mReaderAdapter.setReaderMode(ReaderAdapter.READER_STREAM);
+
+        mReaderAdapter.setPaging(false);
+        mReaderAdapter.setPagingReverse(false);
+
         if (mPreference.getBoolean(PreferenceManager.PREF_READER_STREAM_INTERVAL, false)) {
             mRecyclerView.addItemDecoration(mReaderAdapter.getItemDecoration());
         }
@@ -115,7 +119,7 @@ public class StreamReaderActivity extends ReaderActivity {
         Point point = new Point();
         getWindowManager().getDefaultDisplay().getSize(point);
         if (turn == PreferenceManager.READER_TURN_ATB) {
-            mRecyclerView.smoothScrollBy(0, -point.y+point.y/5);
+            mRecyclerView.smoothScrollBy(0, -point.y + point.y / 5);
         } else {
             mRecyclerView.smoothScrollBy(-point.x, 0);
         }
@@ -129,7 +133,7 @@ public class StreamReaderActivity extends ReaderActivity {
         Point point = new Point();
         getWindowManager().getDefaultDisplay().getSize(point);
         if (turn == PreferenceManager.READER_TURN_ATB) {
-            mRecyclerView.smoothScrollBy(0, point.y-point.y/5);
+            mRecyclerView.smoothScrollBy(0, point.y - point.y / 5);
         } else {
             mRecyclerView.smoothScrollBy(point.x, 0);
         }
