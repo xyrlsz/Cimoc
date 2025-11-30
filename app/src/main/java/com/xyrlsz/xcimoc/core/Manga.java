@@ -161,7 +161,7 @@ public class Manga {
 
                         if (searchType == SEARCH_TITLE) {
                             if (comic != null
-                                    && (indexOfIgnoreCase(comic.getTitle(), keyword, stSame)
+                                    && (indexOfIgnoreCase(comic.getTitle().strip(), keyword.strip(), stSame)
                                     || (!strictSearch))) {
                                 subscriber.onNext(comic);
                                 Thread.sleep(random.nextInt(200));
