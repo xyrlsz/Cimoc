@@ -53,12 +53,12 @@ android {
     compileSdk 36
     namespace "com.xyrlsz.xcimoc"
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
         coreLibraryDesugaringEnabled true
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     defaultConfig {
         applicationId "com.xyrlsz.xcimoc"
@@ -173,7 +173,7 @@ dependencies {
     //noinspection GradleDependency uses-sdk:minSdkVersion 21 cannot be smaller than version 23 declared in library [androidx.activity:activity:1.12.0]
     implementation 'androidx.activity:activity-ktx:1.11.0'
     implementation 'org.greenrobot:greendao:3.3.0'
-    implementation 'com.squareup.okhttp3:okhttp:5.3.0'
+    implementation 'com.squareup.okhttp3:okhttp:5.3.2'
     implementation 'org.mozilla:rhino:1.8.0'
 
     implementation 'com.facebook.fresco:fresco:3.6.0'
@@ -191,7 +191,7 @@ dependencies {
 
     api 'com.google.guava:guava:33.5.0-android'
     implementation 'androidx.multidex:multidex:2.0.1'
-    
+
     // noinspection NewerVersionAvailable  fastjson 1.2.83 是最后一个支持 Android 4.0 及以下版本的版本
     //    implementation 'com.alibaba:fastjson:1.2.83'
 
