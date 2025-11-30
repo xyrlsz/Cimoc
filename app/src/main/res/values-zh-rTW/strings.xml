@@ -120,6 +120,7 @@
     <string name="source_detail_favorite">收藏統計</string>
 
     <string name="category_subject">主題</string>
+    <string name="category_source">圖源</string>
     <string name="category_area">地區</string>
     <string name="category_reader">讀者</string>
     <string name="category_year">年份</string>

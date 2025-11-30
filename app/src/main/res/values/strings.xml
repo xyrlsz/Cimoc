@@ -122,6 +122,7 @@
     <string name="source_detail_favorite">收藏统计</string>
 
     <string name="category_subject">主题</string>
+    <string name="category_source">图源</string>
     <string name="category_area">地区</string>
     <string name="category_reader">读者</string>
     <string name="category_year">年份</string>
