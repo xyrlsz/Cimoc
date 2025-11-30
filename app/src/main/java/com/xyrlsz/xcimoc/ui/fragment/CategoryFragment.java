@@ -1,5 +1,6 @@
 package com.xyrlsz.xcimoc.ui.fragment;
 
+import android.util.Pair;
 import android.view.View;
 import android.widget.AdapterView;
 
@@ -17,8 +18,10 @@ import com.xyrlsz.xcimoc.ui.adapter.GridAdapter;
 import com.xyrlsz.xcimoc.ui.view.CategoryView;
 import com.xyrlsz.xcimoc.utils.HintUtils;
 
+import java.util.LinkedList;
 import java.util.List;
 
+import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.OnClick;
 
@@ -30,7 +33,10 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
     @BindViews({R.id.category_subject, R.id.category_area, R.id.category_reader,
             R.id.category_year, R.id.category_progress, R.id.category_order})
     List<View> mCategoryView;
-
+    @BindView(R.id.category_source)
+    View mCategorySourceView;
+    @BindView(R.id.category_spinner_source)
+    AppCompatSpinner mCategorySourceSpinner;
     private GridAdapter mGridAdapter;
     private Category mCategory;
 
@@ -53,6 +59,9 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
     private void initSpinner() {
         int[] type = new int[]{Category.CATEGORY_SUBJECT, Category.CATEGORY_AREA, Category.CATEGORY_READER,
                 Category.CATEGORY_YEAR, Category.CATEGORY_PROGRESS, Category.CATEGORY_ORDER};
+        LinkedList<Pair<String, String>> list = new LinkedList<>();
+        list.add(new Pair<>("动漫屋", "5"));
+        mCategorySourceSpinner.setAdapter(new CategoryAdapter(getContext(), list));
         for (int i = 0; i != type.length; ++i) {
             if (mCategory.hasAttribute(type[i])) {
                 mCategoryView.get(i).setVisibility(View.VISIBLE);
