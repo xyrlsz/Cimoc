@@ -50,6 +50,7 @@ import com.xyrlsz.xcimoc.manager.SourceManager;
 import com.xyrlsz.xcimoc.presenter.BasePresenter;
 import com.xyrlsz.xcimoc.presenter.MainPresenter;
 import com.xyrlsz.xcimoc.ui.fragment.BaseFragment;
+import com.xyrlsz.xcimoc.ui.fragment.CategoryFragment;
 import com.xyrlsz.xcimoc.ui.fragment.ComicFragment;
 import com.xyrlsz.xcimoc.ui.fragment.dialog.MessageDialogFragment;
 import com.xyrlsz.xcimoc.ui.fragment.recyclerview.SourceFragment;
@@ -181,7 +182,8 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
 //                    runOnUiThread(new Runnable() {
 //                        @Override
 //                        public void run() {
-////                            Toast.makeText(MainActivity.this, "Logged in: " + credentials.getAccessToken(), Toast.LENGTH_LONG).show();
+
+    /// /                            Toast.makeText(MainActivity.this, "Logged in: " + credentials.getAccessToken(), Toast.LENGTH_LONG).show();
 //                            HintUtils.showToast(MainActivity.this, R.string.user_login_sucess);
 //                            mPreference.putString(PreferenceManager.PREFERENCES_USER_TOCKEN, credentials.getAccessToken());
 //                            getUesrInfo();
@@ -212,7 +214,6 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
 //            logoutShowDialog();
 //        }
 //    }
-
     @Override
     protected void initData() {
         mPresenter.loadLast();
@@ -347,6 +348,9 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
 //                case R.id.drawer_tag:
 //                    mCurrentFragment = new TagFragment();
 //                    break;
+                case R.id.drawer_category:
+                    mCurrentFragment = new CategoryFragment();
+                    break;
             }
             mFragmentArray.put(mCheckItem, mCurrentFragment);
             return false;
@@ -398,6 +402,14 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
                     mCheckItem = itemId;
                     getSupportFragmentManager().beginTransaction().hide(mCurrentFragment).commit();
                     if (itemId == R.id.drawer_source) {
+                        mToolbarTitle.setText(item.getTitle().toString());
+                    }
+                    mDrawerLayout.closeDrawer(GravityCompat.START);
+                    break;
+                case R.id.drawer_category:
+                    mCheckItem = itemId;
+                    getSupportFragmentManager().beginTransaction().hide(mCurrentFragment).commit();
+                    if (itemId == R.id.drawer_category) {
                         mToolbarTitle.setText(item.getTitle().toString());
                     }
                     mDrawerLayout.closeDrawer(GravityCompat.START);

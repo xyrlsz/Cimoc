@@ -42,7 +42,7 @@ public class DM5 extends MangaParser {
     public static final String DEFAULT_TITLE = "动漫屋";
 
     public DM5(Source source) {
-        init(source);
+        init(source, new Category());
     }
 
     public static Source getDefaultSource() {

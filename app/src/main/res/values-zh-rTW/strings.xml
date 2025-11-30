@@ -3,6 +3,7 @@
     <string name="drawer_source">圖源</string>
     <string name="drawer_list">列表</string>
     <string name="drawer_tag">標籤</string>
+    <string name="drawer_category">分類</string>
     <string name="drawer_picture">截圖</string>
     <string name="drawer_settings">設定</string>
     <string name="drawer_about">關於</string>

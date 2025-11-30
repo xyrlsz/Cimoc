@@ -20,6 +20,11 @@
             android:checkable="true"
             android:icon="@drawable/ic_widgets_black_24dp"
             android:title="@string/drawer_source" />
+        <item
+        android:id="@+id/drawer_category"
+        android:checkable="true"
+        android:icon="@drawable/ic_material_symbols_category_black"
+        android:title="@string/drawer_category"/>
         <!--<item-->
         <!--android:id="@+id/drawer_tag"-->
         <!--android:checkable="true"-->

@@ -5,6 +5,7 @@
     <string name="drawer_source">图源</string>
     <string name="drawer_list">列表</string>
     <string name="drawer_tag">标签</string>
+    <string name="drawer_category">分类</string>
     <string name="drawer_picture">截图</string>
     <string name="drawer_settings">设置</string>
     <string name="drawer_about">关于</string>
