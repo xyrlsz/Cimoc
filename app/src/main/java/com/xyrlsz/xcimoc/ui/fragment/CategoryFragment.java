@@ -9,10 +9,9 @@ import androidx.appcompat.widget.AppCompatSpinner;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.global.Extra;
 import com.xyrlsz.xcimoc.manager.SourceManager;
+import com.xyrlsz.xcimoc.model.Source;
 import com.xyrlsz.xcimoc.parser.Category;
 import com.xyrlsz.xcimoc.presenter.BasePresenter;
-import com.xyrlsz.xcimoc.presenter.CategoryPresenter;
-import com.xyrlsz.xcimoc.source.DM5;
 import com.xyrlsz.xcimoc.ui.adapter.CategoryAdapter;
 import com.xyrlsz.xcimoc.ui.adapter.GridAdapter;
 import com.xyrlsz.xcimoc.ui.view.CategoryView;
@@ -39,7 +38,8 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
     AppCompatSpinner mCategorySourceSpinner;
     private GridAdapter mGridAdapter;
     private Category mCategory;
-
+    private SourceManager mSourceManager;
+    private LinkedList<Pair<String, String>> mSourceList;
 
     @Override
     protected BasePresenter initPresenter() {
@@ -50,18 +50,50 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
     @Override
     protected void initView() {
         setHasOptionsMenu(true);
-        int source = getActivity().getIntent().getIntExtra(Extra.EXTRA_SOURCE, DM5.TYPE);
-
-        mCategory = SourceManager.getInstance(this).getParser(source).getCategory();
-        initSpinner();
+//        for (Pair<String, String> pair : mSourceList) {
+//            mCategory = mSourceManager.getParser(Integer.parseInt(pair.second)).getCategory();
+//            if (mCategory != null) {
+//                initSpinner(Integer.parseInt(pair.second));
+//            }
+//        }
+        initSpinner(mSourceList.get(0).second);
     }
 
-    private void initSpinner() {
+    @Override
+    protected void initData() {
+        mSourceManager = SourceManager.getInstance(this);
+        List<Source> sourceList = mSourceManager.listEnable();
+        mSourceList = new LinkedList<>();
+        for (Source source : sourceList) {
+            mCategory = mSourceManager.getParser(source.getType()).getCategory();
+            if (mCategory != null) {
+                mSourceList.add(new Pair<>(source.getTitle(), Integer.toString(source.getType())));
+            }
+        }
+        mCategorySourceSpinner.setAdapter(new CategoryAdapter(getContext(), mSourceList));
+        mCategorySourceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                initSpinner(mSourceList.get(position).second);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                initSpinner(mSourceList.get(0).second);
+            }
+        });
+    }
+
+    private void initSpinner(String source) {
+        initSpinner(Integer.parseInt(source));
+    }
+
+    private void initSpinner(int source) {
+
+        mCategory = mSourceManager.getParser(source).getCategory();
         int[] type = new int[]{Category.CATEGORY_SUBJECT, Category.CATEGORY_AREA, Category.CATEGORY_READER,
                 Category.CATEGORY_YEAR, Category.CATEGORY_PROGRESS, Category.CATEGORY_ORDER};
-        LinkedList<Pair<String, String>> list = new LinkedList<>();
-        list.add(new Pair<>("动漫屋", "5"));
-        mCategorySourceSpinner.setAdapter(new CategoryAdapter(getContext(), list));
+
         for (int i = 0; i != type.length; ++i) {
             if (mCategory.hasAttribute(type[i])) {
                 mCategoryView.get(i).setVisibility(View.VISIBLE);
@@ -69,6 +101,8 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
                     mSpinnerList.get(i).setOnItemSelectedListener(this);
                 }
                 mSpinnerList.get(i).setAdapter(new CategoryAdapter(getContext(), mCategory.getAttrList(type[i])));
+            }else{
+                mCategoryView.get(i).setVisibility(View.GONE);
             }
         }
     }

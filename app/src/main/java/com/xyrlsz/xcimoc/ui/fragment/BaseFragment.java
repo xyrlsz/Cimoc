@@ -43,8 +43,8 @@ public abstract class BaseFragment extends Fragment implements BaseView {
         mPreference = App.getPreferenceManager();
         mBasePresenter = initPresenter();
         initProgressBar();
-        initView();
         initData();
+        initView();
         return view;
     }
 
