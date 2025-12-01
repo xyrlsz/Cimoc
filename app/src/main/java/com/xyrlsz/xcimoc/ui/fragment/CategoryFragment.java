@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.AdapterView;
 
 import androidx.appcompat.widget.AppCompatSpinner;
+import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -41,6 +42,7 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
     private static final int STATE_NULL = 0;
     private static final int STATE_DOING = 1;
     private static final int STATE_DONE = 3;
+    private static final int STATE_NO_MORE = 4; // 没有更多数据
     private final List<MiniComic> mComicList = new ArrayList<>();
     @BindViews({R.id.category_spinner_subject, R.id.category_spinner_area, R.id.category_spinner_reader,
             R.id.category_spinner_year, R.id.category_spinner_progress, R.id.category_spinner_order})
@@ -54,16 +56,29 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
     AppCompatSpinner mCategorySourceSpinner;
     @BindView(R.id.recycler_view_content)
     RecyclerView mRecyclerView;
+    @BindView(R.id.nested_scroll_view)
+    NestedScrollView nestedScrollView;
     CategoryGridAdapter categoryGridAdapter;
     int mSource;
     private Category mCategory;
     private SourceManager mSourceManager;
     private LinkedList<Pair<String, String>> mSourceList;
     private CompositeSubscription mCompositeSubscription;
+    private State mCurrentState;
+    private String mCurrentFormat;
 
     @Override
     protected BasePresenter initPresenter() {
         return super.initPresenter();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mCompositeSubscription != null && !mCompositeSubscription.isUnsubscribed()) {
+            mCompositeSubscription.unsubscribe();
+            mCompositeSubscription.clear();
+        }
     }
 
     @Override
@@ -93,6 +108,11 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
             }
         });
         mCompositeSubscription = new CompositeSubscription();
+
+        mCurrentState = new State();
+        mCurrentState.source = mSource;
+        mCurrentState.page = 0;
+        mCurrentState.state = STATE_NULL;
     }
 
     @Override
@@ -126,6 +146,35 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
             // TODO: 打开详情页
         });
         mRecyclerView.setAdapter(categoryGridAdapter);
+
+        GridLayoutManager layoutManager = (GridLayoutManager) mRecyclerView.getLayoutManager();
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            private int lastVisibleItem = 0;
+
+            @Override
+            public void onScrollStateChanged(@NotNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    getAppInstance().getBuilderProvider().resume();
+                } else if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                    getAppInstance().getBuilderProvider().pause();
+                }
+            }
+
+            @Override
+            public void onScrolled(@NotNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (layoutManager != null) {
+                    lastVisibleItem = layoutManager.findLastVisibleItemPosition();
+                    int totalItemCount = layoutManager.getItemCount();
+
+                    // 当滚动到最后几个项目时加载更多
+                    if (totalItemCount > 0 && lastVisibleItem >= totalItemCount - 6) {
+                        loadMoreData();
+                    }
+                }
+            }
+        });
     }
 
     protected RecyclerView.LayoutManager initLayoutManager() {
@@ -177,6 +226,11 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
 
     }
 
+    @OnClick(R.id.category_action_button_to_top)
+    void onToTopButtonClick() {
+        nestedScrollView.smoothScrollTo(0, 0);
+    }
+
     @OnClick(R.id.category_action_button)
     void onActionButtonClick() {
         String[] args = new String[mSpinnerList.size()];
@@ -184,12 +238,24 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
             args[i] = getSpinnerValue(mSpinnerList.get(i));
         }
 
-        String format = mCategory.getFormat(args);
-        State state = new State();
-        state.source = mSource;
-        state.page = 0;
-        state.state = STATE_NULL;
-        loadCategory(state, format);
+        mCurrentFormat = mCategory.getFormat(args);
+
+        mCurrentState.state = STATE_NULL;
+        mCurrentState.page = 0;
+
+
+        mComicList.clear();
+        categoryGridAdapter.notifyDataSetChanged();
+
+
+        loadCategory(mCurrentState, mCurrentFormat);
+    }
+
+    private void loadMoreData() {
+        if (mCurrentState != null && mCurrentState.state == STATE_DONE) {
+            mCurrentState.state = STATE_NULL;
+            loadCategory(mCurrentState, mCurrentFormat);
+        }
     }
 
     public void loadCategory(State state, String format) {
@@ -205,8 +271,26 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
                             if (state.page == 1) {
                                 mComicList.clear();
                             }
-                            for (Comic comic : list) {
-                                mComicList.add(new MiniComic(comic));
+                            if (list != null && !list.isEmpty()) {
+                                for (Comic comic : list) {
+                                    mComicList.add(new MiniComic(comic));
+                                }
+
+                                // 根据返回数据数量判断是否还有更多数据
+                                if (list.size() >= 20) { // 假设每页20条
+                                    state.state = STATE_DONE; // 可以加载下一页
+                                } else {
+                                    state.state = STATE_NULL; // 没有更多数据
+                                }
+
+                                App.runOnMainThread(() -> {
+                                    categoryGridAdapter.notifyDataSetChanged();
+                                    // 可以添加加载完成的提示
+                                });
+                            } else {
+                                // 没有更多数据了
+                                state.state = STATE_NULL;
+                                // 可以显示"没有更多数据"的提示
                             }
                             App.runOnMainThread(() -> categoryGridAdapter.notifyDataSetChanged());
                         }
@@ -214,9 +298,10 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
                         @Override
                         public void call(Throwable throwable) {
                             throwable.printStackTrace();
-                            if (state.page == 1) {
-
-                            }
+                            state.state = STATE_DONE; // 出错后允许重试
+//                            if (state.page == 1) {
+//
+//                            }
                         }
                     }));
         }

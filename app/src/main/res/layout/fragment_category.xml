@@ -1,221 +1,244 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical">
-    <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/nested_scroll_view"
         android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/category_source"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="10dp"
+                    android:paddingTop="6dp"
+                    android:paddingRight="10dp"
+                    android:paddingBottom="6dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:layout_marginEnd="10dp"
+                        android:text="@string/category_source"
+                        android:textColor="?attr/colorPrimary"
+                        android:textSize="16sp" />
+
+                    <androidx.appcompat.widget.AppCompatSpinner
+                        android:id="@+id/category_spinner_source"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/category_subject"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="10dp"
+                    android:paddingTop="6dp"
+                    android:paddingRight="10dp"
+                    android:paddingBottom="6dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:layout_marginEnd="10dp"
+                        android:text="@string/category_subject"
+                        android:textColor="?attr/colorPrimary"
+                        android:textSize="16sp" />
+
+                    <androidx.appcompat.widget.AppCompatSpinner
+                        android:id="@+id/category_spinner_subject"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/category_area"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="10dp"
+                    android:paddingTop="6dp"
+                    android:paddingRight="10dp"
+                    android:paddingBottom="6dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:layout_marginEnd="10dp"
+                        android:text="@string/category_area"
+                        android:textColor="?attr/colorPrimary"
+                        android:textSize="16sp" />
+
+                    <androidx.appcompat.widget.AppCompatSpinner
+                        android:id="@+id/category_spinner_area"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/category_reader"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="10dp"
+                    android:paddingTop="6dp"
+                    android:paddingRight="10dp"
+                    android:paddingBottom="6dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:layout_marginEnd="10dp"
+                        android:text="@string/category_reader"
+                        android:textColor="?attr/colorPrimary"
+                        android:textSize="16sp" />
+
+                    <androidx.appcompat.widget.AppCompatSpinner
+                        android:id="@+id/category_spinner_reader"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/category_progress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="10dp"
+                    android:paddingTop="6dp"
+                    android:paddingRight="10dp"
+                    android:paddingBottom="6dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:layout_marginEnd="10dp"
+                        android:text="@string/category_progress"
+                        android:textColor="?attr/colorPrimary"
+                        android:textSize="16sp" />
+
+                    <androidx.appcompat.widget.AppCompatSpinner
+                        android:id="@+id/category_spinner_progress"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/category_year"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="10dp"
+                    android:paddingTop="6dp"
+                    android:paddingRight="10dp"
+                    android:paddingBottom="6dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:layout_marginEnd="10dp"
+                        android:text="@string/category_year"
+                        android:textColor="?attr/colorPrimary"
+                        android:textSize="16sp" />
+
+                    <androidx.appcompat.widget.AppCompatSpinner
+                        android:id="@+id/category_spinner_year"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/category_order"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingLeft="10dp"
+                    android:paddingTop="6dp"
+                    android:paddingRight="10dp"
+                    android:paddingBottom="6dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:layout_marginEnd="10dp"
+                        android:text="@string/category_order"
+                        android:textColor="?attr/colorPrimary"
+                        android:textSize="16sp" />
+
+                    <androidx.appcompat.widget.AppCompatSpinner
+                        android:id="@+id/category_spinner_order"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/category_action_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|end"
+                    android:layout_margin="16dp"
+                    android:contentDescription="TODO"
+                    android:src="@drawable/ic_search_white_24dp" />
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_view_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:paddingLeft="4dp"
+                android:paddingTop="6dp"
+                android:paddingRight="4dp" />
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/category_action_button_to_top"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/category_source"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingLeft="10dp"
-            android:paddingTop="6dp"
-            android:paddingRight="10dp"
-            android:paddingBottom="6dp"
-            >
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:layout_marginEnd="10dp"
-                android:text="@string/category_source"
-                android:textColor="?attr/colorPrimary"
-                android:textSize="16sp" />
-
-            <androidx.appcompat.widget.AppCompatSpinner
-                android:id="@+id/category_spinner_source"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/category_subject"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingLeft="10dp"
-            android:paddingTop="6dp"
-            android:paddingRight="10dp"
-            android:paddingBottom="6dp"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:layout_marginEnd="10dp"
-                android:text="@string/category_subject"
-                android:textColor="?attr/colorPrimary"
-                android:textSize="16sp" />
-
-            <androidx.appcompat.widget.AppCompatSpinner
-                android:id="@+id/category_spinner_subject"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/category_area"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingLeft="10dp"
-            android:paddingTop="6dp"
-            android:paddingRight="10dp"
-            android:paddingBottom="6dp"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:layout_marginEnd="10dp"
-                android:text="@string/category_area"
-                android:textColor="?attr/colorPrimary"
-                android:textSize="16sp" />
-
-            <androidx.appcompat.widget.AppCompatSpinner
-                android:id="@+id/category_spinner_area"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/category_reader"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingLeft="10dp"
-            android:paddingTop="6dp"
-            android:paddingRight="10dp"
-            android:paddingBottom="6dp"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:layout_marginEnd="10dp"
-                android:text="@string/category_reader"
-                android:textColor="?attr/colorPrimary"
-                android:textSize="16sp" />
-
-            <androidx.appcompat.widget.AppCompatSpinner
-                android:id="@+id/category_spinner_reader"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/category_progress"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingLeft="10dp"
-            android:paddingTop="6dp"
-            android:paddingRight="10dp"
-            android:paddingBottom="6dp"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:layout_marginEnd="10dp"
-                android:text="@string/category_progress"
-                android:textColor="?attr/colorPrimary"
-                android:textSize="16sp" />
-
-            <androidx.appcompat.widget.AppCompatSpinner
-                android:id="@+id/category_spinner_progress"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/category_year"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingLeft="10dp"
-            android:paddingTop="6dp"
-            android:paddingRight="10dp"
-            android:paddingBottom="6dp"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:layout_marginEnd="10dp"
-                android:text="@string/category_year"
-                android:textColor="?attr/colorPrimary"
-                android:textSize="16sp" />
-
-            <androidx.appcompat.widget.AppCompatSpinner
-                android:id="@+id/category_spinner_year"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/category_order"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingLeft="10dp"
-            android:paddingTop="6dp"
-            android:paddingRight="10dp"
-            android:paddingBottom="6dp"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:layout_marginEnd="10dp"
-                android:text="@string/category_order"
-                android:textColor="?attr/colorPrimary"
-                android:textSize="16sp" />
-
-            <androidx.appcompat.widget.AppCompatSpinner
-                android:id="@+id/category_spinner_order"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/category_action_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="16dp"
-            android:contentDescription="TODO"
-            android:src="@drawable/ic_search_white_24dp" />
-    </LinearLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view_content"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:paddingLeft="4dp"
-        android:paddingTop="6dp"
-        android:paddingRight="4dp" />
-
-</LinearLayout>
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:contentDescription="@string/button"
+        android:src="@drawable/ic_material_symbols_arrow_shape_up_outline"
+        app:layout_behavior="com.xyrlsz.xcimoc.ui.widget.ScrollAwareFABBehavior" />
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
