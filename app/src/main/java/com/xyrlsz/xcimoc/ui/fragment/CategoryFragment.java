@@ -120,33 +120,16 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
         setHasOptionsMenu(true);
 
         categoryGridAdapter = new CategoryGridAdapter(getContext(), mComicList);
-
+        categoryGridAdapter.setOnComicClickListener(comic -> {
+            // TODO: 打开详情页
+        });
+        mRecyclerView.setAdapter(categoryGridAdapter);
         mRecyclerView.setRecycledViewPool(getAppInstance().getGridRecycledPool());
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setItemAnimator(null);
         mRecyclerView.setLayoutManager(initLayoutManager());
 
-
         initSpinner(mSourceList.get(0).second);
-
-        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(@NotNull RecyclerView recyclerView, int newState) {
-                switch (newState) {
-                    case RecyclerView.SCROLL_STATE_DRAGGING:
-                        getAppInstance().getBuilderProvider().pause();
-                        break;
-                    case RecyclerView.SCROLL_STATE_IDLE:
-                        getAppInstance().getBuilderProvider().resume();
-                        break;
-                }
-            }
-        });
-        categoryGridAdapter.setOnComicClickListener(comic -> {
-            // TODO: 打开详情页
-        });
-        mRecyclerView.setAdapter(categoryGridAdapter);
-
         GridLayoutManager layoutManager = (GridLayoutManager) mRecyclerView.getLayoutManager();
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             private int lastVisibleItem = 0;
@@ -158,6 +141,14 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
                     getAppInstance().getBuilderProvider().resume();
                 } else if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
                     getAppInstance().getBuilderProvider().pause();
+                }
+                switch (newState) {
+                    case RecyclerView.SCROLL_STATE_DRAGGING:
+                        getAppInstance().getBuilderProvider().pause();
+                        break;
+                    case RecyclerView.SCROLL_STATE_IDLE:
+                        getAppInstance().getBuilderProvider().resume();
+                        break;
                 }
             }
 
@@ -175,6 +166,8 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
                 }
             }
         });
+
+
     }
 
     protected RecyclerView.LayoutManager initLayoutManager() {
@@ -284,7 +277,12 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
                                 }
 
                                 App.runOnMainThread(() -> {
-                                    categoryGridAdapter.notifyDataSetChanged();
+                                    int start = mComicList.size() - list.size();
+                                    if (start > 0) {
+                                        categoryGridAdapter.notifyItemRangeInserted(start, list.size());
+                                    } else {
+                                        categoryGridAdapter.notifyDataSetChanged();
+                                    }
                                     // 可以添加加载完成的提示
                                 });
                             } else {
@@ -292,7 +290,7 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
                                 state.state = STATE_NULL;
                                 // 可以显示"没有更多数据"的提示
                             }
-                            App.runOnMainThread(() -> categoryGridAdapter.notifyDataSetChanged());
+
                         }
                     }, new Action1<Throwable>() {
                         @Override
