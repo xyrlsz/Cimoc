@@ -4,6 +4,7 @@ import android.graphics.Point;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.manager.PreferenceManager;
 import com.xyrlsz.xcimoc.model.ImageUrl;
@@ -27,10 +28,10 @@ public class StreamReaderActivity extends ReaderActivity {
         mLoadPrev = mPreference.getBoolean(PreferenceManager.PREF_READER_STREAM_LOAD_PREV, false);
         mLoadNext = mPreference.getBoolean(PreferenceManager.PREF_READER_STREAM_LOAD_NEXT, true);
         mReaderAdapter.setReaderMode(ReaderAdapter.READER_STREAM);
-
-        mReaderAdapter.setPaging(false);
-        mReaderAdapter.setPagingReverse(false);
-
+        if (App.getPreferenceManager().getBoolean(PreferenceManager.PREF_READER_PAGING_STREAM_OFF, false)) {
+            mReaderAdapter.setPaging(false);
+            mReaderAdapter.setPagingReverse(false);
+        }
         if (mPreference.getBoolean(PreferenceManager.PREF_READER_STREAM_INTERVAL, false)) {
             mRecyclerView.addItemDecoration(mReaderAdapter.getItemDecoration());
         }

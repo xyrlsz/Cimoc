@@ -121,6 +121,9 @@ public class SettingsActivity extends BackActivity implements SettingsView {
     @BindView(R.id.settings_st_engine)
     ChoicePreference mStEngine;
 
+    @BindView(R.id.settings_reader_paging_stream_off)
+    CheckBoxPreference mReaderPagingStreamOff;
+
     private SettingsPresenter mPresenter;
     private String mStoragePath;
     private String mTempStorage;
@@ -183,6 +186,8 @@ public class SettingsActivity extends BackActivity implements SettingsView {
                 PreferenceManager.DETAIL_TEXT_DEFAULT, R.array.detail_text_st, DIALOG_REQUEST_DETAIL_TEXT_ST);
         mStEngine.bindPreference(getSupportFragmentManager(), PreferenceManager.PREF_ST_ENGINE,
                 PreferenceManager.ST_JCC, R.array.st_engine_items, DIALOG_REQUEST_ST_ENGINE);
+
+        mReaderPagingStreamOff.bindPreference(PreferenceManager.PREF_READER_PAGING_STREAM_OFF, false);
     }
 
     @OnClick(R.id.settings_reader_config)
@@ -325,6 +330,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         mOtherShowTopbar.setColorStateList(stateList);
         mReaderCloseAutoResizeImage.setColorStateList(stateList);
         mReaderVolumeKeyControls.setColorStateList(stateList);
+        mReaderPagingStreamOff.setColorStateList(stateList);
     }
 
     @OnClick(R.id.settings_other_storage)

@@ -142,6 +142,13 @@
                     app:title="@string/settings_reader_paging_reverse" />
 
                 <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
+                    android:id="@+id/settings_reader_paging_stream_off"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:summary="@string/settings_reader_paging_steam_off"
+                    app:title="@string/settings_reader_paging_steam_off" />
+
+                <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
                     android:id="@+id/settings_reader_white_edge"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

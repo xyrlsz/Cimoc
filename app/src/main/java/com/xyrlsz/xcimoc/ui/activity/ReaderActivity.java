@@ -242,8 +242,9 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
         mReaderAdapter.setScaleFactor(mPreference.getInt(PreferenceManager.PREF_READER_SCALE_FACTOR, 200) * 0.01f);
         mReaderAdapter.setDoubleTap(!mPreference.getBoolean(PreferenceManager.PREF_READER_BAN_DOUBLE_CLICK, false));
         mReaderAdapter.setVertical(turn == PreferenceManager.READER_TURN_ATB);
-        // 卷纸模式不设置自动切割大图
-        if (App.getPreferenceManager().getInt(PreferenceManager.PREF_READER_MODE, PreferenceManager.READER_MODE_PAGE) == PreferenceManager.READER_MODE_STREAM) {
+        if (App.getPreferenceManager().getInt(PreferenceManager.PREF_READER_MODE, PreferenceManager.READER_MODE_PAGE) == PreferenceManager.READER_MODE_STREAM
+                &&
+                App.getPreferenceManager().getBoolean(PreferenceManager.PREF_READER_PAGING_STREAM_OFF, false)) {
             mReaderAdapter.setPaging(false);
             mReaderAdapter.setPagingReverse(false);
         } else {
