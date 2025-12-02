@@ -1,10 +1,19 @@
 package com.xyrlsz.xcimoc.source;
 
+import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_AREA;
+import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_ORDER;
+import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_PROGRESS;
+import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_SUBJECT;
+
+import android.util.Pair;
+
 import com.google.common.collect.Lists;
+import com.google.gson.Gson;
 import com.xyrlsz.xcimoc.model.Chapter;
 import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.ImageUrl;
 import com.xyrlsz.xcimoc.model.Source;
+import com.xyrlsz.xcimoc.parser.MangaCategory;
 import com.xyrlsz.xcimoc.parser.MangaParser;
 import com.xyrlsz.xcimoc.parser.NodeIterator;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
@@ -13,11 +22,17 @@ import com.xyrlsz.xcimoc.soup.Node;
 import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,9 +50,10 @@ public class Baozi extends MangaParser {
     public static final String DEFAULT_TITLE = "包子漫画";
     //    private static String baseUrl = "https://www.baozimh.com";
     private static final String baseUrl = "https://cn.baozimhcn.com";
+    private static final String imgDomain = "as.baozimh.com";
 
     public Baozi(Source source) {
-        init(source);
+        init(source, new Category());
     }
 
     public static Source getDefaultSource() {
@@ -153,7 +169,7 @@ public class Baozi extends MangaParser {
                 domain = matcher.group(2);
             }
             if (domain != null && !domain.isEmpty()) {
-                imgUrl = imgUrl.replace(domain, "as.baozimh.com");
+                imgUrl = imgUrl.replace(domain, imgDomain);
             }
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false, getHeader()));
         }
@@ -170,5 +186,156 @@ public class Baozi extends MangaParser {
     @Override
     public Headers getHeader() {
         return Headers.of("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36", "Referer", baseUrl);
+    }
+
+    @Override
+    public Request getCategoryRequest(String format, int page) {
+        try {
+            JSONObject object = new JSONObject(format);
+            int limit = 36;
+
+            String url = StringUtils.format("%s/api/bzmhq/amp_comic_list?type=" +
+                    object.getString(String.valueOf(CATEGORY_SUBJECT)) +
+                    "&region=" +
+                    object.getString(String.valueOf(CATEGORY_AREA)) +
+                    "&state=" +
+                    object.getString(String.valueOf(CATEGORY_PROGRESS)) +
+                    "&filter=" +
+                    object.getString(String.valueOf(CATEGORY_ORDER)) +
+                    "&page=" +
+                    page +
+                    "&limit=" +
+                    limit +
+                    "&language=cn", baseUrl);
+            return new Request.Builder().url(url).build();
+        } catch (JSONException e) {
+            return null;
+        }
+
+    }
+
+    @Override
+    public List<Comic> parseCategory(String html, int page) {
+        List<Comic> list = new ArrayList<>();
+        JSONObject data;
+        try {
+            data = new JSONObject(html);
+            JSONArray comics = data.getJSONArray("items");
+            for (int i = 0; i < comics.length(); i++) {
+                JSONObject object = comics.getJSONObject(i);
+                String cid = object.getString("comic_id");
+                String title = object.getString("name");
+                String cover = StringUtils.format("https://%s/cover/%s?w=285&h=375&q=100", imgDomain, object.getString("topic_img"));
+                list.add(new Comic(TYPE, cid, title, cover, null, null));
+            }
+
+        } catch (JSONException e) {
+            return list;
+        }
+        return list;
+    }
+
+    private static class Category extends MangaCategory {
+
+        @Override
+        public boolean isComposite() {
+            return true;
+        }
+
+        @Override
+        public String getFormat(String... args) {
+            Map<String, Object> map = new HashMap<>();
+            map.put(String.valueOf(CATEGORY_SUBJECT), args[CATEGORY_SUBJECT]);
+            map.put(String.valueOf(CATEGORY_PROGRESS), args[CATEGORY_PROGRESS]);
+            map.put(String.valueOf(CATEGORY_ORDER), args[CATEGORY_ORDER]);
+            map.put(String.valueOf(CATEGORY_AREA), args[CATEGORY_AREA]);
+            Gson gson = new Gson();
+            return gson.toJson(map);
+        }
+
+        @Override
+        protected List<Pair<String, String>> getSubject() {
+            List<Pair<String, String>> list = new ArrayList<>();
+
+            list.add(Pair.create("全部", "all"));
+            list.add(Pair.create("恋爱", "lianai"));
+            list.add(Pair.create("纯爱", "chunai"));
+            list.add(Pair.create("古风", "gufeng"));
+            list.add(Pair.create("异能", "yineng"));
+            list.add(Pair.create("悬疑", "xuanyi"));
+            list.add(Pair.create("剧情", "juqing"));
+            list.add(Pair.create("科幻", "kehuan"));
+            list.add(Pair.create("奇幻", "qihuan"));
+            list.add(Pair.create("玄幻", "xuanhuan"));
+            list.add(Pair.create("穿越", "chuanyue"));
+            list.add(Pair.create("冒险", "mouxian"));
+            list.add(Pair.create("推理", "tuili"));
+            list.add(Pair.create("武侠", "wuxia"));
+            list.add(Pair.create("格斗", "gedou"));
+            list.add(Pair.create("战争", "zhanzheng"));
+            list.add(Pair.create("热血", "rexie"));
+            list.add(Pair.create("搞笑", "gaoxiao"));
+            list.add(Pair.create("大女主", "danuzhu"));
+            list.add(Pair.create("都市", "dushi"));
+            list.add(Pair.create("总裁", "zongcai"));
+            list.add(Pair.create("后宫", "hougong"));
+            list.add(Pair.create("日常", "richang"));
+            list.add(Pair.create("韩漫", "hanman"));
+            list.add(Pair.create("少年", "shaonian"));
+            list.add(Pair.create("其他", "qita"));
+            return list;
+        }
+
+        @Override
+        protected boolean hasArea() {
+            return true;
+        }
+
+        @Override
+        protected List<Pair<String, String>> getArea() {
+            List<Pair<String, String>> list = new ArrayList<>();
+            list.add(Pair.create("全部", "all"));
+            list.add(Pair.create("国漫", "cn"));
+            list.add(Pair.create("日本", "jp"));
+            list.add(Pair.create("韩国", "kr"));
+            list.add(Pair.create("欧美", "en"));
+            return list;
+        }
+
+        @Override
+        public boolean hasProgress() {
+            return true;
+        }
+
+        @Override
+        public List<Pair<String, String>> getProgress() {
+            List<Pair<String, String>> list = new ArrayList<>();
+            list.add(Pair.create("全部", "all"));
+            list.add(Pair.create("连载中", "serial"));
+            list.add(Pair.create("已完结", "pub"));
+            return list;
+        }
+
+        @Override
+        protected boolean hasOrder() {
+            return true;
+        }
+
+        @Override
+        protected List<Pair<String, String>> getOrder() {
+            List<Pair<String, String>> list = new ArrayList<>();
+            list.add(Pair.create("全部", "*"));
+            list.add(Pair.create("ABCD", "ABCD"));
+            list.add(Pair.create("EFGH", "EFGH"));
+            list.add(Pair.create("IJKL", "IJKL"));
+            list.add(Pair.create("NMOP", "NMOP"));
+            list.add(Pair.create("QRST", "QRST"));
+            list.add(Pair.create("UVW", "UVW"));
+            list.add(Pair.create("XYZ", "XYZ"));
+            list.add(Pair.create("0-9", "0-9"));
+
+            return list;
+        }
+
     }
 }
