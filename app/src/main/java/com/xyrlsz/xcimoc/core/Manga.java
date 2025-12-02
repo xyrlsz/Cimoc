@@ -168,7 +168,7 @@ public class Manga {
                             }
                         } else if (searchType == SEARCH_AUTHOR) {
                             if (comic != null) {
-                                String[] separators = {",", ";", "、", "，", "；", " ", "/", "\\"};
+                                String[] separators = {",", ";", "、", "，", "；", " ", "/"};
                                 boolean findAuthor = false;
                                 for (String separator : separators) {
                                     String[] keywords = keyword.strip().split(separator);

@@ -59,6 +59,23 @@ public class DownloadFragment extends GridFragment implements DownloadView {
         mPresenter.load();
     }
 
+    private void outputComic(int type) {
+        showProgressDialog();
+        ComicUtils.OutputDownloadedComic(this, getContext(), type, mPresenter.load(mSavedId), new ComicUtils.OutputComicCallback() {
+            @Override
+            public void onSuccess() {
+                hideProgressDialog();
+                App.runOnMainThread(() -> HintUtils.showToast(getActivity(), R.string.common_execute_success));
+            }
+
+            @Override
+            public void onFailure(String message) {
+                hideProgressDialog();
+                App.runOnMainThread(() -> HintUtils.showToast(getActivity(), message));
+            }
+        });
+    }
+
     @Override
     public void onDialogResult(int requestCode, Bundle bundle) {
         switch (requestCode) {
@@ -107,71 +124,17 @@ public class DownloadFragment extends GridFragment implements DownloadView {
                 int output = bundle.getInt(EXTRA_DIALOG_RESULT_INDEX);
                 switch (output) {
                     case OPERATION_OUTPUT_SIMPLE:
-                        showProgressDialog();
-                        ComicUtils.OutputDownloadedComic(this, getContext(), ComicUtils.SIMPLE, mPresenter.load(mSavedId), new ComicUtils.OutputComicCallback() {
-                            @Override
-                            public void onSuccess() {
-                                hideProgressDialog();
-                                App.runOnMainThread(() -> HintUtils.showToast(getActivity(), R.string.common_execute_success));
-                            }
-
-                            @Override
-                            public void onFailure(String message) {
-                                hideProgressDialog();
-                                App.runOnMainThread(() -> HintUtils.showToast(getActivity(), message));
-                            }
-                        });
+                        outputComic(ComicUtils.SIMPLE);
                         break;
                     case OPERATION_OUTPUT_ZIP:
-                        showProgressDialog();
-                        ComicUtils.OutputDownloadedComic(this, getContext(), ComicUtils.ZIP, mPresenter.load(mSavedId), new ComicUtils.OutputComicCallback() {
-                            @Override
-                            public void onSuccess() {
-                                hideProgressDialog();
-                                App.runOnMainThread(() -> HintUtils.showToast(getActivity(), R.string.common_execute_success));
-                            }
-
-                            @Override
-                            public void onFailure(String message) {
-                                hideProgressDialog();
-                                App.runOnMainThread(() -> HintUtils.showToast(getActivity(), message));
-                            }
-                        });
+                        outputComic(ComicUtils.ZIP);
                         break;
-
                     case OPERATION_OUTPUT_EPUB:
-                        showProgressDialog();
-                        ComicUtils.OutputDownloadedComic(this, getContext(), ComicUtils.EPUB, mPresenter.load(mSavedId), new ComicUtils.OutputComicCallback() {
-                            @Override
-                            public void onSuccess() {
-                                hideProgressDialog();
-                                App.runOnMainThread(() -> HintUtils.showToast(getActivity(), R.string.common_execute_success));
-                            }
-
-                            @Override
-                            public void onFailure(String message) {
-                                hideProgressDialog();
-                                App.runOnMainThread(() -> HintUtils.showToast(getActivity(), message));
-                            }
-                        });
+                        outputComic(ComicUtils.EPUB);
                         break;
                     case OPERATION_OUTPUT_CBZ:
-                        showProgressDialog();
-                        ComicUtils.OutputDownloadedComic(this, getContext(), ComicUtils.CBZ, mPresenter.load(mSavedId), new ComicUtils.OutputComicCallback() {
-                            @Override
-                            public void onSuccess() {
-                                hideProgressDialog();
-                                App.runOnMainThread(() -> HintUtils.showToast(getActivity(), R.string.common_execute_success));
-                            }
-
-                            @Override
-                            public void onFailure(String message) {
-                                hideProgressDialog();
-                                App.runOnMainThread(() -> HintUtils.showToast(getActivity(), message));
-                            }
-                        });
+                        outputComic(ComicUtils.CBZ);
                         break;
-
                 }
                 break;
             default:
