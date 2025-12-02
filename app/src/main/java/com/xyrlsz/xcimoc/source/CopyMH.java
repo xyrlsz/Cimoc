@@ -1,14 +1,21 @@
 package com.xyrlsz.xcimoc.source;
 
 import static com.xyrlsz.xcimoc.core.Manga.getResponseBody;
+import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_AREA;
+import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_ORDER;
+import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_SUBJECT;
+
+import android.util.Pair;
 
 import com.google.common.collect.Lists;
+import com.google.gson.Gson;
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.model.Chapter;
 import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.ImageUrl;
 import com.xyrlsz.xcimoc.model.Source;
 import com.xyrlsz.xcimoc.parser.JsonIterator;
+import com.xyrlsz.xcimoc.parser.MangaCategory;
 import com.xyrlsz.xcimoc.parser.MangaParser;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
@@ -20,6 +27,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -44,7 +52,7 @@ public class CopyMH extends MangaParser {
     private final String pseudoId = CopyMangaHeaderBuilder.generatePseudoId();
 
     public CopyMH(Source source) {
-        init(source);
+        init(source, new Category());
     }
 
     public static Source getDefaultSource() {
@@ -301,5 +309,171 @@ public class CopyMH extends MangaParser {
             e.printStackTrace();
         }
         return Headers.of();
+    }
+
+    @Override
+    public Request getCategoryRequest(String format, int page) {
+        try {
+            JSONObject object = new JSONObject(format);
+            int limit = 21;
+            int offset = (page - 1) * limit;
+
+            String url = StringUtils.format(
+                    "%s/api/v3/comics?free_type=1&limit=" +
+                            limit +
+                            "&offset=" +
+                            offset +
+                            "&top=" +
+                            object.getString(String.valueOf(CATEGORY_AREA)) +
+                            "&theme=" +
+                            object.getString(String.valueOf(CATEGORY_SUBJECT)) +
+                            "&ordering=" +
+                            object.getString(String.valueOf(CATEGORY_ORDER)) +
+                            "&_update=true", apiBaseUrl);
+
+            return new Request.Builder().headers(getHeader()).url(url).build();
+        } catch (JSONException e) {
+            return null;
+        }
+
+    }
+
+    @Override
+    public List<Comic> parseCategory(String html, int page) {
+        List<Comic> list = new ArrayList<>();
+        JSONObject data;
+        try {
+            data = new JSONObject(html).getJSONObject("results");
+            JSONArray comics = data.getJSONArray("list");
+            for (int i = 0; i < comics.length(); i++) {
+                JSONObject object = comics.getJSONObject(i);
+                String cid = object.getString("path_word");
+                String title = object.getString("name");
+                String cover = object.getString("cover");
+                list.add(new Comic(TYPE, cid, title, cover, null, null));
+            }
+
+        } catch (JSONException e) {
+            return list;
+        }
+        return list;
+    }
+
+    private static class Category extends MangaCategory {
+
+        @Override
+        public boolean isComposite() {
+            return true;
+        }
+
+        @Override
+        public String getFormat(String... args) {
+            Map<String, Object> map = new HashMap<>();
+            map.put(String.valueOf(CATEGORY_SUBJECT), args[CATEGORY_SUBJECT]);
+            map.put(String.valueOf(CATEGORY_ORDER), args[CATEGORY_ORDER]);
+            map.put(String.valueOf(CATEGORY_AREA), args[CATEGORY_AREA]);
+            Gson gson = new Gson();
+            return gson.toJson(map);
+        }
+
+        @Override
+        protected List<Pair<String, String>> getSubject() {
+            List<Pair<String, String>> list = new ArrayList<>();
+
+            list.add(Pair.create("全部", ""));
+            list.add(Pair.create("愛情", "aiqing"));
+            list.add(Pair.create("歡樂向", "huanlexiang"));
+            list.add(Pair.create("冒險", "maoxian"));
+            list.add(Pair.create("奇幻", "qihuan"));
+            list.add(Pair.create("百合", "baihe"));
+            list.add(Pair.create("校园", "xiaoyuan"));
+            list.add(Pair.create("科幻", "kehuan"));
+            list.add(Pair.create("東方", "dongfang"));
+            list.add(Pair.create("耽美", "danmei"));
+            list.add(Pair.create("生活", "shenghuo"));
+            list.add(Pair.create("格鬥", "gedou"));
+            list.add(Pair.create("轻小说", "qingxiaoshuo"));
+            list.add(Pair.create("悬疑", "xuanyi"));
+            list.add(Pair.create("其他", "qita"));
+            list.add(Pair.create("神鬼", "shengui"));
+            list.add(Pair.create("职场", "zhichang"));
+            list.add(Pair.create("TL", "teenslove"));
+            list.add(Pair.create("萌系", "mengxi"));
+            list.add(Pair.create("治愈", "zhiyu"));
+            list.add(Pair.create("長條", "changtiao"));
+            list.add(Pair.create("四格", "sige"));
+            list.add(Pair.create("节操", "jiecao"));
+            list.add(Pair.create("舰娘", "jianniang"));
+            list.add(Pair.create("竞技", "jingji"));
+            list.add(Pair.create("搞笑", "gaoxiao"));
+            list.add(Pair.create("伪娘", "weiniang"));
+            list.add(Pair.create("热血", "rexue"));
+            list.add(Pair.create("励志", "lizhi"));
+            list.add(Pair.create("性转换", "xingzhuanhuan"));
+            list.add(Pair.create("彩色", "COLOR"));
+            list.add(Pair.create("後宮", "hougong"));
+            list.add(Pair.create("美食", "meishi"));
+            list.add(Pair.create("侦探", "zhentan"));
+            list.add(Pair.create("AA", "aa"));
+            list.add(Pair.create("音乐舞蹈", "yinyuewudao"));
+            list.add(Pair.create("魔幻", "mohuan"));
+            list.add(Pair.create("战争", "zhanzheng"));
+            list.add(Pair.create("历史", "lishi"));
+            list.add(Pair.create("异世界", "yishijie"));
+            list.add(Pair.create("惊悚", "jingsong"));
+            list.add(Pair.create("机战", "jizhan"));
+            list.add(Pair.create("都市", "dushi"));
+            list.add(Pair.create("穿越", "chuanyue"));
+            list.add(Pair.create("恐怖", "kongbu"));
+            list.add(Pair.create("C100", "comiket100"));
+            list.add(Pair.create("重生", "chongsheng"));
+            list.add(Pair.create("C99", "comiket99"));
+            list.add(Pair.create("C101", "comiket101"));
+            list.add(Pair.create("C97", "comiket97"));
+            list.add(Pair.create("C96", "comiket96"));
+            list.add(Pair.create("生存", "shengcun"));
+            list.add(Pair.create("宅系", "zhaixi"));
+            list.add(Pair.create("武侠", "wuxia"));
+            list.add(Pair.create("C98", "C98"));
+            list.add(Pair.create("C95", "comiket95"));
+            list.add(Pair.create("FATE", "fate"));
+            list.add(Pair.create("转生", "zhuansheng"));
+            list.add(Pair.create("無修正", "Uncensored"));
+            list.add(Pair.create("仙侠", "xianxia"));
+            list.add(Pair.create("LoveLive", "loveLive"));
+
+            return list;
+        }
+
+        @Override
+        protected boolean hasOrder() {
+            return true;
+        }
+
+        @Override
+        protected List<Pair<String, String>> getOrder() {
+            List<Pair<String, String>> list = new ArrayList<>();
+            list.add(Pair.create("更新時間（倒序）", "-datetime_updated"));
+            list.add(Pair.create("熱度（倒序）", "-popular"));
+            list.add(Pair.create("更新時間", "datetime_updated"));
+            list.add(Pair.create("熱度", "popular"));
+            return list;
+        }
+
+        @Override
+        protected boolean hasArea() {
+            return true;
+        }
+
+        @Override
+        protected List<Pair<String, String>> getArea() {
+            List<Pair<String, String>> list = new ArrayList<>();
+            list.add(Pair.create("全部", ""));
+            list.add(Pair.create("日漫", "japan"));
+            list.add(Pair.create("韩漫", "korea"));
+            list.add(Pair.create("美漫", "west"));
+            list.add(Pair.create("已完结", "finish"));
+            return list;
+        }
     }
 }
