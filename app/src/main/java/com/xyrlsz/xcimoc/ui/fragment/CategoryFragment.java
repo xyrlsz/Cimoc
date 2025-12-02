@@ -4,6 +4,7 @@ import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.util.Pair;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 
@@ -127,6 +128,7 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
         setHasOptionsMenu(true);
 
         categoryGridAdapter = new CategoryGridAdapter(getContext(), mComicList);
+        categoryGridAdapter.setProvider(getAppInstance().getBuilderProvider());
         categoryGridAdapter.setOnComicClickListener(comic -> {
             // TODO: 打开详情页
             Intent intent = DetailActivity.createIntent(getContext(), null, comic.getSource(), comic.getCid());

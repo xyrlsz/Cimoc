@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="6dp"
-    app:cardUseCompatPadding="true"
-    app:cardCornerRadius="8dp">
+    app:cardCornerRadius="8dp"
+    app:cardUseCompatPadding="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -13,70 +14,27 @@
         android:orientation="vertical">
 
         <!-- 封面图 -->
-        <ImageView
+        <com.facebook.drawee.view.SimpleDraweeView
             android:id="@+id/item_cover"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:adjustViewBounds="true"
-            android:scaleType="centerCrop" />
+            android:scaleType="centerCrop"
+            fresco:actualImageScaleType="centerCrop"
+            fresco:placeholderImage="@drawable/ic_about_black_24dp"
+            fresco:placeholderImageScaleType="centerInside" />
 
         <!-- 标题 -->
         <TextView
             android:id="@+id/item_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="6dp"
-            android:textSize="14sp"
-            android:maxLines="2"
             android:ellipsize="end"
-            android:textColor="#333" />
-
-        <!-- 点赞/人气区域 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingStart="6dp"
-            android:paddingEnd="6dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:layout_width="14dp"
-                android:layout_height="14dp"
-                android:src="@drawable/ic_material_symbols_category_black" />
-
-            <TextView
-                android:id="@+id/item_fav"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:textColor="#777"
-                android:textSize="12sp" />
-        </LinearLayout>
-
-        <!-- 连载与更新 -->
-        <TextView
-            android:id="@+id/item_status"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingStart="6dp"
-            android:paddingEnd="6dp"
-            android:textColor="#888"
-            android:textSize="12sp"
-            android:maxLines="1" />
-
-        <!-- 更新时间 -->
-        <TextView
-            android:id="@+id/item_update"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingStart="6dp"
-            android:paddingEnd="6dp"
-            android:paddingBottom="6dp"
-            android:textColor="#888"
-            android:textSize="12sp"
-            android:maxLines="1" />
+            android:maxLines="2"
+            android:padding="6dp"
+            android:textColor="#333"
+            android:textSize="14sp" />
 
     </LinearLayout>
 
