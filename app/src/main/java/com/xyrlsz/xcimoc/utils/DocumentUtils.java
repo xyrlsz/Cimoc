@@ -12,6 +12,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -288,6 +289,10 @@ public class DocumentUtils {
         InputStream input = resolver.openInputStream(src.getUri());
         writeBinaryToFile(resolver, dst, input);
     }
+    public static void writeBinaryToFile(ContentResolver resolver, File src, CimocDocumentFile dst) throws IOException {
+        InputStream input = new FileInputStream(src);
+        writeBinaryToFile(resolver, dst, input);
+    }
 
     private static void closeStream(Closeable... stream) {
         for (Closeable closeable : stream) {
@@ -313,4 +318,11 @@ public class DocumentUtils {
     }
 
 
+    public static void copyFile(ContentResolver resolver, File src, CimocDocumentFile dst) {
+        try {
+            writeBinaryToFile(resolver, src, dst);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
