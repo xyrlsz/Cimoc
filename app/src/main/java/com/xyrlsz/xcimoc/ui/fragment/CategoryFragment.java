@@ -4,7 +4,6 @@ import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.util.Pair;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 
@@ -26,6 +25,7 @@ import com.xyrlsz.xcimoc.ui.activity.DetailActivity;
 import com.xyrlsz.xcimoc.ui.adapter.CategoryAdapter;
 import com.xyrlsz.xcimoc.ui.adapter.CategoryGridAdapter;
 import com.xyrlsz.xcimoc.ui.view.CategoryView;
+import com.xyrlsz.xcimoc.utils.ThemeUtils;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -177,6 +177,12 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
                 }
             }
         });
+        boolean isDarkMode = ThemeUtils.getSysIsDarkMode(getContext());
+        if (isDarkMode) {
+            toggleHeadButton.setImageResource(R.drawable.ic_bxs_up_arrow_white);
+        } else {
+            toggleHeadButton.setImageResource(R.drawable.ic_bxs_up_arrow);
+        }
         toggleHeadButton.setOnClickListener(v -> toggleHeadView());
 
     }
