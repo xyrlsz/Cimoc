@@ -1,12 +1,13 @@
 package com.xyrlsz.xcimoc.ui.fragment;
 
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.util.Pair;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageButton;
 
 import androidx.appcompat.widget.AppCompatSpinner;
-import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -56,16 +57,21 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
     AppCompatSpinner mCategorySourceSpinner;
     @BindView(R.id.recycler_view_content)
     RecyclerView mRecyclerView;
-    @BindView(R.id.nested_scroll_view)
-    NestedScrollView nestedScrollView;
+
     CategoryGridAdapter categoryGridAdapter;
     int mSource;
+    @BindView(R.id.head_view)
+    View headView;
+    @BindView(R.id.category_action_toggle_head)
+    ImageButton toggleHeadButton;
     private Category mCategory;
     private SourceManager mSourceManager;
     private LinkedList<Pair<String, String>> mSourceList;
     private CompositeSubscription mCompositeSubscription;
     private State mCurrentState;
     private String mCurrentFormat;
+    private boolean isHeadCollapsed = false;
+    private int headOriginalHeight = 0;
 
     @Override
     protected BasePresenter initPresenter() {
@@ -166,8 +172,52 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
                 }
             }
         });
+        toggleHeadButton.setOnClickListener(v -> toggleHeadView());
 
+    }
 
+    private void toggleHeadView() {
+        if (headOriginalHeight == 0) {
+            headView.measure(View.MeasureSpec.makeMeasureSpec(headView.getWidth(), View.MeasureSpec.EXACTLY),
+                    View.MeasureSpec.UNSPECIFIED);
+            headOriginalHeight = headView.getMeasuredHeight();
+        }
+
+        int startHeight;
+        int endHeight;
+
+        if (isHeadCollapsed) {
+            // 展开
+            startHeight = 0;
+            endHeight = headOriginalHeight;
+            animateIconToggle(true);
+        } else {
+            // 折叠
+            startHeight = headView.getHeight();
+            endHeight = 0;
+            animateIconToggle(false);
+        }
+
+        ValueAnimator animator = ValueAnimator.ofInt(startHeight, endHeight);
+        animator.setDuration(300);
+        animator.addUpdateListener(animation -> {
+            int val = (int) animation.getAnimatedValue();
+            headView.getLayoutParams().height = val;
+            headView.requestLayout();
+        });
+        animator.start();
+
+        isHeadCollapsed = !isHeadCollapsed;
+    }
+
+    private void animateIconToggle(boolean expand) {
+        int from = expand ? 180 : 0;
+        int to = expand ? 0 : 180;
+
+        toggleHeadButton.animate()
+                .rotation(to)
+                .setDuration(200)
+                .start();
     }
 
     protected RecyclerView.LayoutManager initLayoutManager() {
@@ -221,7 +271,7 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
 
     @OnClick(R.id.category_action_button_to_top)
     void onToTopButtonClick() {
-        nestedScrollView.smoothScrollTo(0, 0);
+        mRecyclerView.smoothScrollToPosition(0);
     }
 
     @OnClick(R.id.category_action_button)
@@ -242,6 +292,7 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
 
 
         loadCategory(mCurrentState, mCurrentFormat);
+        toggleHeadView();
     }
 
     private void loadMoreData() {
@@ -258,7 +309,6 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
             mCompositeSubscription.add(Manga.getCategoryComic(parser, format, ++state.page)
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Action1<List<Comic>>() {
-                        @SuppressLint("NotifyDataSetChanged")
                         @Override
                         public void call(List<Comic> list) {
                             if (state.page == 1) {
