@@ -1,9 +1,15 @@
 package com.xyrlsz.xcimoc.source;
 
 
+import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_ORDER;
+import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_PROGRESS;
+import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_SUBJECT;
+
 import android.content.Context;
+import android.util.Pair;
 
 import com.google.common.collect.Lists;
+import com.google.gson.Gson;
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.Constants;
 import com.xyrlsz.xcimoc.R;
@@ -12,6 +18,7 @@ import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.ImageUrl;
 import com.xyrlsz.xcimoc.model.Source;
 import com.xyrlsz.xcimoc.parser.JsonIterator;
+import com.xyrlsz.xcimoc.parser.MangaCategory;
 import com.xyrlsz.xcimoc.parser.MangaParser;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
@@ -26,8 +33,10 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.Headers;
 import okhttp3.MediaType;
@@ -48,7 +57,7 @@ public class Komiic extends MangaParser {
     private String _cid = "", _path = "";
 
     public Komiic(Source source) {
-        init(source);
+        init(source, new Category());
         if (KomiicUtils.checkExpired()) {
             KomiicUtils.refresh(App.getAppContext());
         }
@@ -205,7 +214,6 @@ public class Komiic extends MangaParser {
         return list;
     }
 
-
     @Override
     public Request getImagesRequest(String cid, String path) {
         String jsonBody = "{"
@@ -252,7 +260,6 @@ public class Komiic extends MangaParser {
         return list;
     }
 
-
     @Override
     public Request getCheckRequest(String cid) {
         return getInfoRequest(cid);
@@ -261,6 +268,189 @@ public class Komiic extends MangaParser {
     @Override
     public Headers getHeader() {
         return Headers.of("referer", StringUtils.format("https://komiic.com/comic/%s/chapter/%s", _cid, _path));
+    }
+
+
+    @Override
+    public Request getCategoryRequest(String format, int page) {
+        try {
+            JSONObject object = new JSONObject(format);
+            int limit = 30;
+            int offset = (page - 1) * limit;
+            String sub = object.getString(String.valueOf(CATEGORY_SUBJECT)).isEmpty() ? "" : "\"" + object.getString(String.valueOf(CATEGORY_SUBJECT)) + "\"";
+            String json = "{\"operationName\":\"comicByCategories\",\"variables\":{\"categoryId\":" +
+                    "[" + sub + "]" +
+                    ",\"pagination\":{\"limit\":" +
+                    limit +
+                    ",\"offset\":" +
+                    offset +
+                    ",\"orderBy\":\"" +
+                    object.getString(String.valueOf(CATEGORY_ORDER)) +
+                    "\",\"asc\":false,\"status\":\"" +
+                    object.getString(String.valueOf(CATEGORY_PROGRESS)) +
+                    "\"}},\"query\":\"query comicByCategories($categoryId: [ID!]!, $pagination: Pagination!) {\\n  comicByCategories(categoryId: $categoryId, pagination: $pagination) {\\n    id\\n    title\\n    status\\n    year\\n    imageUrl\\n    authors {\\n      id\\n      name\\n      __typename\\n    }\\n    categories {\\n      id\\n      name\\n      __typename\\n    }\\n    dateUpdated\\n    monthViews\\n    views\\n    favoriteCount\\n    lastBookUpdate\\n    lastChapterUpdate\\n    __typename\\n  }\\n}\"}";
+            String url = StringUtils.format("%s/api/query", baseUrl);
+            RequestBody requestBody = RequestBody.create(json, MediaType.parse("application/json; charset=utf-8"));
+            return new Request.Builder().url(url).post(requestBody).build();
+        } catch (JSONException e) {
+            return null;
+        }
+
+    }
+
+    @Override
+    public List<Comic> parseCategory(String html, int page) {
+        List<Comic> list = new ArrayList<>();
+        JSONObject data;
+        try {
+            data = new JSONObject(html).getJSONObject("data");
+            JSONArray comics = data.getJSONArray("comicByCategories");
+            for (int i = 0; i < comics.length(); i++) {
+                JSONObject object = comics.getJSONObject(i);
+                String cid = object.getString("id");
+                String title = object.getString("title");
+                String cover = object.getString("imageUrl");
+                list.add(new Comic(TYPE, cid, title, cover, null, null));
+            }
+
+        } catch (JSONException e) {
+            return list;
+        }
+        return list;
+    }
+
+    private static class Category extends MangaCategory {
+
+        @Override
+        public boolean isComposite() {
+            return true;
+        }
+
+        @Override
+        public String getFormat(String... args) {
+            Map<String, Object> map = new HashMap<>();
+            map.put(String.valueOf(CATEGORY_SUBJECT), args[CATEGORY_SUBJECT]);
+            map.put(String.valueOf(CATEGORY_PROGRESS), args[CATEGORY_PROGRESS]);
+            map.put(String.valueOf(CATEGORY_ORDER), args[CATEGORY_ORDER]);
+            Gson gson = new Gson();
+            return gson.toJson(map);
+        }
+
+        @Override
+        protected List<Pair<String, String>> getSubject() {
+            List<Pair<String, String>> list = new ArrayList<>();
+
+            list.add(Pair.create("全部", ""));
+            list.add(Pair.create("愛情", "1"));
+            list.add(Pair.create("神鬼", "3"));
+            list.add(Pair.create("校園", "4"));
+            list.add(Pair.create("搞笑", "5"));
+            list.add(Pair.create("生活", "6"));
+            list.add(Pair.create("懸疑", "7"));
+            list.add(Pair.create("冒險", "8"));
+            list.add(Pair.create("恐怖", "9"));
+            list.add(Pair.create("職場", "10"));
+            list.add(Pair.create("魔幻", "11"));
+            list.add(Pair.create("後宮", "2"));
+            list.add(Pair.create("魔法", "12"));
+            list.add(Pair.create("格鬥", "13"));
+            list.add(Pair.create("宅男", "14"));
+            list.add(Pair.create("勵志", "15"));
+            list.add(Pair.create("耽美", "16"));
+            list.add(Pair.create("科幻", "17"));
+            list.add(Pair.create("百合", "18"));
+            list.add(Pair.create("治癒", "19"));
+            list.add(Pair.create("萌系", "20"));
+            list.add(Pair.create("熱血", "21"));
+            list.add(Pair.create("競技", "22"));
+            list.add(Pair.create("推理", "23"));
+            list.add(Pair.create("雜誌", "24"));
+            list.add(Pair.create("偵探", "25"));
+            list.add(Pair.create("偽娘", "26"));
+            list.add(Pair.create("美食", "27"));
+            list.add(Pair.create("四格", "28"));
+            list.add(Pair.create("社會", "31"));
+            list.add(Pair.create("歷史", "32"));
+            list.add(Pair.create("戰爭", "33"));
+            list.add(Pair.create("舞蹈", "34"));
+            list.add(Pair.create("武俠", "35"));
+            list.add(Pair.create("機戰", "36"));
+            list.add(Pair.create("音樂", "37"));
+            list.add(Pair.create("體育", "40"));
+            list.add(Pair.create("黑道", "42"));
+            list.add(Pair.create("腐女", "46"));
+            list.add(Pair.create("異世界", "47"));
+            list.add(Pair.create("驚悚", "48"));
+            list.add(Pair.create("成人", "51"));
+            list.add(Pair.create("戰鬥", "54"));
+            list.add(Pair.create("復仇", "55"));
+            list.add(Pair.create("轉生", "56"));
+            list.add(Pair.create("黑暗奇幻", "57"));
+            list.add(Pair.create("戲劇", "58"));
+            list.add(Pair.create("生存", "59"));
+            list.add(Pair.create("策略", "60"));
+            list.add(Pair.create("政治", "61"));
+            list.add(Pair.create("黑暗", "62"));
+            list.add(Pair.create("動作", "64"));
+            list.add(Pair.create("性轉換", "70"));
+            list.add(Pair.create("日常", "78"));
+            list.add(Pair.create("青春", "81"));
+            list.add(Pair.create("醫療", "85"));
+            list.add(Pair.create("致鬱", "86"));
+            list.add(Pair.create("心理", "87"));
+            list.add(Pair.create("穿越", "88"));
+            list.add(Pair.create("友情", "92"));
+            list.add(Pair.create("犯罪", "93"));
+            list.add(Pair.create("劇情", "97"));
+            list.add(Pair.create("少女", "113"));
+            list.add(Pair.create("賭博", "114"));
+            list.add(Pair.create("女性向", "123"));
+            list.add(Pair.create("溫馨", "129"));
+            list.add(Pair.create("同人", "164"));
+            list.add(Pair.create("幻想", "183"));
+            list.add(Pair.create("成長", "184"));
+            list.add(Pair.create("心裡", "185"));
+            list.add(Pair.create("溫暖", "186"));
+            list.add(Pair.create("戀愛", "187"));
+            list.add(Pair.create("奇幻", "189"));
+            list.add(Pair.create("驚愕", "204"));
+            list.add(Pair.create("懷疑", "214"));
+            list.add(Pair.create("驚訝", "219"));
+            list.add(Pair.create("同性", "222"));
+            list.add(Pair.create("驚奇", "223"));
+            list.add(Pair.create("博彩", "227"));
+            list.add(Pair.create("末世", "232"));
+            return list;
+        }
+
+
+        @Override
+        public boolean hasProgress() {
+            return true;
+        }
+
+        @Override
+        public List<Pair<String, String>> getProgress() {
+            List<Pair<String, String>> list = new ArrayList<>();
+            list.add(Pair.create("全部", ""));
+            list.add(Pair.create("連載", "ONGOING"));
+            list.add(Pair.create("完結", "END"));
+            return list;
+        }
+
+        @Override
+        protected boolean hasOrder() {
+            return true;
+        }
+
+        @Override
+        protected List<Pair<String, String>> getOrder() {
+            List<Pair<String, String>> list = new ArrayList<>();
+            list.add(Pair.create("更新", "DATE_UPDATED"));
+            list.add(Pair.create("觀看數", "VIEWS"));
+            list.add(Pair.create("喜愛數", "FAVORITE_COUNT"));
+            return list;
+        }
 
     }
 }
