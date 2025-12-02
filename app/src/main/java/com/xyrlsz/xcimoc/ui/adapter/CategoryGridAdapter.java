@@ -1,6 +1,7 @@
 package com.xyrlsz.xcimoc.ui.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +22,7 @@ import com.xyrlsz.xcimoc.fresco.ControllerBuilderProvider;
 import com.xyrlsz.xcimoc.manager.PreferenceManager;
 import com.xyrlsz.xcimoc.model.MiniComic;
 import com.xyrlsz.xcimoc.utils.FrescoUtils;
+import com.xyrlsz.xcimoc.utils.ThemeUtils;
 
 import java.util.List;
 
@@ -105,6 +107,12 @@ public class CategoryGridAdapter extends RecyclerView.Adapter<CategoryGridAdapte
         }
         // 标题
         holder.title.setText(comic.getTitle());
+        boolean isDarkMode = ThemeUtils.getSysIsDarkMode(mContext);
+        if (isDarkMode) {
+            holder.title.setTextColor(Color.WHITE);
+        } else {
+            holder.title.setTextColor(Color.BLACK);
+        }
         // 点击事件
         holder.itemView.setOnClickListener(v -> {
             if (mListener != null) {
