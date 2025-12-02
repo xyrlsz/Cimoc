@@ -22,6 +22,7 @@ import com.xyrlsz.xcimoc.fresco.ControllerBuilderProvider;
 import com.xyrlsz.xcimoc.manager.PreferenceManager;
 import com.xyrlsz.xcimoc.model.MiniComic;
 import com.xyrlsz.xcimoc.utils.FrescoUtils;
+import com.xyrlsz.xcimoc.utils.STConvertUtils;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
 
 import java.util.List;
@@ -101,12 +102,12 @@ public class CategoryGridAdapter extends RecyclerView.Adapter<CategoryGridAdapte
                     .setImageRequest(request)
                     .build();
             holder.cover.setController(controller);
-        }else{
+        } else {
             Uri uri = Uri.parse(comic.getCover());
             holder.cover.setImageURI(uri);
         }
         // 标题
-        holder.title.setText(comic.getTitle());
+        holder.title.setText(STConvertUtils.convert(comic.getTitle()));
         boolean isDarkMode = ThemeUtils.getSysIsDarkMode(mContext);
         if (isDarkMode) {
             holder.title.setTextColor(Color.WHITE);

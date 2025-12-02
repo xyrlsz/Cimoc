@@ -11,6 +11,7 @@ import androidx.appcompat.widget.AppCompatSpinner;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.core.Manga;
@@ -64,6 +65,8 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
     int mSource;
     @BindView(R.id.head_view)
     View headView;
+    @BindView(R.id.category_action_button)
+    FloatingActionButton actionButton;
     @BindView(R.id.category_action_toggle_head)
     ImageButton toggleHeadButton;
     private Category mCategory;
@@ -188,28 +191,33 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
     }
 
     private void toggleHeadView() {
+        headView.measure(
+                View.MeasureSpec.makeMeasureSpec(headView.getWidth(), View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.UNSPECIFIED
+        );
+        int realHeight = headView.getMeasuredHeight();
+
+        int startHeight;
+        int endHeight;
+
+        if (isHeadCollapsed) {
+            startHeight = 0;
+            endHeight = realHeight;
+            animateIconToggle(true);
+//            actionButton.setVisibility(View.VISIBLE);
+        } else {
+            startHeight = headView.getHeight();
+            endHeight = 0;
+            animateIconToggle(false);
+//            actionButton.setVisibility(View.GONE);
+        }
+        ValueAnimator animator = ValueAnimator.ofInt(startHeight, endHeight);
         if (headOriginalHeight == 0) {
             headView.measure(View.MeasureSpec.makeMeasureSpec(headView.getWidth(), View.MeasureSpec.EXACTLY),
                     View.MeasureSpec.UNSPECIFIED);
             headOriginalHeight = headView.getMeasuredHeight();
         }
 
-        int startHeight;
-        int endHeight;
-
-        if (isHeadCollapsed) {
-            // 展开
-            startHeight = 0;
-            endHeight = headOriginalHeight;
-            animateIconToggle(true);
-        } else {
-            // 折叠
-            startHeight = headView.getHeight();
-            endHeight = 0;
-            animateIconToggle(false);
-        }
-
-        ValueAnimator animator = ValueAnimator.ofInt(startHeight, endHeight);
         animator.setDuration(300);
         animator.addUpdateListener(animation -> {
             int val = (int) animation.getAnimatedValue();
@@ -247,7 +255,11 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
     }
 
     private void initSpinner(int source) {
+//        mComicList.clear();
+//        categoryGridAdapter.notifyDataSetChanged();
+
         mCategory = mSourceManager.getParser(source).getCategory();
+        mCurrentState.source = source;
         int[] type = new int[]{Category.CATEGORY_SUBJECT, Category.CATEGORY_AREA, Category.CATEGORY_READER,
                 Category.CATEGORY_YEAR, Category.CATEGORY_PROGRESS, Category.CATEGORY_ORDER};
 
@@ -262,6 +274,19 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
                 mCategoryView.get(i).setVisibility(View.GONE);
             }
         }
+        headView.post(() -> {
+            headView.measure(
+                    View.MeasureSpec.makeMeasureSpec(headView.getWidth(), View.MeasureSpec.EXACTLY),
+                    View.MeasureSpec.UNSPECIFIED
+            );
+            headOriginalHeight = headView.getMeasuredHeight();
+
+            // 若当前是展开状态，需要立即更新高度
+            if (!isHeadCollapsed) {
+                headView.getLayoutParams().height = headOriginalHeight;
+                headView.requestLayout();
+            }
+        });
     }
 
     @Override
@@ -301,7 +326,6 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
         categoryGridAdapter.notifyDataSetChanged();
 
         loadCategory(mCurrentState, mCurrentFormat);
-        toggleHeadView();
     }
 
     private void loadMoreData() {
