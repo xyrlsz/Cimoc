@@ -94,39 +94,65 @@ public class ComicUtils {
             callback.onFailure("没有可导出的章节");
             return;
         }
+        // 优先使用缓存封面
+        byte[] coverCacheBytes = FrescoUtils.getCacheFileBytes(coverUrl);
+        if (coverCacheBytes == null) {
+            Objects.requireNonNull(App.getHttpClient()).newCall(new Request.Builder().url(coverUrl).headers(headers).build()).enqueue(new Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    callback.onFailure("封面下载失败: " + e.getMessage());
+                }
 
-        Objects.requireNonNull(App.getHttpClient()).newCall(new Request.Builder().url(coverUrl).headers(headers).build()).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                callback.onFailure("封面下载失败: " + e.getMessage());
-            }
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    ResponseBody body = response.body();
+                    byte[] coverBytes = body.bytes();
 
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                ResponseBody body = response.body();
-                byte[] coverBytes = body.bytes();
-
+                    switch (type) {
+                        case SIMPLE:
+                            exportAsSimple(context, mSourceManager, comic, finalChapterList, outputRoot, coverBytes, callback);
+                            break;
+                        case ZIP:
+                            exportAsZip(context, mSourceManager, comic, finalChapterList, outputRoot, coverBytes, callback);
+                            break;
+                        case EPUB:
+                            exportAsEpub(context, mSourceManager, comic, finalChapterList, outputRoot, coverBytes, callback);
+                            break;
+                        case CBZ:
+                            exportAsCBZ(context, mSourceManager, comic, finalChapterList, outputRoot, coverBytes, callback);
+                            break;
+                        default:
+                            callback.onFailure("未知导出类型");
+                            break;
+                    }
+                }
+            });
+        } else {
+            try {
                 switch (type) {
                     case SIMPLE:
-                        exportAsSimple(context, mSourceManager, comic, finalChapterList, outputRoot, coverBytes, callback);
+                        exportAsSimple(context, mSourceManager, comic, finalChapterList, outputRoot, coverCacheBytes, callback);
                         break;
                     case ZIP:
-                        exportAsZip(context, mSourceManager, comic, finalChapterList, outputRoot, coverBytes, callback);
+                        exportAsZip(context, mSourceManager, comic, finalChapterList, outputRoot, coverCacheBytes, callback);
                         break;
                     case EPUB:
-                        exportAsEpub(context, mSourceManager, comic, finalChapterList, outputRoot, coverBytes, callback);
+                        exportAsEpub(context, mSourceManager, comic, finalChapterList, outputRoot, coverCacheBytes, callback);
                         break;
                     case CBZ:
-                        exportAsCBZ(context, mSourceManager, comic, finalChapterList, outputRoot, coverBytes, callback);
+                        exportAsCBZ(context, mSourceManager, comic, finalChapterList, outputRoot, coverCacheBytes, callback);
                         break;
                     default:
                         callback.onFailure("未知导出类型");
                         break;
                 }
+            } catch (IOException e) {
+                HintUtils.showToast(context, "导出失败: " + e.getMessage());
             }
-        });
-    }
 
+        }
+
+    }
 
     private static void exportAsSimple(Context context, SourceManager sourceManager, Comic comic,
                                        List<Chapter> chapterList, CimocDocumentFile outputRoot,
@@ -627,6 +653,10 @@ public class ComicUtils {
             default:
                 return ".jpg";
         }
+    }
+
+    private void export() {
+
     }
 
     public interface OutputComicCallback {

@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.text.TextUtils;
 import android.webkit.URLUtil;
 
@@ -36,6 +37,10 @@ import com.xyrlsz.xcimoc.fresco.OkHttpNetworkFetcher;
 import com.xyrlsz.xcimoc.saf.CimocDocumentFile;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -298,6 +303,27 @@ public class FrescoUtils {
         return copyCacheFile(url, path);
     }
 
+    public static byte[] getCacheFileBytes(String url) {
+        File file = getFileFromDiskCache(url);
+        if (file == null) {
+            return null;
+        }
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                return Files.readAllBytes(file.toPath());
+            } else {
+                InputStream is = new FileInputStream(file);
+                byte[] bytes = new byte[is.available()];
+                is.read(bytes);
+                is.close();
+                return bytes;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     /**
      * 拷贝到某一个文件,已指定文件名
      *
@@ -320,6 +346,11 @@ public class FrescoUtils {
         boolean isSuccess = file.renameTo(path);
 
         return isSuccess;
+    }
+
+    public static boolean copyCacheFile(Context context, String url, CimocDocumentFile destFile) {
+        ContentResolver resolver = context.getContentResolver();
+        return copyCacheFile(resolver, url, destFile);
     }
 
     public static boolean copyCacheFile(ContentResolver resolver, String url, CimocDocumentFile destFile) {
