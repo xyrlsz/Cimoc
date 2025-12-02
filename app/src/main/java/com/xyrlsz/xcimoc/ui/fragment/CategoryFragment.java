@@ -1,7 +1,7 @@
 package com.xyrlsz.xcimoc.ui.fragment;
 
 import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.util.Pair;
 import android.view.View;
 import android.widget.AdapterView;
@@ -21,6 +21,7 @@ import com.xyrlsz.xcimoc.model.Source;
 import com.xyrlsz.xcimoc.parser.Category;
 import com.xyrlsz.xcimoc.parser.Parser;
 import com.xyrlsz.xcimoc.presenter.BasePresenter;
+import com.xyrlsz.xcimoc.ui.activity.DetailActivity;
 import com.xyrlsz.xcimoc.ui.adapter.CategoryAdapter;
 import com.xyrlsz.xcimoc.ui.adapter.CategoryGridAdapter;
 import com.xyrlsz.xcimoc.ui.view.CategoryView;
@@ -128,6 +129,8 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
         categoryGridAdapter = new CategoryGridAdapter(getContext(), mComicList);
         categoryGridAdapter.setOnComicClickListener(comic -> {
             // TODO: 打开详情页
+            Intent intent = DetailActivity.createIntent(getContext(), null, comic.getSource(), comic.getCid());
+            startActivity(intent);
         });
         mRecyclerView.setAdapter(categoryGridAdapter);
         mRecyclerView.setRecycledViewPool(getAppInstance().getGridRecycledPool());
@@ -271,7 +274,7 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
 
     @OnClick(R.id.category_action_button_to_top)
     void onToTopButtonClick() {
-        mRecyclerView.smoothScrollToPosition(0);
+        mRecyclerView.scrollToPosition(0);
     }
 
     @OnClick(R.id.category_action_button)
@@ -286,10 +289,8 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
         mCurrentState.state = STATE_NULL;
         mCurrentState.page = 0;
 
-
         mComicList.clear();
         categoryGridAdapter.notifyDataSetChanged();
-
 
         loadCategory(mCurrentState, mCurrentFormat);
         toggleHeadView();
