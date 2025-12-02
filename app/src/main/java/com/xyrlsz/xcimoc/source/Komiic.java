@@ -4,12 +4,12 @@ package com.xyrlsz.xcimoc.source;
 import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_ORDER;
 import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_PROGRESS;
 import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_SUBJECT;
+import static com.xyrlsz.xcimoc.parser.MangaCategory.getParseFormatMap;
 
 import android.content.Context;
 import android.util.Pair;
 
 import com.google.common.collect.Lists;
-import com.google.gson.Gson;
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.Constants;
 import com.xyrlsz.xcimoc.R;
@@ -33,10 +33,10 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import okhttp3.Headers;
 import okhttp3.MediaType;
@@ -273,28 +273,24 @@ public class Komiic extends MangaParser {
 
     @Override
     public Request getCategoryRequest(String format, int page) {
-        try {
-            JSONObject object = new JSONObject(format);
-            int limit = 30;
-            int offset = (page - 1) * limit;
-            String sub = object.getString(String.valueOf(CATEGORY_SUBJECT)).isEmpty() ? "" : "\"" + object.getString(String.valueOf(CATEGORY_SUBJECT)) + "\"";
-            String json = "{\"operationName\":\"comicByCategories\",\"variables\":{\"categoryId\":" +
-                    "[" + sub + "]" +
-                    ",\"pagination\":{\"limit\":" +
-                    limit +
-                    ",\"offset\":" +
-                    offset +
-                    ",\"orderBy\":\"" +
-                    object.getString(String.valueOf(CATEGORY_ORDER)) +
-                    "\",\"asc\":false,\"status\":\"" +
-                    object.getString(String.valueOf(CATEGORY_PROGRESS)) +
-                    "\"}},\"query\":\"query comicByCategories($categoryId: [ID!]!, $pagination: Pagination!) {\\n  comicByCategories(categoryId: $categoryId, pagination: $pagination) {\\n    id\\n    title\\n    status\\n    year\\n    imageUrl\\n    authors {\\n      id\\n      name\\n      __typename\\n    }\\n    categories {\\n      id\\n      name\\n      __typename\\n    }\\n    dateUpdated\\n    monthViews\\n    views\\n    favoriteCount\\n    lastBookUpdate\\n    lastChapterUpdate\\n    __typename\\n  }\\n}\"}";
-            String url = StringUtils.format("%s/api/query", baseUrl);
-            RequestBody requestBody = RequestBody.create(json, MediaType.parse("application/json; charset=utf-8"));
-            return new Request.Builder().url(url).post(requestBody).build();
-        } catch (JSONException e) {
-            return null;
-        }
+        Map<Integer, String> map = getParseFormatMap(format);
+        int limit = 30;
+        int offset = (page - 1) * limit;
+        String sub = Objects.requireNonNull(map.get(CATEGORY_SUBJECT)).isEmpty() ? "" : "\"" + Objects.requireNonNull(map.get(CATEGORY_SUBJECT)) + "\"";
+        String json = "{\"operationName\":\"comicByCategories\",\"variables\":{\"categoryId\":" +
+                "[" + sub + "]" +
+                ",\"pagination\":{\"limit\":" +
+                limit +
+                ",\"offset\":" +
+                offset +
+                ",\"orderBy\":\"" +
+                map.get(CATEGORY_ORDER) +
+                "\",\"asc\":false,\"status\":\"" +
+                map.get(CATEGORY_PROGRESS) +
+                "\"}},\"query\":\"query comicByCategories($categoryId: [ID!]!, $pagination: Pagination!) {\\n  comicByCategories(categoryId: $categoryId, pagination: $pagination) {\\n    id\\n    title\\n    status\\n    year\\n    imageUrl\\n    authors {\\n      id\\n      name\\n      __typename\\n    }\\n    categories {\\n      id\\n      name\\n      __typename\\n    }\\n    dateUpdated\\n    monthViews\\n    views\\n    favoriteCount\\n    lastBookUpdate\\n    lastChapterUpdate\\n    __typename\\n  }\\n}\"}";
+        String url = StringUtils.format("%s/api/query", baseUrl);
+        RequestBody requestBody = RequestBody.create(json, MediaType.parse("application/json; charset=utf-8"));
+        return new Request.Builder().url(url).post(requestBody).build();
 
     }
 
@@ -326,15 +322,6 @@ public class Komiic extends MangaParser {
             return true;
         }
 
-        @Override
-        public String getFormat(String... args) {
-            Map<String, Object> map = new HashMap<>();
-            map.put(String.valueOf(CATEGORY_SUBJECT), args[CATEGORY_SUBJECT]);
-            map.put(String.valueOf(CATEGORY_PROGRESS), args[CATEGORY_PROGRESS]);
-            map.put(String.valueOf(CATEGORY_ORDER), args[CATEGORY_ORDER]);
-            Gson gson = new Gson();
-            return gson.toJson(map);
-        }
 
         @Override
         protected List<Pair<String, String>> getSubject() {

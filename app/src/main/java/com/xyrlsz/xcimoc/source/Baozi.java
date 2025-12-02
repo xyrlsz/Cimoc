@@ -4,11 +4,11 @@ import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_AREA;
 import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_ORDER;
 import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_PROGRESS;
 import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_SUBJECT;
+import static com.xyrlsz.xcimoc.parser.MangaCategory.getParseFormatMap;
 
 import android.util.Pair;
 
 import com.google.common.collect.Lists;
-import com.google.gson.Gson;
 import com.xyrlsz.xcimoc.model.Chapter;
 import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.ImageUrl;
@@ -28,7 +28,6 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -190,27 +189,24 @@ public class Baozi extends MangaParser {
 
     @Override
     public Request getCategoryRequest(String format, int page) {
-        try {
-            JSONObject object = new JSONObject(format);
-            int limit = 36;
 
-            String url = StringUtils.format("%s/api/bzmhq/amp_comic_list?type=" +
-                    object.getString(String.valueOf(CATEGORY_SUBJECT)) +
-                    "&region=" +
-                    object.getString(String.valueOf(CATEGORY_AREA)) +
-                    "&state=" +
-                    object.getString(String.valueOf(CATEGORY_PROGRESS)) +
-                    "&filter=" +
-                    object.getString(String.valueOf(CATEGORY_ORDER)) +
-                    "&page=" +
-                    page +
-                    "&limit=" +
-                    limit +
-                    "&language=cn", baseUrl);
-            return new Request.Builder().url(url).build();
-        } catch (JSONException e) {
-            return null;
-        }
+        Map<Integer, String> map = getParseFormatMap(format);
+        int limit = 36;
+
+        String url = StringUtils.format("%s/api/bzmhq/amp_comic_list?type=" +
+                map.get(CATEGORY_SUBJECT) +
+                "&region=" +
+                map.get(CATEGORY_AREA) +
+                "&state=" +
+                map.get(CATEGORY_PROGRESS) +
+                "&filter=" +
+                map.get(CATEGORY_ORDER) +
+                "&page=" +
+                page +
+                "&limit=" +
+                limit +
+                "&language=cn", baseUrl);
+        return new Request.Builder().url(url).build();
 
     }
 
@@ -240,17 +236,6 @@ public class Baozi extends MangaParser {
         @Override
         public boolean isComposite() {
             return true;
-        }
-
-        @Override
-        public String getFormat(String... args) {
-            Map<String, Object> map = new HashMap<>();
-            map.put(String.valueOf(CATEGORY_SUBJECT), args[CATEGORY_SUBJECT]);
-            map.put(String.valueOf(CATEGORY_PROGRESS), args[CATEGORY_PROGRESS]);
-            map.put(String.valueOf(CATEGORY_ORDER), args[CATEGORY_ORDER]);
-            map.put(String.valueOf(CATEGORY_AREA), args[CATEGORY_AREA]);
-            Gson gson = new Gson();
-            return gson.toJson(map);
         }
 
         @Override

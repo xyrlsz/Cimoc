@@ -4,11 +4,11 @@ import static com.xyrlsz.xcimoc.core.Manga.getResponseBody;
 import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_AREA;
 import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_ORDER;
 import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_SUBJECT;
+import static com.xyrlsz.xcimoc.parser.MangaCategory.getParseFormatMap;
 
 import android.util.Pair;
 
 import com.google.common.collect.Lists;
-import com.google.gson.Gson;
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.model.Chapter;
 import com.xyrlsz.xcimoc.model.Comic;
@@ -313,28 +313,25 @@ public class CopyMH extends MangaParser {
 
     @Override
     public Request getCategoryRequest(String format, int page) {
-        try {
-            JSONObject object = new JSONObject(format);
-            int limit = 21;
-            int offset = (page - 1) * limit;
 
-            String url = StringUtils.format(
-                    "%s/api/v3/comics?free_type=1&limit=" +
-                            limit +
-                            "&offset=" +
-                            offset +
-                            "&top=" +
-                            object.getString(String.valueOf(CATEGORY_AREA)) +
-                            "&theme=" +
-                            object.getString(String.valueOf(CATEGORY_SUBJECT)) +
-                            "&ordering=" +
-                            object.getString(String.valueOf(CATEGORY_ORDER)) +
-                            "&_update=true", apiBaseUrl);
+        Map<Integer, String> map = getParseFormatMap(format);
+        int limit = 21;
+        int offset = (page - 1) * limit;
 
-            return new Request.Builder().headers(getHeader()).url(url).build();
-        } catch (JSONException e) {
-            return null;
-        }
+        String url = StringUtils.format(
+                "%s/api/v3/comics?free_type=1&limit=" +
+                        limit +
+                        "&offset=" +
+                        offset +
+                        "&top=" +
+                        map.get(CATEGORY_AREA) +
+                        "&theme=" +
+                        map.get(CATEGORY_SUBJECT) +
+                        "&ordering=" +
+                        map.get(CATEGORY_ORDER) +
+                        "&_update=true", apiBaseUrl);
+
+        return new Request.Builder().headers(getHeader()).url(url).build();
 
     }
 
@@ -366,15 +363,6 @@ public class CopyMH extends MangaParser {
             return true;
         }
 
-        @Override
-        public String getFormat(String... args) {
-            Map<String, Object> map = new HashMap<>();
-            map.put(String.valueOf(CATEGORY_SUBJECT), args[CATEGORY_SUBJECT]);
-            map.put(String.valueOf(CATEGORY_ORDER), args[CATEGORY_ORDER]);
-            map.put(String.valueOf(CATEGORY_AREA), args[CATEGORY_AREA]);
-            Gson gson = new Gson();
-            return gson.toJson(map);
-        }
 
         @Override
         protected List<Pair<String, String>> getSubject() {

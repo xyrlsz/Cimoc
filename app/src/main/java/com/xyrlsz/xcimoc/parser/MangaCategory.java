@@ -2,13 +2,24 @@ package com.xyrlsz.xcimoc.parser;
 
 import android.util.Pair;
 
+import com.google.gson.Gson;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Hiroshi on 2016/12/10.
  */
 
 public abstract class MangaCategory implements Category {
+
+    public static Map<Integer, String> getParseFormatMap(String format) {
+        Gson gson = new Gson();
+        return gson.fromJson(format,
+                new com.google.gson.reflect.TypeToken<Map<Integer, String>>() {
+                }.getType());
+    }
 
     @Override
     public boolean isComposite() {
@@ -35,6 +46,16 @@ public abstract class MangaCategory implements Category {
 
     protected boolean hasProgress() {
         return false;
+    }
+
+    @Override
+    public String getFormat(String... args) {
+        Map<Integer, String> map = new HashMap<>();
+        for (int i = 0; i < args.length; i++) {
+            map.put(i, args[i]);
+        }
+        Gson gson = new Gson();
+        return gson.toJson(map);
     }
 
     protected List<Pair<String, String>> getProgress() {
