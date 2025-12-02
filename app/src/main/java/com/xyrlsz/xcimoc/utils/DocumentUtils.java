@@ -225,6 +225,9 @@ public class DocumentUtils {
             }
         } finally {
             closeStream(output, writer);
+            if (tmp != null && tmp.exists()) {
+                tmp.delete();
+            }
         }
     }
 
@@ -251,6 +254,9 @@ public class DocumentUtils {
             }
         } finally {
             closeStream(output, writer);
+            if (tmp != null && tmp.exists()) {
+                tmp.delete();
+            }
         }
     }
 
