@@ -138,8 +138,8 @@ public class DetailAdapter extends BaseAdapter<Chapter> {
     }
 
     public String getGroupName(int position) {
-        return mDataSet.get(position - 1).getSourceGroup();
-
+//        return mDataSet.get(position - 1).getSourceGroup();
+        return STConvertUtils.convert(mDataSet.get(position - 1).getSourceGroup());
     }
 
     @Override
