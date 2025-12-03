@@ -145,16 +145,10 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
         initSpinner(mSourceList.get(0).second);
         GridLayoutManager layoutManager = (GridLayoutManager) mRecyclerView.getLayoutManager();
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            private int lastVisibleItem = 0;
-
+            private ScrollDirection lastDirection = ScrollDirection.NONE;
             @Override
             public void onScrollStateChanged(@NotNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    getAppInstance().getBuilderProvider().resume();
-                } else if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
-                    getAppInstance().getBuilderProvider().pause();
-                }
                 switch (newState) {
                     case RecyclerView.SCROLL_STATE_DRAGGING:
                         getAppInstance().getBuilderProvider().pause();
@@ -163,13 +157,14 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
                         getAppInstance().getBuilderProvider().resume();
                         break;
                 }
+
             }
 
             @Override
             public void onScrolled(@NotNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 if (layoutManager != null) {
-                    lastVisibleItem = layoutManager.findLastVisibleItemPosition();
+                    int lastVisibleItem = layoutManager.findLastVisibleItemPosition();
                     int totalItemCount = layoutManager.getItemCount();
 
                     // 当滚动到最后几个项目时加载更多
@@ -177,9 +172,37 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
                         loadMoreData();
                     }
                 }
+                ScrollDirection currentDirection = ScrollDirection.NONE;
+                // 滑动阈值，避免微小抖动
+                int scrollThreshold = 50;
+                if (dy > scrollThreshold) {
+                    currentDirection = ScrollDirection.UP;
+                } else if (dy < -scrollThreshold) {
+                    currentDirection = ScrollDirection.DOWN;
+                }
+                // 方向发生变化时处理
+                if (currentDirection != lastDirection) {
+                    lastDirection = currentDirection;
+                    switch (currentDirection) {
+                        case UP:
+                            // 处理向上滑动
+                            if (!isHeadCollapsed && !mComicList.isEmpty()) {
+                                toggleHeadView();
+                            }
+                            break;
+                        case DOWN:
+                            // 处理向下滑动
+
+                            break;
+                    }
+                }
+            }
+
+            private enum ScrollDirection {
+                UP, DOWN, NONE
             }
         });
-        boolean isDarkMode = ThemeUtils.getSysIsDarkMode(getContext());
+        boolean isDarkMode = ThemeUtils.getSysIsDarkMode(requireContext());
         if (isDarkMode) {
             toggleHeadButton.setImageResource(R.drawable.ic_bxs_up_arrow_white);
         } else {
