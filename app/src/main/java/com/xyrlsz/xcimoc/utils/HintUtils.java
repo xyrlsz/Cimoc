@@ -1,6 +1,8 @@
 package com.xyrlsz.xcimoc.utils;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 import android.widget.Toast;
 
@@ -14,28 +16,49 @@ import com.xyrlsz.xcimoc.App;
 public class HintUtils {
 
     public static void showSnackbar(View layout, String msg) {
-        if (layout != null && layout.isShown()) {
-            Snackbar snackbar = Snackbar.make(layout, msg, Snackbar.LENGTH_SHORT);
-            int theme = ThemeUtils.getThemeId();
-            snackbar.setBackgroundTint(App.getAppContext().getResources().getColor(ThemeUtils.getThemeColorById(theme)));
-            snackbar.show();
+        if (layout == null) {
+            return;
         }
+        runOnMainThread(() -> {
+            if (layout.isShown()) {
+                Snackbar snackbar = Snackbar.make(layout, msg, Snackbar.LENGTH_SHORT);
+                int theme = ThemeUtils.getThemeId();
+                snackbar.setBackgroundTint(App.getAppContext().getResources().getColor(ThemeUtils.getThemeColorById(theme)));
+                snackbar.show();
+            }
+        });
     }
 
     public static void showToast(Context context, int resId) {
-        Toast.makeText(context, resId, Toast.LENGTH_SHORT).show();
+        if (context == null) return;
+        runOnMainThread(() -> {
+            Toast.makeText(context.getApplicationContext(), resId, Toast.LENGTH_SHORT).show();
+        });
     }
 
     public static void showToastLong(Context context, int resId) {
-        Toast.makeText(context, resId, Toast.LENGTH_LONG).show();
+        if (context == null) return;
+        runOnMainThread(() -> {
+            Toast.makeText(context.getApplicationContext(), resId, Toast.LENGTH_LONG).show();
+        });
     }
 
     public static void showToast(Context context, CharSequence text) {
-        Toast.makeText(context, text, Toast.LENGTH_SHORT).show();
+        if (context == null) return;
+        runOnMainThread(() -> {
+            Toast.makeText(context.getApplicationContext(), text, Toast.LENGTH_SHORT).show();
+        });
     }
 
     public static void showToastLong(Context context, CharSequence text) {
-        Toast.makeText(context, text, Toast.LENGTH_LONG).show();
+        if (context == null) return;
+        runOnMainThread(() -> {
+            Toast.makeText(context.getApplicationContext(), text, Toast.LENGTH_LONG).show();
+        });
+    }
+
+    private static void runOnMainThread(Runnable runnable) {
+        new Handler(Looper.getMainLooper()).post(runnable);
     }
 
 }
