@@ -21,6 +21,10 @@ import com.xyrlsz.xcimoc.utils.ServiceUtils;
 
 import java.util.ArrayList;
 
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+
 /**
  * Created by Hiroshi on 2016/9/1.
  */
@@ -60,7 +64,7 @@ public class DownloadFragment extends GridFragment implements DownloadView {
     }
 
     private void outputComic(int type) {
-        showProgressDialog();
+        // showProgressDialog();
         ComicUtils.OutputDownloadedComic(this, getContext(), type, mPresenter.load(mSavedId), new ComicUtils.OutputComicCallback() {
             @Override
             public void onSuccess() {
@@ -121,21 +125,29 @@ public class DownloadFragment extends GridFragment implements DownloadView {
                 }
                 break;
             case DIALOG_REQUEST_OUTPUT:
-                int output = bundle.getInt(EXTRA_DIALOG_RESULT_INDEX);
-                switch (output) {
-                    case OPERATION_OUTPUT_SIMPLE:
-                        outputComic(ComicUtils.SIMPLE);
-                        break;
-                    case OPERATION_OUTPUT_ZIP:
-                        outputComic(ComicUtils.ZIP);
-                        break;
-                    case OPERATION_OUTPUT_EPUB:
-                        outputComic(ComicUtils.EPUB);
-                        break;
-                    case OPERATION_OUTPUT_CBZ:
-                        outputComic(ComicUtils.CBZ);
-                        break;
-                }
+                showProgressDialog();
+                Observable.create((Observable.OnSubscribe<String>) subscriber -> {
+                            int output = bundle.getInt(EXTRA_DIALOG_RESULT_INDEX);
+                            switch (output) {
+                                case OPERATION_OUTPUT_SIMPLE:
+                                    outputComic(ComicUtils.SIMPLE);
+                                    break;
+                                case OPERATION_OUTPUT_ZIP:
+                                    outputComic(ComicUtils.ZIP);
+                                    break;
+                                case OPERATION_OUTPUT_EPUB:
+                                    outputComic(ComicUtils.EPUB);
+                                    break;
+                                case OPERATION_OUTPUT_CBZ:
+                                    outputComic(ComicUtils.CBZ);
+                                    break;
+                            }
+                        })
+                        .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()) // 指定下游回调线程
+                        .subscribe(result -> {
+
+                        });
+
                 break;
             default:
                 break;
