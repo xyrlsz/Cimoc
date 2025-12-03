@@ -174,7 +174,7 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
                 }
                 ScrollDirection currentDirection = ScrollDirection.NONE;
                 // 滑动阈值，避免微小抖动
-                int scrollThreshold = 50;
+                int scrollThreshold = 10;
                 if (dy > scrollThreshold) {
                     currentDirection = ScrollDirection.UP;
                 } else if (dy < -scrollThreshold) {
