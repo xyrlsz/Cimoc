@@ -10,9 +10,14 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.FrameLayout;
 
 import androidx.annotation.ColorRes;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -32,11 +37,15 @@ import com.xyrlsz.xcimoc.utils.HintUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+
 /**
  * Created by Hiroshi on 2016/8/11.
  */
 public class SourceFragment extends RecyclerViewFragment implements SourceView, SourceAdapter.OnItemCheckedListener {
 
+    @BindView(R.id.fragment_container)
+    FrameLayout frameLayout;
     private SourcePresenter mPresenter;
     private SourceAdapter mSourceAdapter;
 
@@ -50,6 +59,16 @@ public class SourceFragment extends RecyclerViewFragment implements SourceView, 
     @Override
     protected void initView() {
         setHasOptionsMenu(true);
+        ViewCompat.setOnApplyWindowInsetsListener(frameLayout, (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(
+                    v.getPaddingLeft(),
+                    v.getPaddingTop(),
+                    v.getPaddingRight(),
+                    systemBars.bottom
+            );
+            return insets;
+        });
         super.initView();
     }
 

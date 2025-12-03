@@ -54,8 +54,7 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
     @BindViews({R.id.category_subject, R.id.category_area, R.id.category_reader,
             R.id.category_year, R.id.category_progress, R.id.category_order})
     List<View> mCategoryView;
-    @BindView(R.id.category_source)
-    View mCategorySourceView;
+
     @BindView(R.id.category_spinner_source)
     AppCompatSpinner mCategorySourceSpinner;
     @BindView(R.id.recycler_view_content)
