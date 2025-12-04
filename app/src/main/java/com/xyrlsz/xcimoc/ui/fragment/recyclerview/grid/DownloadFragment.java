@@ -64,13 +64,13 @@ public class DownloadFragment extends GridFragment implements DownloadView {
         ComicUtils.OutputDownloadedComic(this, getContext(), type, mPresenter.load(mSavedId), new ComicUtils.OutputComicCallback() {
             @Override
             public void onSuccess() {
-
+                hideProgressDialog();
                 HintUtils.showToast(getActivity(), R.string.common_execute_success);
             }
 
             @Override
             public void onFailure(String message) {
-
+                hideProgressDialog();
                 HintUtils.showToast(getActivity(), message);
             }
         });
@@ -139,7 +139,7 @@ public class DownloadFragment extends GridFragment implements DownloadView {
                             break;
                     }
                 }, () -> {
-                    hideProgressDialog();
+
                 });
 
                 break;
