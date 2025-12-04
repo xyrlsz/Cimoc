@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
-import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.model.MiniComic;
 import com.xyrlsz.xcimoc.model.Task;
@@ -18,12 +17,9 @@ import com.xyrlsz.xcimoc.ui.view.DownloadView;
 import com.xyrlsz.xcimoc.utils.ComicUtils;
 import com.xyrlsz.xcimoc.utils.HintUtils;
 import com.xyrlsz.xcimoc.utils.ServiceUtils;
+import com.xyrlsz.xcimoc.utils.ThreadRunUtils;
 
 import java.util.ArrayList;
-
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 
 /**
  * Created by Hiroshi on 2016/9/1.
@@ -68,14 +64,14 @@ public class DownloadFragment extends GridFragment implements DownloadView {
         ComicUtils.OutputDownloadedComic(this, getContext(), type, mPresenter.load(mSavedId), new ComicUtils.OutputComicCallback() {
             @Override
             public void onSuccess() {
-                hideProgressDialog();
-                App.runOnMainThread(() -> HintUtils.showToast(getActivity(), R.string.common_execute_success));
+
+                HintUtils.showToast(getActivity(), R.string.common_execute_success);
             }
 
             @Override
             public void onFailure(String message) {
-                hideProgressDialog();
-                App.runOnMainThread(() -> HintUtils.showToast(getActivity(), message));
+
+                HintUtils.showToast(getActivity(), message);
             }
         });
     }
@@ -126,27 +122,25 @@ public class DownloadFragment extends GridFragment implements DownloadView {
                 break;
             case DIALOG_REQUEST_OUTPUT:
                 showProgressDialog();
-                Observable.create((Observable.OnSubscribe<String>) subscriber -> {
-                            int output = bundle.getInt(EXTRA_DIALOG_RESULT_INDEX);
-                            switch (output) {
-                                case OPERATION_OUTPUT_SIMPLE:
-                                    outputComic(ComicUtils.SIMPLE);
-                                    break;
-                                case OPERATION_OUTPUT_ZIP:
-                                    outputComic(ComicUtils.ZIP);
-                                    break;
-                                case OPERATION_OUTPUT_EPUB:
-                                    outputComic(ComicUtils.EPUB);
-                                    break;
-                                case OPERATION_OUTPUT_CBZ:
-                                    outputComic(ComicUtils.CBZ);
-                                    break;
-                            }
-                        })
-                        .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()) // 指定下游回调线程
-                        .subscribe(result -> {
-
-                        });
+                ThreadRunUtils.runTaskObserveOnUI(() -> {
+                    int output = bundle.getInt(EXTRA_DIALOG_RESULT_INDEX);
+                    switch (output) {
+                        case OPERATION_OUTPUT_SIMPLE:
+                            outputComic(ComicUtils.SIMPLE);
+                            break;
+                        case OPERATION_OUTPUT_ZIP:
+                            outputComic(ComicUtils.ZIP);
+                            break;
+                        case OPERATION_OUTPUT_EPUB:
+                            outputComic(ComicUtils.EPUB);
+                            break;
+                        case OPERATION_OUTPUT_CBZ:
+                            outputComic(ComicUtils.CBZ);
+                            break;
+                    }
+                }, () -> {
+                    hideProgressDialog();
+                });
 
                 break;
             default:

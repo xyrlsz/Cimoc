@@ -11,7 +11,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.Constants;
@@ -24,11 +23,9 @@ import java.util.Objects;
 
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import okio.BufferedSink;
 
 public class ZaiManhuaSignUtils {
 
@@ -132,9 +129,7 @@ public class ZaiManhuaSignUtils {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if (response.isSuccessful()) {
-                    App.runOnMainThread(() -> {
-                        HintUtils.showToast(App.getAppContext(), "再漫画签到成功");
-                    });
+                    HintUtils.showToast(App.getAppContext(), "再漫画签到成功");
                 }
             }
         });

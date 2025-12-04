@@ -39,6 +39,7 @@ import com.xyrlsz.xcimoc.utils.HintUtils;
 import com.xyrlsz.xcimoc.utils.KomiicUtils;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
+import com.xyrlsz.xcimoc.utils.ThreadRunUtils;
 import com.xyrlsz.xcimoc.utils.ZaiManhuaSignUtils;
 
 import org.json.JSONException;
@@ -155,9 +156,7 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
 
             ZaiManhuaSignUtils.CheckSigned(isSigned -> {
                 if (isSigned) {
-                    App.runOnMainThread(() -> {
-                        mZaiAutoSign.setSummary(getString(R.string.is_sign));
-                    });
+                    ThreadRunUtils.runOnMainThread(() -> mZaiAutoSign.setSummary(getString(R.string.is_sign)));
                 }
             });
 
@@ -563,9 +562,7 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
     void onZaiAutoSignLongClick() {
         ZaiManhuaSignUtils.CheckSigned(isSigned -> {
             if (isSigned) {
-                App.runOnMainThread(() -> {
-                    HintUtils.showToast(getApplicationContext(), "再漫画已签到");
-                });
+                HintUtils.showToast(getApplicationContext(), "再漫画已签到");
             } else {
                 ZaiManhuaSignUtils.SignIn();
             }

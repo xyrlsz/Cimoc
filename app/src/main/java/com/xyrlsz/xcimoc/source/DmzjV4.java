@@ -41,7 +41,7 @@ public class DmzjV4 extends MangaParser {
     String V4_API_URL = "https://nnv4api.dmzj.com";
     String COOKIES = "";
     String UID = "";
-    private SharedPreferences sharedPreferences;
+    private final SharedPreferences sharedPreferences;
 
     public DmzjV4(Source source) {
         //        init(source, new Category());
@@ -121,11 +121,9 @@ public class DmzjV4 extends MangaParser {
     public Request getInfoRequest(String cid) {
         String uid = getUID();
         if (uid.isEmpty()) {
-            App.runOnMainThread(
-                    ()
-                            -> HintUtils.showToast(App.getAppContext(),
-                            App.getAppResources().getString(R.string.dmzj_should_login)));
-//            App.goActivity(ComicSourceLoginActivity.class);
+
+            HintUtils.showToast(App.getAppContext(),
+                    App.getAppResources().getString(R.string.dmzj_should_login));
         }
         String url =
                 StringUtils.format("%s/comic/detail/%s?uid=%s&channel=android", V4_API_URL, cid, uid);

@@ -27,6 +27,7 @@ import com.xyrlsz.xcimoc.ui.adapter.CategoryAdapter;
 import com.xyrlsz.xcimoc.ui.adapter.CategoryGridAdapter;
 import com.xyrlsz.xcimoc.ui.view.CategoryView;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
+import com.xyrlsz.xcimoc.utils.ThreadRunUtils;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -146,6 +147,7 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
         GridLayoutManager layoutManager = (GridLayoutManager) mRecyclerView.getLayoutManager();
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             private ScrollDirection lastDirection = ScrollDirection.NONE;
+
             @Override
             public void onScrollStateChanged(@NotNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
@@ -381,7 +383,7 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
                                     state.state = STATE_NULL; // 没有更多数据
                                 }
 
-                                App.runOnMainThread(() -> {
+                                ThreadRunUtils.runOnMainThread(() -> {
                                     int start = mComicList.size() - list.size();
                                     if (start > 0) {
                                         categoryGridAdapter.notifyItemRangeInserted(start, list.size());

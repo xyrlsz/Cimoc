@@ -139,28 +139,20 @@ public class ZaiManhua extends MangaParser {
     @Override
     public Comic parseInfo(String html, Comic comic) {
         if (getTOKEN().isEmpty()) {
-            App.runOnMainThread(() -> {
-                HintUtils.showToast(App.getAppContext(), "再漫画未登录可能导致漫画无法阅读");
-            });
+            HintUtils.showToast(App.getAppContext(), "再漫画未登录可能导致漫画无法阅读");
         }
         long timestamp = System.currentTimeMillis() / 1000;
         if (timestamp > getEXP() && !getTOKEN().isEmpty()) {
-            App.runOnMainThread(() -> {
-                HintUtils.showToast(App.getAppContext(), "再漫画登录过期，可能需要重新登录");
-            });
+            HintUtils.showToast(App.getAppContext(), "再漫画登录过期，可能需要重新登录");
             ZaiManhuaSignUtils.LoginWithPasswdMd5(App.getAppContext(), new ZaiManhuaSignUtils.LoginCallback() {
                 @Override
                 public void onSuccess() {
-                    App.runOnMainThread(() -> {
-                        HintUtils.showToast(App.getAppContext(), "再漫画自动登录成功");
-                    });
+                    HintUtils.showToast(App.getAppContext(), "再漫画自动登录成功");
                 }
 
                 @Override
                 public void onFail() {
-                    App.runOnMainThread(() -> {
-                        HintUtils.showToast(App.getAppContext(), "再漫画自动登录失败");
-                    });
+                    HintUtils.showToast(App.getAppContext(), "再漫画自动登录失败");
                 }
             }, username, passwdMd5);
 

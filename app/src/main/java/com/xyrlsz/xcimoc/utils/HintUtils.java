@@ -1,8 +1,6 @@
 package com.xyrlsz.xcimoc.utils;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.View;
 import android.widget.Toast;
 
@@ -58,7 +56,7 @@ public class HintUtils {
     }
 
     private static void runOnMainThread(Runnable runnable) {
-        new Handler(Looper.getMainLooper()).post(runnable);
+        ThreadRunUtils.runOnMainThread(runnable);
     }
 
 }

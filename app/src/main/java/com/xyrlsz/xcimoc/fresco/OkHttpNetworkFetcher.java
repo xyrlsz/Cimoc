@@ -21,7 +21,7 @@ import com.facebook.imagepipeline.producers.BaseProducerContextCallbacks;
 import com.facebook.imagepipeline.producers.Consumer;
 import com.facebook.imagepipeline.producers.ProducerContext;
 import com.xyrlsz.xcimoc.App;
-import com.xyrlsz.xcimoc.ui.widget.CustomToast;
+import com.xyrlsz.xcimoc.utils.HintUtils;
 
 import java.io.IOException;
 import java.util.concurrent.Executor;
@@ -46,8 +46,8 @@ public class OkHttpNetworkFetcher extends
     private static final String TOTAL_TIME = "total_time";
     private static final String IMAGE_SIZE = "image_size";
     private final OkHttpClient mOkHttpClient;
+    private final Headers mHeaders;
     private Executor mCancellationExecutor;
-    private Headers mHeaders;
 
     /**
      * @param okHttpClient client to use
@@ -60,7 +60,8 @@ public class OkHttpNetworkFetcher extends
         try {
             mCancellationExecutor = okHttpClient.dispatcher().executorService();
         } catch (NullPointerException e) {
-            CustomToast.showToast(App.getAppContext(), "网络连接失败，请检查网络！！", 2000);
+//            CustomToast.showToast(App.getAppContext(), "网络连接失败，请检查网络！！", 2000);
+            HintUtils.showToast(App.getAppContext(), "网络连接失败，请检查网络！！");
         }
 
 

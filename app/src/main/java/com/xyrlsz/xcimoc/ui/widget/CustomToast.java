@@ -7,8 +7,8 @@ import android.widget.Toast;
 public class CustomToast {
 
     private static Toast mToast;
-    private static Handler mHandler = new Handler();
-    private static Runnable r = new Runnable() {
+    private static final Handler mHandler = new Handler();
+    private static final Runnable r = new Runnable() {
         public void run() {
             mToast.cancel();
         }

@@ -245,10 +245,7 @@ public class Komiic extends MangaParser {
             _cookies = "";
         }
         if (KomiicUtils.checkEmptyAccountIsOverImgLimit() && _cookies.isEmpty()) {
-            App.runOnMainThread(() ->
-//                    Toast.makeText(App.getAppContext(), R.string.limit_over_tip, Toast.LENGTH_SHORT).show()
-                            HintUtils.showToast(App.getAppContext(), R.string.limit_over_tip)
-            );
+            HintUtils.showToast(App.getAppContext(), R.string.limit_over_tip);
         }
         for (int i = 1; i <= images.length(); i++) {
             Long comicChapter = chapter.getId();

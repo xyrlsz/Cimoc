@@ -57,7 +57,7 @@ public class Vomicmh extends MangaParser {
     }
 
     @Override
-    public Request getSearchRequest(String keyword, int page) throws UnsupportedEncodingException, Exception {
+    public Request getSearchRequest(String keyword, int page) throws Exception {
         if (page == 1) {
             String url = StringUtils.format(baseUrl + "/so/key/%s/1", keyword);
             return new Request.Builder().url(url).build();
@@ -140,10 +140,8 @@ public class Vomicmh extends MangaParser {
         SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.VOMIC_SHARED, MODE_PRIVATE);
         String cookie = sharedPreferences.getString(Constants.VOMIC_SHARED_COOKIES, "");
         if (cookie.isEmpty()) {
-            App.goActivity(ComicSourceLoginActivity.class);
-            App.runOnMainThread(() ->
-                    HintUtils.showToast(App.getAppContext(), App.getAppResources().getString(R.string.user_login_tips))
-            );
+//            App.goActivity(ComicSourceLoginActivity.class);
+            HintUtils.showToast(App.getAppContext(), App.getAppResources().getString(R.string.user_login_tips));
             return null;
         }
         return new Request.Builder().url(baseUrl + path).addHeader("cookie", cookie).build();
