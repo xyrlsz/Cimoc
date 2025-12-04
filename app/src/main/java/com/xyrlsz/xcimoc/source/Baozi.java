@@ -106,13 +106,8 @@ public class Baozi extends MangaParser {
         String cover = body.src("div > amp-img");
         String author = body.text(".comics-detail__author");
         String intro = body.text(".comics-detail__desc");
-        List<Node> tags = body.list(".tag-list");
-        boolean status = false;
-        for (Node tag : tags) {
-            if (tag.text().equals("已完结") || tag.text().equals("已完結")) {
-                status = true;
-            }
-        }
+        String tags = body.text(".tag-list");
+        boolean status = isFinish(tags);
         String update = body.text("div > span > em");
         comic.setInfo(title, cover, update, intro, author, status);
         return comic;
