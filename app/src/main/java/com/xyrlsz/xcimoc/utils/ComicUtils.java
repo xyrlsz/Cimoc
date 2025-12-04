@@ -107,45 +107,12 @@ public class ComicUtils {
                 public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                     ResponseBody body = response.body();
                     byte[] coverBytes = body.bytes();
-
-                    switch (type) {
-                        case SIMPLE:
-                            exportAsSimple(context, mSourceManager, comic, finalChapterList, outputRoot, coverBytes, callback);
-                            break;
-                        case ZIP:
-                            exportAsZip(context, mSourceManager, comic, finalChapterList, outputRoot, coverBytes, callback);
-                            break;
-                        case EPUB:
-                            exportAsEpub(context, mSourceManager, comic, finalChapterList, outputRoot, coverBytes, callback);
-                            break;
-                        case CBZ:
-                            exportAsCBZ(context, mSourceManager, comic, finalChapterList, outputRoot, coverBytes, callback);
-                            break;
-                        default:
-                            callback.onFailure("未知导出类型");
-                            break;
-                    }
+                    export(context, mSourceManager, comic, finalChapterList, outputRoot, coverBytes, callback, type);
                 }
             });
         } else {
             try {
-                switch (type) {
-                    case SIMPLE:
-                        exportAsSimple(context, mSourceManager, comic, finalChapterList, outputRoot, coverCacheBytes, callback);
-                        break;
-                    case ZIP:
-                        exportAsZip(context, mSourceManager, comic, finalChapterList, outputRoot, coverCacheBytes, callback);
-                        break;
-                    case EPUB:
-                        exportAsEpub(context, mSourceManager, comic, finalChapterList, outputRoot, coverCacheBytes, callback);
-                        break;
-                    case CBZ:
-                        exportAsCBZ(context, mSourceManager, comic, finalChapterList, outputRoot, coverCacheBytes, callback);
-                        break;
-                    default:
-                        callback.onFailure("未知导出类型");
-                        break;
-                }
+                export(context, mSourceManager, comic, finalChapterList, outputRoot, coverCacheBytes, callback, type);
             } catch (IOException e) {
                 HintUtils.showToast(context, "导出失败: " + e.getMessage());
             }
@@ -655,7 +622,26 @@ public class ComicUtils {
         }
     }
 
-    private void export() {
+    private static void export(Context context, SourceManager sourceManager, Comic comic,
+                               List<Chapter> chapterList, CimocDocumentFile outputRoot,
+                               byte[] cover, OutputComicCallback callback, int type) throws IOException {
+        switch (type) {
+            case SIMPLE:
+                exportAsSimple(context, sourceManager, comic, chapterList, outputRoot, cover, callback);
+                break;
+            case ZIP:
+                exportAsZip(context, sourceManager, comic, chapterList, outputRoot, cover, callback);
+                break;
+            case EPUB:
+                exportAsEpub(context, sourceManager, comic, chapterList, outputRoot, cover, callback);
+                break;
+            case CBZ:
+                exportAsCBZ(context, sourceManager, comic, chapterList, outputRoot, cover, callback);
+                break;
+            default:
+                callback.onFailure("未知导出类型");
+                break;
+        }
 
     }
 
