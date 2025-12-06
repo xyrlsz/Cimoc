@@ -67,7 +67,6 @@ public class ResultActivity extends BackActivity implements ResultView, BaseAdap
         intent.putExtra(Extra.EXTRA_MODE, resultMode);
         intent.putExtra(Extra.EXTRA_SOURCE, array);
         intent.putExtra(Extra.EXTRA_KEYWORD, keyword);
-//        intent.putExtra(Extra.EXTRA_STRICT, true);
         return intent;
     }
 
@@ -76,26 +75,10 @@ public class ResultActivity extends BackActivity implements ResultView, BaseAdap
         intent.putExtra(Extra.EXTRA_MODE, resultMode);
         intent.putExtra(Extra.EXTRA_SOURCE, array);
         intent.putExtra(Extra.EXTRA_KEYWORD, keyword);
-//        intent.putExtra(Extra.EXTRA_STRICT, true);
         intent.putExtra(Extra.EXTRA_SEARCH_TYPE, searchType);
         return intent;
     }
 
-    public static Intent createIntent(Context context, String keyword, boolean strictSearch, int[] array, int resultMode) {
-        Intent intent = createIntent(context, keyword, array, resultMode);
-//        intent.putExtra(Extra.EXTRA_MODE, type);
-//        intent.putExtra(Extra.EXTRA_SOURCE, array);
-//        intent.putExtra(Extra.EXTRA_KEYWORD, keyword);
-        intent.putExtra(Extra.EXTRA_STRICT, strictSearch);
-        return intent;
-    }
-
-    public static Intent createIntent(Context context, String keyword, boolean strictSearch, boolean stSame, int[] array, int resultMode) {
-        Intent intent = createIntent(context, keyword, array, resultMode);
-        intent.putExtra(Extra.EXTRA_STRICT, strictSearch);
-        intent.putExtra(Extra.EXTAR_STSAME, stSame);
-        return intent;
-    }
 
     public static Intent createIntent(Context context, String keyword, boolean strictSearch, boolean stSame, int[] array, int resultMode, int searchType) {
         Intent intent = createIntent(context, keyword, array, resultMode);
@@ -188,16 +171,6 @@ public class ResultActivity extends BackActivity implements ResultView, BaseAdap
     public void onSearchSuccess(Comic comic) {
         hideProgressBar();
         mResultAdapter.add(comic);
-//        if(App.getPreferenceManager().getBoolean(PreferenceManager.PREF_OTHER_FIREBASE_EVENT, true)) {
-//            Bundle bundle = new Bundle();
-//            bundle.putString(FirebaseAnalytics.Param.CHARACTER, getIntent().getStringExtra(Extra.EXTRA_KEYWORD));
-//            bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "bySearch");
-//            bundle.putString(FirebaseAnalytics.Param.CONTENT, comic.getTitle());
-//            bundle.putInt(FirebaseAnalytics.Param.SOURCE, comic.getSource());
-//            bundle.putBoolean(FirebaseAnalytics.Param.SUCCESS, true);
-//            FirebaseAnalytics mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
-//            mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SEARCH, bundle);
-//        }
     }
 
     @Override
@@ -216,15 +189,6 @@ public class ResultActivity extends BackActivity implements ResultView, BaseAdap
     public void onSearchError() {
         hideProgressBar();
         showSnackbar(R.string.result_empty);
-//        if(App.getPreferenceManager().getBoolean(PreferenceManager.PREF_OTHER_FIREBASE_EVENT, true)) {
-//            Bundle bundle = new Bundle();
-//            bundle.putString(FirebaseAnalytics.Param.CHARACTER, getIntent().getStringExtra(Extra.EXTRA_KEYWORD));
-//            bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "bySearch");
-//            bundle.putString(FirebaseAnalytics.Param.CONTENT, getString(R.string.result_empty));
-//            bundle.putBoolean(FirebaseAnalytics.Param.SUCCESS, false);
-//            FirebaseAnalytics mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
-//            mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SEARCH, bundle);
-//        }
     }
 
     @Override
