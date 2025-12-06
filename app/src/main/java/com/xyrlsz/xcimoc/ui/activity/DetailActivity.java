@@ -133,7 +133,7 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Intent intent;
+
         if (!isProgressBarShown()) {
             switch (item.getItemId()) {
 //                case R.id.detail_history:
@@ -147,8 +147,8 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
 //                    break;
                 case R.id.detail_download:
                     if (!mDetailAdapter.getDateSet().isEmpty()) {
-                        intent = ChapterActivity.createIntent(this, new ArrayList<>(mDetailAdapter.getDateSet()));
-                        startActivityForResult(intent, REQUEST_CODE_DOWNLOAD);
+                        Intent intent1 = ChapterActivity.createIntent(this, new ArrayList<>(mDetailAdapter.getDateSet()));
+                        startActivityForResult(intent1, REQUEST_CODE_DOWNLOAD);
                     }
                     break;
 //                case R.id.detail_tag:
@@ -169,27 +169,27 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
 //                            FirebaseAnalytics mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 //                            mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SEARCH, bundle);
 //                        }
-                        intent = ResultActivity.createIntent(this, mPresenter.getComic().getTitle(), null, ResultActivity.LAUNCH_MODE_SEARCH, SEARCH_TITLE);
-                        startActivity(intent);
+                        Intent intent2 = ResultActivity.createIntent(this, mPresenter.getComic().getTitle(), null, ResultActivity.LAUNCH_MODE_SEARCH, SEARCH_TITLE);
+                        startActivity(intent2);
                     } else {
                         showSnackbar(R.string.common_keyword_empty);
                     }
                     break;
                 case R.id.detail_search_author:
                     if (!StringUtils.isEmpty(mPresenter.getComic().getAuthor())) {
-                        intent = ResultActivity.createIntent(this, mPresenter.getComic().getAuthor(), null, ResultActivity.LAUNCH_MODE_SEARCH, SEARCH_AUTHOR);
-                        startActivity(intent);
+                        Intent intent3 = ResultActivity.createIntent(this, mPresenter.getComic().getAuthor(), null, ResultActivity.LAUNCH_MODE_SEARCH, SEARCH_AUTHOR);
+                        startActivity(intent3);
                     } else {
                         showSnackbar(R.string.common_keyword_empty);
                     }
                     break;
                 case R.id.detail_share_url:
                     String url = mPresenter.getComic().getUrl();
-                    intent = new Intent(Intent.ACTION_SEND);
-                    intent.setType("text/plain");
-                    intent.putExtra(Intent.EXTRA_TEXT, url);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(Intent.createChooser(intent, url));
+                    Intent intent4 = new Intent(Intent.ACTION_SEND);
+                    intent4.setType("text/plain");
+                    intent4.putExtra(Intent.EXTRA_TEXT, url);
+                    intent4.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(Intent.createChooser(intent4, url));
 
                     // firebase analytics
 //                    if(App.getPreferenceManager().getBoolean(PreferenceManager.PREF_OTHER_FIREBASE_EVENT, true)) {
