@@ -210,7 +210,7 @@ public class DocumentUtils {
         try {
             Uri fileData = file.getUri();
             if (UriUtils.isHttpOrHttps(fileData)) {
-                tmp = File.createTempFile(System.currentTimeMillis() + "", "tmp");
+                tmp = File.createTempFile(System.currentTimeMillis() + "_" + file.getName(), "tmp");
                 fileData = Uri.fromFile(tmp);
             }
             output = resolver.openOutputStream(fileData);
@@ -238,7 +238,7 @@ public class DocumentUtils {
         try {
             Uri fileData = file.getUri();
             if (UriUtils.isHttpOrHttps(fileData)) {
-                tmp = File.createTempFile(System.currentTimeMillis() + "", "tmp");
+                tmp = File.createTempFile(System.currentTimeMillis() + "_" + file.getName(), "tmp");
                 fileData = Uri.fromFile(tmp);
             }
             output = resolver.openOutputStream(fileData);
@@ -295,6 +295,7 @@ public class DocumentUtils {
         InputStream input = resolver.openInputStream(src.getUri());
         writeBinaryToFile(resolver, dst, input);
     }
+
     public static void writeBinaryToFile(ContentResolver resolver, File src, CimocDocumentFile dst) throws IOException {
         InputStream input = new FileInputStream(src);
         writeBinaryToFile(resolver, dst, input);
