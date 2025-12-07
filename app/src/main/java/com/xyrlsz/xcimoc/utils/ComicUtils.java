@@ -269,7 +269,7 @@ public class ComicUtils {
             int chapterIndex = 1;
             int sizeDigits = String.valueOf(chapterList.size()).length();
             for (Chapter chapter : chapterList) {
-                String chapterDir = String.format("%0" + sizeDigits + "d_%s/", chapterIndex, sanitizeFileName(chapter.getTitle()));
+                String chapterDir = String.format("%0" + sizeDigits + "d-%s/", chapterIndex, sanitizeFileName(chapter.getTitle()));
                 List<ImageUrl> imageUrls = Download.images(App.getApp().getDocumentFile(), comic, chapter,
                                 sourceManager.getParser(comic.getSource()).getTitle())
                         .toBlocking().first();
@@ -557,7 +557,7 @@ public class ComicUtils {
                 for (ImageUrl imageUrl : imageUrls) {
                     String url = imageUrl.getUrl();
                     Uri uri = Uri.parse(url);
-                    InputStream is = null;
+                    InputStream is;
 
                     try {
                         if (url.startsWith("file://")) {
