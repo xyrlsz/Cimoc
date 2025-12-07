@@ -40,8 +40,7 @@ public class DetailAdapter extends BaseAdapter<Chapter> {
     private String cover;
     private String update;
     private Boolean finish;
-    //漫画源中倒序
-    private Boolean isReverseOrder;
+
     //用户手动调整顺序
     private Boolean Reversed = false;
     private String last;
@@ -165,12 +164,8 @@ public class DetailAdapter extends BaseAdapter<Chapter> {
         this.update = update;
         this.author = author;
         this.last = last;
-        this.isReverseOrder = isReverseOrder;
     }
 
-    public boolean isReverseOrder() {
-        return isReverseOrder;
-    }
 
     public boolean isReversed() {
         return Reversed;

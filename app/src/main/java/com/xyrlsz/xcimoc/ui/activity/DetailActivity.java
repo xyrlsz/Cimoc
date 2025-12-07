@@ -2,7 +2,6 @@ package com.xyrlsz.xcimoc.ui.activity;
 
 import static com.xyrlsz.xcimoc.ui.activity.SearchActivity.SEARCH_AUTHOR;
 import static com.xyrlsz.xcimoc.ui.activity.SearchActivity.SEARCH_TITLE;
-import static com.xyrlsz.xcimoc.utils.interpretationUtils.isReverseOrder;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -300,11 +299,7 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
         mDetailAdapter.setLast(path);
         int mode = mPreference.getInt(PreferenceManager.PREF_READER_MODE, PreferenceManager.READER_MODE_PAGE);
         List<Chapter> c = mDetailAdapter.getDateSet();
-        if (mDetailAdapter.isReverseOrder()) {
-            if (!mDetailAdapter.isReversed()) {
-                c = Lists.reverse(mDetailAdapter.getDateSet());
-            }
-        } else if (mDetailAdapter.isReversed()) {
+        if (mDetailAdapter.isReversed()) {
             c = Lists.reverse(mDetailAdapter.getDateSet());
         }
         Intent intent = ReaderActivity.createIntent(DetailActivity.this, id, c, mode);
@@ -347,7 +342,7 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
     @Override
     public void onComicLoadSuccess(Comic comic) {
         mDetailAdapter.setInfo(comic.getCover(), comic.getTitle(), comic.getAuthor(),
-                comic.getIntro(), comic.getFinish(), comic.getUpdate(), comic.getLast(), isReverseOrder(comic));
+                comic.getIntro(), comic.getFinish(), comic.getUpdate(), comic.getLast(), false);
 
         if (comic.getTitle() != null && comic.getCover() != null) {
             Headers headers = SourceManager.getInstance(this).getParser(comic.getSource()).getHeader();
@@ -384,13 +379,9 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
     @Override
     public void onPreLoadSuccess(List<Chapter> list, Comic comic) {
         hideProgressBar();
-        if (isReverseOrder(comic)) {
-            mDetailAdapter.addAll(Lists.reverse(list));
-        } else {
-            mDetailAdapter.addAll(list);
-        }
+        mDetailAdapter.addAll(list);
         mDetailAdapter.setInfo(comic.getCover(), comic.getTitle(), comic.getAuthor(),
-                comic.getIntro(), comic.getFinish(), comic.getUpdate(), comic.getLast(), isReverseOrder(comic));
+                comic.getIntro(), comic.getFinish(), comic.getUpdate(), comic.getLast(), false);
 
         if (comic.getTitle() != null && comic.getCover() != null) {
             Headers headers = SourceManager.getInstance(this).getParser(comic.getSource()).getHeader();
