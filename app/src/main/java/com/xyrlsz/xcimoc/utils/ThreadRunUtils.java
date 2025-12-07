@@ -13,10 +13,10 @@ public class ThreadRunUtils {
 
     public static void runTaskObserveOnUI(Runnable io, Runnable ui) {
 
-        Observable.create((Observable.OnSubscribe<String>) subscriber -> {
+        Observable.create((Observable.OnSubscribe<Void>) subscriber -> {
                     // 在 IO 线程执行耗时操作
                     io.run();
-                    subscriber.onNext("");
+                    subscriber.onNext(null);
                     subscriber.onCompleted();
                 })
                 .subscribeOn(Schedulers.io())          // 指定上游执行线程
