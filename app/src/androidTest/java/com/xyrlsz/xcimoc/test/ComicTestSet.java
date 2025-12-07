@@ -1,6 +1,5 @@
 package com.xyrlsz.xcimoc.test;
 
-import com.xyrlsz.xcimoc.source.Animx2;
 import com.xyrlsz.xcimoc.source.Baozi;
 import com.xyrlsz.xcimoc.source.BuKa;
 import com.xyrlsz.xcimoc.source.Cartoonmad;
@@ -15,7 +14,6 @@ import com.xyrlsz.xcimoc.source.IKanman;
 import com.xyrlsz.xcimoc.source.Komiic;
 import com.xyrlsz.xcimoc.source.MYCOMIC;
 import com.xyrlsz.xcimoc.source.MangaBZ;
-import com.xyrlsz.xcimoc.source.Mangakakalot;
 import com.xyrlsz.xcimoc.source.Manhuatai;
 import com.xyrlsz.xcimoc.source.Manhuayu;
 import com.xyrlsz.xcimoc.source.TTKMH;
@@ -32,7 +30,7 @@ public class ComicTestSet {
     private static Map<Integer, String> comicTestSet = new HashMap<>();
 
     private static void init() {
-        comicTestSet.put(Animx2.TYPE, "index-comic-name-女子學院的男生-id-24755");
+//        comicTestSet.put(Animx2.TYPE, "index-comic-name-女子學院的男生-id-24755");
         comicTestSet.put(Baozi.TYPE, "yirenzhixia-dongmantang");
         comicTestSet.put(BuKa.TYPE, "modoujingbingdenuli");
         comicTestSet.put(Cartoonmad.TYPE, "3583");
@@ -41,7 +39,7 @@ public class ComicTestSet {
 //        comicTestSet.put(Dmzj.TYPE, "benghuai3rd");
         comicTestSet.put(HotManga.TYPE, "wueyxingxuanlv");
         comicTestSet.put(IKanman.TYPE, "7580");
-        comicTestSet.put(Mangakakalot.TYPE, "jujutsu-kaisen-168");
+//        comicTestSet.put(Mangakakalot.TYPE, "jujutsu-kaisen-168");
         comicTestSet.put(MangaBZ.TYPE, "38bz");
         comicTestSet.put(Manhuatai.TYPE, "27417");
         comicTestSet.put(MYCOMIC.TYPE, "7580");

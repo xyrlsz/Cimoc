@@ -7,7 +7,6 @@ import com.xyrlsz.xcimoc.model.ComicDao;
 import com.xyrlsz.xcimoc.model.DaoSession;
 import com.xyrlsz.xcimoc.model.Source;
 import com.xyrlsz.xcimoc.model.SourceDao;
-import com.xyrlsz.xcimoc.source.Animx2;
 import com.xyrlsz.xcimoc.source.Baozi;
 import com.xyrlsz.xcimoc.source.BuKa;
 import com.xyrlsz.xcimoc.source.Cartoonmad;
@@ -27,7 +26,6 @@ import com.xyrlsz.xcimoc.source.MYCOMIC;
 import com.xyrlsz.xcimoc.source.ManBen;
 import com.xyrlsz.xcimoc.source.ManWa;
 import com.xyrlsz.xcimoc.source.MangaBZ;
-import com.xyrlsz.xcimoc.source.Mangakakalot;
 import com.xyrlsz.xcimoc.source.Manhuatai;
 import com.xyrlsz.xcimoc.source.Manhuayu;
 import com.xyrlsz.xcimoc.source.TTKMH;
@@ -95,7 +93,7 @@ public class UpdateHelper {
             ComicSourceTable.put(ZaiManhua.TYPE, ZaiManhua.getDefaultSource());
             ComicSourceTable.put(ManBen.TYPE, ManBen.getDefaultSource());
             ComicSourceTable.put(GFMH.TYPE, GFMH.getDefaultSource());
-            ComicSourceTable.put(ManWa.TYPE,ManWa.getDefaultSource());
+            ComicSourceTable.put(ManWa.TYPE, ManWa.getDefaultSource());
             ComicSourceTable.put(MH5.TYPE, MH5.getDefaultSource());
             ComicSourceTable.put(DuManWuApp.TYPE, DuManWuApp.getDefaultSource());
         }
