@@ -16,8 +16,8 @@ import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.core.Manga;
 import com.xyrlsz.xcimoc.manager.SourceManager;
+import com.xyrlsz.xcimoc.model.CategoryMiniComic;
 import com.xyrlsz.xcimoc.model.Comic;
-import com.xyrlsz.xcimoc.model.MiniComic;
 import com.xyrlsz.xcimoc.model.Source;
 import com.xyrlsz.xcimoc.parser.Category;
 import com.xyrlsz.xcimoc.parser.Parser;
@@ -48,7 +48,7 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
     private static final int STATE_DOING = 1;
     private static final int STATE_DONE = 3;
     private static final int STATE_NO_MORE = 4; // 没有更多数据
-    private final List<MiniComic> mComicList = new ArrayList<>();
+    private final List<CategoryMiniComic> mComicList = new ArrayList<>();
     @BindViews({R.id.category_spinner_subject, R.id.category_spinner_area, R.id.category_spinner_reader,
             R.id.category_spinner_year, R.id.category_spinner_progress, R.id.category_spinner_order})
     List<AppCompatSpinner> mSpinnerList;
@@ -373,7 +373,7 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
                             }
                             if (list != null && !list.isEmpty()) {
                                 for (Comic comic : list) {
-                                    mComicList.add(new MiniComic(comic));
+                                    mComicList.add(new CategoryMiniComic(comic));
                                 }
 
                                 // 根据返回数据数量判断是否还有更多数据

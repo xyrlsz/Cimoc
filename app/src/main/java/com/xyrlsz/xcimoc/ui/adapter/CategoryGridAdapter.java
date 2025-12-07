@@ -20,7 +20,7 @@ import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.fresco.ControllerBuilderProvider;
 import com.xyrlsz.xcimoc.manager.PreferenceManager;
-import com.xyrlsz.xcimoc.model.MiniComic;
+import com.xyrlsz.xcimoc.model.CategoryMiniComic;
 import com.xyrlsz.xcimoc.utils.FrescoUtils;
 import com.xyrlsz.xcimoc.utils.STConvertUtils;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
@@ -30,11 +30,11 @@ import java.util.List;
 public class CategoryGridAdapter extends RecyclerView.Adapter<CategoryGridAdapter.ViewHolder> {
 
     private final Context mContext;
-    private final List<MiniComic> mList;
+    private final List<CategoryMiniComic> mList;
     private OnComicClickListener mListener;
     private ControllerBuilderProvider mProvider;
 
-    public CategoryGridAdapter(Context context, List<MiniComic> list) {
+    public CategoryGridAdapter(Context context, List<CategoryMiniComic> list) {
         this.mContext = context;
         this.mList = list;
     }
@@ -57,7 +57,7 @@ public class CategoryGridAdapter extends RecyclerView.Adapter<CategoryGridAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        MiniComic comic = mList.get(position);
+        CategoryMiniComic comic = mList.get(position);
 
         // 封面
 //        Uri uri = Uri.parse(comic.getCover());
@@ -128,7 +128,8 @@ public class CategoryGridAdapter extends RecyclerView.Adapter<CategoryGridAdapte
     }
 
     public interface OnComicClickListener {
-        void onComicClick(MiniComic comic);
+
+        void onComicClick(CategoryMiniComic comic);
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
