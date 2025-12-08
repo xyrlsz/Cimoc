@@ -9,7 +9,6 @@ import com.xyrlsz.xcimoc.model.Source;
 import com.xyrlsz.xcimoc.model.SourceDao;
 import com.xyrlsz.xcimoc.source.Baozi;
 import com.xyrlsz.xcimoc.source.BuKa;
-import com.xyrlsz.xcimoc.source.Cartoonmad;
 import com.xyrlsz.xcimoc.source.CopyMH;
 import com.xyrlsz.xcimoc.source.DM5;
 import com.xyrlsz.xcimoc.source.DongManManHua;
@@ -69,7 +68,7 @@ public class UpdateHelper {
 //            ComicSourceTable.put(Animx2.TYPE, Animx2.getDefaultSource());
             ComicSourceTable.put(Baozi.TYPE, Baozi.getDefaultSource());
             ComicSourceTable.put(BuKa.TYPE, BuKa.getDefaultSource());
-            ComicSourceTable.put(Cartoonmad.TYPE, Cartoonmad.getDefaultSource());
+//            ComicSourceTable.put(Cartoonmad.TYPE, Cartoonmad.getDefaultSource());
             ComicSourceTable.put(CopyMH.TYPE, CopyMH.getDefaultSource());
             ComicSourceTable.put(DM5.TYPE, DM5.getDefaultSource());
             ComicSourceTable.put(HotManga.TYPE, HotManga.getDefaultSource());

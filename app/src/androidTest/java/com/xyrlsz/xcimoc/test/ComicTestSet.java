@@ -2,7 +2,7 @@ package com.xyrlsz.xcimoc.test;
 
 import com.xyrlsz.xcimoc.source.Baozi;
 import com.xyrlsz.xcimoc.source.BuKa;
-import com.xyrlsz.xcimoc.source.Cartoonmad;
+
 import com.xyrlsz.xcimoc.source.CopyMH;
 import com.xyrlsz.xcimoc.source.DM5;
 import com.xyrlsz.xcimoc.source.DongManManHua;
@@ -33,7 +33,7 @@ public class ComicTestSet {
 //        comicTestSet.put(Animx2.TYPE, "index-comic-name-女子學院的男生-id-24755");
         comicTestSet.put(Baozi.TYPE, "yirenzhixia-dongmantang");
         comicTestSet.put(BuKa.TYPE, "modoujingbingdenuli");
-        comicTestSet.put(Cartoonmad.TYPE, "3583");
+//        comicTestSet.put(Cartoonmad.TYPE, "3583");
         comicTestSet.put(CopyMH.TYPE, "wueyxingxuanlv");
         comicTestSet.put(DM5.TYPE, "manhua-ruoyetongxuexiangrangnimingbaixinyi");
 //        comicTestSet.put(Dmzj.TYPE, "benghuai3rd");

@@ -10,7 +10,7 @@ import com.xyrlsz.xcimoc.model.SourceDao.Properties;
 import com.xyrlsz.xcimoc.parser.MangaParser;
 import com.xyrlsz.xcimoc.source.Baozi;
 import com.xyrlsz.xcimoc.source.BuKa;
-import com.xyrlsz.xcimoc.source.Cartoonmad;
+
 import com.xyrlsz.xcimoc.source.CopyMH;
 import com.xyrlsz.xcimoc.source.DM5;
 import com.xyrlsz.xcimoc.source.DongManManHua;
@@ -126,9 +126,9 @@ public class SourceManager {
                 case BuKa.TYPE:
                     parser = new BuKa(source);
                     break;
-                case Cartoonmad.TYPE:
-                    parser = new Cartoonmad(source);
-                    break;
+//                case Cartoonmad.TYPE:
+//                    parser = new Cartoonmad(source);
+//                    break;
 //                case Animx2.TYPE:
 //                    parser = new Animx2(source);
 //                    break;

@@ -8,7 +8,6 @@ import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.manager.SourceManager;
 import com.xyrlsz.xcimoc.source.Baozi;
 import com.xyrlsz.xcimoc.source.BuKa;
-import com.xyrlsz.xcimoc.source.Cartoonmad;
 import com.xyrlsz.xcimoc.source.CopyMH;
 import com.xyrlsz.xcimoc.source.DM5;
 import com.xyrlsz.xcimoc.source.DongManManHua;
@@ -71,7 +70,7 @@ public class BrowserFilter extends BaseActivity {
 //        list.add(Animx2.TYPE);
         list.add(Baozi.TYPE);
         list.add(BuKa.TYPE);
-        list.add(Cartoonmad.TYPE);
+//        list.add(Cartoonmad.TYPE);
         list.add(CopyMH.TYPE);
         list.add(DM5.TYPE);
         list.add(HotManga.TYPE);
