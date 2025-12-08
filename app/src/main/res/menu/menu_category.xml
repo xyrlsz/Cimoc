@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/category_refresh"
+        android:icon="@drawable/raphaelrefresh"
+        android:title="@string/category_refresh"
+        app:showAsAction="ifRoom" />
+</menu>

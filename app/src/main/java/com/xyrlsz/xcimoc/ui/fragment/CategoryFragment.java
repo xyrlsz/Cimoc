@@ -3,6 +3,9 @@ package com.xyrlsz.xcimoc.ui.fragment;
 import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.util.Pair;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
@@ -39,7 +42,6 @@ import butterknife.BindView;
 import butterknife.BindViews;
 import butterknife.OnClick;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
 
 
@@ -47,7 +49,7 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
     private static final int STATE_NULL = 0;
     private static final int STATE_DOING = 1;
     private static final int STATE_DONE = 3;
-    private static final int STATE_NO_MORE = 4; // 没有更多数据
+    //    private static final int STATE_NO_MORE = 4; // 没有更多数据
     private final List<CategoryMiniComic> mComicList = new ArrayList<>();
     @BindViews({R.id.category_spinner_subject, R.id.category_spinner_area, R.id.category_spinner_reader,
             R.id.category_spinner_year, R.id.category_spinner_progress, R.id.category_spinner_order})
@@ -92,19 +94,27 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
         }
     }
 
-    @Override
-    protected void initData() {
+    private void updateSourceList() {
         mSourceManager = SourceManager.getInstance(this);
         List<Source> sourceList = mSourceManager.listEnable();
         mSourceList = new LinkedList<>();
         for (Source source : sourceList) {
-            mCategory = mSourceManager.getParser(source.getType()).getCategory();
-            if (mCategory != null) {
-                mSourceList.add(new Pair<>(source.getTitle(), Integer.toString(source.getType())));
+            if (source.getEnable()) {
+                mCategory = mSourceManager.getParser(source.getType()).getCategory();
+                if (mCategory != null) {
+                    mSourceList.add(new Pair<>(source.getTitle(), Integer.toString(source.getType())));
+                }
             }
         }
         mSource = Integer.parseInt(mSourceList.get(0).second);
         mCategorySourceSpinner.setAdapter(new CategoryAdapter(getContext(), mSourceList));
+        mCategorySourceSpinner.setSelection(0);
+    }
+
+    @Override
+    protected void initData() {
+        updateSourceList();
+
         mCategorySourceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -365,51 +375,60 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
             state.state = STATE_DOING;
             mCompositeSubscription.add(Manga.getCategoryComic(parser, format, ++state.page)
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Action1<List<Comic>>() {
-                        @Override
-                        public void call(List<Comic> list) {
-                            if (state.page == 1) {
-                                mComicList.clear();
+                    .subscribe(list -> {
+                        if (state.page == 1) {
+                            mComicList.clear();
+                        }
+                        if (list != null && !list.isEmpty()) {
+                            for (Comic comic : list) {
+                                mComicList.add(new CategoryMiniComic(comic));
                             }
-                            if (list != null && !list.isEmpty()) {
-                                for (Comic comic : list) {
-                                    mComicList.add(new CategoryMiniComic(comic));
-                                }
 
-                                // 根据返回数据数量判断是否还有更多数据
-                                if (list.size() >= 20) { // 假设每页20条
-                                    state.state = STATE_DONE; // 可以加载下一页
-                                } else {
-                                    state.state = STATE_NULL; // 没有更多数据
-                                }
-
-                                ThreadRunUtils.runOnMainThread(() -> {
-                                    int start = mComicList.size() - list.size();
-                                    if (start > 0) {
-                                        categoryGridAdapter.notifyItemRangeInserted(start, list.size());
-                                    } else {
-                                        categoryGridAdapter.notifyDataSetChanged();
-                                    }
-                                    // 可以添加加载完成的提示
-                                });
+                            // 根据返回数据数量判断是否还有更多数据
+                            if (list.size() >= 20) { // 假设每页20条
+                                state.state = STATE_DONE; // 可以加载下一页
                             } else {
-                                // 没有更多数据了
-                                state.state = STATE_NULL;
-                                // 可以显示"没有更多数据"的提示
+                                state.state = STATE_NULL; // 没有更多数据
                             }
 
+                            ThreadRunUtils.runOnMainThread(() -> {
+                                int start = mComicList.size() - list.size();
+                                if (start > 0) {
+                                    categoryGridAdapter.notifyItemRangeInserted(start, list.size());
+                                } else {
+                                    categoryGridAdapter.notifyDataSetChanged();
+                                }
+                                // 可以添加加载完成的提示
+                            });
+                        } else {
+                            // 没有更多数据了
+                            state.state = STATE_NULL;
+                            // 可以显示"没有更多数据"的提示
                         }
-                    }, new Action1<Throwable>() {
-                        @Override
-                        public void call(Throwable throwable) {
-                            throwable.printStackTrace();
-                            state.state = STATE_DONE; // 出错后允许重试
-//                            if (state.page == 1) {
-//
-//                            }
-                        }
+
+                    }, throwable -> {
+                        throwable.printStackTrace();
+                        state.state = STATE_DONE; // 出错后允许重试
                     }));
         }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_category, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.category_refresh:
+                updateSourceList();
+                mComicList.clear();
+                categoryGridAdapter.notifyDataSetChanged();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private String getSpinnerValue(AppCompatSpinner spinner) {
