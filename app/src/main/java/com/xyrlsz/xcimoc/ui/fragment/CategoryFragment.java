@@ -424,8 +424,8 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
         switch (item.getItemId()) {
             case R.id.category_refresh:
                 updateSourceList();
-                mComicList.clear();
-                categoryGridAdapter.notifyDataSetChanged();
+                // mComicList.clear();
+                // categoryGridAdapter.notifyDataSetChanged();
                 break;
         }
         return super.onOptionsItemSelected(item);
