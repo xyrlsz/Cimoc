@@ -258,7 +258,9 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
 
                 @Override
                 public void onFail() {
-                    HintUtils.showToast(getAppContext(), "再漫画登录失败");
+                    if (!username.isEmpty()) {
+                        HintUtils.showToast(getAppContext(), "再漫画登录失败");
+                    }
                 }
             }, username, passwordMd5);
         } else if (autoSign) {
