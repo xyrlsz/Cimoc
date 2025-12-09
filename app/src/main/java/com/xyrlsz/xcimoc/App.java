@@ -32,6 +32,7 @@ import com.xyrlsz.xcimoc.ui.activity.MainActivity;
 import com.xyrlsz.xcimoc.ui.adapter.GridAdapter;
 import com.xyrlsz.xcimoc.utils.DocumentUtils;
 import com.xyrlsz.xcimoc.utils.FrescoUtils;
+import com.xyrlsz.xcimoc.utils.HintUtils;
 import com.xyrlsz.xcimoc.utils.KomiicUtils;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
@@ -247,9 +248,9 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
                 @Override
                 public void onSuccess() {
                     if (autoSign) {
-                        ZaiManhuaSignUtils.CheckSigned(isSigned -> {
+                        ZaiManhuaSignUtils.CheckSigned(getAppContext(), isSigned -> {
                             if (!isSigned) {
-                                ZaiManhuaSignUtils.SignIn();
+                                ZaiManhuaSignUtils.SignIn(getAppContext());
                             }
                         });
                     }
@@ -257,13 +258,13 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
 
                 @Override
                 public void onFail() {
-
+                    HintUtils.showToast(getAppContext(), "再漫画登录失败");
                 }
             }, username, passwordMd5);
         } else if (autoSign) {
-            ZaiManhuaSignUtils.CheckSigned(isSigned -> {
+            ZaiManhuaSignUtils.CheckSigned(getAppContext(), isSigned -> {
                 if (!isSigned) {
-                    ZaiManhuaSignUtils.SignIn();
+                    ZaiManhuaSignUtils.SignIn(getAppContext());
                 }
             });
         }

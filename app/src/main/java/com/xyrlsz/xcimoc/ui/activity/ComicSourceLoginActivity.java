@@ -154,7 +154,7 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
             mZaiAutoSign.setChecked(autoSign);
             mZaiAutoSign.setVisibility(View.VISIBLE);
 
-            ZaiManhuaSignUtils.CheckSigned(isSigned -> {
+            ZaiManhuaSignUtils.CheckSigned(getApplicationContext(), isSigned -> {
                 if (isSigned) {
                     ThreadRunUtils.runOnMainThread(() -> mZaiAutoSign.setSummary(getString(R.string.is_sign)));
                 }
@@ -560,11 +560,11 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
 
     @OnLongClick(R.id.comic_login_zai_auto_sign)
     void onZaiAutoSignLongClick() {
-        ZaiManhuaSignUtils.CheckSigned(isSigned -> {
+        ZaiManhuaSignUtils.CheckSigned(getApplicationContext(), isSigned -> {
             if (isSigned) {
                 HintUtils.showToast(getApplicationContext(), "再漫画已签到");
             } else {
-                ZaiManhuaSignUtils.SignIn();
+                ZaiManhuaSignUtils.SignIn(getApplicationContext());
             }
         });
     }

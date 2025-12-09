@@ -29,8 +29,8 @@ import okhttp3.Response;
 
 public class ZaiManhuaSignUtils {
 
-    public static void CheckSigned(CheckSignCallback callback) {
-        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.ZAI_SHARED, MODE_PRIVATE);
+    public static void CheckSigned(Context context, CheckSignCallback callback) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(Constants.ZAI_SHARED, MODE_PRIVATE);
         Request request = new Request.Builder()
                 .url("https://m.zaimanhua.com/lpi/v1/task/list?_v=15")
                 .addHeader("Authorization", "Bearer " + sharedPreferences.getString(ZAI_SHARED_TOKEN, ""))
@@ -110,8 +110,8 @@ public class ZaiManhuaSignUtils {
     }
 
     // 签到
-    public static void SignIn() {
-        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.ZAI_SHARED, MODE_PRIVATE);
+    public static void SignIn(Context context) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(Constants.ZAI_SHARED, MODE_PRIVATE);
         String token = sharedPreferences.getString(Constants.ZAI_SHARED_TOKEN, "");
         Request request = new Request.Builder()
                 .url("https://m.zaimanhua.com/lpi/v1/task/sign_in?_v=15")
@@ -124,12 +124,13 @@ public class ZaiManhuaSignUtils {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 e.printStackTrace();
+                HintUtils.showToast(context, "再漫画签到失败");
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if (response.isSuccessful()) {
-                    HintUtils.showToast(App.getAppContext(), "再漫画签到成功");
+                    HintUtils.showToast(context, "再漫画签到成功");
                 }
             }
         });
