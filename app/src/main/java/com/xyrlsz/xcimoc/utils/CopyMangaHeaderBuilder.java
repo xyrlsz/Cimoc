@@ -15,7 +15,8 @@ import okhttp3.Headers;
  * <a href="https://github.com/venera-app/venera-configs/blob/main/copy_manga.js">...</a>
  */
 
-public class CopyMangaHeaderBuilder {
+public record CopyMangaHeaderBuilder(String token, String deviceInfo, String device,
+                                     String pseudoId, String copyRegion) {
 
     // 固定参数
     private static final String SECRET_BASE64 = "M2FmMDg1OTAzMTEwMzJlZmUwNjYwNTUwYTA1NjNhNTM=";
@@ -26,12 +27,6 @@ public class CopyMangaHeaderBuilder {
     private static final String VERSION = "3.0.0";
     private static final String UMSTRING = "b4c89ca4104ea9a97750314d791520ac";
     private static final String REGION = "1";
-
-    private final String token;
-    private final String deviceInfo;
-    private final String device;
-    private final String pseudoId;
-    private final String copyRegion;
 
     public CopyMangaHeaderBuilder(String token, String deviceInfo, String device, String pseudoId) {
         this(token, deviceInfo, device, pseudoId, REGION);
@@ -88,7 +83,10 @@ public class CopyMangaHeaderBuilder {
             throw new Exception("生成 Headers 失败", e);
         }
     }
-    /** HMAC-SHA256 签名并输出十六进制字符串 */
+
+    /**
+     * HMAC-SHA256 签名并输出十六进制字符串
+     */
     private static String hmacSHA256Hex(byte[] key, byte[] message) throws Exception {
         try {
             Mac mac = Mac.getInstance("HmacSHA256");
@@ -100,7 +98,9 @@ public class CopyMangaHeaderBuilder {
         }
     }
 
-    /** 字节数组转 hex 字符串 */
+    /**
+     * 字节数组转 hex 字符串
+     */
     private static String bytesToHex(byte[] bytes) {
         StringBuilder sb = new StringBuilder(bytes.length * 2);
         for (byte b : bytes) {
@@ -109,12 +109,16 @@ public class CopyMangaHeaderBuilder {
         return sb.toString();
     }
 
-    /** 随机生成 deviceinfo */
+    /**
+     * 随机生成 deviceinfo
+     */
     public static String generateDeviceInfo() {
         return randomInt(1000000, 9999999) + "V-" + randomInt(1000, 9999);
     }
 
-    /** 随机生成 device */
+    /**
+     * 随机生成 device
+     */
     @SuppressLint("DefaultLocale")
     public static String generateDevice() {
         Random r = new Random();
@@ -130,7 +134,9 @@ public class CopyMangaHeaderBuilder {
                 randA1, randA2, randD, randA3, part1, part2);
     }
 
-    /** 随机生成 pseudoid */
+    /**
+     * 随机生成 pseudoid
+     */
     public static String generatePseudoId() {
         String chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         StringBuilder sb = new StringBuilder();
