@@ -130,26 +130,28 @@ public class DownloadFragment extends GridFragment implements DownloadView {
                 }
                 break;
             case DIALOG_REQUEST_OUTPUT:
-                showProgressDialog();
-                ThreadRunUtils.runTaskObserveOnUI(() -> {
-                    int output = bundle.getInt(EXTRA_DIALOG_RESULT_INDEX);
-                    switch (output) {
-                        case OPERATION_OUTPUT_SIMPLE:
-                            outputComic(ComicUtils.SIMPLE);
-                            break;
-                        case OPERATION_OUTPUT_ZIP:
-                            outputComic(ComicUtils.ZIP);
-                            break;
-                        case OPERATION_OUTPUT_EPUB:
-                            outputComic(ComicUtils.EPUB);
-                            break;
-                        case OPERATION_OUTPUT_CBZ:
-                            outputComic(ComicUtils.CBZ);
-                            break;
-                    }
-                }, () -> {
-
-                });
+                if (isDownload) {
+                    HintUtils.showToast(getActivity(), R.string.download_ask_stop);
+                } else {
+                    showProgressDialog();
+                    ThreadRunUtils.runOnIOThread(() -> {
+                        int output = bundle.getInt(EXTRA_DIALOG_RESULT_INDEX);
+                        switch (output) {
+                            case OPERATION_OUTPUT_SIMPLE:
+                                outputComic(ComicUtils.SIMPLE);
+                                break;
+                            case OPERATION_OUTPUT_ZIP:
+                                outputComic(ComicUtils.ZIP);
+                                break;
+                            case OPERATION_OUTPUT_EPUB:
+                                outputComic(ComicUtils.EPUB);
+                                break;
+                            case OPERATION_OUTPUT_CBZ:
+                                outputComic(ComicUtils.CBZ);
+                                break;
+                        }
+                    });
+                }
 
                 break;
             default:

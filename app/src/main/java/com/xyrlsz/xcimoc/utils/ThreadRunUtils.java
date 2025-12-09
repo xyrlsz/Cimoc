@@ -10,7 +10,11 @@ public class ThreadRunUtils {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(aBoolean -> runnable.run());
     }
-
+    public static void runOnIOThread(Runnable runnable) {
+        Observable.just(true)
+                .observeOn(Schedulers.io())
+                .subscribe(aBoolean -> runnable.run());
+    }
     public static void runTaskObserveOnUI(Runnable io, Runnable ui) {
 
         Observable.create((Observable.OnSubscribe<Void>) subscriber -> {
