@@ -8,6 +8,7 @@ import android.util.Pair;
 import com.github.houbb.opencc4j.util.ZhConverterUtil;
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.manager.ChapterManager;
+import com.xyrlsz.xcimoc.manager.ComicManager;
 import com.xyrlsz.xcimoc.manager.SourceManager;
 import com.xyrlsz.xcimoc.model.Chapter;
 import com.xyrlsz.xcimoc.model.Comic;
@@ -224,6 +225,9 @@ public class Manga {
                             } else {
                                 html = getResponseBody(App.getHttpClient(), request);
                             }
+                        }
+                        if(comic.getId()==null){
+                            ComicManager.getInstance(parser).updateOrInsert(comic);
                         }
                         Long sourceComic = IdCreator.createSourceComic(comic);
                         list = parser.parseChapter(html, comic, sourceComic);

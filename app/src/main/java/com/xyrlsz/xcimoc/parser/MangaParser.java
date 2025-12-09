@@ -3,6 +3,8 @@ package com.xyrlsz.xcimoc.parser;
 import android.net.Uri;
 import android.util.Pair;
 
+import com.xyrlsz.xcimoc.App;
+import com.xyrlsz.xcimoc.component.AppGetter;
 import com.xyrlsz.xcimoc.core.Manga;
 import com.xyrlsz.xcimoc.model.Chapter;
 import com.xyrlsz.xcimoc.model.Comic;
@@ -23,8 +25,7 @@ import okhttp3.Request;
 /**
  * Created by Hiroshi on 2016/8/22.
  */
-public abstract class MangaParser implements Parser {
-
+public abstract class MangaParser implements Parser, AppGetter {
     protected String mTitle;
     protected List<UrlFilter> filter = new ArrayList<>();
     private Category mCategory;
@@ -36,6 +37,11 @@ public abstract class MangaParser implements Parser {
 
     public static Source getDefaultSource() {
         return new Source(null, null, -100, true, null);
+    }
+
+    @Override
+    public App getAppInstance() {
+        return App.getApp();
     }
 
     protected void init(Source source, Category category) {
