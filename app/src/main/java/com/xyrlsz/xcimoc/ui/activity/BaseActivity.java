@@ -19,6 +19,7 @@ import com.xyrlsz.xcimoc.ui.view.BaseView;
 import com.xyrlsz.xcimoc.ui.widget.ViewUtils;
 import com.xyrlsz.xcimoc.utils.HintUtils;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
+import com.xyrlsz.xcimoc.utils.ThreadRunUtils;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -154,12 +155,16 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
     }
 
     public void showProgressDialog() {
-        mProgressDialog.show(getSupportFragmentManager(), null);
+        ThreadRunUtils.runOnMainThread(()->{
+            mProgressDialog.show(getSupportFragmentManager(), null);
+        });
     }
 
     public void hideProgressDialog() {
-        // 可能 onSaveInstanceState 后任务结束，需要取消对话框，直接 dismiss 会抛异常
-        mProgressDialog.dismissAllowingStateLoss();
+        ThreadRunUtils.runOnMainThread(()->{
+            // 可能 onSaveInstanceState 后任务结束，需要取消对话框，直接 dismiss 会抛异常
+            mProgressDialog.dismissAllowingStateLoss();
+        });
     }
 
 }

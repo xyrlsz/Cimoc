@@ -9,6 +9,7 @@ import androidx.core.content.ContextCompat;
 
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
+import com.xyrlsz.xcimoc.utils.ThreadRunUtils;
 
 import butterknife.BindView;
 
@@ -47,9 +48,11 @@ public abstract class BackActivity extends BaseActivity {
     }
 
     protected void hideProgressBar() {
-        if (mProgressBar != null) {
-            mProgressBar.setVisibility(View.GONE);
-        }
+        ThreadRunUtils.runOnMainThread(()->{
+            if (mProgressBar != null) {
+                mProgressBar.setVisibility(View.GONE);
+            }
+        });
     }
 
 }
