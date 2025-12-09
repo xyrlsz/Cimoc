@@ -259,7 +259,7 @@ public class DownloadService extends Service implements AppGetter {
                     }
                 }
             }
-            comic.setChapterCount(list.size());
+//            comic.setChapterCount(list.size());
             mComicManager.update(comic);
         }
 
