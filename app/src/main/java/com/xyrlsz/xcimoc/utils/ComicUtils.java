@@ -114,7 +114,8 @@ public class ComicUtils {
             try {
                 export(context, mSourceManager, comic, finalChapterList, outputRoot, coverCacheBytes, callback, type);
             } catch (IOException e) {
-                HintUtils.showToast(context, "导出失败: " + e.getMessage());
+//                HintUtils.showToast(context, "导出失败: " + e.getMessage());
+                callback.onFailure("导出失败: " + e.getMessage());
             }
 
         }
