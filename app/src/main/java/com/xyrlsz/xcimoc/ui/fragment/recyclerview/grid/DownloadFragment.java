@@ -63,9 +63,9 @@ public class DownloadFragment extends GridFragment implements DownloadView {
         // showProgressDialog();
         ComicUtils.OutputDownloadedComic(this, getContext(), type, mPresenter.load(mSavedId), new ComicUtils.OutputComicCallback() {
             @Override
-            public void onSuccess() {
+            public void onSuccess(String path) {
                 ThreadRunUtils.runOnMainThread(() -> hideProgressDialog());
-                HintUtils.showToast(getActivity(), R.string.common_execute_success);
+                HintUtils.showToast(getActivity(), getString(R.string.common_execute_success) + ": " + path);
             }
 
             @Override

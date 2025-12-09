@@ -227,7 +227,7 @@ public class ComicUtils {
                         }
                     }
                     if (allSuccess) {
-                        callback.onSuccess();
+                        callback.onSuccess(UriUtils.convertContentToFilePath(comicRoot.getUri()));
                     } else {
                         callback.onFailure("部分章节导出失败");
                     }
@@ -326,7 +326,7 @@ public class ComicUtils {
             }
 
             zos.close();
-            callback.onSuccess();
+            callback.onSuccess(UriUtils.convertContentToFilePath(zipFile.getUri()));
 
         } catch (Exception e) {
             callback.onFailure("ZIP 导出异常: " + e.getMessage());
@@ -501,7 +501,7 @@ public class ComicUtils {
             zos.closeEntry();
 
             zos.close();
-            callback.onSuccess();
+            callback.onSuccess(UriUtils.convertContentToFilePath(epubFile.getUri()));
         } catch (Exception e) {
             callback.onFailure("EPUB 导出失败: " + e.getMessage());
         }
@@ -594,7 +594,7 @@ public class ComicUtils {
             }
 
             zos.close();
-            callback.onSuccess();
+            callback.onSuccess(UriUtils.convertContentToFilePath(cbzFile.getUri()));
 
         } catch (Exception e) {
             callback.onFailure("CBZ 导出异常: " + e.getMessage());
@@ -647,7 +647,7 @@ public class ComicUtils {
     }
 
     public interface OutputComicCallback {
-        void onSuccess();
+        void onSuccess(String path);
 
         void onFailure(String message);
     }
