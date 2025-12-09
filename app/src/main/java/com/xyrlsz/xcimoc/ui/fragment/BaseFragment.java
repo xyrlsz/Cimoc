@@ -19,6 +19,7 @@ import com.xyrlsz.xcimoc.presenter.BasePresenter;
 import com.xyrlsz.xcimoc.ui.activity.BaseActivity;
 import com.xyrlsz.xcimoc.ui.view.BaseView;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
+import com.xyrlsz.xcimoc.utils.ThreadRunUtils;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -95,9 +96,11 @@ public abstract class BaseFragment extends Fragment implements BaseView {
     }
 
     protected void hideProgressBar() {
-        if (mProgressBar != null) {
-            mProgressBar.setVisibility(View.GONE);
-        }
+        ThreadRunUtils.runOnMainThread(()->{
+            if (mProgressBar != null) {
+                mProgressBar.setVisibility(View.GONE);
+            }
+        });
     }
 
 }
