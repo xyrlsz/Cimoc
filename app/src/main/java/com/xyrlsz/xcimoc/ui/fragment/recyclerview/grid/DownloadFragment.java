@@ -1,5 +1,6 @@
 package com.xyrlsz.xcimoc.ui.fragment.recyclerview.grid;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -64,8 +65,16 @@ public class DownloadFragment extends GridFragment implements DownloadView {
         ComicUtils.OutputDownloadedComic(this, getContext(), type, mPresenter.load(mSavedId), new ComicUtils.OutputComicCallback() {
             @Override
             public void onSuccess(String path) {
-                ThreadRunUtils.runOnMainThread(() -> hideProgressDialog());
-                HintUtils.showToast(getActivity(), getString(R.string.common_execute_success) + ": " + path);
+                ThreadRunUtils.runOnMainThread(() ->{
+                    hideProgressDialog();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    builder.setMessage("已导出至: " + path)
+                            .setTitle(R.string.common_execute_success)
+                            .setPositiveButton(R.string.app_dialog_ok, null)
+                            .show();
+                });
+//                HintUtils.showToast(getActivity(), getString(R.string.common_execute_success) + ": " + path);
+
             }
 
             @Override
@@ -93,10 +102,10 @@ public class DownloadFragment extends GridFragment implements DownloadView {
                         fragment.show(requireActivity().getSupportFragmentManager(), null);
                         break;
                     case OPERATION_OUTPUT:
-                        ItemDialogFragment outputfragment = ItemDialogFragment.newInstance(R.string.common_operation_select,
+                        ItemDialogFragment outputFragment = ItemDialogFragment.newInstance(R.string.common_operation_select,
                                 getOutputType(), DIALOG_REQUEST_OUTPUT);
-                        outputfragment.setTargetFragment(this, DIALOG_REQUEST_OUTPUT);
-                        outputfragment.show(requireActivity().getSupportFragmentManager(), null);
+                        outputFragment.setTargetFragment(this, DIALOG_REQUEST_OUTPUT);
+                        outputFragment.show(requireActivity().getSupportFragmentManager(), null);
                         break;
 
                     default:
