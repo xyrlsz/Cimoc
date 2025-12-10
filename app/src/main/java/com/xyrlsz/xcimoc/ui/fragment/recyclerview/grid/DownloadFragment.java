@@ -65,7 +65,7 @@ public class DownloadFragment extends GridFragment implements DownloadView {
         ComicUtils.OutputDownloadedComic(this, getContext(), type, mPresenter.load(mSavedId), new ComicUtils.OutputComicCallback() {
             @Override
             public void onSuccess(String path) {
-                ThreadRunUtils.runOnMainThread(() ->{
+                ThreadRunUtils.runOnMainThread(() -> {
                     hideProgressDialog();
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     builder.setMessage("已导出至: " + path)
@@ -149,6 +149,17 @@ public class DownloadFragment extends GridFragment implements DownloadView {
                             case OPERATION_OUTPUT_CBZ:
                                 outputComic(ComicUtils.CBZ);
                                 break;
+                        }
+                    }, new ThreadRunUtils.TaskCallback() {
+                        @Override
+                        public void onSuccess() {
+
+                        }
+
+                        @Override
+                        public void onError(String msg) {
+                            hideProgressDialog();
+                            HintUtils.showToast(getActivity(), msg);
                         }
                     });
                 }
