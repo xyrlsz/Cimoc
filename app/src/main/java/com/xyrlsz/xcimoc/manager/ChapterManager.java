@@ -101,9 +101,9 @@ public class ChapterManager {
                     @Override
                     public Void call() {
                         if (chapter.getId() == null) {
-                            insert(chapter);
+                            runInTx(() -> insert(chapter));
                         } else {
-                            update(chapter);
+                            runInTx(() -> update(chapter));
                         }
                         return null;
                     }
@@ -122,8 +122,8 @@ public class ChapterManager {
                 .filter(chapter -> chapter.getId() != null)
                 .flatMap((Func1<Chapter, Observable<?>>) chapter -> Observable.fromCallable(new Callable<Void>() {
                     @Override
-                    public Void call() throws Exception {
-                        mChapterDao.insertOrReplace(chapter);
+                    public Void call() {
+                        runInTx(() -> mChapterDao.insertOrReplace(chapter));
                         return null;
                     }
                 }).subscribeOn(Schedulers.io()), 10)

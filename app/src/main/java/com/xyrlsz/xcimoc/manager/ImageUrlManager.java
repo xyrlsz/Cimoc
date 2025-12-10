@@ -69,9 +69,9 @@ public class ImageUrlManager {
                     @Override
                     public Void call() {
                         if (imageUrl.getId() == null) {
-                            insert(imageUrl);
+                            runInTx(() -> insert(imageUrl));
                         } else {
-                            update(imageUrl);
+                            runInTx(() -> update(imageUrl));
                         }
                         return null;
                     }
@@ -90,7 +90,7 @@ public class ImageUrlManager {
                 .flatMap((Func1<ImageUrl, Observable<?>>) imageUrl -> Observable.fromCallable(new Callable<Void>() {
                     @Override
                     public Void call() {
-                        mImageUrlDao.insertOrReplace(imageUrl);
+                        runInTx(() -> mImageUrlDao.insertOrReplace(imageUrl));
                         return null;
                     }
                 }).subscribeOn(Schedulers.io()), 10)
