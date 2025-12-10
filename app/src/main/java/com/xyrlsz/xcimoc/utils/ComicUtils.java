@@ -39,6 +39,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 /**
@@ -210,7 +211,8 @@ public class ComicUtils {
 
         Observable.merge(tasks)
                 .toList()
-                .observeOn(Schedulers.io())
+//                .observeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(results -> {
                     boolean allSuccess;
