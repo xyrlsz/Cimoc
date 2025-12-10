@@ -41,6 +41,7 @@ import java.io.InterruptedIOException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -250,18 +251,20 @@ public class DownloadService extends Service implements AppGetter {
                 map.put(task.getPath(), task);
             }
             if (!map.isEmpty()) {
+                List<Chapter> res = new LinkedList<>();
                 for (Chapter chapter : list) {
                     Task task = map.get(chapter.getPath());
                     if (task != null) {
                         chapter.setDownload(true);
                         chapter.setCount(task.getProgress());
                         chapter.setComplete(task.isFinish());
-                        mChapterManager.update(chapter);
+//                        mChapterManager.update(chapter);
+                        res.add(chapter);
                     }
                 }
+                mChapterManager.runInTx(() -> mChapterManager.updateOrInsert(res));
             }
-//            comic.setChapterCount(list.size());
-            mComicManager.update(comic);
+
         }
 
         private boolean RequestAndWrite(CimocDocumentFile parent, Request request, int num, String url) throws InterruptedIOException {
