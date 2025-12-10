@@ -5,8 +5,11 @@ import com.xyrlsz.xcimoc.model.ImageUrl;
 import com.xyrlsz.xcimoc.model.ImageUrlDao;
 
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import rx.Observable;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by HaleyDu on 2020/8/27.
@@ -54,21 +57,44 @@ public class ImageUrlManager {
     }
 
     public void updateOrInsert(List<ImageUrl> imageUrlList) {
-        for (ImageUrl imageurl : imageUrlList) {
-            if (imageurl.getId() == null) {
-                insert(imageurl);
-            } else {
-                update(imageurl);
-            }
-        }
+//        for (ImageUrl imageurl : imageUrlList) {
+//            if (imageurl.getId() == null) {
+//                insert(imageurl);
+//            } else {
+//                update(imageurl);
+//            }
+//        }
+        Observable.from(imageUrlList)
+                .flatMap((Func1<ImageUrl, Observable<?>>) imageUrl -> Observable.fromCallable(new Callable<Void>() {
+                    @Override
+                    public Void call() {
+                        if (imageUrl.getId() == null) {
+                            insert(imageUrl);
+                        } else {
+                            update(imageUrl);
+                        }
+                        return null;
+                    }
+                }).subscribeOn(Schedulers.io()), 10)
+                .subscribe();
     }
 
     public void insertOrReplace(List<ImageUrl> imageUrlList) {
-        for (ImageUrl imageurl : imageUrlList) {
-            if (imageurl.getId() != null) {
-                mImageUrlDao.insertOrReplace(imageurl);
-            }
-        }
+//        for (ImageUrl imageurl : imageUrlList) {
+//            if (imageurl.getId() != null) {
+//                mImageUrlDao.insertOrReplace(imageurl);
+//            }
+//        }
+        Observable.from(imageUrlList)
+                .filter(imageUrl -> imageUrl.getId() != null)
+                .flatMap((Func1<ImageUrl, Observable<?>>) imageUrl -> Observable.fromCallable(new Callable<Void>() {
+                    @Override
+                    public Void call() {
+                        mImageUrlDao.insertOrReplace(imageUrl);
+                        return null;
+                    }
+                }).subscribeOn(Schedulers.io()), 10)
+                .subscribe();
     }
 
     public void update(ImageUrl imageurl) {
