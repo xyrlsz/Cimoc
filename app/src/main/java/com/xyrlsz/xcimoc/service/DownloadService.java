@@ -238,7 +238,8 @@ public class DownloadService extends Service implements AppGetter {
 
             completeDownload(mTask.getId());
             Comic comic = mComicManager.load(mTask.getSource(), mTask.getCid());
-            List<Chapter> chapterList = mChapterManager.getChapterList(IdCreator.createSourceComic(comic));
+            Long sourceComic = IdCreator.createSourceComic(comic);
+            List<Chapter> chapterList = mChapterManager.getChapterList(sourceComic);
             updateChapterList(chapterList);
         }
 

@@ -20,7 +20,7 @@ public class ChapterManager {
 
     private static ChapterManager mInstance;
 
-    private ChapterDao mChapterDao;
+    private final ChapterDao mChapterDao;
 
     private ChapterManager(AppGetter getter) {
         mChapterDao = getter.getAppInstance().getDaoSession().getChapterDao();
@@ -88,13 +88,27 @@ public class ChapterManager {
     }
 
     public void updateOrInsert(List<Chapter> chapterList) {
-        for (Chapter chapter : chapterList) {
-            if (chapter.getId() == null) {
-                insert(chapter);
-            } else {
-                update(chapter);
-            }
-        }
+//        for (Chapter chapter : chapterList) {
+//            if (chapter.getId() == null) {
+//                insert(chapter);
+//            } else {
+//                update(chapter);
+//            }
+//        }
+
+        Observable.from(chapterList)
+                .flatMap((Func1<Chapter, Observable<?>>) chapter -> Observable.fromCallable(new Callable<Void>() {
+                    @Override
+                    public Void call() {
+                        if (chapter.getId() == null) {
+                            insert(chapter);
+                        } else {
+                            update(chapter);
+                        }
+                        return null;
+                    }
+                }).subscribeOn(Schedulers.io()), 10)
+                .subscribe();
     }
 
     public void insertOrReplace(List<Chapter> chapterList) {
@@ -125,6 +139,13 @@ public class ChapterManager {
 
     public void deleteByKey(long key) {
         mChapterDao.deleteByKey(key);
+    }
+
+    public void deleteBySourceComic(Long sourceComic) {
+        mChapterDao.queryBuilder()
+                .where(Properties.SourceComic.eq(sourceComic))
+                .buildDelete()
+                .executeDeleteWithoutDetachingEntities();
     }
 
     public void insert(Chapter chapter) {

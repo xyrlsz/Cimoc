@@ -20,9 +20,10 @@ import rx.Observable;
  */
 public class ComicManager {
 
+    public static int RESULT_DELETE = 0;
+    public static int RESULT_UPDATE = 1;
     private static ComicManager mInstance;
-
-    private ComicDao mComicDao;
+    private final ComicDao mComicDao;
 
     private ComicManager(AppGetter getter) {
         mComicDao = getter.getAppInstance().getDaoSession().getComicDao();
@@ -184,12 +185,18 @@ public class ComicManager {
         mComicDao.insertOrReplace(comic);
     }
 
-    public void updateOrDelete(Comic comic) {
+    public void delete(Comic comic) {
+        mComicDao.delete(comic);
+        comic.setId(null);
+    }
+
+    public int updateOrDelete(Comic comic) {
         if (comic.getFavorite() == null && comic.getHistory() == null && comic.getDownload() == null) {
-            mComicDao.delete(comic);
-            comic.setId(null);
+            delete(comic);
+            return RESULT_DELETE;
         } else {
             update(comic);
+            return RESULT_UPDATE;
         }
     }
 

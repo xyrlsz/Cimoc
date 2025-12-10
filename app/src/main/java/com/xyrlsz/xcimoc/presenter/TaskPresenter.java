@@ -1,6 +1,7 @@
 package com.xyrlsz.xcimoc.presenter;
 
 import com.xyrlsz.xcimoc.core.Download;
+import com.xyrlsz.xcimoc.manager.ChapterManager;
 import com.xyrlsz.xcimoc.manager.ComicManager;
 import com.xyrlsz.xcimoc.manager.SourceManager;
 import com.xyrlsz.xcimoc.manager.TaskManager;
@@ -12,6 +13,7 @@ import com.xyrlsz.xcimoc.rx.RxBus;
 import com.xyrlsz.xcimoc.rx.RxEvent;
 import com.xyrlsz.xcimoc.rx.ToAnotherList;
 import com.xyrlsz.xcimoc.ui.view.TaskView;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -31,6 +33,7 @@ public class TaskPresenter extends BasePresenter<TaskView> {
     private TaskManager mTaskManager;
     private ComicManager mComicManager;
     private SourceManager mSourceManager;
+    private ChapterManager mChapterManager;
     private Comic mComic;
 
     @Override
@@ -38,6 +41,7 @@ public class TaskPresenter extends BasePresenter<TaskView> {
         mTaskManager = TaskManager.getInstance(mBaseView);
         mComicManager = ComicManager.getInstance(mBaseView);
         mSourceManager = SourceManager.getInstance(mBaseView);
+        mChapterManager = ChapterManager.getInstance(mBaseView);
     }
 
     @SuppressWarnings("unchecked")
@@ -198,7 +202,10 @@ public class TaskPresenter extends BasePresenter<TaskView> {
                 }
                 if (isEmpty) {
                     mComic.setDownload(null);
-                    mComicManager.updateOrDelete(mComic);
+                    int res = mComicManager.updateOrDelete(mComic);
+                    if (res == ComicManager.RESULT_DELETE) {
+                        mChapterManager.deleteBySourceComic(IdCreator.createSourceComic(mComic));
+                    }
                     Download.delete(mBaseView.getAppInstance().getDocumentFile(), mComic,
                             mSourceManager.getParser(mComic.getSource()).getTitle());
                 }

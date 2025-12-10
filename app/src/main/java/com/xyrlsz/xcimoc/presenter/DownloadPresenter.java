@@ -3,6 +3,7 @@ package com.xyrlsz.xcimoc.presenter;
 import androidx.collection.LongSparseArray;
 
 import com.xyrlsz.xcimoc.core.Download;
+import com.xyrlsz.xcimoc.manager.ChapterManager;
 import com.xyrlsz.xcimoc.manager.ComicManager;
 import com.xyrlsz.xcimoc.manager.SourceManager;
 import com.xyrlsz.xcimoc.manager.TaskManager;
@@ -13,6 +14,7 @@ import com.xyrlsz.xcimoc.rx.RxEvent;
 import com.xyrlsz.xcimoc.rx.ToAnotherList;
 import com.xyrlsz.xcimoc.ui.view.DownloadView;
 import com.xyrlsz.xcimoc.utils.ComicUtils;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,12 +34,14 @@ public class DownloadPresenter extends BasePresenter<DownloadView> {
     private ComicManager mComicManager;
     private TaskManager mTaskManager;
     private SourceManager mSourceManager;
+    private ChapterManager mChapterManager;
 
     @Override
     protected void onViewAttach() {
         mComicManager = ComicManager.getInstance(mBaseView);
         mTaskManager = TaskManager.getInstance(mBaseView);
         mSourceManager = SourceManager.getInstance(mBaseView);
+        mChapterManager = ChapterManager.getInstance(mBaseView);
     }
 
     @SuppressWarnings("unchecked")
@@ -88,7 +92,10 @@ public class DownloadPresenter extends BasePresenter<DownloadView> {
                                 Comic comic = mComicManager.load(id);
                                 mTaskManager.deleteByComicId(id);
                                 comic.setDownload(null);
-                                mComicManager.updateOrDelete(comic);
+                                int res = mComicManager.updateOrDelete(comic);
+                                if (res == ComicManager.RESULT_DELETE) {
+                                    mChapterManager.deleteBySourceComic(IdCreator.createSourceComic(comic));
+                                }
                                 return comic;
                             }
                         });

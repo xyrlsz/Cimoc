@@ -1,5 +1,6 @@
 package com.xyrlsz.xcimoc.presenter;
 
+import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.core.Backup;
 import com.xyrlsz.xcimoc.core.Download;
 import com.xyrlsz.xcimoc.core.Manga;
@@ -20,6 +21,7 @@ import com.xyrlsz.xcimoc.utils.IdCreator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -247,8 +249,30 @@ public class DetailPresenter extends BasePresenter<DetailView> {
         mCompositeSubscription.add(Observable.create(new Observable.OnSubscribe<ArrayList<Task>>() {
                     @Override
                     public void call(Subscriber<? super ArrayList<Task>> subscriber) {
-                        final ArrayList<Task> result = getTaskList(dList);
+                        List<Chapter> dchapterList = new LinkedList<>();
+                        List<Chapter> cchapterList = new LinkedList<>();
+                        if (mComic.getId() == null) {
+                            ComicManager.getInstance(App.getApp()).updateOrInsert(mComic);
+                        }
+                        for (Chapter chapter : dList) {
+                            Long newSourceComic = IdCreator.recreateSourceComic(chapter.getSourceComic(), mComic.getId());
+                            Long newChapterId = IdCreator.recreateChapterId(newSourceComic, chapter.getId());
+                            chapter.setId(newChapterId);
+                            chapter.setSourceComic(newSourceComic);
+                            dchapterList.add(chapter);
+                        }
+                        for (Chapter chapter : cList) {
+                            Long newSourceComic = IdCreator.recreateSourceComic(chapter.getSourceComic(), mComic.getId());
+                            Long newChapterId = IdCreator.recreateChapterId(newSourceComic, chapter.getId());
+                            chapter.setId(newChapterId);
+                            chapter.setSourceComic(newSourceComic);
+                            cchapterList.add(chapter);
+                        }
+                        ChapterManager.getInstance(App.getApp()).insertOrReplace(cchapterList);
+                        final ArrayList<Task> result = getTaskList(dchapterList);
                         mComic.setDownload(System.currentTimeMillis());
+                        mComic.setHistory(System.currentTimeMillis());
+                        RxBus.getInstance().post(new RxEvent(RxEvent.EVENT_COMIC_READ, new MiniComic(mComic)));
                         mComicManager.runInTx(new Runnable() {
                             @Override
                             public void run() {

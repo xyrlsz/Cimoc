@@ -1,11 +1,13 @@
 package com.xyrlsz.xcimoc.presenter;
 
+import com.xyrlsz.xcimoc.manager.ChapterManager;
 import com.xyrlsz.xcimoc.manager.ComicManager;
 import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.MiniComic;
 import com.xyrlsz.xcimoc.rx.RxEvent;
 import com.xyrlsz.xcimoc.rx.ToAnotherList;
 import com.xyrlsz.xcimoc.ui.view.HistoryView;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 
 import java.util.List;
 
@@ -19,10 +21,12 @@ import rx.functions.Func1;
 public class HistoryPresenter extends BasePresenter<HistoryView> {
 
     private ComicManager mComicManager;
+    private ChapterManager mChapterManager;
 
     @Override
     protected void onViewAttach() {
         mComicManager = ComicManager.getInstance(mBaseView);
+        mChapterManager = ChapterManager.getInstance(mBaseView);
     }
 
     @SuppressWarnings("unchecked")
@@ -72,7 +76,10 @@ public class HistoryPresenter extends BasePresenter<HistoryView> {
     public void delete(long id) {
         Comic comic = mComicManager.load(id);
         comic.setHistory(null);
-        mComicManager.updateOrDelete(comic);
+        int res = mComicManager.updateOrDelete(comic);
+        if (res == ComicManager.RESULT_DELETE) {
+            mChapterManager.deleteBySourceComic(IdCreator.createSourceComic(comic));
+        }
         mBaseView.onHistoryDelete(id);
     }
 
@@ -86,7 +93,10 @@ public class HistoryPresenter extends BasePresenter<HistoryView> {
                             public void run() {
                                 for (Comic comic : list) {
                                     comic.setHistory(null);
-                                    mComicManager.updateOrDelete(comic);
+                                    int res = mComicManager.updateOrDelete(comic);
+                                    if (res == ComicManager.RESULT_DELETE) {
+                                        mChapterManager.deleteBySourceComic(IdCreator.createSourceComic(comic));
+                                    }
                                 }
                             }
                         });

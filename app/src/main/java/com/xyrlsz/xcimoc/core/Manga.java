@@ -226,9 +226,9 @@ public class Manga {
                                 html = getResponseBody(App.getHttpClient(), request);
                             }
                         }
-                        if(comic.getId()==null){
-                            ComicManager.getInstance(parser).updateOrInsert(comic);
-                        }
+//                        if(comic.getId()==null){
+//                            ComicManager.getInstance(parser).updateOrInsert(comic);
+//                        }
                         Long sourceComic = IdCreator.createSourceComic(comic);
                         list = parser.parseChapter(html, comic, sourceComic);
                         if (list == null) {
