@@ -40,7 +40,7 @@
         <item>默認</item>
         <item>簡體</item>
         <item>繁體</item>
-<!--        <item>繁體（台灣詞彙）</item>-->
+        <!--        <item>繁體（台灣詞彙）</item>-->
     </string-array>
     <string-array name="event_items">
         <item>無</item>
@@ -61,5 +61,9 @@
     <string-array name="search_type_items">
         <item>標題</item>
         <item>作者</item>
+    </string-array>
+    <string-array name="copy_region_items">
+        <item>海外線路</item>
+        <item>大陸線路</item>
     </string-array>
 </resources>

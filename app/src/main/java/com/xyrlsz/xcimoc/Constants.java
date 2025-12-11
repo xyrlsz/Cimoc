@@ -25,6 +25,9 @@ public final class Constants {
     public static final String VOMIC_SHARED_COOKIES = "cookies";
     public static final String VOMIC_SHARED_USERNAME = "username";
 
+    public static final String COPYMG_SHARED = "copyMh";
+    public static final String COPYMG_SHARED_REGION = "region";
+
     public static final String WEBDAV_SHARED = "webdav";
     public static final String WEBDAV_SHARED_URL = "url";
     public static final String WEBDAV_SHARED_USERNAME = "username";

@@ -72,4 +72,8 @@
         <item>标题</item>
         <item>作者</item>
     </string-array>
+    <string-array name="copy_region_items">
+        <item>海外线路</item>
+        <item>大陆线路</item>
+    </string-array>
 </resources>

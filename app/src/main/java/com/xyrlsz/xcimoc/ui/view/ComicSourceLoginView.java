@@ -1,6 +1,8 @@
 package com.xyrlsz.xcimoc.ui.view;
 
-public interface ComicSourceLoginView extends BaseView {
+import com.xyrlsz.xcimoc.component.DialogCaller;
+
+public interface ComicSourceLoginView extends BaseView, DialogCaller {
     void onLoginSuccess();
 
     void onLoginFail();

@@ -406,4 +406,7 @@
     <string name="auto_sign_summary">未签到</string>
     <string name="is_sign">已签到</string>
     <string name="category_refresh">刷新</string>
+    <string name="copymg">拷贝漫画</string>
+    <string name="copy_region_title">CDN线路</string>
+    <string name="copy_region_summary">拷贝漫画的CDN线路源</string>
 </resources>

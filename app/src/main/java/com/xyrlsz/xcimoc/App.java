@@ -59,7 +59,6 @@ import okhttp3.OkHttpClient;
  */
 public class App extends MultiDexApplication implements AppGetter, Thread.UncaughtExceptionHandler {
 
-    private static final String CRASH_FILE_PATH = "/Cimoc/Log/crash";
     private static final TrustAllCerts trustAllCerts = new TrustAllCerts();
     public static int mWidthPixels;
     public static int mHeightPixels;

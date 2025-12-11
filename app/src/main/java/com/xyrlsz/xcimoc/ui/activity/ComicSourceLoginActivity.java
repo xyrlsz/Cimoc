@@ -35,6 +35,7 @@ import com.xyrlsz.xcimoc.ui.view.ComicSourceLoginView;
 import com.xyrlsz.xcimoc.ui.widget.LoginDialog;
 import com.xyrlsz.xcimoc.ui.widget.Option;
 import com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference;
+import com.xyrlsz.xcimoc.ui.widget.preference.ChoicePreference;
 import com.xyrlsz.xcimoc.utils.HintUtils;
 import com.xyrlsz.xcimoc.utils.KomiicUtils;
 import com.xyrlsz.xcimoc.utils.StringUtils;
@@ -64,35 +65,45 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class ComicSourceLoginActivity extends BackActivity implements ComicSourceLoginView {
+    private final int DIALOG_COPY_REGION = 1000;
     @BindView(R.id.comic_login_layout)
     View mComicSourceLoginLayout;
-
     @BindView(R.id.comic_login_dmzj_login)
     Option mDmzjLogin;
     @BindView(R.id.comic_login_dmzj_logout)
     ImageButton mDmzjLogout;
-
     @BindView(R.id.comic_login_komiic_login)
     Option mkomiicLogin;
     @BindView(R.id.comic_login_komiic_logout)
     ImageButton mKomiicLogout;
-
     @BindView(R.id.comic_login_vomicmh_login)
     Option mVoMiCMHLogin;
     @BindView(R.id.comic_login_vomicmh_logout)
     ImageButton mVoMiCMHLogout;
-
     @BindView(R.id.comic_login_zai_login)
     Option mZaiLogin;
     @BindView(R.id.comic_login_zai_logout)
     ImageButton mZaiLogout;
-
     @BindView(R.id.comic_login_zai_auto_sign)
     CheckBoxPreference mZaiAutoSign;
+    @BindView(R.id.comic_login_copy_region)
+    ChoicePreference mCopyRegion;
 
     @Override
     protected String getDefaultTitle() {
         return getString(R.string.settings_comic_login_title);
+    }
+
+    @Override
+    public void onDialogResult(int requestCode, Bundle bundle) {
+        // 实现对话框结果的回调处理
+        // 根据 requestCode 处理不同的对话框结果
+        switch (requestCode) {
+            case DIALOG_COPY_REGION:
+                int res = bundle.getInt(EXTRA_DIALOG_RESULT_INDEX);
+                mCopyRegion.setValue(res);
+                break;
+        }
     }
 
     @Override
@@ -167,6 +178,10 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        SharedPreferences copySharedPreferences = getSharedPreferences(Constants.COPYMG_SHARED, MODE_PRIVATE);
+        mCopyRegion.bindPreference(getSupportFragmentManager(), copySharedPreferences, Constants.COPYMG_SHARED_REGION, 0, R.array.copy_region_items, DIALOG_COPY_REGION);
+
     }
 
     @Override

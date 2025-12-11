@@ -6,10 +6,13 @@ import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_ORDER;
 import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_SUBJECT;
 import static com.xyrlsz.xcimoc.parser.MangaCategory.getParseFormatMap;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Pair;
 
 import com.google.common.collect.Lists;
 import com.xyrlsz.xcimoc.App;
+import com.xyrlsz.xcimoc.Constants;
 import com.xyrlsz.xcimoc.model.Chapter;
 import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.ImageUrl;
@@ -301,8 +304,10 @@ public class CopyMH extends MangaParser {
 
     @Override
     public Headers getHeader() {
+        SharedPreferences prefs = App.getAppContext().getSharedPreferences(Constants.COPYMG_SHARED, Context.MODE_PRIVATE);
+        String region = String.valueOf(prefs.getInt(Constants.COPYMG_SHARED_REGION, 0));
         CopyMangaHeaderBuilder builder =
-                new CopyMangaHeaderBuilder(null, deviceInfo, device, pseudoId);
+                new CopyMangaHeaderBuilder(null, deviceInfo, device, pseudoId, region);
         try {
             return builder.genHeaders();
         } catch (Exception e) {

@@ -371,4 +371,8 @@
     <string name="auto_sign_summary">未簽到</string>
     <string name="is_sign">已簽到</string>
     <string name="category_refresh">刷新</string>
+
+    <string name="copymg">拷貝漫畫</string>
+    <string name="copy_region_title">CDN線路</string>
+    <string name="copy_region_summary">拷貝漫畫的CDN線路源</string>
 </resources>

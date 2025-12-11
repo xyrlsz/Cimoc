@@ -181,6 +181,27 @@
                     app:summary="@string/auto_sign_summary"
                     app:title="@string/auto_sign" />
 
+                <TextView
+                    android:id="@+id/comic_login_copy"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_marginBottom="10dp"
+                    android:text="@string/copymg"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="14sp" />
+
+                <com.xyrlsz.xcimoc.ui.widget.preference.ChoicePreference
+                    android:id="@+id/comic_login_copy_region"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:title="@string/copy_region_title" />
+
+
             </LinearLayout>
         </ScrollView>
     </LinearLayout>

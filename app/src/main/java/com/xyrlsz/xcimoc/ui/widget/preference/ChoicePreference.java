@@ -1,6 +1,7 @@
 package com.xyrlsz.xcimoc.ui.widget.preference;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,7 +22,8 @@ import com.xyrlsz.xcimoc.ui.widget.Option;
 
 public class ChoicePreference extends Option implements View.OnClickListener {
 
-    private PreferenceManager mPreferenceManager;
+    private final PreferenceManager mPreferenceManager;
+    private SharedPreferences mSharedPreferences = null;
     private FragmentManager mFragmentManager;
     private Fragment mTargetFragment;
     private String mPreferenceKey;
@@ -60,16 +62,30 @@ public class ChoicePreference extends Option implements View.OnClickListener {
     }
 
     public void bindPreference(FragmentManager manager, String key, int def, int item, int request) {
-        bindPreference(manager, null, key, def, item, request);
+        bindPreference(manager, null, null, key, def, item, request);
+    }
+
+    public void bindPreference(FragmentManager manager, SharedPreferences sharedPreferences, String key, int def, int item, int request) {
+        bindPreference(manager, null, sharedPreferences, key, def, item, request);
     }
 
     public void bindPreference(FragmentManager manager, BaseFragment fragment, String key, int def, int item, int request) {
+        bindPreference(manager, fragment, null, key, def, item, request);
+    }
+
+    public void bindPreference(FragmentManager manager, BaseFragment fragment, SharedPreferences sharedPreferences, String key, int def, int item, int request) {
         mFragmentManager = manager;
         mTargetFragment = fragment;
         mPreferenceKey = key;
-        mChoice = mPreferenceManager.getInt(key, def);
         mItems = getResources().getStringArray(item);
         mRequestCode = request;
+        mSharedPreferences = sharedPreferences;
+        if (mSharedPreferences != null) {
+            mChoice = mSharedPreferences.getInt(key, def);
+            int s = mChoice;
+        } else {
+            mChoice = mPreferenceManager.getInt(key, def);
+        }
         mSummaryView.setText(mItems[mChoice < mItems.length ? mChoice : 0]);
     }
 
@@ -78,7 +94,11 @@ public class ChoicePreference extends Option implements View.OnClickListener {
     }
 
     public void setValue(int choice) {
-        mPreferenceManager.putInt(mPreferenceKey, choice);
+        if (mSharedPreferences != null) {
+            mSharedPreferences.edit().putInt(mPreferenceKey, choice).apply();
+        } else {
+            mPreferenceManager.putInt(mPreferenceKey, choice);
+        }
         mChoice = choice;
         mSummaryView.setText(mItems[mChoice < mItems.length ? mChoice : 0]);
     }
