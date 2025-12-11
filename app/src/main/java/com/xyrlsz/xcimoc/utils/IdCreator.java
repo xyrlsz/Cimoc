@@ -18,19 +18,18 @@ public class IdCreator {
         return createSourceComic(comic.getSource(), comic.getId());
     }
 
-    public static Long createSourceComic(int source, Long id) {
-//        return Long.parseLong(source + "0" + (id == null? "00" : id));
-        id = id == null ? 0 : id;
-        return (id << 16) | (source & 0xFFFF);
+    public static Long createSourceComic(int source, Long comicID) {
+        comicID = comicID == null ? 0 : comicID;
+        return (comicID << 16) | (source & 0xFFFF);
     }
 
-    public static Long recreateSourceComic(Long oldSourceComic, Long newId) {
+    public static Long recreateSourceComic(Long oldSourceComic, Long newComicID) {
         if (oldSourceComic == null) {
             return null;
         }
         int source = (int) (oldSourceComic & 0xFFFFL);
-        newId = newId == null ? 0L : newId;
-        return (newId << 16) | (source & 0xFFFFL);
+        newComicID = newComicID == null ? 0L : newComicID;
+        return (newComicID << 16) | (source & 0xFFFFL);
     }
 
     public static Long recreateChapterId(Long newSourceComic, Long oldChapterId) {
