@@ -7,8 +7,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 
 import com.xyrlsz.xcimoc.R;
-
-import org.apache.commons.lang3.StringUtils;
+import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -45,8 +44,8 @@ public class ComicFilterDialog extends Dialog {
                 callBack.OnClickCancel();
                 dismiss();
             } else if (!isCompleted && !isNotCompleted) {
-                 isCompleted = true;
-                 isNotCompleted = true;
+                isCompleted = true;
+                isNotCompleted = true;
             }
             callBack.OnClickCommit(keyword, isCompleted, isNotCompleted);
             dismiss();

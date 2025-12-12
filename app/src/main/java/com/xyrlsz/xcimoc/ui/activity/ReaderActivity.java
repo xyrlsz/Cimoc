@@ -307,7 +307,7 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
 
     @OnClick(R.id.reader_back_btn)
     void onBackClick() {
-        onBackPressed();
+        getOnBackPressedDispatcher().onBackPressed();
     }
 
     @Override

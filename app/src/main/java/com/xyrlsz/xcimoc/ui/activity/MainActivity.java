@@ -149,71 +149,6 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
         initFragment();
     }
 
-//    private void login() {
-//        HintUtils.showToast(MainActivity.this, R.string.user_login_tips);
-//        WebAuthProvider.init(auth0)
-//            .withScheme("demo")
-//            .withScope("openid profile email")
-//            .withAudience(String.format("https://%s/userinfo", getString(R.string.com_auth0_domain)))
-//            .start(MainActivity.this, new AuthCallback() {
-//                @Override
-//                public void onFailure(@NonNull final Dialog dialog) {
-//                    runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            dialog.show();
-//                        }
-//                    });
-//                }
-//
-//                @Override
-//                public void onFailure(final AuthenticationException exception) {
-//                    runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-////                            Toast.makeText(MainActivity.this, "Error: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
-//                            HintUtils.showToast(MainActivity.this, R.string.user_login_failed);
-//                        }
-//                    });
-//                }
-//
-//                @Override
-//                public void onSuccess(@NonNull final Credentials credentials) {
-//                    runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-
-    /// /                            Toast.makeText(MainActivity.this, "Logged in: " + credentials.getAccessToken(), Toast.LENGTH_LONG).show();
-//                            HintUtils.showToast(MainActivity.this, R.string.user_login_sucess);
-//                            mPreference.putString(PreferenceManager.PREFERENCES_USER_TOCKEN, credentials.getAccessToken());
-//                            getUesrInfo();
-//                        }
-//                    });
-//                }
-//            });
-//    }
-//
-//    private void logoutShowDialog(){
-//        MessageDialogFragment fragment = MessageDialogFragment.newInstance(R.string.user_login_logout,
-//            R.string.user_login_logout_tips, true, DIALOG_REQUEST_LOGOUT);
-//        fragment.show(getSupportFragmentManager(), null);
-//    }
-//
-//    private void logout() {
-//        HintUtils.showToast(MainActivity.this, R.string.user_login_logout_sucess);
-//        mPreference.putString(PreferenceManager.PREFERENCES_USER_EMAIL, "");
-//        mPreference.putString(PreferenceManager.PREFERENCES_USER_TOCKEN, "");
-//        mPreference.putString(PreferenceManager.PREFERENCES_USER_NAME, "");
-//        mPreference.putString(PreferenceManager.PREFERENCES_USER_ID, "");
-//    }
-//
-//    private void loginout() {
-//        if (mPreference.getString(PreferenceManager.PREFERENCES_USER_ID, "") == "") {
-//            login();
-//        } else {
-//            logoutShowDialog();
-//        }
-//    }
     @Override
     protected void initData() {
         mPresenter.loadLast();
@@ -228,45 +163,10 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
         }
         mPresenter.getSourceBaseUrl();
 
-//        showAuthorNotice();
         showPermission();
-//        getMh50KeyIv();
 
     }
 
-
-//    public void getUesrInfo() {
-//        String accessTocken = mPreference.getString(PreferenceManager.PREFERENCES_USER_TOCKEN, null);
-//        if (accessTocken != null) {
-//            AuthenticationAPIClient authentication = new AuthenticationAPIClient(auth0);
-//            authentication
-//                .userInfo(accessTocken)
-//                .start(new BaseCallback<UserProfile, AuthenticationException>() {
-//                    @Override
-//                    public void onSuccess(UserProfile information) {
-//                        //user information received
-//                        mPreference.putString(PreferenceManager.PREFERENCES_USER_EMAIL, information.getEmail());
-//                        mPreference.putString(PreferenceManager.PREFERENCES_USER_NAME, information.getName());
-//                        mPreference.putString(PreferenceManager.PREFERENCES_USER_ID, (String) information.getExtraInfo().get("sub"));
-//                    }
-//
-//                    @Override
-//                    public void onFailure(AuthenticationException error) {
-//                        //user information request failed
-//                        HintUtils.showToast(MainActivity.this, R.string.user_login_failed);
-//                    }
-//                });
-//        } else {
-//            HintUtils.showToast(MainActivity.this, R.string.user_login_failed);
-//        }
-//    }
-
-//    @Override
-//    protected void initUser() {
-//        //auth0
-//        auth0 = new Auth0(this);
-//        auth0.setOIDCConformant(true);
-//    }
 
     private void initDrawerToggle() {
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, 0, 0) {
@@ -377,18 +277,6 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
         super.onSaveInstanceState(outState);
     }
 
-//    @Override
-//    public void onBackPressed() {
-//        super.onBackPressed();
-//        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
-//            mDrawerLayout.closeDrawer(GravityCompat.START);
-//        } else if (System.currentTimeMillis() - mExitTime > 2000) {
-//            HintUtils.showToast(this, R.string.main_double_click);
-//            mExitTime = System.currentTimeMillis();
-//        } else {
-//            finish();
-//        }
-//    }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -640,69 +528,6 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
             ((ThemeResponsive) mFragmentArray.valueAt(i)).onThemeChange(primary, accent);
         }
     }
-
-//    private void showAuthorNotice() {
-//        FirebaseRemoteConfig mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
-//        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
-//                .setMinimumFetchIntervalInSeconds(3600)
-//                .build();
-//        mFirebaseRemoteConfig.setConfigSettingsAsync(configSettings);
-//        mFirebaseRemoteConfig.setDefaultsAsync(R.xml.remote_config);
-//        mFirebaseRemoteConfig.fetchAndActivate()
-//                .addOnCompleteListener(this, new OnCompleteListener<Boolean>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<Boolean> task) {
-//                        if (task.isSuccessful()) {
-//                            boolean updated = task.getResult();
-//                            Log.d("FireBase_FirstOpenMsg", "Config params updated: " + updated);
-//                        } else {
-//                            Log.d("FireBase_FirstOpenMsg", "Config params updated Failed. ");
-//                        }
-//
-//                        String showMsg = mFirebaseRemoteConfig.getString("first_open_msg");
-//                        if (!mPreference.getBoolean(PreferenceManager.PREF_MAIN_NOTICE, false)
-//                                || showMsg.compareTo(mPreference.getString(PreferenceManager.PREF_MAIN_NOTICE_LAST, "")) != 0) {
-//                            mPreference.putString(PreferenceManager.PREF_MAIN_NOTICE_LAST, showMsg);
-//                            MessageDialogFragment fragment = MessageDialogFragment.newInstance(R.string.main_notice,
-//                                    showMsg, false, DIALOG_REQUEST_NOTICE);
-//                            fragment.show(getSupportFragmentManager(), null);
-//                        }
-//                    }
-//                });
-//    }
-
-//    private void getMh50KeyIv() {
-//        FirebaseRemoteConfig mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
-//        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
-//                .setMinimumFetchIntervalInSeconds(60*60)
-//                .build();
-//        mFirebaseRemoteConfig.setConfigSettingsAsync(configSettings);
-//        mFirebaseRemoteConfig.setDefaultsAsync(R.xml.remote_config);
-//        mFirebaseRemoteConfig.fetchAndActivate()
-//                .addOnCompleteListener(this, new OnCompleteListener<Boolean>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<Boolean> task) {
-//                        if (task.isSuccessful()) {
-//                            boolean updated = task.getResult();
-//                            Log.d("FireBase_FirstOpenMsg", "Config params updated: " + updated);
-//                        } else {
-//                            Log.d("FireBase_FirstOpenMsg", "Config params updated Failed. ");
-//                        }
-//
-//                        String mh50_key = mFirebaseRemoteConfig.getString("mh50_key_msg");
-//                        String mh50_iv = mFirebaseRemoteConfig.getString("mh50_iv_msg");
-//
-//                        if (!mh50_key.equals(mPreference.getString(PreferenceManager.PREFERENCES_MH50_KEY_MSG, "KA58ZAQ321oobbG8"))){
-//                            mPreference.putString(PreferenceManager.PREFERENCES_MH50_KEY_MSG, mh50_key);
-//                            Toast.makeText(MainActivity.this,"漫画堆key已更新",Toast.LENGTH_LONG).show();
-//                        }
-//                        if (!mh50_iv.equals(mPreference.getString(PreferenceManager.PREFERENCES_MH50_IV_MSG, "A1B2C3DEF1G321o8"))){
-//                            mPreference.putString(PreferenceManager.PREFERENCES_MH50_IV_MSG, mh50_iv);
-//                            Toast.makeText(MainActivity.this,"漫画堆iv已更新",Toast.LENGTH_LONG).show();
-//                        }
-//                    }
-//                });
-//    }
 
     private void showPermission() {
         SharedPreferences sharedPreferences = getSharedPreferences("showPermission", MODE_PRIVATE);

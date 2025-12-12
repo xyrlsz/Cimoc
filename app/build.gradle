@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'org.greenrobot.greendao'
-apply plugin: 'com.google.protobuf'
+//apply plugin: 'com.google.protobuf'
 
 //def getGitCommitHash = { ->
 //    def stdout = new ByteArrayOutputStream()
@@ -131,30 +131,30 @@ android {
     }
     sourceSets {
         main {
-            proto {
-                srcDir 'src/main/proto' // proto 文件目录
-            }
+//            proto {
+//                srcDir 'src/main/proto' // proto 文件目录
+//            }
         }
     }
 }
-protobuf {
-    protoc {
-        artifact = 'com.google.protobuf:protoc:4.33.1' // 使用与依赖相同的版本
-    }
-
-    generateProtoTasks {
-        all().each { task ->
-            task.builtins {
-                java {
-                    option "lite"
-                }
-                kotlin {
-                    option "lite"
-                }
-            }
-        }
-    }
-}
+//protobuf {
+//    protoc {
+//        artifact = 'com.google.protobuf:protoc:4.33.1' // 使用与依赖相同的版本
+//    }
+//
+//    generateProtoTasks {
+//        all().each { task ->
+//            task.builtins {
+//                java {
+//                    option "lite"
+//                }
+//                kotlin {
+//                    option "lite"
+//                }
+//            }
+//        }
+//    }
+//}
 
 greendao {
     schemaVersion 12
@@ -174,7 +174,7 @@ dependencies {
     implementation 'androidx.activity:activity-ktx:1.11.0'
     implementation 'org.greenrobot:greendao:3.3.0'
     implementation 'com.squareup.okhttp3:okhttp:5.3.2'
-    implementation 'org.mozilla:rhino:1.8.0'
+    implementation 'org.mozilla:rhino:1.8.1'
 
     implementation 'com.facebook.fresco:fresco:3.6.0'
     implementation 'com.facebook.fresco:middleware:3.6.0'
@@ -210,14 +210,14 @@ dependencies {
         exclude group: 'xpp3', module: 'xpp3'
     }
 
-    implementation 'org.apache.commons:commons-text:1.14.0'
+//    implementation 'org.apache.commons:commons-text:1.15.0'
 
 
-    // protobuf 依赖
-    // noinspection NewerVersionAvailable
-    implementation 'com.google.protobuf:protobuf-javalite:4.33.1'
-    // noinspection NewerVersionAvailable
-    implementation 'com.google.protobuf:protobuf-kotlin-lite:4.33.1'
+//    // protobuf 依赖
+//    // noinspection NewerVersionAvailable
+//    implementation 'com.google.protobuf:protobuf-javalite:4.33.1'
+//    // noinspection NewerVersionAvailable
+//    implementation 'com.google.protobuf:protobuf-kotlin-lite:4.33.1'
 
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
 

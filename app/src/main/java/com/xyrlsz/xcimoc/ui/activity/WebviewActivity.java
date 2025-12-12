@@ -19,6 +19,8 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 
+import androidx.activity.OnBackPressedCallback;
+
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.utils.HintUtils;
@@ -37,7 +39,7 @@ public class WebviewActivity extends BackActivity {
     private LinearLayout buttonPanel;
     private FloatingActionButton loadButton;
     private FloatingActionButton exitButton;
-    private String htmlStr = "";
+    private final String htmlStr = "";
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -100,23 +102,26 @@ public class WebviewActivity extends BackActivity {
             startActivity(intent);
         });
         exitButton.setOnClickListener(v -> finish());
+        OnBackPressedCallback callback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                // 如果 WebView 可以返回上一页，则返回上一页
+                if (webView.canGoBack()) {
+                    webView.goBack();
+                } else {
+                    // 否则执行默认的返回操作
+                    getOnBackPressedDispatcher().onBackPressed();
+                }
 
+            }
+        };
+
+        getOnBackPressedDispatcher().addCallback(this, callback);
     }
 
     @Override
     protected int getLayoutRes() {
         return R.layout.activity_webview;
-    }
-
-    @Override
-    public void onBackPressed() {
-        // 如果 WebView 可以返回上一页，则返回上一页
-        if (webView.canGoBack()) {
-            webView.goBack();
-        } else {
-            // 否则执行默认的返回操作
-            super.onBackPressed();
-        }
     }
 
 

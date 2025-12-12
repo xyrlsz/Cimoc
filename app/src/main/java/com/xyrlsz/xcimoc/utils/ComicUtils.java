@@ -73,7 +73,7 @@ public class ComicUtils {
         chapterList = Lists.reverse(chapterList);
 
         String coverUrl = comic.getCover();
-        if (coverUrl == null || coverUrl.isEmpty()) {
+        if (StringUtils.isEmpty(coverUrl)) {
             callback.onFailure("封面 URL 为空");
             return;
         }

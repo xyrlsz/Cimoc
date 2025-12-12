@@ -119,4 +119,11 @@ public class StringUtils {
         return null;
     }
 
+    public static String join(String[] array, String delimiter) {
+        if (array == null || array.length == 0) {
+            return "";
+        }
+        return String.join(delimiter, array);
+    }
+
 }
