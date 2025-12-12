@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import rx.Observable;
 import rx.Subscriber;
@@ -114,7 +115,7 @@ public class Backup {
                 result.put(JSON_KEY_VERSION, 1);
                 result.put(JSON_KEY_COMIC_ARRAY, buildComicArray(list));
                 CimocDocumentFile file = DocumentUtils.getOrCreateFile(dir, "automatic.".concat(SUFFIX_CFBF));
-                DocumentUtils.writeStringToFile(resolver, file, result.toString());
+                DocumentUtils.writeStringToFile(resolver, Objects.requireNonNull(file), result.toString());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -130,7 +131,7 @@ public class Backup {
                 result.put(JSON_KEY_COMIC_ARRAY, buildComicArray(list));
                 String filename = StringUtils.getDateStringWithSuffix(SUFFIX_CFBF);
                 CimocDocumentFile file = DocumentUtils.getOrCreateFile(dir, filename);
-                DocumentUtils.writeStringToFile(resolver, file, result.toString());
+                DocumentUtils.writeStringToFile(resolver, Objects.requireNonNull(file), result.toString());
                 return list.size();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -148,7 +149,7 @@ public class Backup {
                 result.put(JSON_KEY_TAG_ARRAY, buildTagArray(list));
                 String filename = StringUtils.getDateStringWithSuffix(SUFFIX_CTBF);
                 CimocDocumentFile file = DocumentUtils.getOrCreateFile(dir, filename);
-                DocumentUtils.writeStringToFile(resolver, file, result.toString());
+                DocumentUtils.writeStringToFile(resolver, Objects.requireNonNull(file), result.toString());
                 return list.size();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -168,7 +169,7 @@ public class Backup {
 
                 String filename = StringUtils.getDateStringWithSuffix(SUFFIX_CSBF);
                 CimocDocumentFile file = DocumentUtils.getOrCreateFile(dir, filename);
-                DocumentUtils.writeStringToFile(resolver, file, result);
+                DocumentUtils.writeStringToFile(resolver, Objects.requireNonNull(file), result);
                 return settingMap.size();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -344,7 +345,7 @@ public class Backup {
 //                }
 
                 if (filename.endsWith(SUFFIX_CSBF)) {
-                    for (Map.Entry entry : entries.entrySet()) {
+                    for (Map.Entry entry : Objects.requireNonNull(entries).entrySet()) {
                         if (!entry.getKey().toString().equals(PreferenceManager.PREF_OTHER_STORAGE)) {
                             App.getPreferenceManager().putObject(entry.getKey().toString(), entry.getValue());
                         }

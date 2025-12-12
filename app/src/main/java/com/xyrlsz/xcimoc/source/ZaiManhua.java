@@ -51,10 +51,10 @@ public class ZaiManhua extends MangaParser {
     private final SharedPreferences sharedPreferences;
     //    private List<UrlFilter> filter = new ArrayList<>();
     String TOKEN = "";
-    String UID = "";
+    String UID;
     long EXP = 0;
-    String username = "";
-    String passwdMd5 = "";
+    String username;
+    String passwdMd5;
 
     public ZaiManhua(Source source) {
         init(source, new Category());

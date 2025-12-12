@@ -8,6 +8,8 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.webkit.URLUtil;
 
+import androidx.annotation.NonNull;
+
 import com.facebook.binaryresource.BinaryResource;
 import com.facebook.binaryresource.FileBinaryResource;
 import com.facebook.cache.common.CacheKey;
@@ -274,17 +276,17 @@ public class FrescoUtils {
     public static File getFileFromDiskCache(String url) throws NullPointerException {
         File localFile = null;
         if (!TextUtils.isEmpty(url)) {
-            CacheKey cacheKey = DefaultCacheKeyFactory.getInstance().getEncodedCacheKey(ImageRequest.fromUri(url), null);
+            CacheKey cacheKey = DefaultCacheKeyFactory.getInstance().getEncodedCacheKey(Objects.requireNonNull(ImageRequest.fromUri(url)), null);
             if (ImagePipelineFactory.getInstance()
                     .getDiskCachesStoreSupplier().get().getMainFileCache().hasKey(cacheKey)) {
                 BinaryResource resource = ImagePipelineFactory.getInstance()
                         .getDiskCachesStoreSupplier().get().getMainFileCache().getResource(cacheKey);
-                localFile = ((FileBinaryResource) resource).getFile();
+                localFile = ((FileBinaryResource) Objects.requireNonNull(resource)).getFile();
             } else if (ImagePipelineFactory.getInstance()
                     .getDiskCachesStoreSupplier().get().getSmallImageFileCache().hasKey(cacheKey)) {
                 BinaryResource resource = ImagePipelineFactory.getInstance()
                         .getDiskCachesStoreSupplier().get().getSmallImageFileCache().getResource(cacheKey);
-                localFile = ((FileBinaryResource) resource).getFile();
+                localFile = ((FileBinaryResource) Objects.requireNonNull(resource)).getFile();
             }
         }
         return localFile;
@@ -439,7 +441,7 @@ public class FrescoUtils {
 
         ImageRequest imageRequest = ImageRequest.fromUri(url);
         CacheKey cacheKey = DefaultCacheKeyFactory.getInstance()
-                .getEncodedCacheKey(imageRequest, null);
+                .getEncodedCacheKey(Objects.requireNonNull(imageRequest), null);
         return ImagePipelineFactory.getInstance()
                 .getDiskCachesStoreSupplier()
                 .get()
@@ -471,7 +473,7 @@ public class FrescoUtils {
         DataSource<Void> dataSource = imagePipeline.prefetchToDiskCache(imageRequest, context, Priority.HIGH);
         dataSource.subscribe(new BaseDataSubscriber<Void>() {
             @Override
-            protected void onNewResultImpl(DataSource<Void> dataSource) {
+            protected void onNewResultImpl(@NonNull DataSource<Void> dataSource) {
 
 
                 File file = copyCacheFileToDir(url, dir);
@@ -485,13 +487,13 @@ public class FrescoUtils {
             }
 
             @Override
-            public void onProgressUpdate(DataSource<Void> dataSource) {
+            public void onProgressUpdate(@NonNull DataSource<Void> dataSource) {
                 super.onProgressUpdate(dataSource);
                 listener.onProgress(dataSource.getProgress());
             }
 
             @Override
-            protected void onFailureImpl(DataSource<Void> dataSource) {
+            protected void onFailureImpl(@NonNull DataSource<Void> dataSource) {
                 listener.onFail();
             }
         }, CallerThreadExecutor.getInstance());
@@ -518,72 +520,72 @@ public class FrescoUtils {
      */
     public static class MyImageCacheStatsTracker implements ImageCacheStatsTracker {
         @Override
-        public void onBitmapCachePut(CacheKey cacheKey) {
+        public void onBitmapCachePut(@NonNull CacheKey cacheKey) {
 
         }
 
         @Override
-        public void onBitmapCacheHit(CacheKey cacheKey) {
+        public void onBitmapCacheHit(@NonNull CacheKey cacheKey) {
 
         }
 
         @Override
-        public void onBitmapCacheMiss(CacheKey cacheKey) {
+        public void onBitmapCacheMiss(@NonNull CacheKey cacheKey) {
 
         }
 
         @Override
-        public void onMemoryCachePut(CacheKey cacheKey) {
+        public void onMemoryCachePut(@NonNull CacheKey cacheKey) {
 
         }
 
         @Override
-        public void onMemoryCacheHit(CacheKey cacheKey) {
+        public void onMemoryCacheHit(@NonNull CacheKey cacheKey) {
 
         }
 
         @Override
-        public void onMemoryCacheMiss(CacheKey cacheKey) {
+        public void onMemoryCacheMiss(@NonNull CacheKey cacheKey) {
 
         }
 
         @Override
-        public void onStagingAreaHit(CacheKey cacheKey) {
+        public void onStagingAreaHit(@NonNull CacheKey cacheKey) {
 
         }
 
         @Override
-        public void onStagingAreaMiss(CacheKey cacheKey) {
+        public void onStagingAreaMiss(@NonNull CacheKey cacheKey) {
 
         }
 
         @Override
-        public void onDiskCacheHit(CacheKey cacheKey) {
+        public void onDiskCacheHit(@NonNull CacheKey cacheKey) {
             //Logger.e("ImageCacheStatsTracker---onDiskCacheHit");
         }
 
         @Override
-        public void onDiskCacheMiss(CacheKey cacheKey) {
+        public void onDiskCacheMiss(@NonNull CacheKey cacheKey) {
 
         }
 
         @Override
-        public void onDiskCacheGetFail(CacheKey cacheKey) {
+        public void onDiskCacheGetFail(@NonNull CacheKey cacheKey) {
 
         }
 
         @Override
-        public void onDiskCachePut(CacheKey cacheKey) {
+        public void onDiskCachePut(@NonNull CacheKey cacheKey) {
 
         }
 
         @Override
-        public void registerBitmapMemoryCache(MemoryCache<?, ?> bitmapMemoryCache) {
+        public void registerBitmapMemoryCache(@NonNull MemoryCache<?, ?> bitmapMemoryCache) {
 
         }
 
         @Override
-        public void registerEncodedMemoryCache(MemoryCache<?, ?> encodedMemoryCache) {
+        public void registerEncodedMemoryCache(@NonNull MemoryCache<?, ?> encodedMemoryCache) {
 
         }
     }

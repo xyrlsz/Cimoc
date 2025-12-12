@@ -1,5 +1,7 @@
 package com.xyrlsz.xcimoc.test;
 
+import androidx.annotation.NonNull;
+
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.WebSocket;
@@ -16,22 +18,22 @@ public class WebSocketLogger {
 
         webSocket = client.newWebSocket(request, new WebSocketListener() {
             @Override
-            public void onOpen(WebSocket ws, okhttp3.Response response) {
+            public void onOpen(@NonNull WebSocket ws, @NonNull okhttp3.Response response) {
                 ws.send("测试启动");
             }
 
             @Override
-            public void onMessage(WebSocket ws, String text) {
+            public void onMessage(@NonNull WebSocket ws, @NonNull String text) {
                 // 可选：接收服务端消息
             }
 
             @Override
-            public void onClosed(WebSocket ws, int code, String reason) {
+            public void onClosed(@NonNull WebSocket ws, int code, @NonNull String reason) {
                 // 连接关闭
             }
 
             @Override
-            public void onFailure(WebSocket ws, Throwable t, okhttp3.Response response) {
+            public void onFailure(@NonNull WebSocket ws, @NonNull Throwable t, okhttp3.Response response) {
                 // 连接失败
             }
         });

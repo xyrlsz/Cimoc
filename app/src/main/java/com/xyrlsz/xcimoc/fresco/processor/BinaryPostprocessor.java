@@ -2,11 +2,15 @@ package com.xyrlsz.xcimoc.fresco.processor;
 
 import android.graphics.Bitmap;
 
+import androidx.annotation.NonNull;
+
 import com.facebook.cache.common.CacheKey;
 import com.facebook.cache.common.SimpleCacheKey;
 import com.facebook.common.references.CloseableReference;
 import com.facebook.imagepipeline.bitmaps.PlatformBitmapFactory;
 import com.facebook.imagepipeline.request.BasePostprocessor;
+
+import java.util.Objects;
 
 /**
  * 二值化处理 仅用于测试
@@ -21,8 +25,9 @@ public class BinaryPostprocessor extends BasePostprocessor {
         this.url = url;
     }
 
+    @NonNull
     @Override
-    public CloseableReference<Bitmap> process(Bitmap sourceBitmap, PlatformBitmapFactory bitmapFactory) {
+    public CloseableReference<Bitmap> process(Bitmap sourceBitmap, @NonNull PlatformBitmapFactory bitmapFactory) {
         int width = sourceBitmap.getWidth();
         int height = sourceBitmap.getHeight();
 
@@ -44,7 +49,7 @@ public class BinaryPostprocessor extends BasePostprocessor {
         try {
             Bitmap bitmap = reference.get();
             bitmap.setPixels(pixels, 0, width, 0, 0, width, height);
-            return CloseableReference.cloneOrNull(reference);
+            return Objects.requireNonNull(CloseableReference.cloneOrNull(reference));
         } finally {
             CloseableReference.closeSafely(reference);
         }

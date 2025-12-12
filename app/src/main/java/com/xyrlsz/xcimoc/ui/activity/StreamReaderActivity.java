@@ -2,6 +2,7 @@ package com.xyrlsz.xcimoc.ui.activity;
 
 import android.graphics.Point;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.xyrlsz.xcimoc.App;
@@ -43,7 +44,7 @@ public class StreamReaderActivity extends ReaderActivity {
         ((ZoomableRecyclerView) mRecyclerView).setTapListenerListener(this);
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 switch (newState) {
                     case RecyclerView.SCROLL_STATE_DRAGGING:
                         hideControl();
@@ -67,7 +68,7 @@ public class StreamReaderActivity extends ReaderActivity {
             }
 
             @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 int target = mLayoutManager.findFirstVisibleItemPosition();
                 if (target != mLastPosition) {
                     ImageUrl newImage = mReaderAdapter.getItem(target);

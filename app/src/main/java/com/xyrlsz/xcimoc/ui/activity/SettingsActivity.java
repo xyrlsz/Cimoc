@@ -33,6 +33,7 @@ import com.xyrlsz.xcimoc.utils.ThemeUtils;
 
 import java.io.File;
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.BindViews;
@@ -220,7 +221,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
                     } else {
                         String path = data.getStringExtra(Extra.EXTRA_PICKER_PATH);
                         if (!StringUtils.isEmpty(path)) {
-                            CimocDocumentFile file = CimocDocumentFile.fromFile(new File(path));
+                            CimocDocumentFile file = CimocDocumentFile.fromFile(new File(Objects.requireNonNull(path)));
                             mTempStorage = file.getUri().toString();
                             mPresenter.moveFiles(file);
                         } else {

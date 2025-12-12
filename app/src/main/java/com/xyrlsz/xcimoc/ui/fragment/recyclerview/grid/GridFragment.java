@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -145,7 +146,7 @@ public abstract class GridFragment extends RecyclerViewFragment implements GridV
 
     @Override
     public void onThemeChange(@ColorRes int primary, @ColorRes int accent) {
-        mActionButton.setBackgroundTintList(ContextCompat.getColorStateList(getActivity(), accent));
+        mActionButton.setBackgroundTintList(ContextCompat.getColorStateList(requireActivity(), accent));
     }
 
     protected void showComicInfo(Comic comic, int request) {

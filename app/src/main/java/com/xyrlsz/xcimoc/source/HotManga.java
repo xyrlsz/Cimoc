@@ -42,7 +42,7 @@ public class HotManga extends MangaParser {
 
     @Override
     public Request getSearchRequest(String keyword, int page) {
-        String url = "";
+        String url;
         if (page == 1) {
             url = StringUtils.format("%s/api/v3/search/comic?platform=1&limit=30&offset=0&q=%s", website, keyword);
             return new Request.Builder()
@@ -108,7 +108,7 @@ public class HotManga extends MangaParser {
 
     @Override
     public Comic parseInfo(String html, Comic comic) {
-        JSONObject body = null;
+        JSONObject body;
         try {
             JSONObject comicInfo = new JSONObject(html).getJSONObject("results");
             body = comicInfo.getJSONObject("comic");

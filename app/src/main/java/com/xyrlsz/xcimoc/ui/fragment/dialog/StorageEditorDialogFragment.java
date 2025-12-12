@@ -6,11 +6,15 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.component.DialogCaller;
 import com.xyrlsz.xcimoc.ui.activity.DirPickerActivity;
+
+import java.util.Objects;
 
 /**
  * Created by Hiroshi on 2016/12/5.
@@ -24,6 +28,7 @@ public class StorageEditorDialogFragment extends EditorDialogFragment {
         return fragment;
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog dialog = (AlertDialog) super.onCreateDialog(savedInstanceState);
@@ -32,17 +37,17 @@ public class StorageEditorDialogFragment extends EditorDialogFragment {
         dialog.setButton(DialogInterface.BUTTON_POSITIVE, title, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int which) {
-                int requestCode = getArguments().getInt(DialogCaller.EXTRA_DIALOG_REQUEST_CODE);
+                int requestCode = requireArguments().getInt(DialogCaller.EXTRA_DIALOG_REQUEST_CODE);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     try {
                         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-                        getActivity().startActivityForResult(intent, requestCode);
+                        requireActivity().startActivityForResult(intent, requestCode);
                     } catch (ActivityNotFoundException e) {
-                        ((DialogCaller) getActivity()).onDialogResult(requestCode, null);
+                        ((DialogCaller) requireActivity()).onDialogResult(requestCode, null);
                     }
                 } else {
                     Intent intent = new Intent(getActivity(), DirPickerActivity.class);
-                    getActivity().startActivityForResult(intent, requestCode);
+                    requireActivity().startActivityForResult(intent, requestCode);
                 }
             }
         });

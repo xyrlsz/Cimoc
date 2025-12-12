@@ -5,6 +5,7 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Rect;
 import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.SwitchCompat;
 import android.view.View;
@@ -33,8 +34,9 @@ public class SourceAdapter extends BaseAdapter<Source> {
         super(context, list);
     }
 
+    @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = mInflater.inflate(R.layout.item_source, parent, false);
         return new SourceHolder(view);
     }
@@ -48,7 +50,7 @@ public class SourceAdapter extends BaseAdapter<Source> {
         viewHolder.sourceSwitch.setChecked(source.getEnable());
         viewHolder.sourceSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            public void onCheckedChanged(@NonNull CompoundButton buttonView, boolean isChecked) {
                 if (mOnItemCheckedListener != null) {
                     mOnItemCheckedListener.onItemCheckedListener(isChecked, viewHolder.getAdapterPosition());
                 }
@@ -68,7 +70,7 @@ public class SourceAdapter extends BaseAdapter<Source> {
     public RecyclerView.ItemDecoration getItemDecoration() {
         return new RecyclerView.ItemDecoration() {
             @Override
-            public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+            public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
                 int offset = parent.getWidth() / 90;
                 outRect.set(offset, 0, offset, (int) (offset * 1.5));
             }

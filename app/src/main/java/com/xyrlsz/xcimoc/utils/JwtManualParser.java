@@ -6,7 +6,7 @@ import org.json.JSONObject;
 import java.util.Base64;
 
 public  class JwtManualParser {
-    private String jwt = "";
+    private String jwt;
     public JwtManualParser(String jwt){
         this.jwt = jwt;
     }

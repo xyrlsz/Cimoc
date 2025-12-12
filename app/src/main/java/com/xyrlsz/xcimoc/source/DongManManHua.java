@@ -120,9 +120,9 @@ public class DongManManHua extends MangaParser {
         for (Node nodePage : body.list("div.detail_lst > div.paginate > a")) {
             String urlPage = nodePage.href();
             String urlPageTag = nodePage.attr("a", "class");
-            if (urlPage.equals("#") && (urlPageTag == null || urlPageTag.equals(""))) {
+            if (urlPage.equals("#") && (urlPageTag == null || urlPageTag.isEmpty())) {
                 list.addAll(parseChapter(body, sourceComic));
-            } else if (urlPageTag == null || urlPageTag.equals("")) {
+            } else if (urlPageTag == null || urlPageTag.isEmpty()) {
                 try {
                     String pageTagUrl = baseUrl + urlPage;
                     Request request = new Request.Builder()
@@ -181,7 +181,6 @@ public class DongManManHua extends MangaParser {
             );
             JSONObject motiontoonJson = new JSONObject(html1).getJSONObject("assets").getJSONObject("image");
             Iterator<String> Json_Iterator = motiontoonJson.keys();
-            i = 1;
             while (Json_Iterator.hasNext()) {
                 String key = Json_Iterator.next();
                 if (key.contains("layer")) {

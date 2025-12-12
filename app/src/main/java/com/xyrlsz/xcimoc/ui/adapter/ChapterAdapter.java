@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.xyrlsz.xcimoc.R;
@@ -39,8 +40,9 @@ public class ChapterAdapter extends BaseAdapter<Switcher<Chapter>> {
         return isButtonMode ? TYPE_BUTTON : TYPE_ITEM;
     }
 
+    @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == TYPE_ITEM) {
             View view = mInflater.inflate(R.layout.item_select, parent, false);
             return new ItemHolder(view);
@@ -79,7 +81,7 @@ public class ChapterAdapter extends BaseAdapter<Switcher<Chapter>> {
     public RecyclerView.ItemDecoration getItemDecoration() {
         return new RecyclerView.ItemDecoration() {
             @Override
-            public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+            public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
                 int offset = parent.getWidth() / 40;
                 outRect.set(offset, 0, offset, (int) (offset * 1.5));
             }

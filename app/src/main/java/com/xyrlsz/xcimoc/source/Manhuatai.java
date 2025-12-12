@@ -67,7 +67,7 @@ public class Manhuatai extends MangaParser {
 
     @Override
     public Request getSearchRequest(String keyword, int page) throws UnsupportedEncodingException {
-        String url = null;
+        String url;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             url = StringUtils.format(baseUrl + "/api/getsortlist/?product_id=2&productname=mht&platformname=wap&orderby=click&search_key=%s&page=%d&size=48",
                     URLEncoder.encode(keyword, StandardCharsets.UTF_8), page);

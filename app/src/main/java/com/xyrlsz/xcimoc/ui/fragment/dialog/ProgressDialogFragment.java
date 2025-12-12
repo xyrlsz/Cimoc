@@ -18,6 +18,8 @@ import com.xyrlsz.xcimoc.rx.RxBus;
 import com.xyrlsz.xcimoc.rx.RxEvent;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
 
+import java.util.Objects;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -47,9 +49,9 @@ public class ProgressDialogFragment extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.dialog_progress, container, false);
         unbinder = ButterKnife.bind(this, view);
-        getDialog().requestWindowFeature(Window.FEATURE_NO_TITLE);
+        Objects.requireNonNull(getDialog()).requestWindowFeature(Window.FEATURE_NO_TITLE);
         setCancelable(false);
-        int resId = ThemeUtils.getResourceId(getActivity(), R.attr.colorAccent);
+        int resId = ThemeUtils.getResourceId(requireActivity(), R.attr.colorAccent);
         mProgressBar.getIndeterminateDrawable().setColorFilter(ContextCompat.getColor(getActivity(), resId), PorterDuff.Mode.SRC_ATOP);
         mCompositeSubscription = new CompositeSubscription();
         mCompositeSubscription.add(RxBus.getInstance().toObservable(RxEvent.EVENT_DIALOG_PROGRESS).subscribe(new Action1<RxEvent>() {

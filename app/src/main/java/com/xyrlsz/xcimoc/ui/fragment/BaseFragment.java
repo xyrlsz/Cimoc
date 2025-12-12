@@ -21,6 +21,8 @@ import com.xyrlsz.xcimoc.ui.view.BaseView;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
 import com.xyrlsz.xcimoc.utils.ThreadRunUtils;
 
+import java.util.Objects;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -88,11 +90,11 @@ public abstract class BaseFragment extends Fragment implements BaseView {
     int getLayoutRes();
 
     protected void showProgressDialog() {
-        ((BaseActivity) getActivity()).showProgressDialog();
+        ((BaseActivity) requireActivity()).showProgressDialog();
     }
 
     protected void hideProgressDialog() {
-        ((BaseActivity) getActivity()).hideProgressDialog();
+        ((BaseActivity) requireActivity()).hideProgressDialog();
     }
 
     protected void hideProgressBar() {

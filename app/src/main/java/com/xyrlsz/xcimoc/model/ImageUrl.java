@@ -8,6 +8,8 @@ import org.greenrobot.greendao.annotation.NotNull;
 import org.greenrobot.greendao.annotation.Transient;
 import org.greenrobot.greendao.converter.PropertyConverter;
 
+import java.util.Objects;
+
 import okhttp3.Headers;
 
 /**
@@ -181,7 +183,7 @@ public class ImageUrl {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof ImageUrl && ((ImageUrl) o).id == id;
+        return o instanceof ImageUrl && Objects.equals(((ImageUrl) o).id, id);
     }
 
     public Long getComicChapter() {

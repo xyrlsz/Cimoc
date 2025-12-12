@@ -3,6 +3,8 @@ package com.xyrlsz.xcimoc.ui.fragment.dialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
@@ -11,6 +13,8 @@ import android.widget.EditText;
 
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.component.DialogCaller;
+
+import java.util.Objects;
 
 /**
  * Created by Hiroshi on 2016/10/15.
@@ -34,11 +38,12 @@ public class EditorDialogFragment extends DialogFragment implements DialogInterf
         return bundle;
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        View view = getActivity().getLayoutInflater().inflate(R.layout.dialog_editor, null);
+        View view = requireActivity().getLayoutInflater().inflate(R.layout.dialog_editor, null);
         mEditText = view.findViewById(R.id.dialog_editor_text);
-       String s = getArguments().getString(DialogCaller.EXTRA_DIALOG_CONTENT);
+       String s = requireArguments().getString(DialogCaller.EXTRA_DIALOG_CONTENT);
         mEditText.setText(s);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(getArguments().getInt(DialogCaller.EXTRA_DIALOG_TITLE))
@@ -49,11 +54,11 @@ public class EditorDialogFragment extends DialogFragment implements DialogInterf
 
     @Override
     public void onClick(DialogInterface dialogInterface, int which) {
-        int requestCode = getArguments().getInt(DialogCaller.EXTRA_DIALOG_REQUEST_CODE);
+        int requestCode = requireArguments().getInt(DialogCaller.EXTRA_DIALOG_REQUEST_CODE);
         Bundle bundle = new Bundle();
         bundle.putString(DialogCaller.EXTRA_DIALOG_RESULT_VALUE, mEditText.getText().toString());
         DialogCaller target = (DialogCaller) (getTargetFragment() != null ? getTargetFragment() : getActivity());
-        target.onDialogResult(requestCode, bundle);
+        Objects.requireNonNull(target).onDialogResult(requestCode, bundle);
     }
 
 }

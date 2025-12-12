@@ -5,6 +5,8 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
+
+import androidx.annotation.NonNull;
 import androidx.core.view.GestureDetectorCompat;
 import androidx.core.view.MotionEventCompat;
 import androidx.recyclerview.widget.RecyclerView;
@@ -49,7 +51,7 @@ public class ZoomableRecyclerView extends RecyclerView implements OnScaleDragGes
         mScaleDragDetector = new ScaleDragDetector(context, this);
         mGestureDetector = new GestureDetectorCompat(getContext(), new GestureDetector.SimpleOnGestureListener() {
             @Override
-            public void onLongPress(MotionEvent e) {
+            public void onLongPress(@NonNull MotionEvent e) {
                 if (mTapGestureListener != null) {
                     mTapGestureListener.onLongPress(e.getRawX(), e.getRawY());
                 }
@@ -137,7 +139,7 @@ public class ZoomableRecyclerView extends RecyclerView implements OnScaleDragGes
 
 
     @Override
-    public boolean onSingleTapConfirmed(MotionEvent e) {
+    public boolean onSingleTapConfirmed(@NonNull MotionEvent e) {
         if (mTapGestureListener != null) {
             mTapGestureListener.onSingleTap(e.getRawX(), e.getRawY());
             return true;
@@ -146,7 +148,7 @@ public class ZoomableRecyclerView extends RecyclerView implements OnScaleDragGes
     }
 
     @Override
-    public boolean onDoubleTap(MotionEvent event) {
+    public boolean onDoubleTap(@NonNull MotionEvent event) {
         if (isDoubleTap) {
             try {
                 float scale = ViewUtils.calculateScale(mMatrix);
@@ -163,7 +165,7 @@ public class ZoomableRecyclerView extends RecyclerView implements OnScaleDragGes
     }
 
     @Override
-    public boolean onDoubleTapEvent(MotionEvent event) {
+    public boolean onDoubleTapEvent(@NonNull MotionEvent event) {
         return false;
     }
 

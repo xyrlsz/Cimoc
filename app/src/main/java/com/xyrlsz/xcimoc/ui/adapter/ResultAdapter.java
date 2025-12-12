@@ -3,6 +3,8 @@ package com.xyrlsz.xcimoc.ui.adapter;
 import android.content.Context;
 import android.graphics.Rect;
 import android.net.Uri;
+
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 import android.view.View;
@@ -36,8 +38,9 @@ public class ResultAdapter extends BaseAdapter<Comic> {
         super(context, list);
     }
 
+    @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = mInflater.inflate(R.layout.item_result, parent, false);
         return new ResultViewHolder(view);
     }
@@ -71,7 +74,7 @@ public class ResultAdapter extends BaseAdapter<Comic> {
     public RecyclerView.ItemDecoration getItemDecoration() {
         return new RecyclerView.ItemDecoration() {
             @Override
-            public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+            public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
                 int offset = parent.getWidth() / 90;
                 outRect.set(0, 0, 0, offset);
             }

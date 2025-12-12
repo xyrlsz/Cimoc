@@ -23,6 +23,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -149,7 +150,7 @@ public class Tencent extends MangaParser {
         int len = matches.size();
         while ((len--) != 0) {
             str = splice(str,
-                    Integer.parseInt(StringUtils.match("^\\d+", matches.get(len), 0)) & 255,
+                    Integer.parseInt(Objects.requireNonNull(StringUtils.match("^\\d+", matches.get(len), 0))) & 255,
                     StringUtils.replaceAll(matches.get(len), "\\d+", "").length()
             );
         }

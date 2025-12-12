@@ -2,6 +2,7 @@ package com.xyrlsz.xcimoc.ui.activity;
 
 import android.os.Build;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.xyrlsz.xcimoc.R;
@@ -41,7 +42,7 @@ public class PageReaderActivity extends ReaderActivity implements OnPageChangedL
         mRecyclerView.setItemAnimator(null);
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 switch (newState) {
                     case RecyclerView.SCROLL_STATE_DRAGGING:
                         hideControl();

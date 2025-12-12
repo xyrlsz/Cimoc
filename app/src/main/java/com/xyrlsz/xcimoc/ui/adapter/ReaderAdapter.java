@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.facebook.drawee.backends.pipeline.PipelineDraweeControllerBuilder;
@@ -72,8 +73,9 @@ public class ReaderAdapter extends BaseAdapter<ImageUrl> {
         return mDataSet.get(position).isLazy() ? TYPE_LOADING : TYPE_IMAGE;
     }
 
+    @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         boolean isWhiteBackground = App.getPreferenceManager().getBoolean(PreferenceManager.PREF_READER_WHITE_BACKGROUND, false);
         int resId;
         if (isWhiteBackground) {
@@ -183,13 +185,13 @@ public class ReaderAdapter extends BaseAdapter<ImageUrl> {
             MangaPostprocessor processor = new MangaPostprocessor(imageUrl, isPaging, isPagingReverse, isWhiteEdge);
             imageRequestBuilder.setPostprocessor(processor);
             if (!isCloseAutoResizeImage) {
-                ResizeOptions options = isVertical ? new ResizeOptions(App.mWidthPixels, App.mHeightPixels) :
+                @SuppressWarnings("SuspiciousNameCombination") ResizeOptions options = isVertical ? new ResizeOptions(App.mWidthPixels, App.mHeightPixels) :
                         new ResizeOptions(App.mHeightPixels, App.mWidthPixels);
                 imageRequestBuilder.setResizeOptions(options);
             }
             imageRequestBuilder.setRequestListener(new BaseRequestListener() {
                 @Override
-                public void onRequestSuccess(ImageRequest request, String requestId, boolean isPrefetch) {
+                public void onRequestSuccess(@NonNull ImageRequest request, @NonNull String requestId, boolean isPrefetch) {
                     imageUrl.setUrl(url);
                 }
             });
@@ -261,14 +263,14 @@ public class ReaderAdapter extends BaseAdapter<ImageUrl> {
             case READER_PAGE:
                 return new RecyclerView.ItemDecoration() {
                     @Override
-                    public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+                    public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
                         outRect.set(0, 0, 0, 0);
                     }
                 };
             case READER_STREAM:
                 return new RecyclerView.ItemDecoration() {
                     @Override
-                    public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+                    public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
                         if (isVertical) {
                             outRect.set(0, 10, 0, 10);
                         } else {

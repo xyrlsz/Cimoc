@@ -3,6 +3,7 @@ package com.xyrlsz.xcimoc.utils;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -94,7 +95,7 @@ public class StringUtils {
             Pattern pattern = Pattern.compile(regex);
             Matcher matcher = pattern.matcher(input);
             if (matcher.find()) {
-                return matcher.group(group).trim();
+                return Objects.requireNonNull(matcher.group(group)).trim();
             }
         } catch (Exception e) {
             e.printStackTrace();

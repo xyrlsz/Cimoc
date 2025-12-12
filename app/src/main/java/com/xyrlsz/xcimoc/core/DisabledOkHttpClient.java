@@ -55,16 +55,18 @@ public class DisabledOkHttpClient extends OkHttpClient {
                 return null;
             }
 
+            @NonNull
             @Override
             public Request request() { return request; }
 
+            @NonNull
             @Override
             public Response execute() throws IOException {
                 throw new IOException("OkHttp is disable.");
             }
 
             @Override
-            public void enqueue(Callback responseCallback) {
+            public void enqueue(@NonNull Callback responseCallback) {
                 responseCallback.onFailure(this, new IOException("OkHttp OkHttp is disable"));
             }
 

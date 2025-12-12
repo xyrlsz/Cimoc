@@ -15,6 +15,8 @@ import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+
+import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 
 import com.xyrlsz.xcimoc.R;
@@ -25,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class MultiAdpaterDialogFragment extends DialogFragment implements DialogInterface.OnClickListener{
 
@@ -44,10 +47,11 @@ public class MultiAdpaterDialogFragment extends DialogFragment implements Dialog
         return fragment;
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        String[] item = getArguments().getStringArray(DialogCaller.EXTRA_DIALOG_ITEMS);
+        String[] item = requireArguments().getStringArray(DialogCaller.EXTRA_DIALOG_ITEMS);
         if (item == null) {
             item = new String[0];
         }
@@ -59,7 +63,7 @@ public class MultiAdpaterDialogFragment extends DialogFragment implements Dialog
             arrayList.add(hashMap);
         }
 
-        LayoutInflater inflater = LayoutInflater.from(getActivity());
+        LayoutInflater inflater = getLayoutInflater();
         getlistview = inflater.inflate(R.layout.listview_adapter, null);
         ListView listview = (ListView) getlistview.findViewById(R.id.listview_adapter);
 
@@ -93,7 +97,7 @@ public class MultiAdpaterDialogFragment extends DialogFragment implements Dialog
     }
 
     private void initCheckArray(int length) {
-        mCheckArray = getArguments().getBooleanArray(DialogCaller.EXTRA_DIALOG_CHOICE_ITEMS);
+        mCheckArray = requireArguments().getBooleanArray(DialogCaller.EXTRA_DIALOG_CHOICE_ITEMS);
         if (mCheckArray == null) {
             mCheckArray = new boolean[length];
             for (int i = 0; i != length; ++i) {
@@ -106,11 +110,11 @@ public class MultiAdpaterDialogFragment extends DialogFragment implements Dialog
     public void onClick(DialogInterface dialogInterface, int which) {
         switch (which) {
             case Dialog.BUTTON_POSITIVE:
-                int requestCode = getArguments().getInt(DialogCaller.EXTRA_DIALOG_REQUEST_CODE);
+                int requestCode = requireArguments().getInt(DialogCaller.EXTRA_DIALOG_REQUEST_CODE);
                 Bundle bundle = new Bundle();
                 bundle.putBooleanArray(DialogCaller.EXTRA_DIALOG_RESULT_VALUE, mCheckArray);
                 DialogCaller target = (DialogCaller) (getTargetFragment() != null ? getTargetFragment() : getActivity());
-                target.onDialogResult(requestCode, bundle);
+                Objects.requireNonNull(target).onDialogResult(requestCode, bundle);
                 isCloseDialog(dialogInterface,true);
                 break;
             case Dialog.BUTTON_NEUTRAL:
@@ -128,7 +132,7 @@ public class MultiAdpaterDialogFragment extends DialogFragment implements Dialog
 
     private void isCloseDialog(DialogInterface dialog, boolean close) {
         try {
-            Field field = dialog.getClass().getSuperclass().getDeclaredField("mShowing");
+            Field field = Objects.requireNonNull(dialog.getClass().getSuperclass()).getDeclaredField("mShowing");
             field.setAccessible(true);
             field.set(dialog, close);
         } catch (Exception e) {

@@ -224,7 +224,7 @@ public class DocumentUtils {
                 throw new IOException();
             }
         } finally {
-            closeStream(output, writer);
+            closeStream(output, null);
             if (tmp != null && tmp.exists()) {
                 tmp.delete();
             }

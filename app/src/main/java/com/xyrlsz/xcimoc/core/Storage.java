@@ -103,8 +103,8 @@ public class Storage {
     }
 
     private static boolean isDirSame(CimocDocumentFile root, CimocDocumentFile dst) {
-        return root.getUri().getScheme().equals("file") && dst.getUri().getPath().endsWith("primary:Cimoc") ||
-                root.getUri().getPath().equals(dst.getUri().getPath());
+        return Objects.requireNonNull(root.getUri().getScheme()).equals("file") && Objects.requireNonNull(dst.getUri().getPath()).endsWith("primary:Cimoc") ||
+                Objects.requireNonNull(root.getUri().getPath()).equals(dst.getUri().getPath());
     }
 
     public static Observable<String> moveRootDir(final ContentResolver resolver, final CimocDocumentFile root, final CimocDocumentFile dst) {
@@ -136,7 +136,7 @@ public class Storage {
                     CimocDocumentFile dir = DocumentUtils.getOrCreateSubDirectory(root, PICTURE);
                     if (dir != null) {
                         CimocDocumentFile file = DocumentUtils.getOrCreateFile(dir, filename);
-                        DocumentUtils.writeBinaryToFile(resolver, file, stream);
+                        DocumentUtils.writeBinaryToFile(resolver, Objects.requireNonNull(file), stream);
                         subscriber.onNext(file.getUri());
                         subscriber.onCompleted();
                     }

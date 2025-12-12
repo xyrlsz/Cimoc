@@ -10,7 +10,7 @@ public class UrlEncodeUtils {
     public static String urlEncodeChinese(String url) {
         try {
             Matcher matcher = Pattern.compile("[\\u4e00-\\u9fa5]").matcher(url);
-            String tmp = "";
+            String tmp;
             while (matcher.find()) {
                 tmp = matcher.group();
                 url = url.replaceAll(tmp, URLEncoder.encode(tmp, "UTF-8"));

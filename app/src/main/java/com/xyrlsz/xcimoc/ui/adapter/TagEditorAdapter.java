@@ -1,6 +1,8 @@
 package com.xyrlsz.xcimoc.ui.adapter;
 
 import android.content.Context;
+
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,8 +27,9 @@ public class TagEditorAdapter extends BaseAdapter<Switcher<Tag>> {
         super(context, list);
     }
 
+    @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = mInflater.inflate(R.layout.item_select, parent, false);
         return new TagHolder(view);
     }

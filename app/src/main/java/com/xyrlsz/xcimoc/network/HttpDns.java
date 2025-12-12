@@ -2,6 +2,8 @@ package com.xyrlsz.xcimoc.network;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -12,11 +14,12 @@ import okhttp3.Dns;
 public class HttpDns implements Dns {
     private static final Dns SYSTEM = Dns.SYSTEM;
 
+    @NonNull
     @Override
-    public List<InetAddress> lookup(String hostname) throws UnknownHostException {
+    public List<InetAddress> lookup(@NonNull String hostname) throws UnknownHostException {
         Log.e("HttpDns", "lookup:" + hostname);
         String ip = DNSHelper.getIpByHost(hostname);
-        if (ip != null && !ip.equals("")) {
+        if (ip != null && !ip.isEmpty()) {
             List<InetAddress> inetAddresses = Arrays.asList(InetAddress.getAllByName(ip));
             Log.e("HttpDns", "inetAddresses:" + inetAddresses);
             return inetAddresses; //返回自己解析的地址列表

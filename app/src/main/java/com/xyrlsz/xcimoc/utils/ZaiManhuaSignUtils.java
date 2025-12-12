@@ -75,7 +75,7 @@ public class ZaiManhuaSignUtils {
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.isSuccessful() && response.body() != null) {
+                if (response.isSuccessful()) {
                     try {
                         JSONObject jsonObject = new JSONObject(response.body().string());
                         JSONObject data = jsonObject.getJSONObject("data");

@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.global.Extra;
 import com.xyrlsz.xcimoc.manager.PreferenceManager;
@@ -32,6 +31,7 @@ import com.xyrlsz.xcimoc.utils.PermissionUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -101,7 +101,7 @@ public class ChapterActivity extends BackActivity implements BaseAdapter.OnItemC
     private List<Switcher<Chapter>> getAdapterList() {
         isAscendMode = mPreference.getBoolean(PreferenceManager.PREF_CHAPTER_ASCEND_MODE, false);
         List<Chapter> list = getIntent().getParcelableArrayListExtra(Extra.EXTRA_CHAPTER);
-        List<Switcher<Chapter>> result = new ArrayList<>(list.size());
+        List<Switcher<Chapter>> result = new ArrayList<>(Objects.requireNonNull(list).size());
         for (int i = 0; i < list.size(); ++i) {
             result.add(new Switcher<>(list.get(i), list.get(i).isDownload()));
         }
@@ -203,12 +203,12 @@ public class ChapterActivity extends BackActivity implements BaseAdapter.OnItemC
         private boolean isLongPress = false;
 
         @Override
-        public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
+        public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
             if (isLongPress) {
                 return true;
             }
 
-            int pos = rv.getChildAdapterPosition(rv.findChildViewUnder(e.getX(), e.getY()));
+            int pos = rv.getChildAdapterPosition(Objects.requireNonNull(rv.findChildViewUnder(e.getX(), e.getY())));
             switch (e.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     mLastPosition = pos;
@@ -239,7 +239,7 @@ public class ChapterActivity extends BackActivity implements BaseAdapter.OnItemC
 
         @Override
         public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-            int pos = rv.getChildAdapterPosition(rv.findChildViewUnder(e.getX(), e.getY()));
+            int pos = rv.getChildAdapterPosition(Objects.requireNonNull(rv.findChildViewUnder(e.getX(), e.getY())));
             switch (e.getAction()) {
                 case MotionEvent.ACTION_MOVE:
                     if (pos != -1 && mLastPosition != pos) {

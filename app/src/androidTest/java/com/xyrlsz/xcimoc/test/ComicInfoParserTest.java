@@ -5,12 +5,10 @@ import android.util.Pair;
 import com.xyrlsz.xcimoc.component.AppGetter;
 import com.xyrlsz.xcimoc.core.Manga;
 import com.xyrlsz.xcimoc.manager.SourceManager;
-import com.xyrlsz.xcimoc.model.Chapter;
 import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.Source;
 import com.xyrlsz.xcimoc.parser.MangaParser;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 

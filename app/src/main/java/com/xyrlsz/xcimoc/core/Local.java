@@ -192,7 +192,7 @@ public class Local {
     }
 
     private static class ScanInfo {
-        CimocDocumentFile dir = null;
+        CimocDocumentFile dir;
         String cover = null;
         int count = 0;
 

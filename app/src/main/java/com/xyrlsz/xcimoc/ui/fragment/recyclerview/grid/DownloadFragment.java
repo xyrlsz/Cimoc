@@ -21,6 +21,7 @@ import com.xyrlsz.xcimoc.utils.ServiceUtils;
 import com.xyrlsz.xcimoc.utils.ThreadRunUtils;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Created by Hiroshi on 2016/9/1.
@@ -51,7 +52,7 @@ public class DownloadFragment extends GridFragment implements DownloadView {
 
     @Override
     protected void initView() {
-        isDownload = ServiceUtils.isServiceRunning(getActivity(), DownloadService.class);
+        isDownload = ServiceUtils.isServiceRunning(requireActivity(), DownloadService.class);
         super.initView();
     }
 
@@ -114,7 +115,7 @@ public class DownloadFragment extends GridFragment implements DownloadView {
                 break;
             case DIALOG_REQUEST_SWITCH:
                 if (isDownload) {
-                    ServiceUtils.stopService(getActivity(), DownloadService.class);
+                    ServiceUtils.stopService(requireActivity(), DownloadService.class);
                     HintUtils.showToast(getActivity(), R.string.download_stop_success);
                 } else {
                     showProgressDialog();
@@ -229,7 +230,7 @@ public class DownloadFragment extends GridFragment implements DownloadView {
             HintUtils.showToast(getActivity(), R.string.download_task_empty);
         } else {
             Intent intent = DownloadService.createIntent(getActivity(), list);
-            getActivity().startService(intent);
+            requireActivity().startService(intent);
             HintUtils.showToast(getActivity(), R.string.download_start_success);
         }
         hideProgressDialog();

@@ -27,6 +27,7 @@ import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import okhttp3.FormBody;
 import okhttp3.Headers;
@@ -197,7 +198,7 @@ public class DM5 extends MangaParser {
         if (str != null) {
             try {
                 str = DecryptionUtils.evalDecrypt(str, "newImgs");
-                if (str.equals("")) {
+                if (str.isEmpty()) {
                     str = DecryptionUtils.evalDecrypt(str);
                 }
                 String[] array = str.split(",");
@@ -279,7 +280,7 @@ public class DM5 extends MangaParser {
 
     @Override
     public Headers getHeader(String url) {
-        String cid = "m".concat(StringUtils.match("cid=(\\d+)", url, 1));
+        String cid = "m".concat(Objects.requireNonNull(StringUtils.match("cid=(\\d+)", url, 1)));
         return Headers.of("Referer", "https://m.dm5.com/".concat(cid));
     }
 

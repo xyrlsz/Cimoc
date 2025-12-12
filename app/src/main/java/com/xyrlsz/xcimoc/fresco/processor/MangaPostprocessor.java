@@ -2,6 +2,8 @@ package com.xyrlsz.xcimoc.fresco.processor;
 
 import android.graphics.Bitmap;
 
+import androidx.annotation.NonNull;
+
 import com.facebook.cache.common.CacheKey;
 import com.facebook.cache.common.SimpleCacheKey;
 import com.facebook.common.references.CloseableReference;
@@ -11,6 +13,8 @@ import com.xyrlsz.xcimoc.model.ImageUrl;
 import com.xyrlsz.xcimoc.rx.RxBus;
 import com.xyrlsz.xcimoc.rx.RxEvent;
 import com.xyrlsz.xcimoc.utils.StringUtils;
+
+import java.util.Objects;
 
 /**
  * Created by Hiroshi on 2017/3/3.
@@ -35,6 +39,7 @@ public class MangaPostprocessor extends BasePostprocessor {
         isWhiteEdge = whiteEdge;
     }
 
+    @NonNull
     @Override
     public CloseableReference<Bitmap> process(Bitmap sourceBitmap, PlatformBitmapFactory bitmapFactory) {
         mWidth = sourceBitmap.getWidth();
@@ -61,10 +66,10 @@ public class MangaPostprocessor extends BasePostprocessor {
                     reference = bitmapFactory.createBitmap(mWidth, mHeight, Bitmap.Config.RGB_565);
                     processing(sourceBitmap, reference.get());
                 }
-                return CloseableReference.cloneOrNull(reference);
+                return Objects.requireNonNull(CloseableReference.cloneOrNull(reference));
 
             } else if (jmttIsDone) {
-                return CloseableReference.cloneOrNull(reference);
+                return Objects.requireNonNull(CloseableReference.cloneOrNull(reference));
             }
         } finally {
             CloseableReference.closeSafely(reference);
@@ -272,7 +277,7 @@ public class MangaPostprocessor extends BasePostprocessor {
             int remainder  = mHeight % rows;
             //Canvas canvas = new Canvas(resultBitmap);
             for (int x = 0; x < 10; x++) {
-                int chunkHeight = (int)Math.floor(mHeight / rows);
+                int chunkHeight = (int) (double) (mHeight / rows);
                 int py = chunkHeight * (x);
                 int y = mHeight - chunkHeight * (x + 1) - remainder;
 

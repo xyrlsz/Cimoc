@@ -3,11 +3,15 @@ package com.xyrlsz.xcimoc.ui.fragment.dialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.component.DialogCaller;
+
+import java.util.Objects;
 
 /**
  * Created by Hiroshi on 2016/10/12.
@@ -37,10 +41,11 @@ public class MessageDialogFragment extends DialogFragment implements DialogInter
         return fragment;
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        String content = getArguments().getString(DialogCaller.EXTRA_DIALOG_CONTENT_TEXT);
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
+        String content = requireArguments().getString(DialogCaller.EXTRA_DIALOG_CONTENT_TEXT);
         if (content == null) {
             content = getString(getArguments().getInt(DialogCaller.EXTRA_DIALOG_CONTENT));
         }
@@ -58,9 +63,9 @@ public class MessageDialogFragment extends DialogFragment implements DialogInter
 
     @Override
     public void onClick(DialogInterface dialogInterface, int which) {
-        int requestCode = getArguments().getInt(DialogCaller.EXTRA_DIALOG_REQUEST_CODE);
+        int requestCode = requireArguments().getInt(DialogCaller.EXTRA_DIALOG_REQUEST_CODE);
         DialogCaller target = (DialogCaller) (getTargetFragment() != null ? getTargetFragment() : getActivity());
-        target.onDialogResult(requestCode, null);
+        Objects.requireNonNull(target).onDialogResult(requestCode, null);
     }
 
 }

@@ -141,7 +141,7 @@ public class DuManWu extends MangaParser {
             Request request = new Request.Builder().url(baseUrl + "/morechapter").post(reqBody).build();
             try {
                 Response response = App.getHttpClient().newCall(request).execute();
-                if (response.isSuccessful() && response.body() != null) {
+                if (response.isSuccessful()) {
                     JSONObject object = new JSONObject(response.body().string());
                     JSONArray data = object.getJSONArray("data");
                     for (int j = 0; j < data.length(); j++) {

@@ -168,7 +168,7 @@ public class YKMH extends MangaParser {
             return null;
         }
         String CDATA = String.format("[%s]", matcher.group(1));
-        JSONArray array = null;
+        JSONArray array;
         try {
             array = new JSONArray(CDATA);
             for (int i = 0; i < array.length(); i++) {

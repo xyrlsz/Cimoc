@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -123,7 +124,7 @@ public class GoDaManHua extends MangaParser {
             SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             outputFormat.setTimeZone(TimeZone.getDefault());
 
-            update = outputFormat.format(date);
+            update = outputFormat.format(Objects.requireNonNull(date));
             comic.setInfo(title, cover, update, intro, author.toString(), isFinish(status));
 
         }

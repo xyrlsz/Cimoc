@@ -285,7 +285,7 @@ public class ComicUtils {
                 int imgSizeDigits = String.valueOf(imageUrls.size()).length();
                 for (ImageUrl imageUrl : imageUrls) {
                     String url = imageUrl.getUrl();
-                    InputStream is = null;
+                    InputStream is;
                     String imgName = String.format("%0" + imgSizeDigits + "d_", imgIndex);
                     try {
                         Uri uri = Uri.parse(url);

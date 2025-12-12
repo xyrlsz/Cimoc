@@ -14,6 +14,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.OnClick;
 
@@ -79,7 +80,7 @@ public class DirPickerActivity extends CoordinatorActivity {
         List<String> list = new ArrayList<>();
         File[] files = parent.listFiles();
         if (files != null) {
-            for (File dir : parent.listFiles()) {
+            for (File dir : Objects.requireNonNull(parent.listFiles())) {
                 if (dir.isDirectory()) {
                     list.add(dir.getName());
                 }

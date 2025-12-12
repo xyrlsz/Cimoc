@@ -8,6 +8,7 @@ import org.jsoup.select.Elements;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by Hiroshi on 2016/9/11.
@@ -29,7 +30,7 @@ public class Node {
     }
 
     public Node getParent(String cssQuery) {
-        return new Node(get().select(cssQuery).first().parent());
+        return new Node(Objects.requireNonNull(get().select(cssQuery).first()).parent());
     }
 
     public Node getChild(String cssQuery) {
@@ -63,7 +64,7 @@ public class Node {
 
     public String text(String cssQuery) {
         try {
-            return element.select(cssQuery).first().text().trim();
+            return Objects.requireNonNull(element.select(cssQuery).first()).text().trim();
         } catch (Exception e) {
             return null;
         }
@@ -97,7 +98,7 @@ public class Node {
 
     public String attr(String cssQuery, String attr) {
         try {
-            return element.select(cssQuery).first().attr(attr).trim();
+            return Objects.requireNonNull(element.select(cssQuery).first()).attr(attr).trim();
         } catch (Exception e) {
             return null;
         }

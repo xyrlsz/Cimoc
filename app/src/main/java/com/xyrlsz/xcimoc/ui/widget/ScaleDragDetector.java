@@ -7,6 +7,8 @@ import android.view.ScaleGestureDetector;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
 
+import androidx.annotation.NonNull;
+
 /**
  * ****************************************************************************
  * Copyright 2011, 2012 Chris Banes.
@@ -62,12 +64,12 @@ public class ScaleDragDetector implements ScaleGestureDetector.OnScaleGestureLis
     }
 
     @Override
-    public boolean onScaleBegin(ScaleGestureDetector detector) {
+    public boolean onScaleBegin(@NonNull ScaleGestureDetector detector) {
         return true;
     }
 
     @Override
-    public void onScaleEnd(ScaleGestureDetector detector) {
+    public void onScaleEnd(@NonNull ScaleGestureDetector detector) {
         mListener.onScaleEnd();
     }
 

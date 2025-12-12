@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import rx.Observable;
 import rx.Subscriber;
@@ -96,13 +97,13 @@ public class Download {
 
     private static void createNoMedia(CimocDocumentFile root) {
         CimocDocumentFile home = DocumentUtils.getOrCreateSubDirectory(root, DOWNLOAD);
-        DocumentUtils.getOrCreateFile(home, NO_MEDIA);
+        DocumentUtils.getOrCreateFile(Objects.requireNonNull(home), NO_MEDIA);
     }
 
     private static CimocDocumentFile createComicIndex(CimocDocumentFile root, Comic comic) {
         CimocDocumentFile home = DocumentUtils.getOrCreateSubDirectory(root, DOWNLOAD);
-        CimocDocumentFile source = DocumentUtils.getOrCreateSubDirectory(home, String.valueOf(comic.getSource()));
-        CimocDocumentFile dir = DocumentUtils.getOrCreateSubDirectory(source, comic.getCid());
+        CimocDocumentFile source = DocumentUtils.getOrCreateSubDirectory(Objects.requireNonNull(home), String.valueOf(comic.getSource()));
+        CimocDocumentFile dir = DocumentUtils.getOrCreateSubDirectory(Objects.requireNonNull(source), comic.getCid());
         if (dir != null) {
             return DocumentUtils.getOrCreateFile(dir, FILE_INDEX);
         }
@@ -120,7 +121,7 @@ public class Download {
             createNoMedia(root);
             String jsonString = getJsonFromComic(list, comic);
             CimocDocumentFile file = createComicIndex(root, comic);
-            DocumentUtils.writeStringToFile(resolver, file, "cimoc".concat(jsonString));
+            DocumentUtils.writeStringToFile(resolver, Objects.requireNonNull(file), "cimoc".concat(jsonString));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -149,12 +150,12 @@ public class Download {
         try {
             String jsonString = getJsonFromChapter(task.getTitle(), task.getPath());
             CimocDocumentFile dir1 = DocumentUtils.getOrCreateSubDirectory(root, DOWNLOAD);
-            CimocDocumentFile dir2 = DocumentUtils.getOrCreateSubDirectory(dir1, String.valueOf(task.getSource()));
-            CimocDocumentFile dir3 = DocumentUtils.getOrCreateSubDirectory(dir2, task.getCid().replaceAll("[:/(\\\\)(\\?)<>\"(\\|)(\\.)]", ""));
-            CimocDocumentFile dir4 = DocumentUtils.getOrCreateSubDirectory(dir3, DecryptionUtils.urlDecrypt(task.getPath().replaceAll("[:/(\\\\)(\\?)<>\"(\\|)(\\.)]", "-")));
+            CimocDocumentFile dir2 = DocumentUtils.getOrCreateSubDirectory(Objects.requireNonNull(dir1), String.valueOf(task.getSource()));
+            CimocDocumentFile dir3 = DocumentUtils.getOrCreateSubDirectory(Objects.requireNonNull(dir2), task.getCid().replaceAll("[:/(\\\\)(\\?)<>\"(\\|)(\\.)]", ""));
+            CimocDocumentFile dir4 = DocumentUtils.getOrCreateSubDirectory(Objects.requireNonNull(dir3), DecryptionUtils.urlDecrypt(task.getPath().replaceAll("[:/(\\\\)(\\?)<>\"(\\|)(\\.)]", "-")));
             if (dir4 != null) {
                 CimocDocumentFile file = DocumentUtils.getOrCreateFile(dir4, FILE_INDEX);
-                DocumentUtils.writeStringToFile(resolver, file, "cimoc".concat(jsonString));
+                DocumentUtils.writeStringToFile(resolver, Objects.requireNonNull(file), "cimoc".concat(jsonString));
                 return dir4;
             }
         } catch (Exception e) {

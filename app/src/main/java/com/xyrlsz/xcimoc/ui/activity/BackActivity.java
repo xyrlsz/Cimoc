@@ -4,7 +4,6 @@ import android.graphics.PorterDuff;
 import android.view.View;
 import android.widget.ProgressBar;
 
-import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 

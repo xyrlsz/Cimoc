@@ -18,7 +18,6 @@ import com.xyrlsz.xcimoc.parser.NodeIterator;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
-import com.xyrlsz.xcimoc.ui.activity.ComicSourceLoginActivity;
 import com.xyrlsz.xcimoc.utils.HintUtils;
 import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
@@ -93,7 +92,7 @@ public class Vomicmh extends MangaParser {
         Node body = new Node(html);
         List<Node> list = body.list("div.detail > div > div");
         String title = body.text("div.detail > div > div > div").replace("&amp;", "&");
-        String cover = "";
+        String cover;
         String author = "";
         String update = "";
         String intro = "";

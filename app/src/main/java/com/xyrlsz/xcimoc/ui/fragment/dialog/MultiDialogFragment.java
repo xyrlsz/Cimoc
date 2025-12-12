@@ -3,11 +3,15 @@ package com.xyrlsz.xcimoc.ui.fragment.dialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.component.DialogCaller;
+
+import java.util.Objects;
 
 /**
  * Created by Hiroshi on 2016/12/2.
@@ -28,10 +32,11 @@ public class MultiDialogFragment extends DialogFragment implements DialogInterfa
         return fragment;
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        String[] item = getArguments().getStringArray(DialogCaller.EXTRA_DIALOG_ITEMS);
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
+        String[] item = requireArguments().getStringArray(DialogCaller.EXTRA_DIALOG_ITEMS);
         if (item == null) {
             item = new String[0];
         }
@@ -43,7 +48,7 @@ public class MultiDialogFragment extends DialogFragment implements DialogInterfa
     }
 
     private void initCheckArray(int length) {
-        mCheckArray = getArguments().getBooleanArray(DialogCaller.EXTRA_DIALOG_CHOICE_ITEMS);
+        mCheckArray = requireArguments().getBooleanArray(DialogCaller.EXTRA_DIALOG_CHOICE_ITEMS);
         if (mCheckArray == null) {
             mCheckArray = new boolean[length];
             for (int i = 0; i != length; ++i) {
@@ -59,11 +64,11 @@ public class MultiDialogFragment extends DialogFragment implements DialogInterfa
 
     @Override
     public void onClick(DialogInterface dialogInterface, int which) {
-        int requestCode = getArguments().getInt(DialogCaller.EXTRA_DIALOG_REQUEST_CODE);
+        int requestCode = requireArguments().getInt(DialogCaller.EXTRA_DIALOG_REQUEST_CODE);
         Bundle bundle = new Bundle();
         bundle.putBooleanArray(DialogCaller.EXTRA_DIALOG_RESULT_VALUE, mCheckArray);
         DialogCaller target = (DialogCaller) (getTargetFragment() != null ? getTargetFragment() : getActivity());
-        target.onDialogResult(requestCode, bundle);
+        Objects.requireNonNull(target).onDialogResult(requestCode, bundle);
     }
 
 }

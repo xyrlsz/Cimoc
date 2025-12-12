@@ -22,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -107,7 +108,7 @@ public class MangaBZ extends MangaParser {
         int i = 0;
         for (Node node : new Node(html).list("#chapterlistload > a")) {
             String title = node.attr("title");
-            if (title.equals("")) {
+            if (title.isEmpty()) {
                 title = node.text();
             }
             String path = node.href().trim().replace("/", "");
@@ -145,7 +146,7 @@ public class MangaBZ extends MangaParser {
             String mid = getValFromRegex(html, "MANGABZ_MID", "(\\w+)");
             String cid = getValFromRegex(html, "MANGABZ_CID", "(\\w+)");
             String sign = getValFromRegex(html, "MANGABZ_VIEWSIGN", "\"(\\w+)\"");
-            int pageCount = Integer.parseInt(getValFromRegex(html, "MANGABZ_IMAGE_COUNT", "(\\d+)"));
+            int pageCount = Integer.parseInt(Objects.requireNonNull(getValFromRegex(html, "MANGABZ_IMAGE_COUNT", "(\\d+)")));
 
             for (int i = 1; i <= pageCount; i++) {
                 String url = "http://www.mangabz.com/" + _path + "/chapterimage.ashx?cid=" + cid +

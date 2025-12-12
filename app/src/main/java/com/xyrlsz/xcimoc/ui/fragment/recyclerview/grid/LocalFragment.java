@@ -23,6 +23,7 @@ import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import java.io.File;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by Hiroshi on 2017/4/19.
@@ -56,7 +57,7 @@ public class LocalFragment extends GridFragment implements LocalView {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             try {
                 Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-                getActivity().startActivityForResult(intent, DIALOG_REQUEST_SCAN);
+                requireActivity().startActivityForResult(intent, DIALOG_REQUEST_SCAN);
             } catch (ActivityNotFoundException e) {
                 HintUtils.showToast(getActivity(), R.string.settings_other_storage_not_found);
             }
@@ -78,9 +79,9 @@ public class LocalFragment extends GridFragment implements LocalView {
                             // Ensure that you're passing only one of the flags
                             int flags = data.getFlags();
                             if ((flags & Intent.FLAG_GRANT_READ_URI_PERMISSION) != 0) {
-                                getActivity().getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                requireActivity().getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
                             } else if ((flags & Intent.FLAG_GRANT_WRITE_URI_PERMISSION) != 0) {
-                                getActivity().getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                                requireActivity().getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                             }
                             mPresenter.scan(CimocDocumentFile.fromTreeUri(getActivity(), uri));
                         }

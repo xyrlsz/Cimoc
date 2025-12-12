@@ -9,11 +9,11 @@ import static com.xyrlsz.xcimoc.Constants.KOMIIC_SHARED_USERNAME;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.view.View;
+
+import androidx.annotation.NonNull;
 
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.Constants;
-import com.xyrlsz.xcimoc.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -74,14 +74,14 @@ public class KomiicUtils {
 
         Objects.requireNonNull(App.getHttpClient()).newCall(request).enqueue(new Callback() {
             @Override
-            public void onFailure(Call call, IOException e) {
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 listener.onFail();
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 List<String> cookies = response.headers("Set-Cookie");
-                if (response.isSuccessful() && response.body() != null && !cookies.isEmpty()) {
+                if (response.isSuccessful() && !cookies.isEmpty()) {
                     Set<String> set = new HashSet<>();
                     for (String s : cookies) {
                         List<String> tmp = Arrays.asList(s.split("; "));
@@ -127,14 +127,14 @@ public class KomiicUtils {
 
             Objects.requireNonNull(App.getHttpClient()).newCall(request).enqueue(new Callback() {
                 @Override
-                public void onFailure(Call call, IOException e) {
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
                     String username = sharedPreferences.getString(KOMIIC_SHARED_USERNAME,"");
                     String password = sharedPreferences.getString(KOMIIC_SHARED_PASSWD,"");
                     login(context,username,password);
                 }
 
                 @Override
-                public void onResponse(Call call, Response response) throws IOException {
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                     List<String> cookies = response.headers("Set-Cookie");
                     if (response.isSuccessful() && !cookies.isEmpty()) {
                         Set<String> set = new HashSet<>();
@@ -174,7 +174,7 @@ public class KomiicUtils {
         SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         try {
             Date date = inputFormat.parse(t);
-            return outputFormat.format(date);
+            return outputFormat.format(Objects.requireNonNull(date));
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -205,13 +205,13 @@ public class KomiicUtils {
         try {
             App.getHttpClient().newCall(request).enqueue(new Callback() {
                 @Override
-                public void onFailure(Call call, IOException e) {
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
                     e.printStackTrace();
                 }
 
                 @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    if (response.isSuccessful() && response.body() != null) {
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    if (response.isSuccessful()) {
                         JSONObject data;
                         try {
                             String json = response.body().string();
@@ -248,7 +248,7 @@ public class KomiicUtils {
                 .build();
         try {
             Response response = Objects.requireNonNull(App.getHttpClient()).newCall(request).execute();
-            if (response.isSuccessful() && response.body() != null) {
+            if (response.isSuccessful()) {
                 JSONObject data;
                 try {
                     String respJson = response.body().string();
@@ -283,7 +283,7 @@ public class KomiicUtils {
         long timestamp = 0;
         try {
             Date date = dateFormat.parse(t);
-            timestamp = date.getTime() / 1000;
+            timestamp = Objects.requireNonNull(date).getTime() / 1000;
 
         } catch (ParseException e) {
             e.printStackTrace();

@@ -3,6 +3,8 @@ package com.xyrlsz.xcimoc.ui.fragment.dialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
@@ -12,6 +14,8 @@ import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.component.DialogCaller;
 
 import org.adw.library.widgets.discreteseekbar.DiscreteSeekBar;
+
+import java.util.Objects;
 
 
 /**
@@ -32,12 +36,13 @@ public class SliderDialogFragment extends DialogFragment implements DialogInterf
         return fragment;
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        View view = getActivity().getLayoutInflater().inflate(R.layout.dialog_slider, null);
-        int[] item = getArguments().getIntArray(DialogCaller.EXTRA_DIALOG_ITEMS);
+        View view = requireActivity().getLayoutInflater().inflate(R.layout.dialog_slider, null);
+        int[] item = requireArguments().getIntArray(DialogCaller.EXTRA_DIALOG_ITEMS);
         mSeekBar = view.findViewById(R.id.dialog_slider_bar);
-        mSeekBar.setMin(item[0]);
+        mSeekBar.setMin(Objects.requireNonNull(item)[0]);
         mSeekBar.setMax(item[1]);
         mSeekBar.setProgress(item[1]);
         mSeekBar.setProgress(item[2]);
@@ -50,11 +55,11 @@ public class SliderDialogFragment extends DialogFragment implements DialogInterf
 
     @Override
     public void onClick(DialogInterface dialogInterface, int which) {
-        int requestCode = getArguments().getInt(DialogCaller.EXTRA_DIALOG_REQUEST_CODE);
+        int requestCode = requireArguments().getInt(DialogCaller.EXTRA_DIALOG_REQUEST_CODE);
         Bundle bundle = new Bundle();
         bundle.putInt(DialogCaller.EXTRA_DIALOG_RESULT_VALUE, mSeekBar.getProgress());
         DialogCaller target = (DialogCaller) (getTargetFragment() != null ? getTargetFragment() : getActivity());
-        target.onDialogResult(requestCode, bundle);
+        Objects.requireNonNull(target).onDialogResult(requestCode, bundle);
     }
 
 }

@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by Hiroshi on 2017/3/24.
@@ -70,7 +71,7 @@ class TreeCimocDocumentFile extends CimocDocumentFile {
         try {
             c = resolver.query(childrenUri, new String[]{DocumentsContract.Document.COLUMN_DOCUMENT_ID,
                     DocumentsContract.Document.COLUMN_DISPLAY_NAME, DocumentsContract.Document.COLUMN_MIME_TYPE}, null, null, null);
-            while (c.moveToNext()) {
+            while (Objects.requireNonNull(c).moveToNext()) {
                 Uri documentUri = DocumentsContract.buildDocumentUriUsingTree(mUri, c.getString(0));
                 String displayName = c.getString(1);
                 mSubFiles.put(displayName, new TreeCimocDocumentFile(this, mContext, documentUri, displayName, c.getString(2)));
@@ -174,7 +175,7 @@ class TreeCimocDocumentFile extends CimocDocumentFile {
         try {
             c = mContext.getContentResolver().query(mUri,
                     new String[]{DocumentsContract.Document.COLUMN_SIZE}, null, null, null);
-            if (c.moveToFirst() && !c.isNull(0)) {
+            if (Objects.requireNonNull(c).moveToFirst() && !c.isNull(0)) {
                 return c.getLong(0);
             } else {
                 return 0;

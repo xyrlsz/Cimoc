@@ -10,6 +10,7 @@ import android.os.Build;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.multidex.MultiDex;
 import androidx.multidex.MultiDexApplication;
@@ -43,6 +44,7 @@ import org.greenrobot.greendao.identityscope.IdentityScopeType;
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Objects;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
@@ -131,7 +133,7 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
     }
 
     private static SSLSocketFactory createSSLSocketFactory() {
-        SSLSocketFactory ssfFactory = null;
+        SSLSocketFactory ssfFactory;
 
         try {
             SSLContext sc = SSLContext.getInstance("TLS");
@@ -316,7 +318,7 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
     }
 
     @Override
-    public void uncaughtException(Thread t, Throwable e) {
+    public void uncaughtException(@NonNull Thread t, Throwable e) {
         StringBuilder sb = new StringBuilder();
         sb.append("MODEL: ").append(Build.MODEL).append('\n');
         sb.append("SDK: ").append(Build.VERSION.SDK_INT).append('\n');
@@ -329,8 +331,8 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         try {
             CimocDocumentFile doc = getDocumentFile();
             CimocDocumentFile dir = DocumentUtils.getOrCreateSubDirectory(doc, "log");
-            CimocDocumentFile file = DocumentUtils.getOrCreateFile(dir, StringUtils.getDateStringWithSuffix("log"));
-            DocumentUtils.writeStringToFile(getContentResolver(), file, sb.toString());
+            CimocDocumentFile file = DocumentUtils.getOrCreateFile(Objects.requireNonNull(dir), StringUtils.getDateStringWithSuffix("log"));
+            DocumentUtils.writeStringToFile(getContentResolver(), Objects.requireNonNull(file), sb.toString());
         } catch (Exception ex) {
         }
         mActivityLifecycle.clear();

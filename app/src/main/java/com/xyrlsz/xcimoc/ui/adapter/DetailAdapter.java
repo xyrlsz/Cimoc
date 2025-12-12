@@ -23,6 +23,7 @@ import com.xyrlsz.xcimoc.ui.widget.ChapterButton;
 import com.xyrlsz.xcimoc.utils.STConvertUtils;
 
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.BindView;
 
@@ -63,7 +64,7 @@ public class DetailAdapter extends BaseAdapter<Chapter> {
     public RecyclerView.ItemDecoration getItemDecoration() {
         return new RecyclerView.ItemDecoration() {
             @Override
-            public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+            public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
                 int position = parent.getChildLayoutPosition(view);
                 if (position == 0) {
                     outRect.set(0, 0, 0, 10);
@@ -146,8 +147,9 @@ public class DetailAdapter extends BaseAdapter<Chapter> {
         return mDataSet.size() + 1;
     }
 
+    @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == 0) {
             View view = mInflater.inflate(R.layout.item_chapter_header, parent, false);
             return new HeaderHolder(view);
@@ -215,10 +217,10 @@ public class DetailAdapter extends BaseAdapter<Chapter> {
     }
 
     @Override
-    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
         final GridLayoutManager manager = (GridLayoutManager) recyclerView.getLayoutManager();
-        manager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+        Objects.requireNonNull(manager).setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
                 if (position == 0 || isFirst(position)) {

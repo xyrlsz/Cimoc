@@ -24,6 +24,7 @@ import com.xyrlsz.xcimoc.utils.pictureUtils;
 import java.io.File;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Objects;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -132,7 +133,7 @@ public class ReaderPresenter extends BasePresenter<ReaderView> {
         if (mComic.getLocal()) {
             CimocDocumentFile dir = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ?
                     CimocDocumentFile.fromSubTreeUri(mBaseView.getAppInstance(), Uri.parse(chapter.getPath())) :
-                    CimocDocumentFile.fromFile(new File(Uri.parse(chapter.getPath()).getPath()));
+                    CimocDocumentFile.fromFile(new File(Objects.requireNonNull(Uri.parse(chapter.getPath()).getPath())));
             return Local.images(dir, chapter);
         }
 

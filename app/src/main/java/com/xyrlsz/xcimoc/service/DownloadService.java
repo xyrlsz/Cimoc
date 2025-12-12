@@ -44,6 +44,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -120,7 +121,7 @@ public class DownloadService extends Service implements AppGetter {
                 mNotification.post(getString(R.string.download_service_doing), true);
             }
             List<Task> list = intent.getParcelableArrayListExtra(Extra.EXTRA_TASK);
-            for (Task task : list) {
+            for (Task task : Objects.requireNonNull(list)) {
                 Worker worker = new Worker(task);
                 Future future = mExecutorService.submit(worker);
                 addWorker(task.getId(), worker, future);
@@ -297,7 +298,7 @@ public class DownloadService extends Service implements AppGetter {
                         String displayName = buildFileName(num, url);
                         displayName = displayName.replaceAll("[:/(\\\\)(\\?)<>\"(\\|)(\\.)]", "_") + ".jpg";
                         CimocDocumentFile file = DocumentUtils.getOrCreateFile(parent, displayName);
-                        DocumentUtils.writeBinaryToFile(mContentResolver, file, response.body().byteStream());
+                        DocumentUtils.writeBinaryToFile(mContentResolver, Objects.requireNonNull(file), response.body().byteStream());
                         return true;
                     }
                 } catch (SocketTimeoutException e) {

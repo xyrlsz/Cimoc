@@ -13,7 +13,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 import androidx.annotation.ColorRes;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -36,6 +36,7 @@ import com.xyrlsz.xcimoc.utils.HintUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.BindView;
 
@@ -90,7 +91,7 @@ public class SourceFragment extends RecyclerViewFragment implements SourceView, 
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_source, menu);
     }
@@ -142,7 +143,7 @@ public class SourceFragment extends RecyclerViewFragment implements SourceView, 
         Source source = mSourceAdapter.getItem(position);
         Intent intent = new Intent(getContext(), WebviewActivity.class);
         String url = source.getBaseUrl();
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(Constants.APP_SHARED, MODE_PRIVATE);
+        SharedPreferences sharedPreferences = requireActivity().getSharedPreferences(Constants.APP_SHARED, MODE_PRIVATE);
         boolean isUseToWebParser = sharedPreferences.getBoolean(Constants.APP_SHARED_TEST_MODE, false);
         if (url == null || url.isEmpty() || !isUseToWebParser) {
             return;
@@ -180,7 +181,7 @@ public class SourceFragment extends RecyclerViewFragment implements SourceView, 
 
     @Override
     public void onThemeChange(@ColorRes int primary, @ColorRes int accent) {
-        mSourceAdapter.setColor(ContextCompat.getColor(getActivity(), accent));
+        mSourceAdapter.setColor(ContextCompat.getColor(requireActivity(), accent));
         mSourceAdapter.notifyDataSetChanged();
     }
 

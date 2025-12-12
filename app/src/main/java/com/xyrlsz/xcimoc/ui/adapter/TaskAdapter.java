@@ -3,6 +3,8 @@ package com.xyrlsz.xcimoc.ui.adapter;
 import android.content.Context;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -35,8 +37,9 @@ public class TaskAdapter extends BaseAdapter<Task> {
         super(context, list);
     }
 
+    @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = mInflater.inflate(R.layout.item_task, parent, false);
         return new TaskHolder(view, ContextCompat.getColor(mContext, colorId));
     }
@@ -64,7 +67,7 @@ public class TaskAdapter extends BaseAdapter<Task> {
     public RecyclerView.ItemDecoration getItemDecoration() {
         return new RecyclerView.ItemDecoration() {
             @Override
-            public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+            public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
                 int offset = parent.getWidth() / 90;
                 outRect.set(0, 0, 0, offset);
             }

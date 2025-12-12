@@ -167,7 +167,6 @@ public class DecryptionUtils {
 
         switch (bits) {
             case 0:
-                bits = 0;
                 maxpower = 8;
                 power = 0;
                 while (power != maxpower) {
@@ -222,7 +221,6 @@ public class DecryptionUtils {
             int cc;
             switch (cc = bits) {
                 case 0:
-                    bits = 0;
                     maxpower = 8;
                     power = 0;
                     while (power != maxpower) {

@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by Hiroshi on 2017/3/24.
@@ -160,7 +161,7 @@ class RawCimocDocumentFile extends CimocDocumentFile {
     @Override
     public CimocDocumentFile[] listFiles() {
         final File[] files = mFile.listFiles();
-        final CimocDocumentFile[] results = new CimocDocumentFile[files.length];
+        final CimocDocumentFile[] results = new CimocDocumentFile[Objects.requireNonNull(files).length];
         for (int i = 0; i < files.length; ++i) {
             results[i] = new RawCimocDocumentFile(this, files[i]);
         }

@@ -160,7 +160,7 @@ public class Komiic extends MangaParser {
         }
 
         String update = KomiicUtils.FormatTime(comicObject.getString("dateUpdated"));
-        String intro = "";
+        String intro;
         intro = comicObject.getString("description");
 
         comic.setInfo(title, cover, update, intro, author.toString(), !comicObject.getString("status").equals("ONGOING"));

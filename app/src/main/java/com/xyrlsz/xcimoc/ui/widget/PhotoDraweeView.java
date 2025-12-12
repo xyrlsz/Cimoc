@@ -73,7 +73,7 @@ public class PhotoDraweeView extends RetryDraweeView implements OnScaleDragGestu
         mScaleDragDetector = new ScaleDragDetector(getContext(), this);
         mGestureDetector = new GestureDetectorCompat(getContext(), new GestureDetector.SimpleOnGestureListener() {
             @Override
-            public void onLongPress(MotionEvent e) {
+            public void onLongPress(@NonNull MotionEvent e) {
                 if (mTapGestureListener != null) {
                     mTapGestureListener.onLongPress(e.getRawX(), e.getRawY());
                 }
@@ -132,7 +132,7 @@ public class PhotoDraweeView extends RetryDraweeView implements OnScaleDragGestu
     }
 
     @Override
-    public boolean onSingleTapConfirmed(MotionEvent e) {
+    public boolean onSingleTapConfirmed(@NonNull MotionEvent e) {
         if (mTapGestureListener != null) {
             mTapGestureListener.onSingleTap(e.getRawX(), e.getRawY());
             return true;
@@ -141,7 +141,7 @@ public class PhotoDraweeView extends RetryDraweeView implements OnScaleDragGestu
     }
 
     @Override
-    public boolean onDoubleTap(MotionEvent event) {
+    public boolean onDoubleTap(@NonNull MotionEvent event) {
         if (isDoubleTap) {
             try {
                 float scale = ViewUtils.calculateScale(mMatrix);
@@ -158,7 +158,7 @@ public class PhotoDraweeView extends RetryDraweeView implements OnScaleDragGestu
     }
 
     @Override
-    public boolean onDoubleTapEvent(MotionEvent event) {
+    public boolean onDoubleTapEvent(@NonNull MotionEvent event) {
         return false;
     }
 

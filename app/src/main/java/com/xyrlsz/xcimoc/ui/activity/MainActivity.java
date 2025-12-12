@@ -60,6 +60,7 @@ import com.xyrlsz.xcimoc.utils.PermissionUtils;
 import com.xyrlsz.xcimoc.utils.STConvertUtils;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import butterknife.BindView;
 import okhttp3.Request;
@@ -273,7 +274,7 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
     }
 
@@ -284,22 +285,20 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
         if (itemId != mCheckItem) {
             switch (itemId) {
                 case R.id.drawer_comic:
-                    mToolbarTitle.setText(mComicFragment.getCurrTitle());
+                    Objects.requireNonNull(mToolbarTitle).setText(mComicFragment.getCurrTitle());
                 case R.id.drawer_source:
 //                case R.id.drawer_tag:
                     mCheckItem = itemId;
                     getSupportFragmentManager().beginTransaction().hide(mCurrentFragment).commit();
                     if (itemId == R.id.drawer_source) {
-                        mToolbarTitle.setText(item.getTitle().toString());
+                        Objects.requireNonNull(mToolbarTitle).setText(Objects.requireNonNull(item.getTitle()).toString());
                     }
                     mDrawerLayout.closeDrawer(GravityCompat.START);
                     break;
                 case R.id.drawer_category:
                     mCheckItem = itemId;
                     getSupportFragmentManager().beginTransaction().hide(mCurrentFragment).commit();
-                    if (itemId == R.id.drawer_category) {
-                        mToolbarTitle.setText(item.getTitle().toString());
-                    }
+                    Objects.requireNonNull(mToolbarTitle).setText(Objects.requireNonNull(item.getTitle()).toString());
                     mDrawerLayout.closeDrawer(GravityCompat.START);
                     break;
                 case R.id.drawer_comiclist:
@@ -363,7 +362,7 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
             switch (requestCode) {
                 case REQUEST_ACTIVITY_SETTINGS:
                     int[] result = data.getIntArrayExtra(Extra.EXTRA_RESULT);
-                    if (result[0] == 1) {
+                    if (Objects.requireNonNull(result)[0] == 1) {
                         changeTheme(result[1], result[2], result[3]);
                     }
                     if (result[4] == 1 && mNightMask != null) {

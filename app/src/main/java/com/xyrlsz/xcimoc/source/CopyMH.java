@@ -64,7 +64,7 @@ public class CopyMH extends MangaParser {
 
     @Override
     public Request getSearchRequest(String keyword, int page) {
-        String url = "";
+        String url;
         if (page == 1) {
             url = StringUtils.format(
                     "%s/api/v3/search/comic?platform=1&q=%s&limit=30&offset=0&q_type&_update=true&format=json", apiBaseUrl,

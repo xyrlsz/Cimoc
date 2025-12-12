@@ -14,6 +14,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.global.Extra;
 import com.xyrlsz.xcimoc.manager.PreferenceManager;
@@ -35,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.OnClick;
 
@@ -192,7 +195,7 @@ public class TaskActivity extends CoordinatorActivity implements TaskView {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (!mTaskAdapter.getDateSet().isEmpty()) {
             switch (item.getItemId()) {
                 case R.id.task_history:
@@ -272,7 +275,7 @@ public class TaskActivity extends CoordinatorActivity implements TaskView {
             switch (requestCode) {
                 case REQUEST_CODE_DELETE:
                     List<Chapter> list = data.getParcelableArrayListExtra(Extra.EXTRA_CHAPTER);
-                    if (!list.isEmpty()) {
+                    if (!Objects.requireNonNull(list).isEmpty()) {
                         showProgressDialog();
                         for (Chapter chapter : list) {
                             mBinder.getService().removeDownload(chapter.getTid());

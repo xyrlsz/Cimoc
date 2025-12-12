@@ -3,6 +3,7 @@ package com.xyrlsz.xcimoc.ui.fragment.recyclerview;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.ColorRes;
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
@@ -27,6 +28,7 @@ import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by Hiroshi on 2016/10/10.
@@ -72,7 +74,7 @@ public class TagFragment extends RecyclerViewFragment implements TagView {
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_tag, menu);
     }
@@ -161,7 +163,7 @@ public class TagFragment extends RecyclerViewFragment implements TagView {
 
     @Override
     public void onThemeChange(@ColorRes int primary, @ColorRes int accent) {
-        mTagAdapter.setColor(ContextCompat.getColor(getActivity(), primary));
+        mTagAdapter.setColor(ContextCompat.getColor(requireActivity(), primary));
         mTagAdapter.notifyDataSetChanged();
     }
 

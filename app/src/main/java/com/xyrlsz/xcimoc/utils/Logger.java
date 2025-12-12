@@ -3,6 +3,7 @@ package com.xyrlsz.xcimoc.utils;
 import android.util.Log;
 
 import java.util.Locale;
+import java.util.Objects;
 
 
 public class Logger {
@@ -134,15 +135,13 @@ public class Logger {
             int lineNumber = 0;
             for (int i = 2; i < trace.length; i++) {
                 Class<?> clazz = trace[i].getClass();
-                if (!clazz.equals(Logger.class)) {
-                    callingClass = trace[i].getClassName();
-                    callingClass = callingClass.substring(callingClass
-                            .lastIndexOf('.') + 1);
-                    caller = trace[i].getMethodName();
-                    callFile = trace[i].getFileName();
-                    lineNumber = trace[i].getLineNumber();
-                    break;
-                }
+                callingClass = trace[i].getClassName();
+                callingClass = callingClass.substring(callingClass
+                        .lastIndexOf('.') + 1);
+                caller = trace[i].getMethodName();
+                callFile = trace[i].getFileName();
+                lineNumber = trace[i].getLineNumber();
+                break;
             }
 
             String method = String.format(Locale.getDefault(), "[%03d] %s.%s(%s:%d)"
@@ -150,7 +149,7 @@ public class Logger {
 
             return String.format(Locale.getDefault(), "%s> %s", formatLength(method, 93), msg);
         } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(TAG, Objects.requireNonNull(e.getMessage()));
         }
         return "----->ERROR LOG STRING<------";
     }

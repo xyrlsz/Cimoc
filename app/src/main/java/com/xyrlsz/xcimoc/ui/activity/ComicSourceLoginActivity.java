@@ -240,15 +240,15 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
 
             Objects.requireNonNull(App.getHttpClient()).newCall(request).enqueue(new Callback() {
                 @Override
-                public void onFailure(Call call, IOException e) {
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
                     onLoginFail();
                 }
 
                 @Override
-                public void onResponse(Call call, Response response) throws IOException {
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
 
                     List<String> cookies = response.headers("Set-Cookie");
-                    if (response.isSuccessful() && response.body() != null && !cookies.isEmpty()) {
+                    if (response.isSuccessful() && !cookies.isEmpty()) {
                         String json = response.body().string();
                         String uid = StringUtils.match("m=(\\d+)\\|", json, 1);
                         Set<String> set = new HashSet<>();
@@ -453,7 +453,7 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
 
                 @Override
                 public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                    if (response.isSuccessful() && response.body() != null) {
+                    if (response.isSuccessful()) {
                         try {
                             JSONObject jsonObject = new JSONObject(response.body().string());
                             String token = jsonObject.getString("token");
