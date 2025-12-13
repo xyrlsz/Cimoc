@@ -11,18 +11,20 @@
         android:background="?attr/colorPrimary"
         android:orientation="horizontal"
         android:padding="10dp">
+
         <androidx.cardview.widget.CardView
             android:id="@+id/item_header_comic_image_card"
             android:layout_width="100dp"
             android:layout_height="match_parent"
             android:layout_marginEnd="10dp"
-            fresco:cardCornerRadius="5dp"
-            >
+            fresco:cardCornerRadius="5dp">
+
             <com.facebook.drawee.view.SimpleDraweeView
                 android:id="@+id/item_header_comic_image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                fresco:actualImageScaleType="centerCrop" />
+                fresco:actualImageScaleType="centerCrop"
+                fresco:placeholderImage="@drawable/ic_about_black_24dp" />
         </androidx.cardview.widget.CardView>
 
 

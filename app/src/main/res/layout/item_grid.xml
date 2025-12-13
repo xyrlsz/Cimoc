@@ -22,7 +22,8 @@
                 android:id="@+id/item_grid_image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                fresco:actualImageScaleType="focusCrop" />
+                fresco:actualImageScaleType="focusCrop"
+                fresco:placeholderImage="@drawable/ic_about_black_24dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
