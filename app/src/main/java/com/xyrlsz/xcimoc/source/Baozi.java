@@ -77,7 +77,7 @@ public class Baozi extends MangaParser {
 
                 String cid = node.href(".comics-card__info").split("/")[2];
                 String cover = node.src(".comics-card > a > amp-img");
-                cover = replaceDomain(cover);
+                // cover = replaceDomain(cover);
                 return new Comic(TYPE, cid, title, cover, null, author);
             }
         };
@@ -106,7 +106,7 @@ public class Baozi extends MangaParser {
         Node body = new Node(html);
         String title = body.text(".comics-detail__title");
         String cover = body.src("div > amp-img");
-        cover = replaceDomain(cover);
+        // cover = replaceDomain(cover);
         String author = body.text(".comics-detail__author");
         String intro = body.text(".comics-detail__desc");
         String tags = body.text(".tag-list");
