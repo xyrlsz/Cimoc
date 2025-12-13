@@ -77,6 +77,7 @@ public class Baozi extends MangaParser {
 
                 String cid = node.href(".comics-card__info").split("/")[2];
                 String cover = node.src(".comics-card > a > amp-img");
+                cover = replaceDomain(cover);
                 return new Comic(TYPE, cid, title, cover, null, author);
             }
         };
@@ -104,6 +105,7 @@ public class Baozi extends MangaParser {
         Node body = new Node(html);
         String title = body.text(".comics-detail__title");
         String cover = body.src("div > amp-img");
+        cover = replaceDomain(cover);
         String author = body.text(".comics-detail__author");
         String intro = body.text(".comics-detail__desc");
         String tags = body.text(".tag-list");
@@ -155,22 +157,26 @@ public class Baozi extends MangaParser {
             Long comicChapter = chapter.getId();
             Long id = IdCreator.createImageId(comicChapter, i);
             String imgUrl = imageNodes.get(i - 1).attr(".comic-contain__item", "data-src").replace("/w640/", "/");
-            String regex = "^(https?://)?([^/\\s:]+)(:\\d+)?";
-            Pattern pattern = Pattern.compile(regex);
-            Matcher matcher = pattern.matcher(imgUrl);
-            String domain = "";
-            if (matcher.find()) {
-                domain = matcher.group(2);
-            }
-            if (domain != null && !domain.isEmpty()) {
-                imgUrl = imgUrl.replace(domain, imgDomain);
-            }
+            imgUrl = replaceDomain(imgUrl);
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false, getHeader()));
         }
 
         return list;
     }
 
+    private String replaceDomain(String url) {
+        String regex = "^(https?://)?([^/\\s:]+)(:\\d+)?";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(url);
+        String domain = "";
+        if (matcher.find()) {
+            domain = matcher.group(2);
+        }
+        if (domain != null && !domain.isEmpty()) {
+            url = url.replace(domain, imgDomain);
+        }
+        return url;
+    }
 
     @Override
     public Request getCheckRequest(String cid) {
