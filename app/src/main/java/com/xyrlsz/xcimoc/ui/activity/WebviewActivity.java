@@ -34,12 +34,12 @@ public class WebviewActivity extends BackActivity {
     public static final String EXTRA_WEB_HEADERS = "extra_web_headers";
     public static final String EXTRA_WEB_HTML = "extra_web_html";
     public static final String EXTRA_IS_USE_TO_WEB_PARSER = "extra_is_use_to_web_parser";
+    private final String htmlStr = "";
     boolean isShowButton = true;
     private WebView webView;
     private LinearLayout buttonPanel;
     private FloatingActionButton loadButton;
     private FloatingActionButton exitButton;
-    private final String htmlStr = "";
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -110,9 +110,8 @@ public class WebviewActivity extends BackActivity {
                     webView.goBack();
                 } else {
                     // 否则执行默认的返回操作
-                    getOnBackPressedDispatcher().onBackPressed();
+                    finish();
                 }
-
             }
         };
 
