@@ -117,8 +117,7 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         if (!manager_wifi.isWifiEnabled() && onlyWifi) {
             return new DisabledOkHttpClient();
         }
-        if (mHttpClient == null) {
-
+        if (mHttpClient == null || mHttpClient.getClass() == DisabledOkHttpClient.class) {
             // 3.OkHttp访问https的Client实例
             mHttpClient = new OkHttpClient().newBuilder()
                     .sslSocketFactory(createSSLSocketFactory(), trustAllCerts)
