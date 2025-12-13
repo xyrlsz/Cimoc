@@ -47,8 +47,8 @@ public class Baozi extends MangaParser {
 
     public static final int TYPE = 101;
     public static final String DEFAULT_TITLE = "包子漫画";
-    //    private static String baseUrl = "https://www.baozimh.com";
-    private static final String baseUrl = "https://cn.baozimhcn.com";
+    private static String baseUrl = "https://www.baozimh.com";
+    //    private static final String baseUrl = "https://cn.bzmgcn.com";
     private static final String imgDomain = "as.baozimh.com";
 
     public Baozi(Source source) {
@@ -56,7 +56,7 @@ public class Baozi extends MangaParser {
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, "https://cn.baozimhcn.com");
+        return new Source(null, DEFAULT_TITLE, TYPE, true, baseUrl);
     }
 
     @Override
@@ -90,8 +90,9 @@ public class Baozi extends MangaParser {
 
     @Override
     protected void initUrlFilterList() {
-        filter.add(new UrlFilter("cn.baozimhcn.com", "comic/([\\w\\-]+)"));
-        filter.add(new UrlFilter("www.baozimh.com", "comic/([\\w\\-]+)"));
+        filter.add(new UrlFilter("baozimhcn.com", "comic/([\\w\\-]+)"));
+        filter.add(new UrlFilter("baozimh.com", "comic/([\\w\\-]+)"));
+        filter.add(new UrlFilter("bzmgcn.com", "comic/([\\w\\-]+)"));
     }
 
     @Override
