@@ -23,7 +23,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 fresco:actualImageScaleType="focusCrop"
-                fresco:placeholderImage="@drawable/ic_about_black_24dp" />
+                fresco:placeholderImage="@drawable/ic_icon_park_error_picture" />
 
             <LinearLayout
                 android:layout_width="match_parent"
