@@ -4,17 +4,19 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Rect;
-import androidx.annotation.ColorInt;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.SwitchCompat;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.SwitchCompat;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.model.Source;
+import com.xyrlsz.xcimoc.utils.STConvertUtils;
 
 import java.util.List;
 
@@ -46,14 +48,11 @@ public class SourceAdapter extends BaseAdapter<Source> {
         super.onBindViewHolder(holder, position);
         Source source = mDataSet.get(position);
         final SourceHolder viewHolder = (SourceHolder) holder;
-        viewHolder.sourceTitle.setText(source.getTitle());
+        viewHolder.sourceTitle.setText(STConvertUtils.convert(source.getTitle()));
         viewHolder.sourceSwitch.setChecked(source.getEnable());
-        viewHolder.sourceSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(@NonNull CompoundButton buttonView, boolean isChecked) {
-                if (mOnItemCheckedListener != null) {
-                    mOnItemCheckedListener.onItemCheckedListener(isChecked, viewHolder.getAdapterPosition());
-                }
+        viewHolder.sourceSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (mOnItemCheckedListener != null) {
+                mOnItemCheckedListener.onItemCheckedListener(isChecked, viewHolder.getAdapterPosition());
             }
         });
         if (color != -1) {

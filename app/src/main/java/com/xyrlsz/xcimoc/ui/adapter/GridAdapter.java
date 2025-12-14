@@ -76,7 +76,7 @@ public class GridAdapter extends BaseAdapter<Object> {
                     gridHolder.rlItemGrid.setLayoutParams(params);
                 });
                 gridHolder.comicTitle.setText(STConvertUtils.convert(comic.getTitle()));
-                gridHolder.comicSource.setText(mTitleGetter.getTitle(comic.getSource()));
+                gridHolder.comicSource.setText(STConvertUtils.convert(mTitleGetter.getTitle(comic.getSource())));
                 if (mProvider != null) {
                     //            ImageRequest request = ImageRequestBuilder
                     //                    .newBuilderWithSource(Uri.parse(comic.getCover()))
@@ -196,9 +196,9 @@ public class GridAdapter extends BaseAdapter<Object> {
     @SuppressLint("NotifyDataSetChanged")
     public void filterByKeyword(String keyword) {
         List<Object> temp = new ArrayList<>();
-        if(mOriginalData.isEmpty()){
+        if (mOriginalData.isEmpty()) {
             mOriginalData.addAll(mDataSet);
-        } else if(mDataSet.isEmpty()){
+        } else if (mDataSet.isEmpty()) {
             mDataSet.addAll(mOriginalData);
         }
         for (Object O_comic : mDataSet) {
@@ -216,9 +216,9 @@ public class GridAdapter extends BaseAdapter<Object> {
     @SuppressLint("NotifyDataSetChanged")
     public void filterByKeyword(String keyword, boolean isCompleted, boolean isNotCompleted) {
         List<Object> temp = new ArrayList<>();
-        if(mOriginalData.isEmpty()){
+        if (mOriginalData.isEmpty()) {
             mOriginalData.addAll(mDataSet);
-        } else if(mDataSet.isEmpty()){
+        } else if (mDataSet.isEmpty()) {
             mDataSet.addAll(mOriginalData);
         }
         for (Object O_comic : mDataSet) {

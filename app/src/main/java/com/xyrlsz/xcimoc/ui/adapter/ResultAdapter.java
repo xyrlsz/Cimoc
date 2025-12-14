@@ -3,13 +3,13 @@ package com.xyrlsz.xcimoc.ui.adapter;
 import android.content.Context;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.ViewHolder;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.facebook.imagepipeline.common.ResizeOptions;
@@ -53,7 +53,7 @@ public class ResultAdapter extends BaseAdapter<Comic> {
 
         viewHolder.comicTitle.setText(STConvertUtils.convert(comic.getTitle()));
         viewHolder.comicAuthor.setText(comic.getAuthor());
-        viewHolder.comicSource.setText(mTitleGetter.getTitle(comic.getSource()));
+        viewHolder.comicSource.setText(STConvertUtils.convert(mTitleGetter.getTitle(comic.getSource())));
         viewHolder.comicUpdate.setText(comic.getUpdate());
         ImageRequest request = ImageRequestBuilder
                 .newBuilderWithSource(Uri.parse(comic.getCover()))

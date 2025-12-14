@@ -6,6 +6,7 @@ import android.widget.ArrayAdapter;
 
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.utils.CollectionUtils;
+import com.xyrlsz.xcimoc.utils.STConvertUtils;
 
 import java.util.List;
 
@@ -17,15 +18,10 @@ import rx.functions.Func1;
 
 public class CategoryAdapter extends ArrayAdapter<String> {
 
-    private List<Pair<String, String>> mCategoryList;
+    private final List<Pair<String, String>> mCategoryList;
 
     public CategoryAdapter(Context context, List<Pair<String, String>> list) {
-        super(context, R.layout.item_spinner, CollectionUtils.map(list, new Func1<Pair<String, String>, String>() {
-            @Override
-            public String call(Pair<String, String> pair) {
-                return pair.first;
-            }
-        }));
+        super(context, R.layout.item_spinner, CollectionUtils.map(list, pair -> STConvertUtils.convert(pair.first)));
         mCategoryList = list;
     }
 
