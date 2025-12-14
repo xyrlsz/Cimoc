@@ -47,7 +47,7 @@ public class Baozi extends MangaParser {
 
     public static final int TYPE = 101;
     public static final String DEFAULT_TITLE = "包子漫画";
-    private static String baseUrl = "https://www.baozimh.com";
+    private static final String baseUrl = "https://www.baozimh.com";
     //    private static final String baseUrl = "https://cn.bzmgcn.com";
     private static final String imgDomain = "as.baozimh.com";
 

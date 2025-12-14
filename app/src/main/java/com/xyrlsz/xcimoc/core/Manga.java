@@ -63,42 +63,42 @@ public class Manga {
         }
     }
 
-    public static Observable<Comic> getSearchResult(final MangaParser parser, final String keyword, final int page, final boolean strictSearch) {
-        return Observable.create(new Observable.OnSubscribe<Comic>() {
-            @Override
-            public void call(Subscriber<? super Comic> subscriber) {
-                try {
-                    Request request = parser.getSearchRequest(keyword, page);
-                    Random random = new Random();
-                    String html;
-                    if (parser.isGetSearchUseWebParser()) {
-                        WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
-                        html = webParser.getHtmlStrSync();
-                    } else {
-                        html = getResponseBody(App.getHttpClient(), request);
-                    }
-                    SearchIterator iterator = parser.getSearchIterator(html, page);
-                    if (iterator == null || iterator.empty()) {
-                        throw new Exception();
-                    }
-                    while (iterator.hasNext()) {
-                        Comic comic = iterator.next();
-//                        if (comic != null && (comic.getTitle().indexOf(keyword) != -1 || comic.getAuthor().indexOf(keyword) != -1)) {
-                        if (comic != null
-                                && (indexOfIgnoreCase(comic.getTitle(), keyword)
-                                || indexOfIgnoreCase(comic.getAuthor(), keyword)
-                                || (!strictSearch))) {
-                            subscriber.onNext(comic);
-                            Thread.sleep(random.nextInt(200));
-                        }
-                    }
-                    subscriber.onCompleted();
-                } catch (Exception e) {
-                    subscriber.onError(e);
-                }
-            }
-        }).subscribeOn(Schedulers.io());
-    }
+//    public static Observable<Comic> getSearchResult(final MangaParser parser, final String keyword, final int page, final boolean strictSearch) {
+//        return Observable.create(new Observable.OnSubscribe<Comic>() {
+//            @Override
+//            public void call(Subscriber<? super Comic> subscriber) {
+//                try {
+//                    Request request = parser.getSearchRequest(keyword, page);
+//                    Random random = new Random();
+//                    String html;
+//                    if (parser.isGetSearchUseWebParser()) {
+//                        WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
+//                        html = webParser.getHtmlStrSync();
+//                    } else {
+//                        html = getResponseBody(App.getHttpClient(), request);
+//                    }
+//                    SearchIterator iterator = parser.getSearchIterator(html, page);
+//                    if (iterator == null || iterator.empty()) {
+//                        throw new Exception();
+//                    }
+//                    while (iterator.hasNext()) {
+//                        Comic comic = iterator.next();
+////                        if (comic != null && (comic.getTitle().indexOf(keyword) != -1 || comic.getAuthor().indexOf(keyword) != -1)) {
+//                        if (comic != null
+//                                && (indexOfIgnoreCase(comic.getTitle(), keyword)
+//                                || indexOfIgnoreCase(comic.getAuthor(), keyword)
+//                                || (!strictSearch))) {
+//                            subscriber.onNext(comic);
+//                            Thread.sleep(random.nextInt(200));
+//                        }
+//                    }
+//                    subscriber.onCompleted();
+//                } catch (Exception e) {
+//                    subscriber.onError(e);
+//                }
+//            }
+//        }).subscribeOn(Schedulers.io());
+//    }
 
     public static Observable<Comic> getSearchResult(final MangaParser parser, final String keyword, final int page, final boolean strictSearch, final boolean stSame) {
         return Observable.create(new Observable.OnSubscribe<Comic>() {

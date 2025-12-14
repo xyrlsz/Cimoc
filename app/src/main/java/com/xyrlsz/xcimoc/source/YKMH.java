@@ -107,7 +107,7 @@ public class YKMH extends MangaParser {
         String cover = info.getChild("div#Cover > *").src();
         String update = info.text("p.txtItme > span.date");
         String author = info.getParent("p.txtItme > span.icon01").text();
-        String intro = body.getParent("p#full-des #showmore-des").text();
+        String intro = body.getParent("p#full-des #showmore-des").text().replace("展开", "");
         String isFinish = info.getParent("p.txtItme > span.icon01").text();
         boolean finish = isFinish.contains("完结");
         comic.setInfo(title, cover, update, intro, author, finish);
