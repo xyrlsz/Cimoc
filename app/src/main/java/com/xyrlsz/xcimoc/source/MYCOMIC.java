@@ -1,9 +1,20 @@
 package com.xyrlsz.xcimoc.source;
 
+import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_AREA;
+import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_ORDER;
+import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_PROGRESS;
+import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_READER;
+import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_SUBJECT;
+import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_YEAR;
+import static com.xyrlsz.xcimoc.parser.MangaCategory.getParseFormatMap;
+
+import android.util.Pair;
+
 import com.xyrlsz.xcimoc.model.Chapter;
 import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.ImageUrl;
 import com.xyrlsz.xcimoc.model.Source;
+import com.xyrlsz.xcimoc.parser.MangaCategory;
 import com.xyrlsz.xcimoc.parser.MangaParser;
 import com.xyrlsz.xcimoc.parser.NodeIterator;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
@@ -38,7 +49,7 @@ public class MYCOMIC extends MangaParser {
     private static final String baseUrl = "https://mycomic.com";
 
     public MYCOMIC(Source source) {
-        init(source);
+        init(source, new Category());
     }
 
     public static Source getDefaultSource() {
@@ -171,8 +182,193 @@ public class MYCOMIC extends MangaParser {
     }
 
     @Override
-    public Request getCheckRequest(String cid) {
-        return getInfoRequest(cid);
+    public Request getCategoryRequest(String format, int page) {
+        Map<Integer, String> map = getParseFormatMap(format);
+        String url =
+                baseUrl + "/comics?filter%5Baudience%5D=" +
+                        map.get(CATEGORY_READER) +
+                        "&filter%5Bcountry%5D=" +
+                        map.get(CATEGORY_AREA) +
+                        "&filter%5Btag%5D=" +
+                        map.get(CATEGORY_SUBJECT) +
+                        "&filter%5Byear%5D=" +
+                        map.get(CATEGORY_YEAR) +
+                        "&filter%5Bend%5D=" +
+                        map.get(CATEGORY_PROGRESS) +
+                        "&sort=" +
+                        map.get(CATEGORY_ORDER) +
+                        "&page=" +
+                        page;
+
+        return new Request.Builder().url(url).build();
+
     }
+
+    @Override
+    public List<Comic> parseCategory(String html, int page) {
+        List<Comic> list = new ArrayList<>();
+        Node body = new Node(html);
+        List<Node> comicNodes = body.list("div.grid > div.group");
+        for (Node comicNode : comicNodes) {
+            String title = comicNode.text("[data-flux-subheading]");
+            String cover = comicNode.attr("div > a > img", "data-src");
+            if (cover.isEmpty()) {
+                cover = comicNode.src("div > a > img");
+            }
+            String[] tmp = comicNode.href("div > a").split("/");
+            String cid = tmp[tmp.length - 1];
+            list.add(new Comic(TYPE, cid, title, cover, null, null));
+        }
+        return list;
+    }
+
+    private static class Category extends MangaCategory {
+
+        @Override
+        public boolean isComposite() {
+            return true;
+        }
+
+        @Override
+        protected List<Pair<String, String>> getSubject() {
+            List<Pair<String, String>> list = new ArrayList<>();
+            list.add(new Pair<>("所有", ""));
+            list.add(new Pair<>("魔幻", "mohuan"));
+            list.add(new Pair<>("魔法", "mofa"));
+            list.add(new Pair<>("熱血", "rexue"));
+            list.add(new Pair<>("冒險", "maoxian"));
+            list.add(new Pair<>("懸疑", "xuanyi"));
+            list.add(new Pair<>("偵探", "zhentan"));
+            list.add(new Pair<>("愛情", "aiqing"));
+            list.add(new Pair<>("校園", "xiaoyuan"));
+            list.add(new Pair<>("搞笑", "gaoxiao"));
+            list.add(new Pair<>("四格", "sige"));
+            list.add(new Pair<>("科幻", "kehuan"));
+            list.add(new Pair<>("神鬼", "shengui"));
+            list.add(new Pair<>("舞蹈", "wudao"));
+            list.add(new Pair<>("音樂", "yinyue"));
+            list.add(new Pair<>("百合", "baihe"));
+            list.add(new Pair<>("後宮", "hougong"));
+            list.add(new Pair<>("機戰", "jizhan"));
+            list.add(new Pair<>("格鬥", "gedou"));
+            list.add(new Pair<>("恐怖", "kongbu"));
+            list.add(new Pair<>("萌系", "mengxi"));
+            list.add(new Pair<>("武俠", "wuxia"));
+            list.add(new Pair<>("社會", "shehui"));
+            list.add(new Pair<>("歷史", "lishi"));
+            list.add(new Pair<>("耽美", "danmei"));
+            list.add(new Pair<>("勵志", "lizhi"));
+            list.add(new Pair<>("職場", "zhichang"));
+            list.add(new Pair<>("生活", "shenghuo"));
+            list.add(new Pair<>("治癒", "zhiyu"));
+            list.add(new Pair<>("偽娘", "weiniang"));
+            list.add(new Pair<>("黑道", "heidao"));
+            list.add(new Pair<>("戰爭", "zhanzheng"));
+            list.add(new Pair<>("競技", "jingji"));
+            list.add(new Pair<>("體育", "tiyu"));
+            list.add(new Pair<>("美食", "meishi"));
+            list.add(new Pair<>("腐女", "funv"));
+            list.add(new Pair<>("宅男", "zhainan"));
+            list.add(new Pair<>("推理", "tuili"));
+            list.add(new Pair<>("雜誌", "zazhi"));
+            return list;
+        }
+
+        @Override
+        protected boolean hasOrder() {
+            return true;
+        }
+
+        @Override
+        protected List<Pair<String, String>> getOrder() {
+            List<Pair<String, String>> list = new ArrayList<>();
+            list.add(new Pair<>("最新上架", ""));
+            list.add(new Pair<>("最近更新", "-update"));
+            list.add(new Pair<>("最高人氣", "-views"));
+            return list;
+        }
+
+        @Override
+        protected boolean hasArea() {
+            return true;
+        }
+
+        @Override
+        protected List<Pair<String, String>> getArea() {
+            List<Pair<String, String>> list = new ArrayList<>();
+            list.add(new Pair<>("所有", ""));
+            list.add(new Pair<>("日本", "japan"));
+            list.add(new Pair<>("港台", "hongkong"));
+            list.add(new Pair<>("歐美", "europe"));
+            list.add(new Pair<>("內地", "china"));
+            list.add(new Pair<>("韓國", "korea"));
+            list.add(new Pair<>("其他", "other"));
+            return list;
+        }
+
+        @Override
+        protected boolean hasReader() {
+            return true;
+        }
+
+        @Override
+        protected List<Pair<String, String>> getReader() {
+            List<Pair<String, String>> list = new ArrayList<>();
+            list.add(new Pair<>("所有", ""));
+            list.add(new Pair<>("少女", "shaonv"));
+            list.add(new Pair<>("少年", "shaonian"));
+            list.add(new Pair<>("青年", "qingnian"));
+            list.add(new Pair<>("兒童", "ertong"));
+            list.add(new Pair<>("通用", "tongyong"));
+            return list;
+        }
+
+        @Override
+        protected boolean hasProgress() {
+            return true;
+        }
+
+        @Override
+        protected List<Pair<String, String>> getProgress() {
+            List<Pair<String, String>> list = new ArrayList<>();
+            list.add(new Pair<>("所有", ""));
+            list.add(new Pair<>("連載中", "0"));
+            list.add(new Pair<>("已完結", "1"));
+            return list;
+        }
+
+        @Override
+        protected boolean hasYear() {
+            return true;
+        }
+
+        @Override
+        protected List<Pair<String, String>> getYear() {
+            List<Pair<String, String>> list = new ArrayList<>();
+            list.add(new Pair<>("所有", ""));
+            list.add(new Pair<>("2025", "2025"));
+            list.add(new Pair<>("2024", "2024"));
+            list.add(new Pair<>("2023", "2023"));
+            list.add(new Pair<>("2022", "2022"));
+            list.add(new Pair<>("2021", "2021"));
+            list.add(new Pair<>("2020", "2020"));
+            list.add(new Pair<>("2019", "2019"));
+            list.add(new Pair<>("2018", "2018"));
+            list.add(new Pair<>("2017", "2017"));
+            list.add(new Pair<>("2016", "2016"));
+            list.add(new Pair<>("2015", "2015"));
+            list.add(new Pair<>("2014", "2014"));
+            list.add(new Pair<>("2013", "2013"));
+            list.add(new Pair<>("2012", "2012"));
+            list.add(new Pair<>("2011", "2011"));
+            list.add(new Pair<>("2010", "2010"));
+            list.add(new Pair<>("00年代", "200x"));
+            list.add(new Pair<>("90年代", "199x"));
+            list.add(new Pair<>("80年代", "198x"));
+            list.add(new Pair<>("70年代或更早", "197x"));
+            return list;
+        }
+    }
+
 
 }

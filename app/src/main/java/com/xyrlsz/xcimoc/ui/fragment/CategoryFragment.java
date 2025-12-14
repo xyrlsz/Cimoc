@@ -386,7 +386,7 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
                             }
 
                             // 根据返回数据数量判断是否还有更多数据
-                            if (list.size() >= 20) { // 假设每页20条
+                            if (list.size() >= 5) {
                                 state.state = STATE_DONE; // 可以加载下一页
                             } else {
                                 state.state = STATE_NULL; // 没有更多数据
