@@ -1,5 +1,7 @@
 package com.xyrlsz.xcimoc.utils;
 
+import android.util.Log;
+
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -26,20 +28,32 @@ public class ThreadRunUtils {
     }
 
     public static void runOnMainThread(Runnable runnable) {
-        Observable.just(true)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(aBoolean -> runnable.run(),
-                        Throwable::printStackTrace
-                );
-    }
+    runOnMainThread(runnable, new TaskCallback() {
+        @Override
+        public void onSuccess() {
+            // 空实现
+        }
+        
+        @Override
+        public void onError(String msg) {
+            Log.e("ThreadRunUtils", "runOnMainThread error: " + msg);
+        }
+    });
+}
 
-    public static void runOnIOThread(Runnable runnable) {
-        Observable.just(true)
-                .observeOn(Schedulers.io())
-                .subscribe(aBoolean -> runnable.run(),
-                        Throwable::printStackTrace
-                );
-    }
+public static void runOnIOThread(Runnable runnable) {
+    runOnIOThread(runnable, new TaskCallback() {
+        @Override
+        public void onSuccess() {
+            // 空实现
+        }
+        
+        @Override
+        public void onError(String msg) {
+            Log.e("ThreadRunUtils", "runOnIOThread error: " + msg);
+        }
+    });
+}
 
     public static void runTaskObserveOnUI(Runnable io, Runnable ui, TaskCallback callback) {
 
