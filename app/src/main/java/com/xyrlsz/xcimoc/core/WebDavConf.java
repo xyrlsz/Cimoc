@@ -47,7 +47,8 @@ public class WebDavConf {
 
                         @Override
                         public void onError(Throwable e) {
-                            sardine = null;
+                            sardine = new OkHttpSardine();
+                            isInit = false;
                             Log.e("WebDavConf", "WebDav 初始化失败: ", e);
                         }
 
@@ -61,7 +62,8 @@ public class WebDavConf {
 
     public static void update(Context context) {
         url = null;
-        sardine = null;
+        sardine = new OkHttpSardine();
+        isInit = false;
         init(context);
     }
 
