@@ -20,11 +20,11 @@ public record CopyMangaHeaderBuilder(String token, String deviceInfo, String dev
 
     // 固定参数
     private static final String SECRET_BASE64 = "M2FmMDg1OTAzMTEwMzJlZmUwNjYwNTUwYTA1NjNhNTM=";
-    private static final String USER_AGENT = "COPY/3.0.0";
+    private static final String USER_AGENT = "COPY/3.0.6";
     private static final String SOURCE = "copyApp";
     private static final String PLATFORM = "3";
-    private static final String REFERER = "com.copymanga.app-3.0.0";
-    private static final String VERSION = "3.0.0";
+    private static final String REFERER = "com.copymanga.app-3.0.6";
+    private static final String VERSION = "3.0.6";
     private static final String UMSTRING = "b4c89ca4104ea9a97750314d791520ac";
     private static final String REGION = "1";
 
