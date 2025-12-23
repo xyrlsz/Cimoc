@@ -191,7 +191,7 @@ public class ComicManager {
     }
 
     public int updateOrDelete(Comic comic) {
-        if (comic.getFavorite() == null && comic.getHistory() == null && comic.getDownload() == null) {
+        if (comic.getFavorite() == null && comic.getHistory() == null && comic.getDownload() == null && !comic.getLocal()) {
             delete(comic);
             return RESULT_DELETE;
         } else {

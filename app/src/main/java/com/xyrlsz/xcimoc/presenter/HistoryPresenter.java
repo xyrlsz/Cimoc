@@ -75,10 +75,12 @@ public class HistoryPresenter extends BasePresenter<HistoryView> {
 
     public void delete(long id) {
         Comic comic = mComicManager.load(id);
-        comic.setHistory(null);
-        int res = mComicManager.updateOrDelete(comic);
-        if (res == ComicManager.RESULT_DELETE) {
-            mChapterManager.deleteBySourceComic(IdCreator.createSourceComic(comic));
+        if (comic != null) {
+            comic.setHistory(null);
+            int res = mComicManager.updateOrDelete(comic);
+            if (res == ComicManager.RESULT_DELETE) {
+                mChapterManager.deleteBySourceComic(IdCreator.createSourceComic(comic));
+            }
         }
         mBaseView.onHistoryDelete(id);
     }

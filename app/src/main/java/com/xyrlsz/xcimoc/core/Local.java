@@ -18,7 +18,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import rx.Observable;
-import rx.Subscriber;
 import rx.schedulers.Schedulers;
 
 /**
@@ -30,67 +29,51 @@ public class Local {
     private static Pattern chapterPattern = null;
 
     public static Observable<List<Pair<Comic, ArrayList<Task>>>> scan(final CimocDocumentFile root) {
-        return Observable.create(new Observable.OnSubscribe<List<Pair<Comic, ArrayList<Task>>>>() {
-            @Override
-            public void call(Subscriber<? super List<Pair<Comic, ArrayList<Task>>>> subscriber) {
-                List<Pair<Comic, ArrayList<Task>>> result = new ArrayList<>();
+        return Observable.create((Observable.OnSubscribe<List<Pair<Comic, ArrayList<Task>>>>) subscriber -> {
+            List<Pair<Comic, ArrayList<Task>>> result = new ArrayList<>();
 
-                ScanInfo info = new ScanInfo(root);
-                countPicture(info);
-                if (info.count > 5) {
-                    Pair<Comic, ArrayList<Task>> pair = Pair.create(buildComic(info.dir, info.cover), new ArrayList<Task>());
-                    pair.second.add(buildTask(info.dir, info.count, true));
-                    result.add(pair);
-                } else {
-                    List<CimocDocumentFile> list = new LinkedList<>();
-                    list.add(root);
+            ScanInfo info = new ScanInfo(root);
+            countPicture(info);
+            if (info.count > 5) {
+                Pair<Comic, ArrayList<Task>> pair = Pair.create(buildComic(info.dir, info.cover), new ArrayList<>());
+                pair.second.add(buildTask(info.dir, info.count, true));
+                result.add(pair);
+            } else {
+                List<CimocDocumentFile> list = new LinkedList<>();
+                list.add(root);
 
-                    while (!list.isEmpty()) {
-                        CimocDocumentFile dir = list.get(0);
+                while (!list.isEmpty()) {
+                    CimocDocumentFile dir = list.get(0);
 
-                        List<ScanInfo> guessChapter = new LinkedList<>();
-                        List<ScanInfo> guessComic = new LinkedList<>();
-                        List<CimocDocumentFile> guessOther = classify(guessChapter, guessComic, dir);
+                    List<ScanInfo> guessChapter = new LinkedList<>();
+                    List<ScanInfo> guessComic = new LinkedList<>();
+                    List<CimocDocumentFile> guessOther = classify(guessChapter, guessComic, dir);
 
-                        if (guessChapter.size() > 2 * guessComic.size()) {  // 章节
-                            result.add(merge(dir, guessChapter, guessComic));
-                        } else {    // 单章节漫画
-                            split(guessChapter, result);
-                            split(guessComic, result);
-                            list.addAll(guessOther);
-                        }
-
-                        list.remove(0);
+                    if (guessChapter.size() > 2 * guessComic.size()) {  // 章节
+                        result.add(merge(dir, guessChapter, guessComic));
+                    } else {    // 单章节漫画
+                        split(guessChapter, result);
+                        split(guessComic, result);
+                        list.addAll(guessOther);
                     }
+
+                    list.remove(0);
                 }
-                subscriber.onNext(result);
-                subscriber.onCompleted();
             }
+            subscriber.onNext(result);
+            subscriber.onCompleted();
         }).subscribeOn(Schedulers.io());
     }
 
     public static Observable<List<ImageUrl>> images(final CimocDocumentFile dir, final Chapter chapter) {
-        return Observable.create(new Observable.OnSubscribe<List<ImageUrl>>() {
-            @Override
-            public void call(Subscriber<? super List<ImageUrl>> subscriber) {
-                List<CimocDocumentFile> files = dir.listFiles(new CimocDocumentFile.DocumentFileFilter() {
-                    @Override
-                    public boolean call(CimocDocumentFile file) {
-                        return file.isFile() && StringUtils.endWith(file.getName(), "jpg", "png", "jpeg");
-                    }
-                }, new Comparator<CimocDocumentFile>() {
-                    @Override
-                    public int compare(CimocDocumentFile lhs, CimocDocumentFile rhs) {
-                        return lhs.getName().compareTo(rhs.getName());
-                    }
-                });
-                List<ImageUrl> list = Storage.buildImageUrlFromDocumentFile(files, chapter.getTitle(), chapter.getCount(), chapter);
-                if (list.size() != 0) {
-                    subscriber.onNext(list);
-                    subscriber.onCompleted();
-                } else {
-                    subscriber.onError(new Exception());
-                }
+        return Observable.create((Observable.OnSubscribe<List<ImageUrl>>) subscriber -> {
+            List<CimocDocumentFile> files = dir.listFiles(file -> file.isFile() && StringUtils.endWith(file.getName(), "jpg", "png", "jpeg", "webp"), Comparator.comparing(CimocDocumentFile::getName));
+            List<ImageUrl> list = Storage.buildImageUrlFromDocumentFile(files, chapter.getTitle(), chapter.getCount(), chapter);
+            if (!list.isEmpty()) {
+                subscriber.onNext(list);
+                subscriber.onCompleted();
+            } else {
+                subscriber.onError(new Exception());
             }
         }).subscribeOn(Schedulers.io());
     }
@@ -99,7 +82,7 @@ public class Local {
         String name = null;
         int other = 0;
         for (CimocDocumentFile file : info.dir.listFiles()) {
-            if (file.isFile() && StringUtils.endWith(file.getName(), "png", "jpg", "jpeg")) {
+            if (file.isFile() && StringUtils.endWith(file.getName(), "png", "jpg", "jpeg", "webp")) {
                 ++info.count;
             } else {
                 ++other;
