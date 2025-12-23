@@ -23,6 +23,7 @@ import com.facebook.imagepipeline.core.ImagePipelineFactory;
 import com.google.common.collect.Lists;
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.R;
+import com.xyrlsz.xcimoc.core.WebDavConf;
 import com.xyrlsz.xcimoc.fresco.ControllerBuilderSupplierFactory;
 import com.xyrlsz.xcimoc.fresco.ImagePipelineFactoryBuilder;
 import com.xyrlsz.xcimoc.global.Extra;
@@ -96,7 +97,7 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
     @Override
     protected void initData() {
         mAutoBackup = mPreference.getBoolean(PreferenceManager.PREF_BACKUP_SAVE_COMIC, true);
-        mAutoBackupCloud = mPreference.getBoolean(PreferenceManager.PREF_BACKUP_SAVE_COMIC_CLOUD, true);
+        mAutoBackupCloud = mPreference.getBoolean(PreferenceManager.PREF_BACKUP_SAVE_COMIC_CLOUD, false);
         mBackupCount = mPreference.getInt(PreferenceManager.PREF_BACKUP_SAVE_COMIC_COUNT, 0);
         long id = getIntent().getLongExtra(Extra.EXTRA_ID, -1);
         int source = getIntent().getIntExtra(Extra.EXTRA_SOURCE, -1);
@@ -112,7 +113,7 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
         if (mAutoBackup) {
             mPreference.putInt(PreferenceManager.PREF_BACKUP_SAVE_COMIC_COUNT, mBackupCount);
         }
-        if (mAutoBackupCloud) {
+        if (mAutoBackupCloud && WebDavConf.isInit) {
             mPreference.putInt(PreferenceManager.PREF_BACKUP_SAVE_COMIC_COUNT, mBackupCount);
         }
     }
@@ -421,7 +422,7 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
             mPreference.putInt(PreferenceManager.PREF_BACKUP_SAVE_COMIC_COUNT, 0);
             mPresenter.backup(getAppInstance().getDocumentFile());
         }
-        if (mAutoBackupCloud && ++mBackupCount == 10) {
+        if (mAutoBackupCloud && ++mBackupCount == 10 && WebDavConf.isInit) {
             mBackupCount = 0;
             mPreference.putInt(PreferenceManager.PREF_BACKUP_SAVE_COMIC_COUNT, 0);
             mPresenter.backup(CimocDocumentFile.fromWebDav());

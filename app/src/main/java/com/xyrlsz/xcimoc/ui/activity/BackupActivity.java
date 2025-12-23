@@ -61,7 +61,7 @@ public class BackupActivity extends BackActivity implements BackupView {
     protected void initView() {
         super.initView();
         mSaveComicAuto.bindPreference(PreferenceManager.PREF_BACKUP_SAVE_COMIC, true);
-        mSaveComicCloudAuto.bindPreference(PreferenceManager.PREF_BACKUP_SAVE_COMIC_CLOUD, true);
+        mSaveComicCloudAuto.bindPreference(PreferenceManager.PREF_BACKUP_SAVE_COMIC_CLOUD, false);
         SharedPreferences sharedPreferences = getSharedPreferences(Constants.WEBDAV_SHARED, MODE_PRIVATE);
         String webdavUrl = sharedPreferences.getString(Constants.WEBDAV_SHARED_URL, "");
         String webdavUsername = sharedPreferences.getString(Constants.WEBDAV_SHARED_USERNAME, "");

@@ -7,71 +7,93 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 public class ThreadRunUtils {
+
     public static void runOnMainThread(Runnable runnable, TaskCallback callback) {
-        Observable.just(true)
+        Observable.create(subscriber -> {
+                    try {
+                        runnable.run();
+                        subscriber.onNext(null); // Notify completion
+                        subscriber.onCompleted();
+                    } catch (Throwable e) {
+                        subscriber.onError(e); // Pass error directly to RxJava error handler
+                    }
+                })
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(aBoolean -> runnable.run(),
-                        err -> {
-                            callback.onError(err.getMessage());
-                        }
+                .subscribe(
+                        result -> callback.onSuccess(),
+                        err -> callback.onError("Error on Main Thread: " + Log.getStackTraceString(err))
                 );
     }
 
     public static void runOnIOThread(Runnable runnable, TaskCallback callback) {
-        Observable.just(true)
-                .observeOn(Schedulers.io())
-                .subscribe(aBoolean -> runnable.run(),
-                        err -> {
-                            callback.onError(err.getMessage());
-                        }
+        Observable.create(subscriber -> {
+                    try {
+                        runnable.run();
+                        subscriber.onNext(null); // Notify completion
+                        subscriber.onCompleted();
+                    } catch (Throwable e) {
+                        subscriber.onError(e); // Pass error directly to RxJava error handler
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        result -> callback.onSuccess(),
+                        err -> callback.onError("Error on IO Thread: " + Log.getStackTraceString(err))
                 );
     }
 
     public static void runOnMainThread(Runnable runnable) {
-    runOnMainThread(runnable, new TaskCallback() {
-        @Override
-        public void onSuccess() {
-            // 空实现
-        }
-        
-        @Override
-        public void onError(String msg) {
-            Log.e("ThreadRunUtils", "runOnMainThread error: " + msg);
-        }
-    });
-}
+        runOnMainThread(runnable, new TaskCallback() {
+            @Override
+            public void onSuccess() {
+                Log.println(Log.INFO, "ThreadRunUtils", "runOnMainThread success");
+            }
 
-public static void runOnIOThread(Runnable runnable) {
-    runOnIOThread(runnable, new TaskCallback() {
-        @Override
-        public void onSuccess() {
-            // 空实现
-        }
-        
-        @Override
-        public void onError(String msg) {
-            Log.e("ThreadRunUtils", "runOnIOThread error: " + msg);
-        }
-    });
-}
+            @Override
+            public void onError(String msg) {
+                Log.e("ThreadRunUtils", "runOnMainThread error: " + msg);
+            }
+        });
+    }
+
+    public static void runOnIOThread(Runnable runnable) {
+        runOnIOThread(runnable, new TaskCallback() {
+            @Override
+            public void onSuccess() {
+                // No-op
+            }
+
+            @Override
+            public void onError(String msg) {
+                Log.e("ThreadRunUtils", "runOnIOThread error: " + msg);
+            }
+        });
+    }
 
     public static void runTaskObserveOnUI(Runnable io, Runnable ui, TaskCallback callback) {
-
-        Observable.create((Observable.OnSubscribe<Void>) subscriber -> {
-                    // 在 IO 线程执行耗时操作
-                    io.run();
-                    subscriber.onNext(null);
-                    subscriber.onCompleted();
+        Observable.create(subscriber -> {
+                    try {
+                        io.run();
+                        subscriber.onNext(null); // Notify completion
+                        subscriber.onCompleted();
+                    } catch (Throwable e) {
+                        subscriber.onError(e); // Handle any errors
+                    }
                 })
-                .subscribeOn(Schedulers.io())          // 指定上游执行线程
-                .observeOn(AndroidSchedulers.mainThread()) // 指定下游回调线程
-                .subscribe(result -> {
-                    // 在主线程更新 UI
-                    ui.run();
-                    callback.onSuccess();
-                }, err -> {
-                    callback.onError(err.getMessage());
-                });
+                .subscribeOn(Schedulers.io()) // Do IO work on IO thread
+                .observeOn(AndroidSchedulers.mainThread()) // Switch back to main thread for UI updates
+                .subscribe(
+                        result -> {
+                            try {
+                                ui.run();
+                                callback.onSuccess();
+                            } catch (Throwable e) {
+                                callback.onError("UI error: " + Log.getStackTraceString(e));
+                            }
+                        },
+                        err -> callback.onError("RxJava error: " + err.getMessage())
+                );
     }
 
     public interface TaskCallback {
@@ -79,5 +101,4 @@ public static void runOnIOThread(Runnable runnable) {
 
         void onError(String msg);
     }
-
 }

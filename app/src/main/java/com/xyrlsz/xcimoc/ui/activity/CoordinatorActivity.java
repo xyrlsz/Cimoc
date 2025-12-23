@@ -32,7 +32,7 @@ public abstract class CoordinatorActivity extends BackActivity implements
     @BindView(R.id.coordinator_layout)
     CoordinatorLayout mCoordinatorLayout;
 
-    @BindView(R.id.coordinator_activity)
+    @BindView(R.id.coordinator_frame_layout)
     FrameLayout mLayoutView;
 
     @Override
@@ -49,7 +49,7 @@ public abstract class CoordinatorActivity extends BackActivity implements
             mRecyclerView.addItemDecoration(adapter.getItemDecoration());
         }
         mRecyclerView.setAdapter(adapter);
-        ViewCompat.setOnApplyWindowInsetsListener(mCoordinatorLayout, (v, insets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(mLayoutView, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(
                     v.getPaddingLeft(),
@@ -87,7 +87,7 @@ public abstract class CoordinatorActivity extends BackActivity implements
 
     @Override
     protected View getLayoutView() {
-        return mLayoutView;
+        return mCoordinatorLayout;
     }
 
 }

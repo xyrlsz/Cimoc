@@ -8,6 +8,7 @@ import android.content.res.Resources;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
@@ -333,6 +334,7 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
             CimocDocumentFile file = DocumentUtils.getOrCreateFile(Objects.requireNonNull(dir), StringUtils.getDateStringWithSuffix("log"));
             DocumentUtils.writeStringToFile(getContentResolver(), Objects.requireNonNull(file), sb.toString());
         } catch (Exception ex) {
+            Log.e("UncaughtException", "Error while saving crash log", ex);
         }
         mActivityLifecycle.clear();
         System.exit(1);

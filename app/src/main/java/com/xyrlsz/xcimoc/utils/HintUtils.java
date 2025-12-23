@@ -5,7 +5,6 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
-import com.xyrlsz.xcimoc.App;
 
 /**
  * Created by Hiroshi on 2016/9/22.
@@ -21,7 +20,7 @@ public class HintUtils {
             if (layout.isShown()) {
                 Snackbar snackbar = Snackbar.make(layout, msg, Snackbar.LENGTH_SHORT);
                 int theme = ThemeUtils.getThemeId();
-                snackbar.setBackgroundTint(App.getAppContext().getResources().getColor(ThemeUtils.getThemeColorById(theme)));
+                snackbar.setBackgroundTint(layout.getContext().getResources().getColor(ThemeUtils.getThemeColorById(theme)));
                 snackbar.show();
             }
         });
