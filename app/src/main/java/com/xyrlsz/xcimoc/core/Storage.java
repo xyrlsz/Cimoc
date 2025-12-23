@@ -11,6 +11,7 @@ import com.xyrlsz.xcimoc.model.ImageUrl;
 import com.xyrlsz.xcimoc.saf.CimocDocumentFile;
 import com.xyrlsz.xcimoc.utils.DecryptionUtils;
 import com.xyrlsz.xcimoc.utils.DocumentUtils;
+import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import java.io.File;
@@ -161,8 +162,8 @@ public class Storage {
                     uri = DecryptionUtils.urlDecrypt(uri);
                 }
                 Long comicChapter = chapter.getId();
-                Long id = Long.parseLong(comicChapter + "300" + count);
-                ImageUrl image = new ImageUrl(id, chapter.getSourceComic(), ++count, uri, false);
+                Long id = IdCreator.createImageId(comicChapter, count);
+                ImageUrl image = new ImageUrl(id, comicChapter, ++count, uri, false);
                 image.setHeight(opts.outHeight);
                 image.setWidth(opts.outWidth);
                 image.setChapter(chapterStr);
