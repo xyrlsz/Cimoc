@@ -16,7 +16,7 @@ import rx.schedulers.Schedulers;
 
 public class WebDavConf {
     public static String url = "";
-    public static Sardine sardine = new OkHttpSardine();
+    public static Sardine sardine = null;
     public static boolean isInit = false;
 
     public static void init(Context context) {
@@ -24,6 +24,7 @@ public class WebDavConf {
         url = sharedPreferences.getString(Constants.WEBDAV_SHARED_URL, "");
         String username = sharedPreferences.getString(Constants.WEBDAV_SHARED_USERNAME, "");
         String password = sharedPreferences.getString(Constants.WEBDAV_SHARED_PASSWORD, "");
+        sardine = new OkHttpSardine();
         if (!(username.isEmpty() || password.isEmpty() || url.isEmpty())) {
             sardine.setCredentials(username, password);
             Observable.create((Observable.OnSubscribe<Void>) subscriber -> {
@@ -47,7 +48,6 @@ public class WebDavConf {
 
                         @Override
                         public void onError(Throwable e) {
-                            sardine = new OkHttpSardine();
                             isInit = false;
                             Log.e("WebDavConf", "WebDav 初始化失败: ", e);
                         }
@@ -62,7 +62,7 @@ public class WebDavConf {
 
     public static void update(Context context) {
         url = null;
-        sardine = new OkHttpSardine();
+        sardine = null;
         isInit = false;
         init(context);
     }
