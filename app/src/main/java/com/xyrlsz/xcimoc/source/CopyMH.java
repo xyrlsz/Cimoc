@@ -30,7 +30,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -56,6 +55,8 @@ public class CopyMH extends MangaParser {
     private final String device = CopyMangaHeaderBuilder.generateDevice();
     private final String deviceInfo = CopyMangaHeaderBuilder.generateDeviceInfo();
     private final String pseudoId = CopyMangaHeaderBuilder.generatePseudoId();
+    private Long lastGetReqIdTime = 0L;
+    private String lastReqId = "";
 
     public CopyMH(Source source) {
         init(source, new Category());
@@ -137,10 +138,17 @@ public class CopyMH extends MangaParser {
         if (Objects.equals(headers.get("region"), "0")) {
             return "";
         }
+        Long nowTime = System.currentTimeMillis() / 1000;
+        if (nowTime - lastGetReqIdTime < 2 && !lastReqId.isEmpty()) {
+            return lastReqId;
+        }
         String reqIdUrl = "https://marketing.aiacgn.com/api/v2/adopr/query3/?format=json&ident=200100001";
         Request reqIdReq = new Request.Builder()
                 .url(reqIdUrl)
                 .headers(headers)
+                .addHeader("Content-Type", "application/x-www-form-urlencoded;charset=utf-8")
+                .addHeader("accept", "application/json")
+                .addHeader("accept-encoding", "gzip")
                 .build();
         String reqId = "";
         try {
@@ -148,6 +156,8 @@ public class CopyMH extends MangaParser {
             if (response.isSuccessful()) {
                 JSONObject data = new JSONObject(response.body().string());
                 reqId = data.getJSONObject("results").getString("request_id");
+                lastGetReqIdTime = nowTime;
+                lastReqId = reqId;
             }
         } catch (Exception e) {
 
