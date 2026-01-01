@@ -139,7 +139,7 @@ public class CopyMH extends MangaParser {
             return "";
         }
         Long nowTime = System.currentTimeMillis() / 1000;
-        if (nowTime - lastGetReqIdTime < 2 && !lastReqId.isEmpty()) {
+        if (nowTime - lastGetReqIdTime < 3600 && !lastReqId.isEmpty()) {
             return lastReqId;
         }
         String reqIdUrl = "https://marketing.aiacgn.com/api/v2/adopr/query3/?format=json&ident=200100001";
