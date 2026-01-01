@@ -30,15 +30,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import okhttp3.Headers;
 import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * 拷贝漫画
@@ -129,9 +132,32 @@ public class CopyMH extends MangaParser {
         return null;
     }
 
+    private String getReqID() {
+        Headers headers = getHeader();
+        if (Objects.equals(headers.get("region"), "0")) {
+            return "";
+        }
+        String reqIdUrl = "https://marketing.aiacgn.com/api/v2/adopr/query3/?format=json&ident=200100001";
+        Request reqIdReq = new Request.Builder()
+                .url(reqIdUrl)
+                .headers(headers)
+                .build();
+        String reqId = "";
+        try {
+            Response response = App.getHttpClient().newCall(reqIdReq).execute();
+            if (response.isSuccessful()) {
+                JSONObject data = new JSONObject(response.body().string());
+                reqId = data.getJSONObject("results").getString("request_id");
+            }
+        } catch (Exception e) {
+
+        }
+        return reqId;
+    }
+
     @Override
     public Request getInfoRequest(String cid) {
-        String url = StringUtils.format("%s/api/v3/comic2/%s?in_mainland=true&request_id=&platform=3", apiBaseUrl, cid);
+        String url = StringUtils.format("%s/api/v3/comic2/%s?in_mainland=true&platform=3&request_id=%s", apiBaseUrl, cid, getReqID());
         return new Request.Builder()
                 .url(url)
                 .headers(getHeader())
@@ -172,7 +198,7 @@ public class CopyMH extends MangaParser {
     @Override
     public Request getChapterRequest(String html, String cid) {
         String url = String.format(
-                "%s/api/v3/comic/%s/group/default/chapters?limit=100&offset=0&in_mainland=true&request_id=", apiBaseUrl, cid);
+                "%s/api/v3/comic/%s/group/default/chapters?limit=100&offset=0&in_mainland=true&request_id=%s", apiBaseUrl, cid, getReqID());
         return new Request.Builder()
                 .url(url)
                 .headers(getHeader())
@@ -230,7 +256,7 @@ public class CopyMH extends MangaParser {
 
     @Override
     public Request getImagesRequest(String cid, String path) {
-        String url = StringUtils.format("%s/api/v3/comic/%s/chapter2/%s?in_mainland=true&request_id=", apiBaseUrl, cid, path);
+        String url = StringUtils.format("%s/api/v3/comic/%s/chapter2/%s?in_mainland=true&request_id=%s", apiBaseUrl, cid, path, getReqID());
         return new Request.Builder()
                 .url(url)
                 .headers(getHeader())
