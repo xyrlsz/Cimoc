@@ -55,8 +55,7 @@ public class CopyMH extends MangaParser {
     private final String device = CopyMangaHeaderBuilder.generateDevice();
     private final String deviceInfo = CopyMangaHeaderBuilder.generateDeviceInfo();
     private final String pseudoId = CopyMangaHeaderBuilder.generatePseudoId();
-    private Long lastGetReqIdTime = 0L;
-    private String lastReqId = "";
+
 
     public CopyMH(Source source) {
         init(source, new Category());
@@ -138,7 +137,10 @@ public class CopyMH extends MangaParser {
         if (Objects.equals(headers.get("region"), "0")) {
             return "";
         }
-        Long nowTime = System.currentTimeMillis() / 1000;
+        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.COPYMG_SHARED, Context.MODE_PRIVATE);
+        String lastReqId = sharedPreferences.getString(Constants.COPYMG_SHARED_REQID, "");
+        long lastGetReqIdTime = sharedPreferences.getLong(Constants.COPYMG_SHARED_REQID_time, 0L);
+        long nowTime = System.currentTimeMillis() / 1000;
         if (nowTime - lastGetReqIdTime < 3600 && !lastReqId.isEmpty()) {
             return lastReqId;
         }
@@ -156,11 +158,13 @@ public class CopyMH extends MangaParser {
             if (response.isSuccessful()) {
                 JSONObject data = new JSONObject(response.body().string());
                 reqId = data.getJSONObject("results").getString("request_id");
-                lastGetReqIdTime = nowTime;
-                lastReqId = reqId;
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putLong(Constants.COPYMG_SHARED_REQID_time, nowTime);
+                editor.putString(Constants.COPYMG_SHARED_REQID, reqId);
+                editor.apply();
             }
         } catch (Exception e) {
-
+            return lastReqId;
         }
         return reqId;
     }
