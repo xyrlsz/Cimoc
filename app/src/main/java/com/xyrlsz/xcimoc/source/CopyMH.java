@@ -5,6 +5,7 @@ import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_AREA;
 import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_ORDER;
 import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_SUBJECT;
 import static com.xyrlsz.xcimoc.parser.MangaCategory.getParseFormatMap;
+import static com.xyrlsz.xcimoc.utils.RandomUtils.randomInt;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -25,6 +26,7 @@ import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.utils.CopyMangaHeaderBuilder;
 import com.xyrlsz.xcimoc.utils.IdCreator;
 import com.xyrlsz.xcimoc.utils.StringUtils;
+import com.xyrlsz.xcimoc.utils.ThreadRunUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -64,6 +66,7 @@ public class CopyMH extends MangaParser {
     public static Source getDefaultSource() {
         return new Source(null, DEFAULT_TITLE, TYPE, true, website);
     }
+
 
     @Override
     public Request getSearchRequest(String keyword, int page) {
@@ -132,18 +135,11 @@ public class CopyMH extends MangaParser {
         return null;
     }
 
-    private String getReqID() {
+    private String updateReqId() {
         Headers headers = getHeader();
-        if (Objects.equals(headers.get("region"), "0")) {
-            return "";
-        }
         SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.COPYMG_SHARED, Context.MODE_PRIVATE);
         String lastReqId = sharedPreferences.getString(Constants.COPYMG_SHARED_REQID, "");
-        long lastGetReqIdTime = sharedPreferences.getLong(Constants.COPYMG_SHARED_REQID_time, 0L);
         long nowTime = System.currentTimeMillis() / 1000;
-        if (nowTime - lastGetReqIdTime < 3600 && !lastReqId.isEmpty()) {
-            return lastReqId;
-        }
         String reqIdUrl = "https://marketing.aiacgn.com/api/v2/adopr/query3/?format=json&ident=200100001";
         Request reqIdReq = new Request.Builder()
                 .url(reqIdUrl)
@@ -167,6 +163,24 @@ public class CopyMH extends MangaParser {
             return lastReqId;
         }
         return reqId;
+    }
+
+    private String getReqID() {
+        Headers headers = getHeader();
+        if (Objects.equals(headers.get("region"), "0")) {
+            return "";
+        }
+        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.COPYMG_SHARED, Context.MODE_PRIVATE);
+        String lastReqId = sharedPreferences.getString(Constants.COPYMG_SHARED_REQID, "");
+        long lastGetReqIdTime = sharedPreferences.getLong(Constants.COPYMG_SHARED_REQID_time, 0L);
+        long nowTime = System.currentTimeMillis() / 1000;
+        if (nowTime - lastGetReqIdTime < 3600 && !lastReqId.isEmpty()) {
+            if (nowTime - lastGetReqIdTime > 120 + randomInt(1, 120)) {
+                ThreadRunUtils.runOnIOThread(this::updateReqId);
+            }
+            return lastReqId;
+        }
+        return updateReqId();
     }
 
     @Override

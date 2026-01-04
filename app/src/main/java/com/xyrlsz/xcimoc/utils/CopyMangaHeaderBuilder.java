@@ -1,10 +1,18 @@
 package com.xyrlsz.xcimoc.utils;
 
+import static com.xyrlsz.xcimoc.utils.RandomUtils.randomInt;
+
 import android.annotation.SuppressLint;
 
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Base64;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Random;
+
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -38,50 +46,6 @@ public record CopyMangaHeaderBuilder(String token, String deviceInfo, String dev
         this.device = device;
         this.pseudoId = pseudoId;
         this.copyRegion = copyRegion != null ? copyRegion : REGION;
-    }
-
-    public Map<String, String> build() throws Exception {
-        Map<String, String> headers = new HashMap<>();
-
-        // 当前时间信息
-        Date now = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd", Locale.US);
-        String dt = sdf.format(now);
-        String ts = String.valueOf(now.getTime() / 1000);
-
-        // HMAC-SHA256 签名
-        byte[] secretBytes = Base64.getDecoder().decode(SECRET_BASE64);
-        String sig = hmacSHA256Hex(secretBytes, ts.getBytes(StandardCharsets.UTF_8));
-
-        // Token 拼接
-        String auth = "Token" + (token.isEmpty() ? "" : " " + token);
-
-        headers.put("User-Agent", USER_AGENT);
-        headers.put("source", SOURCE);
-        headers.put("deviceinfo", deviceInfo);
-        headers.put("dt", dt);
-        headers.put("platform", PLATFORM);
-        headers.put("referer", REFERER);
-        headers.put("version", VERSION);
-        headers.put("device", device);
-        headers.put("pseudoid", pseudoId);
-        headers.put("Accept", "application/json");
-        headers.put("region", copyRegion);
-        headers.put("authorization", auth);
-        headers.put("umstring", UMSTRING);
-        headers.put("x-auth-timestamp", ts);
-        headers.put("x-auth-signature", sig);
-
-        return headers;
-    }
-
-    public Headers genHeaders() throws Exception {
-        try {
-            Map<String, String> headers = build();
-            return Headers.of(headers);
-        } catch (Exception e) {
-            throw new Exception("生成 Headers 失败", e);
-        }
     }
 
     /**
@@ -147,7 +111,49 @@ public record CopyMangaHeaderBuilder(String token, String deviceInfo, String dev
         return sb.toString();
     }
 
-    private static int randomInt(int min, int max) {
-        return new Random().nextInt(max - min + 1) + min;
+    public Map<String, String> build() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+
+        // 当前时间信息
+        Date now = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd", Locale.US);
+        String dt = sdf.format(now);
+        String ts = String.valueOf(now.getTime() / 1000);
+
+        // HMAC-SHA256 签名
+        byte[] secretBytes = Base64.getDecoder().decode(SECRET_BASE64);
+        String sig = hmacSHA256Hex(secretBytes, ts.getBytes(StandardCharsets.UTF_8));
+
+        // Token 拼接
+        String auth = "Token" + (token.isEmpty() ? "" : " " + token);
+
+        headers.put("User-Agent", USER_AGENT);
+        headers.put("source", SOURCE);
+        headers.put("deviceinfo", deviceInfo);
+        headers.put("dt", dt);
+        headers.put("platform", PLATFORM);
+        headers.put("referer", REFERER);
+        headers.put("version", VERSION);
+        headers.put("device", device);
+        headers.put("pseudoid", pseudoId);
+        headers.put("Accept", "application/json");
+        headers.put("region", copyRegion);
+        headers.put("authorization", auth);
+        headers.put("umstring", UMSTRING);
+        headers.put("x-auth-timestamp", ts);
+        headers.put("x-auth-signature", sig);
+
+        return headers;
     }
+
+    public Headers genHeaders() throws Exception {
+        try {
+            Map<String, String> headers = build();
+            return Headers.of(headers);
+        } catch (Exception e) {
+            throw new Exception("生成 Headers 失败", e);
+        }
+    }
+
+
 }
