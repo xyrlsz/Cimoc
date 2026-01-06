@@ -166,10 +166,10 @@ public class CopyMH extends MangaParser {
     }
 
     private String getReqID() {
-        Headers headers = getHeader();
-        if (Objects.equals(headers.get("region"), "0")) {
-            return "";
-        }
+//        Headers headers = getHeader();
+//        if (Objects.equals(headers.get("region"), "0")) {
+//            return "";
+//        }
         SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.COPYMG_SHARED, Context.MODE_PRIVATE);
         String lastReqId = sharedPreferences.getString(Constants.COPYMG_SHARED_REQID, "");
         long lastGetReqIdTime = sharedPreferences.getLong(Constants.COPYMG_SHARED_REQID_time, 0L);
