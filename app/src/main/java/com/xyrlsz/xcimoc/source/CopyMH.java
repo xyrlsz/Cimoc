@@ -166,10 +166,10 @@ public class CopyMH extends MangaParser {
     }
 
     private String getReqID() {
-//        Headers headers = getHeader();
-//        if (Objects.equals(headers.get("region"), "0")) {
-//            return "";
-//        }
+        Headers headers = getHeader();
+        if (Objects.equals(headers.get("region"), "0")) {
+            return "";
+        }
         SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.COPYMG_SHARED, Context.MODE_PRIVATE);
         String lastReqId = sharedPreferences.getString(Constants.COPYMG_SHARED_REQID, "");
         long lastGetReqIdTime = sharedPreferences.getLong(Constants.COPYMG_SHARED_REQID_time, 0L);
@@ -333,7 +333,7 @@ public class CopyMH extends MangaParser {
             if (url != null) {
                 url = url.replace("c800x.jpg", "c1500x.jpg");
             }
-            list.add(new ImageUrl(id, comicChapter, i + 1, url, false));
+            list.add(new ImageUrl(id, comicChapter, i + 1, url, false, getHeader()));
         }
 
         return list;
