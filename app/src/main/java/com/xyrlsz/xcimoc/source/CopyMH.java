@@ -331,7 +331,9 @@ public class CopyMH extends MangaParser {
             Long id = IdCreator.createImageId(comicChapter, i);
             String url = indexToUrl.get(i);
             if (url != null) {
-                url = url.replace("c800x.jpg", "c1500x.jpg");
+                String imageQuality = "1500";
+//                url = url.replace("c800x.jpg", "c1500x.jpg");
+                url = url.replaceAll("c\\d+x\\.[a-zA-Z]+$", "c" + imageQuality + "x.webp");
             }
             list.add(new ImageUrl(id, comicChapter, i + 1, url, false, getHeader()));
         }
