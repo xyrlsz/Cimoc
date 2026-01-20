@@ -158,7 +158,7 @@ public class Baozi extends MangaParser {
             Long comicChapter = chapter.getId();
             Long id = IdCreator.createImageId(comicChapter, i);
             String imgUrl = imageNodes.get(i - 1).attr(".comic-contain__item", "data-src").replace("/w640/", "/");
-            imgUrl = replaceDomain(imgUrl);
+//            imgUrl = replaceDomain(imgUrl);
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false, getHeader()));
         }
 
@@ -223,7 +223,7 @@ public class Baozi extends MangaParser {
                 JSONObject object = comics.getJSONObject(i);
                 String cid = object.getString("comic_id");
                 String title = object.getString("name");
-                String cover = StringUtils.format("https://%s/cover/%s?w=285&h=375&q=100", imgDomain, object.getString("topic_img"));
+                String cover = StringUtils.format("https://%s/cover/%s?w=285&h=375&q=100", "static-tw.bzmgcn.com", object.getString("topic_img"));
                 list.add(new Comic(TYPE, cid, title, cover, null, null));
             }
 
