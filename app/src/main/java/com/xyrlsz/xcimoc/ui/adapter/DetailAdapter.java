@@ -35,6 +35,7 @@ public class DetailAdapter extends BaseAdapter<Chapter> {
     public String title;
     public String intro;
     public String author;
+    public String source;
     Paint textPaint;
     Paint paint;
     private PipelineDraweeControllerBuilderSupplier mControllerSupplier;
@@ -158,7 +159,7 @@ public class DetailAdapter extends BaseAdapter<Chapter> {
         return new ChapterHolder(view);
     }
 
-    public void setInfo(String cover, String title, String author, String intro, Boolean finish, String update, String last, Boolean isReverseOrder) {
+    public void setInfo(String cover, String title, String author, String intro, Boolean finish, String update, String last, String source) {
         this.cover = cover;
         this.title = title;
         this.intro = intro;
@@ -166,6 +167,7 @@ public class DetailAdapter extends BaseAdapter<Chapter> {
         this.update = update;
         this.author = author;
         this.last = last;
+        this.source = source;
     }
 
 
@@ -191,6 +193,7 @@ public class DetailAdapter extends BaseAdapter<Chapter> {
                     headerHolder.mComicIntro.setText(STConvertUtils.convert(intro));
 //                    headerHolder.mComicAuthor.setTextIsSelectable(true);
                     headerHolder.mComicAuthor.setSelected(true);
+
                     if (finish != null) {
                         headerHolder.mComicStatus.setText(finish ? "完结" : "连载中");
                     }
@@ -198,6 +201,7 @@ public class DetailAdapter extends BaseAdapter<Chapter> {
                         headerHolder.mComicUpdate.setText("最后更新：".concat(update));
                     }
                     headerHolder.mComicAuthor.setText(author);
+                    headerHolder.mComicSource.setText(STConvertUtils.convert(source));
                 }
             } else {
                 Chapter chapter = mDataSet.get(position - 1);
@@ -274,7 +278,8 @@ public class DetailAdapter extends BaseAdapter<Chapter> {
         TextView mComicUpdate;
         @BindView(R.id.item_header_comic_author)
         TextView mComicAuthor;
-
+        @BindView(R.id.item_header_comic_source)
+        TextView mComicSource;
         HeaderHolder(View view) {
             super(view);
         }

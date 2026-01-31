@@ -7,7 +7,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="160dp"
+        android:layout_height="170dp"
         android:background="?attr/colorPrimary"
         android:orientation="horizontal"
         android:padding="10dp">
@@ -26,7 +26,6 @@
                 fresco:actualImageScaleType="centerCrop"
                 fresco:placeholderImage="@drawable/ic_icon_park_error_picture" />
         </androidx.cardview.widget.CardView>
-
 
         <TextView
             android:id="@+id/item_header_comic_title"
@@ -67,6 +66,17 @@
             android:maxLines="4"
             android:textColor="@color/white"
             android:textSize="12sp" />
+        <TextView
+            android:id="@+id/item_header_comic_source"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:singleLine="true"
+            android:textColor="@color/white"
+            android:textSize="11sp" />
     </RelativeLayout>
 
     <RelativeLayout

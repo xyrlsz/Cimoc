@@ -344,7 +344,7 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
     @Override
     public void onComicLoadSuccess(Comic comic) {
         mDetailAdapter.setInfo(comic.getCover(), comic.getTitle(), comic.getAuthor(),
-                comic.getIntro(), comic.getFinish(), comic.getUpdate(), comic.getLast(), false);
+                comic.getIntro(), comic.getFinish(), comic.getUpdate(), comic.getLast(), SourceManager.getInstance(getAppInstance()).getParser(comic.getSource()).getTitle());
 
         if (comic.getTitle() != null && comic.getCover() != null) {
             Headers headers = SourceManager.getInstance(this).getParser(comic.getSource()).getHeader();
@@ -383,7 +383,7 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
         hideProgressBar();
         mDetailAdapter.addAll(list);
         mDetailAdapter.setInfo(comic.getCover(), comic.getTitle(), comic.getAuthor(),
-                comic.getIntro(), comic.getFinish(), comic.getUpdate(), comic.getLast(), false);
+                comic.getIntro(), comic.getFinish(), comic.getUpdate(), comic.getLast(), SourceManager.getInstance(getAppInstance()).getParser(comic.getSource()).getTitle());
 
         if (comic.getTitle() != null && comic.getCover() != null) {
             Headers headers = SourceManager.getInstance(this).getParser(comic.getSource()).getHeader();
