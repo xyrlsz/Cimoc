@@ -323,7 +323,7 @@ public class ZaiManhua extends MangaParser {
             list.add(new Pair<>("其他", "16"));
             list.add(new Pair<>("四格", "17"));
             list.add(new Pair<>("亲情", "3242"));
-            list.add(new Pair<>("百合", "3243"));
+            list.add(new Pair<>("ゆり", "3243"));
             list.add(new Pair<>("秀吉", "3244"));
             list.add(new Pair<>("悬疑", "3245"));
             list.add(new Pair<>("纯爱", "3246"));

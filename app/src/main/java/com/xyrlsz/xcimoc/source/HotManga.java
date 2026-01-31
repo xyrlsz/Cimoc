@@ -1,6 +1,12 @@
 package com.xyrlsz.xcimoc.source;
 
 import static com.xyrlsz.xcimoc.core.Manga.getResponseBody;
+import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_AREA;
+import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_ORDER;
+import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_SUBJECT;
+import static com.xyrlsz.xcimoc.parser.MangaCategory.getParseFormatMap;
+
+import android.util.Pair;
 
 import com.google.common.collect.Lists;
 import com.xyrlsz.xcimoc.App;
@@ -9,6 +15,7 @@ import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.ImageUrl;
 import com.xyrlsz.xcimoc.model.Source;
 import com.xyrlsz.xcimoc.parser.JsonIterator;
+import com.xyrlsz.xcimoc.parser.MangaCategory;
 import com.xyrlsz.xcimoc.parser.MangaParser;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
@@ -19,9 +26,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.Headers;
 import okhttp3.Request;
@@ -30,10 +39,10 @@ import taobe.tec.jcc.JChineseConvertor;
 public class HotManga extends MangaParser {
     public static final int TYPE = 102;
     public static final String DEFAULT_TITLE = "热辣漫画";
-    public static final String website = "https://www.manga2025.com";
+    public static final String website = "https://www.manga2026.com";
 
     public HotManga(Source source) {
-        init(source);
+        init(source, new Category());
     }
 
     public static Source getDefaultSource() {
@@ -60,6 +69,7 @@ public class HotManga extends MangaParser {
 
     @Override
     protected void initUrlFilterList() {
+        filter.add(new UrlFilter("manga2026.com", "/comic/(\\w.+)"));
         filter.add(new UrlFilter("manga2025.com", "/comic/(\\w.+)"));
         filter.add(new UrlFilter("manga2024.com", "/comic/(\\w.+)"));
     }
@@ -213,7 +223,9 @@ public class HotManga extends MangaParser {
                 Long comicChapter = chapter.getId();
                 Long id = IdCreator.createImageId(comicChapter, i);
                 String url = array.getJSONObject(i).getString("url").replace("m_read", "kb_m_read_large");
-                url = url.replace("c800x.jpg", "c1500x.jpg");
+                String imageQuality = "1500";
+//                url = url.replace("c800x.jpg", "c1500x.jpg");
+                url = url.replaceAll("\\.jpg\\.h\\d+x\\.jpg$", ".jpg.h" + imageQuality + "x.jpg");
                 list.add(new ImageUrl(id, comicChapter, i + 1, url, false, getHeader()));
             }
         } catch (Exception e) {
@@ -242,5 +254,152 @@ public class HotManga extends MangaParser {
     @Override
     public Headers getHeader() {
         return Headers.of("Referer", website);
+    }
+
+    @Override
+    public Request getCategoryRequest(String format, int page) {
+
+        Map<Integer, String> map = getParseFormatMap(format);
+        int limit = 21;
+        int offset = (page - 1) * limit;
+
+        String url = StringUtils.format(
+                "%s/api/v3/comics?free_type=1&limit=" +
+                        limit +
+                        "&offset=" +
+                        offset +
+                        "&theme=" +
+                        map.get(CATEGORY_SUBJECT) +
+                        "&ordering=" +
+                        map.get(CATEGORY_ORDER) +
+                        "&_update=true", website);
+
+        return new Request.Builder().headers(getHeader()).url(url).build();
+
+    }
+
+    @Override
+    public List<Comic> parseCategory(String html, int page) {
+        List<Comic> list = new ArrayList<>();
+        JSONObject data;
+        try {
+            data = new JSONObject(html).getJSONObject("results");
+            JSONArray comics = data.getJSONArray("list");
+            for (int i = 0; i < comics.length(); i++) {
+                JSONObject object = comics.getJSONObject(i);
+                String cid = object.getString("path_word");
+                String title = object.getString("name");
+                String cover = object.getString("cover");
+                list.add(new Comic(TYPE, cid, title, cover, null, null));
+            }
+
+        } catch (JSONException e) {
+            return list;
+        }
+        return list;
+    }
+
+    private static class Category extends MangaCategory {
+
+        @Override
+        public boolean isComposite() {
+            return true;
+        }
+
+
+        @Override
+        protected List<Pair<String, String>> getSubject() {
+            List<Pair<String, String>> list = new ArrayList<>();
+
+            list.add(Pair.create("全部", ""));
+
+            list.add(Pair.create("愛情", "aiqing"));
+            list.add(Pair.create("歡樂向", "huanlexiang"));
+            list.add(Pair.create("冒險", "maoxian"));
+            list.add(Pair.create("奇幻", "qihuan"));
+            list.add(Pair.create("百合", "baihe"));
+            list.add(Pair.create("校园", "xiaoyuan"));
+            list.add(Pair.create("科幻", "kehuan"));
+            list.add(Pair.create("東方", "dongfang"));
+            list.add(Pair.create("耽美", "danmei"));
+            list.add(Pair.create("生活", "shenghuo"));
+            list.add(Pair.create("格鬥", "gedou"));
+            list.add(Pair.create("轻小说", "qingxiaoshuo"));
+            list.add(Pair.create("其他", "qita"));
+            list.add(Pair.create("悬疑", "xuanyi"));
+            list.add(Pair.create("TL", "teenslove"));
+            list.add(Pair.create("萌系", "mengxi"));
+            list.add(Pair.create("神鬼", "shengui"));
+            list.add(Pair.create("职场", "zhichang"));
+            list.add(Pair.create("治愈", "zhiyu"));
+            list.add(Pair.create("节操", "jiecao"));
+            list.add(Pair.create("四格", "sige"));
+            list.add(Pair.create("長條", "changtiao"));
+            list.add(Pair.create("舰娘", "jianniang"));
+            list.add(Pair.create("搞笑", "gaoxiao"));
+            list.add(Pair.create("竞技", "jingji"));
+            list.add(Pair.create("伪娘", "weiniang"));
+            list.add(Pair.create("魔幻", "mohuan"));
+            list.add(Pair.create("热血", "rexue"));
+            list.add(Pair.create("性转换", "xingzhuanhuan"));
+            list.add(Pair.create("美食", "meishi"));
+            list.add(Pair.create("励志", "lizhi"));
+            list.add(Pair.create("彩色", "COLOR"));
+            list.add(Pair.create("後宮", "hougong"));
+            list.add(Pair.create("侦探", "zhentan"));
+            list.add(Pair.create("惊悚", "jingsong"));
+            list.add(Pair.create("AA", "aa"));
+            list.add(Pair.create("音乐舞蹈", "yinyuewudao"));
+            list.add(Pair.create("异世界", "yishijie"));
+            list.add(Pair.create("战争", "zhanzheng"));
+            list.add(Pair.create("历史", "lishi"));
+            list.add(Pair.create("机战", "jizhan"));
+            list.add(Pair.create("都市", "dushi"));
+            list.add(Pair.create("穿越", "chuanyue"));
+            list.add(Pair.create("恐怖", "kongbu"));
+            list.add(Pair.create("生存", "shengcun"));
+            list.add(Pair.create("武侠", "wuxia"));
+            list.add(Pair.create("宅系", "zhaixi"));
+            list.add(Pair.create("转生", "zhuansheng"));
+            list.add(Pair.create("無修正", "Uncensored"));
+            list.add(Pair.create("仙侠", "xianxia"));
+            list.add(Pair.create("LoveLive", "loveLive"));
+
+            list.add(Pair.create("C95", "comiket95"));
+            list.add(Pair.create("C96", "comiket96"));
+            list.add(Pair.create("C97", "comiket97"));
+            list.add(Pair.create("C98", "C98"));
+            list.add(Pair.create("C99", "comiket99"));
+            list.add(Pair.create("C100", "comiket100"));
+            list.add(Pair.create("C101", "comiket101"));
+            list.add(Pair.create("C102", "comiket102"));
+            list.add(Pair.create("C103", "comiket103"));
+            list.add(Pair.create("C104", "comiket104"));
+            list.add(Pair.create("C105", "comiket105"));
+
+            list.add(Pair.create("玄幻", "xuanhuan"));
+            list.add(Pair.create("異能", "yineng"));
+            list.add(Pair.create("遊戲", "youxi"));
+            list.add(Pair.create("真人", "zhenren"));
+            list.add(Pair.create("雜誌附贈寫真集", "zazhifuzengxiezhenji"));
+            list.add(Pair.create("FATE", "fate"));
+
+            return list;
+        }
+
+        @Override
+        protected boolean hasOrder() {
+            return true;
+        }
+
+        @Override
+        protected List<Pair<String, String>> getOrder() {
+            List<Pair<String, String>> list = new ArrayList<>();
+            list.add(Pair.create("更新時間（倒序）", "-datetime_updated"));
+            list.add(Pair.create("熱度（倒序）", "-popular"));
+            list.add(Pair.create("更新時間", "datetime_updated"));
+            list.add(Pair.create("熱度", "popular"));
+            return list;
+        }
     }
 }
