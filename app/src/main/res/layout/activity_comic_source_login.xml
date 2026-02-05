@@ -201,6 +201,53 @@
                     android:focusable="true"
                     app:title="@string/copy_region_title" />
 
+                <com.xyrlsz.xcimoc.ui.widget.preference.ChoicePreference
+                    android:id="@+id/comic_login_copy_image_quality"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:title="图片质量" />
+
+                <TextView
+                    android:id="@+id/comic_login_hot"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_marginBottom="10dp"
+                    android:text="热辣漫画"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="14sp" />
+
+                <com.xyrlsz.xcimoc.ui.widget.preference.ChoicePreference
+                    android:id="@+id/comic_login_hot_image_quality"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:title="图片质量" />
+
+                <TextView
+                    android:id="@+id/comic_login_baozi"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_marginBottom="10dp"
+                    android:text="包子漫画"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="14sp" />
+
+                <com.xyrlsz.xcimoc.ui.widget.preference.ChoicePreference
+                    android:id="@+id/comic_login_baozi_image_quality"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:title="图片质量" />
 
             </LinearLayout>
         </ScrollView>

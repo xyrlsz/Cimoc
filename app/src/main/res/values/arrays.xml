@@ -76,4 +76,18 @@
         <item>海外线路</item>
         <item>大陆线路</item>
     </string-array>
+    <string-array name="copy_img_quality_items">
+        <item>800</item>
+        <item>1200</item>
+        <item>1500</item>
+    </string-array>
+    <string-array name="hot_img_quality_items">
+        <item>800</item>
+        <item>1200</item>
+        <item>1500</item>
+    </string-array>
+    <string-array name="baozi_img_quality_items">
+        <item>w640</item>
+        <item>原图</item>
+    </string-array>
 </resources>

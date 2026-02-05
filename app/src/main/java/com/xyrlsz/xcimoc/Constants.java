@@ -29,6 +29,11 @@ public final class Constants {
     public static final String COPYMG_SHARED_REGION = "region";
     public static final String COPYMG_SHARED_REQID = "request_id";
     public static final String COPYMG_SHARED_REQID_time = "request_id_time";
+    public static final String COPYMG_SHARED_IMG_QUALITY = "img_quality";
+    public static final String HOTMG_SHARED = "hotmg";
+    public static final String HOTMG_SHARED_IMG_QUALITY = "img_quality";
+    public static final String BAOZI_SHARED = "baozi";
+    public static final String BAOZI_SHARED_IMG_QUALITY = "img_quality";
     public static final String WEBDAV_SHARED = "webdav";
     public static final String WEBDAV_SHARED_URL = "url";
     public static final String WEBDAV_SHARED_USERNAME = "username";

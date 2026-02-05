@@ -14,6 +14,7 @@ import android.util.Pair;
 import com.google.common.collect.Lists;
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.Constants;
+import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.model.Chapter;
 import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.ImageUrl;
@@ -331,9 +332,11 @@ public class CopyMH extends MangaParser {
             Long id = IdCreator.createImageId(comicChapter, i);
             String url = indexToUrl.get(i);
             if (url != null) {
-                String imageQuality = "1500";
-//                url = url.replace("c800x.jpg", "c1500x.jpg");
-                url = url.replaceAll("c\\d+x\\.[a-zA-Z]+$", "c" + imageQuality + "x.webp");
+                SharedPreferences preferences = App.getAppContext().getSharedPreferences(Constants.COPYMG_SHARED, Context.MODE_PRIVATE);
+
+                String imgQuality = App.getAppResources().getStringArray(R.array.copy_img_quality_items)[preferences.getInt(Constants.COPYMG_SHARED_IMG_QUALITY, 2)];
+//                url = url.replaceAll("\\.jpg\\.h\\d+x\\.jpg$", ".jpg.h" + imageQuality + "x.jpg");
+                url = url.replaceAll("c\\d+x\\.[a-zA-Z]+$", "c" + imgQuality + "x.webp");
             }
             list.add(new ImageUrl(id, comicChapter, i + 1, url, false, getHeader()));
         }

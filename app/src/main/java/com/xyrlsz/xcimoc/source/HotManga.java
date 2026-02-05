@@ -1,15 +1,18 @@
 package com.xyrlsz.xcimoc.source;
 
 import static com.xyrlsz.xcimoc.core.Manga.getResponseBody;
-import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_AREA;
 import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_ORDER;
 import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_SUBJECT;
 import static com.xyrlsz.xcimoc.parser.MangaCategory.getParseFormatMap;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Pair;
 
 import com.google.common.collect.Lists;
 import com.xyrlsz.xcimoc.App;
+import com.xyrlsz.xcimoc.Constants;
+import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.model.Chapter;
 import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.ImageUrl;
@@ -223,9 +226,9 @@ public class HotManga extends MangaParser {
                 Long comicChapter = chapter.getId();
                 Long id = IdCreator.createImageId(comicChapter, i);
                 String url = array.getJSONObject(i).getString("url").replace("m_read", "kb_m_read_large");
-                String imageQuality = "1500";
-//                url = url.replace("c800x.jpg", "c1500x.jpg");
-                url = url.replaceAll("\\.jpg\\.h\\d+x\\.jpg$", ".jpg.h" + imageQuality + "x.jpg");
+                SharedPreferences preferences = App.getAppContext().getSharedPreferences(Constants.HOTMG_SHARED, Context.MODE_PRIVATE);
+                String imgQuality = App.getAppResources().getStringArray(R.array.hot_img_quality_items)[preferences.getInt(Constants.HOTMG_SHARED_IMG_QUALITY, 2)];
+                url = url.replaceAll("\\.jpg\\.h\\d+x\\.jpg$", ".jpg.h" + imgQuality + "x.jpg");
                 list.add(new ImageUrl(id, comicChapter, i + 1, url, false, getHeader()));
             }
         } catch (Exception e) {

@@ -66,6 +66,9 @@ import okhttp3.Response;
 
 public class ComicSourceLoginActivity extends BackActivity implements ComicSourceLoginView {
     private final int DIALOG_COPY_REGION = 1000;
+    private final int DIALOG_COPY_IMG_QUALITY = 1001;
+    private final int DIALOG_HOT_IMG_QUALITY = 2001;
+    private final int DIALOG_BAOZI_IMG_QUALITY = 3001;
     @BindView(R.id.comic_login_layout)
     View mComicSourceLoginLayout;
     @BindView(R.id.comic_login_dmzj_login)
@@ -88,6 +91,12 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
     CheckBoxPreference mZaiAutoSign;
     @BindView(R.id.comic_login_copy_region)
     ChoicePreference mCopyRegion;
+    @BindView(R.id.comic_login_copy_image_quality)
+    ChoicePreference mCopyImgQuality;
+    @BindView(R.id.comic_login_hot_image_quality)
+    ChoicePreference mHotImageQuality;
+    @BindView(R.id.comic_login_baozi_image_quality)
+    ChoicePreference mBaoZiImageQuality;
 
     @Override
     protected String getDefaultTitle() {
@@ -100,9 +109,20 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
         // 根据 requestCode 处理不同的对话框结果
         switch (requestCode) {
             case DIALOG_COPY_REGION:
-                int res = bundle.getInt(EXTRA_DIALOG_RESULT_INDEX);
-                mCopyRegion.setValue(res);
+                int res_copy_region = bundle.getInt(EXTRA_DIALOG_RESULT_INDEX);
+                mCopyRegion.setValue(res_copy_region);
                 break;
+            case DIALOG_COPY_IMG_QUALITY:
+                int res_copy_img_quality = bundle.getInt(EXTRA_DIALOG_RESULT_INDEX);
+                mCopyImgQuality.setValue(res_copy_img_quality);
+                break;
+                case DIALOG_HOT_IMG_QUALITY:
+                int res_hot_img_quality = bundle.getInt(EXTRA_DIALOG_RESULT_INDEX);
+                mHotImageQuality.setValue(res_hot_img_quality);
+                break;
+            case DIALOG_BAOZI_IMG_QUALITY:
+                int res_baozi_img_quality = bundle.getInt(EXTRA_DIALOG_RESULT_INDEX);
+                mBaoZiImageQuality.setValue(res_baozi_img_quality);
         }
     }
 
@@ -132,13 +152,13 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
         String komiicUsername = getSharedPreferences(KOMIIC_SHARED, MODE_PRIVATE).getString(KOMIIC_SHARED_USERNAME, "");
         if (!komiicUsername.isEmpty()) {
             mkomiicLogin.setSummary(komiicUsername);
-            KomiicUtils.getImageLimit(result -> mKomiicLogout.post(() -> {
-                mkomiicLogin.setSummary(komiicUsername + "\n" + getString(R.string.settings_komiic_img_limit_summary) + result);
-                CharSequence tmp = mkomiicLogin.getSummary();
-                KomiicUtils.getImageLimit("", res -> mKomiicLogout.post(() -> {
-                    mkomiicLogin.setSummary(tmp + "\n" + getString(R.string.empty_account_limit) + res);
-                }));
-            }));
+//            KomiicUtils.getImageLimit(result -> mKomiicLogout.post(() -> {
+//                mkomiicLogin.setSummary(komiicUsername + "\n" + getString(R.string.settings_komiic_img_limit_summary) + result);
+//                CharSequence tmp = mkomiicLogin.getSummary();
+//                KomiicUtils.getImageLimit("", res -> mKomiicLogout.post(() -> {
+//                    mkomiicLogin.setSummary(tmp + "\n" + getString(R.string.empty_account_limit) + res);
+//                }));
+//            }));
             mkomiicLogin.setTitle(getString(R.string.logined));
             mKomiicLogout.setVisibility(View.VISIBLE);
         } else {
@@ -181,7 +201,13 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
 
         SharedPreferences copySharedPreferences = getSharedPreferences(Constants.COPYMG_SHARED, MODE_PRIVATE);
         mCopyRegion.bindPreference(getSupportFragmentManager(), copySharedPreferences, Constants.COPYMG_SHARED_REGION, 0, R.array.copy_region_items, DIALOG_COPY_REGION);
+        mCopyImgQuality.bindPreference(getSupportFragmentManager(), copySharedPreferences, Constants.COPYMG_SHARED_IMG_QUALITY, 2, R.array.copy_img_quality_items, DIALOG_COPY_IMG_QUALITY);
 
+        SharedPreferences hotSharedPreferences = getSharedPreferences(Constants.HOTMG_SHARED, MODE_PRIVATE);
+        mHotImageQuality.bindPreference(getSupportFragmentManager(), hotSharedPreferences, Constants.HOTMG_SHARED_IMG_QUALITY, 2, R.array.hot_img_quality_items, DIALOG_HOT_IMG_QUALITY);
+
+        SharedPreferences baoZiSharedPreferences = getSharedPreferences(Constants.BAOZI_SHARED, MODE_PRIVATE);
+        mBaoZiImageQuality.bindPreference(getSupportFragmentManager(), baoZiSharedPreferences, Constants.BAOZI_SHARED_IMG_QUALITY, 0, R.array.baozi_img_quality_items, DIALOG_BAOZI_IMG_QUALITY);
     }
 
     @Override

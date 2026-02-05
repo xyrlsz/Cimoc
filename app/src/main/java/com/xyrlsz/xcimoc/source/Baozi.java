@@ -1,14 +1,19 @@
 package com.xyrlsz.xcimoc.source;
 
+import static android.content.Context.MODE_PRIVATE;
 import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_AREA;
 import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_ORDER;
 import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_PROGRESS;
 import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_SUBJECT;
 import static com.xyrlsz.xcimoc.parser.MangaCategory.getParseFormatMap;
 
+import android.content.SharedPreferences;
 import android.util.Pair;
 
 import com.google.common.collect.Lists;
+import com.xyrlsz.xcimoc.App;
+import com.xyrlsz.xcimoc.Constants;
+import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.model.Chapter;
 import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.ImageUrl;
@@ -157,8 +162,20 @@ public class Baozi extends MangaParser {
         for (int i = 1; i <= imageNodes.size(); i++) {
             Long comicChapter = chapter.getId();
             Long id = IdCreator.createImageId(comicChapter, i);
-            String imgUrl = imageNodes.get(i - 1).attr(".comic-contain__item", "data-src").replace("/w640/", "/");
-//            imgUrl = replaceDomain(imgUrl);
+            String imgUrl = imageNodes.get(i - 1).attr(".comic-contain__item", "data-src");
+            Pattern pattern = Pattern.compile("^(https?://)?([^/\\s:]+)(:\\d+)?(/[a-z]comic/.*)");
+            Matcher matcher = pattern.matcher(imgUrl);
+            if (matcher.find()) {
+                SharedPreferences preferences =
+                        App.getAppContext().getSharedPreferences(Constants.BAOZI_SHARED, MODE_PRIVATE);
+                String imgQuality = App.getAppResources().getStringArray(R.array.baozi_img_quality_items)[preferences.getInt(Constants.BAOZI_SHARED_IMG_QUALITY, 0)];
+                if (!imgQuality.equals("w640")) {
+                    imgQuality = "";
+                } else {
+                    imgQuality = "/w640";
+                }
+                imgUrl = matcher.group(1) + matcher.group(2) + imgQuality + matcher.group(4);
+            }
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false, getHeader()));
         }
 
