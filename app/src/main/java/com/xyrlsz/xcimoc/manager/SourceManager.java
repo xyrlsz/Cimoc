@@ -10,13 +10,11 @@ import com.xyrlsz.xcimoc.model.SourceDao.Properties;
 import com.xyrlsz.xcimoc.parser.MangaParser;
 import com.xyrlsz.xcimoc.source.Baozi;
 import com.xyrlsz.xcimoc.source.BuKa;
-
 import com.xyrlsz.xcimoc.source.CopyMH;
 import com.xyrlsz.xcimoc.source.DM5;
 import com.xyrlsz.xcimoc.source.DongManManHua;
 import com.xyrlsz.xcimoc.source.DuManWu;
 import com.xyrlsz.xcimoc.source.DuManWuApp;
-import com.xyrlsz.xcimoc.source.DuManWuOrg;
 import com.xyrlsz.xcimoc.source.GFMH;
 import com.xyrlsz.xcimoc.source.GoDaManHua;
 import com.xyrlsz.xcimoc.source.HotManga;
@@ -31,7 +29,6 @@ import com.xyrlsz.xcimoc.source.MangaBZ;
 import com.xyrlsz.xcimoc.source.Manhuatai;
 import com.xyrlsz.xcimoc.source.Manhuayu;
 import com.xyrlsz.xcimoc.source.Null;
-import com.xyrlsz.xcimoc.source.TTKMH;
 import com.xyrlsz.xcimoc.source.Tencent;
 import com.xyrlsz.xcimoc.source.Vomicmh;
 import com.xyrlsz.xcimoc.source.YKMH;
@@ -166,9 +163,9 @@ public class SourceManager {
                 case DuManWu.TYPE:
                     parser = new DuManWu(source);
                     break;
-                case DuManWuOrg.TYPE:
-                    parser = new DuManWuOrg(source);
-                    break;
+//                case DuManWuOrg.TYPE:
+//                    parser = new DuManWuOrg(source);
+//                    break;
                 case Komiic.TYPE:
                     parser = new Komiic(source);
                     break;
@@ -178,9 +175,9 @@ public class SourceManager {
                 case GoDaManHua.TYPE:
                     parser = new GoDaManHua(source);
                     break;
-                case TTKMH.TYPE:
-                    parser = new TTKMH(source);
-                    break;
+//                case TTKMH.TYPE:
+//                    parser = new TTKMH(source);
+//                    break;
                 case Vomicmh.TYPE:
                     parser = new Vomicmh(source);
                     break;

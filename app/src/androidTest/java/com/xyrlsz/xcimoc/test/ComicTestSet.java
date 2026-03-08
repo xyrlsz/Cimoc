@@ -7,7 +7,7 @@ import com.xyrlsz.xcimoc.source.CopyMH;
 import com.xyrlsz.xcimoc.source.DM5;
 import com.xyrlsz.xcimoc.source.DongManManHua;
 import com.xyrlsz.xcimoc.source.DuManWu;
-import com.xyrlsz.xcimoc.source.DuManWuOrg;
+
 import com.xyrlsz.xcimoc.source.GoDaManHua;
 import com.xyrlsz.xcimoc.source.HotManga;
 import com.xyrlsz.xcimoc.source.IKanman;
@@ -16,7 +16,7 @@ import com.xyrlsz.xcimoc.source.MYCOMIC;
 import com.xyrlsz.xcimoc.source.MangaBZ;
 import com.xyrlsz.xcimoc.source.Manhuatai;
 import com.xyrlsz.xcimoc.source.Manhuayu;
-import com.xyrlsz.xcimoc.source.TTKMH;
+
 import com.xyrlsz.xcimoc.source.Tencent;
 import com.xyrlsz.xcimoc.source.Vomicmh;
 import com.xyrlsz.xcimoc.source.YKMH;
@@ -47,11 +47,11 @@ public class ComicTestSet {
         comicTestSet.put(DongManManHua.TYPE, "feirenzai");
         comicTestSet.put(YKMH.TYPE, "yiquanchaoren");
         comicTestSet.put(DuManWu.TYPE, "DjbhjZq");
-        comicTestSet.put(DuManWuOrg.TYPE, "Xkq44agdqW");
+//        comicTestSet.put(DuManWuOrg.TYPE, "Xkq44agdqW");
         comicTestSet.put(Komiic.TYPE, "2814");
         comicTestSet.put(Manhuayu.TYPE, "9113");
         comicTestSet.put(GoDaManHua.TYPE, "quanzhifashi-yuewenmanhua");
-        comicTestSet.put(TTKMH.TYPE, "427435");
+//        comicTestSet.put(TTKMH.TYPE, "427435");
         comicTestSet.put(Vomicmh.TYPE, "92561");
         comicTestSet.put(YYManHua.TYPE, "178yy");
         comicTestSet.put(ZaiManhua.TYPE, "65391");

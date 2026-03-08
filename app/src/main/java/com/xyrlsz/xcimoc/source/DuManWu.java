@@ -132,7 +132,12 @@ public class DuManWu extends MangaParser {
 
         for (Node chapterNode : chapterNodes) {
             String title = chapterNode.text();
-            String path = chapterNode.href().split("/")[2].replace(".html", "");
+            String path = "";
+            try {
+                path = chapterNode.href().split("/")[2].replace(".html", "");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
         }
 
