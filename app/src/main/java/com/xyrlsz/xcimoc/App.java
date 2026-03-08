@@ -17,6 +17,7 @@ import androidx.multidex.MultiDex;
 import androidx.multidex.MultiDexApplication;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.xyrlsz.opencc.android.lib.ChineseConverter;
 import com.xyrlsz.xcimoc.component.AppGetter;
 import com.xyrlsz.xcimoc.core.DisabledOkHttpClient;
 import com.xyrlsz.xcimoc.core.Storage;
@@ -202,7 +203,7 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         mPreferenceManager = new PreferenceManager(this);
         DBOpenHelper helper = new DBOpenHelper(this, "cimoc.db");
         mDaoSession = new DaoMaster(helper.getWritableDatabase()).newSession(IdentityScopeType.None);
-        UpdateHelper.update(mPreferenceManager, getDaoSession());
+        UpdateHelper.update(mPreferenceManager, getDaoSession(), getApplicationContext());
         initPixels();
 
         manager_wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
@@ -235,10 +236,13 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         }
 
         // 初始化WebDAV配置
-        WebDavConf.init(getAppContext());
+        WebDavConf.init(getApplicationContext());
+
+        // 初始化OpenCC
+        ChineseConverter.init(getApplicationContext());
 
         // 再漫画检查登录与自动签到
-        SharedPreferences zaiSharedPreferences = getAppContext().getSharedPreferences(Constants.ZAI_SHARED, Context.MODE_PRIVATE);
+        SharedPreferences zaiSharedPreferences = getApplicationContext().getSharedPreferences(Constants.ZAI_SHARED, Context.MODE_PRIVATE);
         long timestamp = System.currentTimeMillis() / 1000;
         long exp = zaiSharedPreferences.getLong(Constants.ZAI_SHARED_EXP, 0);
         boolean autoSign = zaiSharedPreferences.getBoolean(Constants.ZAI_SHARED_AUTO_SIGN, false);
@@ -249,9 +253,9 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
                 @Override
                 public void onSuccess() {
                     if (autoSign) {
-                        ZaiManhuaSignUtils.CheckSigned(getAppContext(), isSigned -> {
+                        ZaiManhuaSignUtils.CheckSigned(getApplicationContext(), isSigned -> {
                             if (!isSigned) {
-                                ZaiManhuaSignUtils.SignIn(getAppContext());
+                                ZaiManhuaSignUtils.SignIn(getApplicationContext());
                             }
                         });
                     }
@@ -260,14 +264,14 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
                 @Override
                 public void onFail() {
                     if (!username.isEmpty()) {
-                        HintUtils.showToast(getAppContext(), "再漫画登录失败");
+                        HintUtils.showToast(getApplicationContext(), "再漫画登录失败");
                     }
                 }
             }, username, passwordMd5);
         } else if (autoSign) {
-            ZaiManhuaSignUtils.CheckSigned(getAppContext(), isSigned -> {
+            ZaiManhuaSignUtils.CheckSigned(getApplicationContext(), isSigned -> {
                 if (!isSigned) {
-                    ZaiManhuaSignUtils.SignIn(getAppContext());
+                    ZaiManhuaSignUtils.SignIn(getApplicationContext());
                 }
             });
         }

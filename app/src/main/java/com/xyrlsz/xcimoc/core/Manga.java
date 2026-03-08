@@ -5,7 +5,6 @@ import static com.xyrlsz.xcimoc.ui.activity.SearchActivity.SEARCH_TITLE;
 
 import android.util.Pair;
 
-import com.github.houbb.opencc4j.util.ZhConverterUtil;
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.manager.ChapterManager;
 import com.xyrlsz.xcimoc.manager.SourceManager;
@@ -19,6 +18,7 @@ import com.xyrlsz.xcimoc.parser.WebParser;
 import com.xyrlsz.xcimoc.rx.RxBus;
 import com.xyrlsz.xcimoc.rx.RxEvent;
 import com.xyrlsz.xcimoc.utils.IdCreator;
+import com.xyrlsz.xcimoc.utils.STConvertUtils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -51,8 +51,8 @@ public class Manga {
     public static boolean indexOfIgnoreCase(String str, String search, boolean stSame) {
         if (stSame) {
             try {
-                String s1 = ZhConverterUtil.toSimple(str);
-                String s2 = ZhConverterUtil.toSimple(search);
+                String s1 = STConvertUtils.T2S(str);
+                String s2 = STConvertUtils.T2S(search);
                 return s1.toLowerCase().contains(s2.toLowerCase());
             } catch (Exception e) {
                 e.printStackTrace();
@@ -83,7 +83,8 @@ public class Manga {
 //                    }
 //                    while (iterator.hasNext()) {
 //                        Comic comic = iterator.next();
-////                        if (comic != null && (comic.getTitle().indexOf(keyword) != -1 || comic.getAuthor().indexOf(keyword) != -1)) {
+
+    /// /                        if (comic != null && (comic.getTitle().indexOf(keyword) != -1 || comic.getAuthor().indexOf(keyword) != -1)) {
 //                        if (comic != null
 //                                && (indexOfIgnoreCase(comic.getTitle(), keyword)
 //                                || indexOfIgnoreCase(comic.getAuthor(), keyword)
@@ -99,7 +100,6 @@ public class Manga {
 //            }
 //        }).subscribeOn(Schedulers.io());
 //    }
-
     public static Observable<Comic> getSearchResult(final MangaParser parser, final String keyword, final int page, final boolean strictSearch, final boolean stSame) {
         return Observable.create(new Observable.OnSubscribe<Comic>() {
             @Override

@@ -1,5 +1,8 @@
 package com.xyrlsz.xcimoc.helper;
 
+import android.content.Context;
+
+import com.xyrlsz.opencc.android.lib.ChineseConverter;
 import com.xyrlsz.xcimoc.BuildConfig;
 import com.xyrlsz.xcimoc.manager.PreferenceManager;
 import com.xyrlsz.xcimoc.model.Comic;
@@ -96,7 +99,7 @@ public class UpdateHelper {
         }
     }
 
-    public static void update(PreferenceManager manager, final DaoSession session) {
+    public static void update(PreferenceManager manager, final DaoSession session, Context context) {
         int version = manager.getInt(PreferenceManager.PREF_APP_VERSION, 0);
 
         if (version != VERSION) {
@@ -110,7 +113,8 @@ public class UpdateHelper {
             initComicSourceTable();
             manager.putInt(PreferenceManager.PREF_APP_VERSION, VERSION);
             updateComicSource(session);
-
+            ChineseConverter.clearDictDataFolder(context);
+            ChineseConverter.init(context);
         }
 
     }
