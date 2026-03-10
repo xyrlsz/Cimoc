@@ -3,9 +3,10 @@ package com.xyrlsz.xcimoc.core;
 import android.content.ContentResolver;
 import android.util.Pair;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.TypeReference;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.ToNumberPolicy;
+import com.google.gson.reflect.TypeToken;
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.manager.PreferenceManager;
 import com.xyrlsz.xcimoc.model.Comic;
@@ -18,6 +19,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -311,43 +313,21 @@ public class Backup {
                 String jsonString = readBackupFile(resolver, root, filename);
 
                 // 将jsonStr转为Map
-                Map<String, ?> entries = JSON.parseObject(
-                        jsonString, new TypeReference<Map<String, ?>>() {
-                        });
+//                Map<String, ?> entries = JSON.parseObject(
+//                        jsonString, new TypeReference<Map<String, ?>>() {
+//                        });
+                Gson gson = new GsonBuilder()
+                        .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
+                        .create();
 
-//                Gson gson = new Gson();
-//                JsonObject jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
-//                Map<String, Object> entries = new HashMap<>();
-//
-//                for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
-//                    JsonElement el = entry.getValue();
-//                    if (el.isJsonPrimitive()) {
-//                        JsonPrimitive prim = el.getAsJsonPrimitive();
-//                        if (prim.isNumber()) {
-//                            BigDecimal bd = prim.getAsBigDecimal();
-//                            if (bd.scale() <= 0) {
-//                                entries.put(entry.getKey(), bd.longValue());
-//                            } else {
-//                                entries.put(entry.getKey(), bd.doubleValue());
-//                            }
-//                        } else if (prim.isBoolean()) {
-//                            entries.put(entry.getKey(), prim.getAsBoolean());
-//                        } else {
-//                            entries.put(entry.getKey(), prim.getAsString());
-//                        }
-//                    } else if (el.isJsonObject()) {
-//                        entries.put(entry.getKey(), gson.fromJson(el, Map.class));
-//                    } else if (el.isJsonArray()) {
-//                        entries.put(entry.getKey(), gson.fromJson(el, List.class));
-//                    } else if (el.isJsonNull()) {
-//                        entries.put(entry.getKey(), null);
-//                    }
-//                }
+                Type type = new TypeToken<Map<String, ?>>() {
+                }.getType();
+                Map<String, ?> entries = gson.fromJson(jsonString, type);
 
                 if (filename.endsWith(SUFFIX_CSBF)) {
-                    for (Map.Entry entry : Objects.requireNonNull(entries).entrySet()) {
-                        if (!entry.getKey().toString().equals(PreferenceManager.PREF_OTHER_STORAGE)) {
-                            App.getPreferenceManager().putObject(entry.getKey().toString(), entry.getValue());
+                    for (Map.Entry<String, ?> entry : Objects.requireNonNull(entries).entrySet()) {
+                        if (!entry.getKey().equals(PreferenceManager.PREF_OTHER_STORAGE)) {
+                            App.getPreferenceManager().putObject(entry.getKey(), entry.getValue());
                         }
                     }
                 }

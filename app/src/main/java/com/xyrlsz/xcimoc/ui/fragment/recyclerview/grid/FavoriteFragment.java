@@ -125,9 +125,9 @@ public class FavoriteFragment extends GridFragment implements FavoriteView {
                     mPreference.getBoolean(PreferenceManager.PREF_OTHER_CHECK_UPDATE, false)) {
                 Calendar calendar = Calendar.getInstance();
                 int day = calendar.get(Calendar.DAY_OF_YEAR);
-                calendar.setTimeInMillis(mPreference.getLong(PreferenceManager.PREF_OTHER_CHECK_UPDATE_LAST, 0));
+                calendar.setTimeInMillis(mPreference.getNumber(PreferenceManager.PREF_OTHER_CHECK_UPDATE_LAST, 0).longValue());
                 if (day != calendar.get(Calendar.DAY_OF_YEAR)) {
-                    mPreference.putLong(PreferenceManager.PREF_OTHER_CHECK_UPDATE_LAST, System.currentTimeMillis());
+                    mPreference.putNumber(PreferenceManager.PREF_OTHER_CHECK_UPDATE_LAST, System.currentTimeMillis());
                     checkUpdate();
                 }
             }

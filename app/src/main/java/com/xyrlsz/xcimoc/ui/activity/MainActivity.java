@@ -214,7 +214,7 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
     }
 
     private void initFragment() {
-        int home = mPreference.getInt(PreferenceManager.PREF_OTHER_LAUNCH, PreferenceManager.HOME_FAVORITE);
+        int home = mPreference.getNumber(PreferenceManager.PREF_OTHER_LAUNCH, PreferenceManager.HOME_FAVORITE).intValue();
         switch (home) {
             default:
             case PreferenceManager.HOME_FAVORITE:
@@ -555,7 +555,7 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
 
     @Override
     protected String getDefaultTitle() {
-        int home = mPreference.getInt(PreferenceManager.PREF_OTHER_LAUNCH, PreferenceManager.HOME_FAVORITE);
+        int home = mPreference.getNumber(PreferenceManager.PREF_OTHER_LAUNCH, PreferenceManager.HOME_FAVORITE).intValue();
         switch (home) {
             default:
             case PreferenceManager.HOME_FAVORITE:

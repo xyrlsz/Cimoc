@@ -88,7 +88,7 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
     protected void initNight() {
         if (mNightMask != null) {
             boolean night = mPreference.getBoolean(PreferenceManager.PREF_NIGHT, false);
-            int color = mPreference.getInt(PreferenceManager.PREF_OTHER_NIGHT_ALPHA, 0xB0) << 24;
+            int color = mPreference.getNumber(PreferenceManager.PREF_OTHER_NIGHT_ALPHA, 0xB0).intValue() << 24;
             mNightMask.setBackgroundColor(color);
             mNightMask.setVisibility(night ? View.VISIBLE : View.INVISIBLE);
         }
@@ -155,13 +155,13 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
     }
 
     public void showProgressDialog() {
-        ThreadRunUtils.runOnMainThread(()->{
+        ThreadRunUtils.runOnMainThread(() -> {
             mProgressDialog.show(getSupportFragmentManager(), null);
         });
     }
 
     public void hideProgressDialog() {
-        ThreadRunUtils.runOnMainThread(()->{
+        ThreadRunUtils.runOnMainThread(() -> {
             // 可能 onSaveInstanceState 后任务结束，需要取消对话框，直接 dismiss 会抛异常
             mProgressDialog.dismissAllowingStateLoss();
         });

@@ -100,7 +100,7 @@ public class UpdateHelper {
     }
 
     public static void update(PreferenceManager manager, final DaoSession session, Context context) {
-        int version = manager.getInt(PreferenceManager.PREF_APP_VERSION, 0);
+        int version = manager.getNumber(PreferenceManager.PREF_APP_VERSION, 0).intValue();
 
         if (version != VERSION) {
             if (version < 963 && version != 0) {
@@ -111,7 +111,7 @@ public class UpdateHelper {
             }
 //            initSource(session);
             initComicSourceTable();
-            manager.putInt(PreferenceManager.PREF_APP_VERSION, VERSION);
+            manager.putNumber(PreferenceManager.PREF_APP_VERSION, VERSION);
             updateComicSource(session);
             ChineseConverter.clearDictDataFolder(context);
             ChineseConverter.init(context);

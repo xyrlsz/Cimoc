@@ -97,7 +97,7 @@ public class DownloadService extends Service implements AppGetter {
         super.onCreate();
 //        getApplication();
         PreferenceManager manager = App.getPreferenceManager();
-        int num = manager.getInt(PreferenceManager.PREF_DOWNLOAD_THREAD, 2);
+        int num = manager.getNumber(PreferenceManager.PREF_DOWNLOAD_THREAD, 2).intValue();
         if (num <= 0) {
             num = 1;
         }

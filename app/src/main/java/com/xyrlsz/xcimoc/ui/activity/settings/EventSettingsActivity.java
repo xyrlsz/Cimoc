@@ -1,5 +1,7 @@
 package com.xyrlsz.xcimoc.ui.activity.settings;
 
+import static com.xyrlsz.xcimoc.manager.PreferenceManager.READER_ORIENTATION_AUTO;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -23,20 +25,20 @@ import java.util.List;
 
 import butterknife.BindViews;
 
-import static com.xyrlsz.xcimoc.manager.PreferenceManager.READER_ORIENTATION_AUTO;
-
 /**
  * Created by Hiroshi on 2016/10/9.
  */
 
 public class EventSettingsActivity extends BaseActivity implements DialogCaller {
 
+    private final float thredhold = 0.3f;
     @BindViews({R.id.event_left, R.id.event_top, R.id.event_middle, R.id.event_bottom, R.id.event_right})
     List<Button> mButtonList;
-
     private int[] mChoiceArray;
     private String[] mKeyArray;
     private boolean isLong;
+    private boolean JoyLock[] = {false, false};
+    private int JoyEvent[] = {7, 8};
 
     public static Intent createIntent(Context context, boolean isLong, int orientation, boolean isStream) {
         Intent intent = new Intent(context, EventSettingsActivity.class);
@@ -156,17 +158,13 @@ public class EventSettingsActivity extends BaseActivity implements DialogCaller 
         return super.onGenericMotionEvent(event);
     }
 
-    private boolean JoyLock[] = {false, false};
-    private int JoyEvent[] = {7, 8};
-    private final float thredhold = 0.3f;
-
     private void checkKey(float val, ClickEvents.JoyLocks joy) {
         //unlock
         if (JoyLock[joy.ordinal()] && val < this.thredhold) {
             JoyLock[joy.ordinal()] = false;
         }
         //lock
-        if(!JoyLock[joy.ordinal()] && val > this.thredhold){
+        if (!JoyLock[joy.ordinal()] && val > this.thredhold) {
             JoyLock[joy.ordinal()] = true;
             showEventList(JoyEvent[joy.ordinal()]);
         }
@@ -187,7 +185,7 @@ public class EventSettingsActivity extends BaseActivity implements DialogCaller 
     public void onDialogResult(int requestCode, Bundle bundle) {
         int index = bundle.getInt(EXTRA_DIALOG_RESULT_INDEX);
         mChoiceArray[requestCode] = index;
-        mPreference.putInt(mKeyArray[requestCode], index);
+        mPreference.putNumber(mKeyArray[requestCode], index);
         if (requestCode < 5) {
             mButtonList.get(requestCode).setText(ClickEvents.getEventTitle(this, index));
         }

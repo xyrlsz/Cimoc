@@ -97,7 +97,7 @@ public class ComicFragment extends BaseFragment implements ComicView {
             }
             return false;
         });
-        int home = mPreference.getInt(PreferenceManager.PREF_OTHER_LAUNCH, PreferenceManager.HOME_FAVORITE);
+        int home = mPreference.getNumber(PreferenceManager.PREF_OTHER_LAUNCH, PreferenceManager.HOME_FAVORITE).intValue();
         switch (home) {
             default:
             case PreferenceManager.HOME_FAVORITE:

@@ -96,7 +96,7 @@ public class ThemeUtils {
     }
 
     public static boolean isDarkMode(Context context) {
-        int appDarkMode = App.getPreferenceManager().getInt(PreferenceManager.PREF_OTHER_DARK_MOD, PreferenceManager.DARK_MODE_FALLOW_SYSTEM);
+        int appDarkMode = App.getPreferenceManager().getNumber(PreferenceManager.PREF_OTHER_DARK_MOD, PreferenceManager.DARK_MODE_FALLOW_SYSTEM).intValue();
         switch (appDarkMode) {
             case PreferenceManager.DARK_MODE_FALLOW_SYSTEM:
                 int nightModeFlags = context.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
@@ -111,7 +111,7 @@ public class ThemeUtils {
     }
 
     public static int getThemeId() {
-        return App.getPreferenceManager().getInt(PreferenceManager.PREF_OTHER_THEME, THEME_ORANGE);
+        return App.getPreferenceManager().getNumber(PreferenceManager.PREF_OTHER_THEME, THEME_ORANGE).intValue();
     }
 
 }

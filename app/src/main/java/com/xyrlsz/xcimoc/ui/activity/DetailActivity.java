@@ -98,7 +98,7 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
     protected void initData() {
         mAutoBackup = mPreference.getBoolean(PreferenceManager.PREF_BACKUP_SAVE_COMIC, true);
         mAutoBackupCloud = mPreference.getBoolean(PreferenceManager.PREF_BACKUP_SAVE_COMIC_CLOUD, false);
-        mBackupCount = mPreference.getInt(PreferenceManager.PREF_BACKUP_SAVE_COMIC_COUNT, 0);
+        mBackupCount = mPreference.getNumber(PreferenceManager.PREF_BACKUP_SAVE_COMIC_COUNT, 0).intValue();
         long id = getIntent().getLongExtra(Extra.EXTRA_ID, -1);
         int source = getIntent().getIntExtra(Extra.EXTRA_SOURCE, -1);
         String cid = getIntent().getStringExtra(Extra.EXTRA_CID);
@@ -111,10 +111,10 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
     protected void onPause() {
         super.onPause();
         if (mAutoBackup) {
-            mPreference.putInt(PreferenceManager.PREF_BACKUP_SAVE_COMIC_COUNT, mBackupCount);
+            mPreference.putNumber(PreferenceManager.PREF_BACKUP_SAVE_COMIC_COUNT, mBackupCount);
         }
         if (mAutoBackupCloud && WebDavConf.isInit) {
-            mPreference.putInt(PreferenceManager.PREF_BACKUP_SAVE_COMIC_COUNT, mBackupCount);
+            mPreference.putNumber(PreferenceManager.PREF_BACKUP_SAVE_COMIC_COUNT, mBackupCount);
         }
     }
 
@@ -299,7 +299,7 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
     private void startReader(String path) {
         long id = mPresenter.updateLast(path);
         mDetailAdapter.setLast(path);
-        int mode = mPreference.getInt(PreferenceManager.PREF_READER_MODE, PreferenceManager.READER_MODE_PAGE);
+        int mode = mPreference.getNumber(PreferenceManager.PREF_READER_MODE, PreferenceManager.READER_MODE_PAGE).intValue();
         List<Chapter> c = mDetailAdapter.getDateSet();
         if (mDetailAdapter.isReversed()) {
             c = Lists.reverse(mDetailAdapter.getDateSet());
@@ -419,12 +419,12 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
     private void increment() {
         if (mAutoBackup && ++mBackupCount == 10) {
             mBackupCount = 0;
-            mPreference.putInt(PreferenceManager.PREF_BACKUP_SAVE_COMIC_COUNT, 0);
+            mPreference.putNumber(PreferenceManager.PREF_BACKUP_SAVE_COMIC_COUNT, 0);
             mPresenter.backup(getAppInstance().getDocumentFile());
         }
         if (mAutoBackupCloud && ++mBackupCount == 10 && WebDavConf.isInit) {
             mBackupCount = 0;
-            mPreference.putInt(PreferenceManager.PREF_BACKUP_SAVE_COMIC_COUNT, 0);
+            mPreference.putNumber(PreferenceManager.PREF_BACKUP_SAVE_COMIC_COUNT, 0);
             mPresenter.backup(CimocDocumentFile.fromWebDav());
         }
     }

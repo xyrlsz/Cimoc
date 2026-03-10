@@ -263,7 +263,7 @@ public class TaskActivity extends CoordinatorActivity implements TaskView {
         }
         mTaskAdapter.setLast(path);
         long id = mPresenter.updateLast(path);
-        int mode = mPreference.getInt(PreferenceManager.PREF_READER_MODE, PreferenceManager.READER_MODE_PAGE);
+        int mode = mPreference.getNumber(PreferenceManager.PREF_READER_MODE, PreferenceManager.READER_MODE_PAGE).intValue();
         Intent readerIntent = ReaderActivity.createIntent(this, id, list, mode);
         startActivity(readerIntent);
     }

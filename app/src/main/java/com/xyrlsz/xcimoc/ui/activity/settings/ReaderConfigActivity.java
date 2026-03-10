@@ -1,9 +1,10 @@
 package com.xyrlsz.xcimoc.ui.activity.settings;
 
 import android.os.Bundle;
-import com.google.android.material.tabs.TabLayout;
+
 import androidx.viewpager.widget.ViewPager;
 
+import com.google.android.material.tabs.TabLayout;
 import com.xyrlsz.xcimoc.R;
 import com.xyrlsz.xcimoc.component.DialogCaller;
 import com.xyrlsz.xcimoc.global.ClickEvents;
@@ -41,7 +42,7 @@ public class ReaderConfigActivity extends BackActivity implements DialogCaller {
         mTabLayout.setupWithViewPager(mViewPager);
         boolean isStream = mViewPager.getCurrentItem() == 1;
         if (isStream) {
-            mKeyArray =  ClickEvents.getStreamClickEvents();
+            mKeyArray = ClickEvents.getStreamClickEvents();
             mChoiceArray = ClickEvents.getStreamClickEventChoice(mPreference);
         } else {
             mKeyArray = ClickEvents.getPageClickEvents();
@@ -49,13 +50,14 @@ public class ReaderConfigActivity extends BackActivity implements DialogCaller {
         }
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) { }
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
 
             @Override
             public void onPageSelected(int position) {
                 boolean isStream = position == 1;
                 if (isStream) {
-                    mKeyArray =  ClickEvents.getStreamClickEvents();
+                    mKeyArray = ClickEvents.getStreamClickEvents();
                     mChoiceArray = ClickEvents.getStreamClickEventChoice(mPreference);
                 } else {
                     mKeyArray = ClickEvents.getPageClickEvents();
@@ -64,7 +66,8 @@ public class ReaderConfigActivity extends BackActivity implements DialogCaller {
             }
 
             @Override
-            public void onPageScrollStateChanged(int state) { }
+            public void onPageScrollStateChanged(int state) {
+            }
         });
     }
 
@@ -82,6 +85,6 @@ public class ReaderConfigActivity extends BackActivity implements DialogCaller {
     public void onDialogResult(int requestCode, Bundle bundle) {
         int index = bundle.getInt(EXTRA_DIALOG_RESULT_INDEX);
         mChoiceArray[requestCode] = index;
-        mPreference.putInt(mKeyArray[requestCode], index);
+        mPreference.putNumber(mKeyArray[requestCode], index);
     }
 }

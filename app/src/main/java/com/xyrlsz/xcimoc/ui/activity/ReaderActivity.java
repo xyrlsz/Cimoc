@@ -156,7 +156,7 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
         mode = getIntent().getIntExtra(Extra.EXTRA_MODE, PreferenceManager.READER_MODE_PAGE);
         String key = mode == PreferenceManager.READER_MODE_PAGE ?
                 PreferenceManager.PREF_READER_PAGE_ORIENTATION : PreferenceManager.PREF_READER_STREAM_ORIENTATION;
-        orientation = mPreference.getInt(key, PreferenceManager.READER_ORIENTATION_PORTRAIT);
+        orientation = mPreference.getNumber(key, PreferenceManager.READER_ORIENTATION_PORTRAIT).intValue();
         final int[] oArray = {ActivityInfo.SCREEN_ORIENTATION_PORTRAIT, ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED};
         setRequestedOrientation(oArray[orientation]);
     }
@@ -176,13 +176,13 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
             mLoadingText.setTextColor(getResources().getColor(R.color.black));
         }
         mHideInfo = mPreference.getBoolean(PreferenceManager.PREF_READER_HIDE_INFO, false);
-        mControllerTrigThreshold = mPreference.getInt(PreferenceManager.PREF_READER_CONTROLLER_TRIG_THRESHOLD, 30) * 0.01f;
+        mControllerTrigThreshold = mPreference.getNumber(PreferenceManager.PREF_READER_CONTROLLER_TRIG_THRESHOLD, 30).intValue() * 0.01f;
         mInfoLayout.setVisibility(mHideInfo ? View.INVISIBLE : View.VISIBLE);
         // 防止miui及其他魔改ROM启用反色
         setTheme(R.style.AppThemeNoDark);
         String key = mode == PreferenceManager.READER_MODE_PAGE ?
                 PreferenceManager.PREF_READER_PAGE_TURN : PreferenceManager.PREF_READER_STREAM_TURN;
-        turn = mPreference.getInt(key, PreferenceManager.READER_TURN_LTR);
+        turn = mPreference.getNumber(key, PreferenceManager.READER_TURN_LTR).intValue();
         if (mPreference.getBoolean(PreferenceManager.PREF_READER_WHITE_BACKGROUND, false)) {
             mReaderBox.setBackgroundResource(R.color.white);
         }
@@ -239,10 +239,10 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
         mReaderAdapter = new ReaderAdapter(this, new LinkedList<>());
         mReaderAdapter.setTapGestureListener(this);
         mReaderAdapter.setLazyLoadListener(this);
-        mReaderAdapter.setScaleFactor(mPreference.getInt(PreferenceManager.PREF_READER_SCALE_FACTOR, 200) * 0.01f);
+        mReaderAdapter.setScaleFactor(mPreference.getNumber(PreferenceManager.PREF_READER_SCALE_FACTOR, 200).intValue() * 0.01f);
         mReaderAdapter.setDoubleTap(!mPreference.getBoolean(PreferenceManager.PREF_READER_BAN_DOUBLE_CLICK, false));
         mReaderAdapter.setVertical(turn == PreferenceManager.READER_TURN_ATB);
-        if (App.getPreferenceManager().getInt(PreferenceManager.PREF_READER_MODE, PreferenceManager.READER_MODE_PAGE) == PreferenceManager.READER_MODE_STREAM
+        if (App.getPreferenceManager().getNumber(PreferenceManager.PREF_READER_MODE, PreferenceManager.READER_MODE_PAGE).intValue() == PreferenceManager.READER_MODE_STREAM
                 &&
                 App.getPreferenceManager().getBoolean(PreferenceManager.PREF_READER_PAGING_STREAM_OFF, false)) {
             mReaderAdapter.setPaging(false);

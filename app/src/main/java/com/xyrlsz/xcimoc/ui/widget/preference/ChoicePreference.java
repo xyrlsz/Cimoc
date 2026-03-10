@@ -84,7 +84,7 @@ public class ChoicePreference extends Option implements View.OnClickListener {
             mChoice = mSharedPreferences.getInt(key, def);
             int s = mChoice;
         } else {
-            mChoice = mPreferenceManager.getInt(key, def);
+            mChoice = mPreferenceManager.getNumber(key, def).intValue();
         }
         mSummaryView.setText(mItems[mChoice < mItems.length ? mChoice : 0]);
     }
@@ -97,7 +97,7 @@ public class ChoicePreference extends Option implements View.OnClickListener {
         if (mSharedPreferences != null) {
             mSharedPreferences.edit().putInt(mPreferenceKey, choice).apply();
         } else {
-            mPreferenceManager.putInt(mPreferenceKey, choice);
+            mPreferenceManager.putNumber(mPreferenceKey, choice);
         }
         mChoice = choice;
         mSummaryView.setText(mItems[mChoice < mItems.length ? mChoice : 0]);

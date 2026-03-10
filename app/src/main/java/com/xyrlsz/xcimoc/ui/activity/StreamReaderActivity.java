@@ -37,7 +37,7 @@ public class StreamReaderActivity extends ReaderActivity {
             mRecyclerView.addItemDecoration(mReaderAdapter.getItemDecoration());
         }
         ((ZoomableRecyclerView) mRecyclerView).setScaleFactor(
-                mPreference.getInt(PreferenceManager.PREF_READER_SCALE_FACTOR, 200) * 0.01f);
+                mPreference.getNumber(PreferenceManager.PREF_READER_SCALE_FACTOR, 200).intValue() * 0.01f);
         ((ZoomableRecyclerView) mRecyclerView).setVertical(turn == PreferenceManager.READER_TURN_ATB);
         ((ZoomableRecyclerView) mRecyclerView).setDoubleTap(
                 !mPreference.getBoolean(PreferenceManager.PREF_READER_BAN_DOUBLE_CLICK, false));

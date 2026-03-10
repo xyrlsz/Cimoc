@@ -79,7 +79,7 @@ public class SliderPreference extends Option implements View.OnClickListener {
         mFragmentManager = manager;
         mTargetFragment = fragment;
         mPreferenceKey = key;
-        mValue = mPreferenceManager.getInt(key, def);
+        mValue = mPreferenceManager.getNumber(key, def).intValue();
         mTitle = title;
         mRequestCode = request;
         mSummaryView.setText(String.valueOf(mValue));
@@ -90,7 +90,7 @@ public class SliderPreference extends Option implements View.OnClickListener {
     }
 
     public void setValue(int value) {
-        mPreferenceManager.putInt(mPreferenceKey, value);
+        mPreferenceManager.getNumber(mPreferenceKey, value).intValue();
         mValue = value;
         mSummaryView.setText(String.valueOf(mValue));
     }

@@ -12,7 +12,7 @@ public class STConvertUtils {
     public static String T2S(String s) {
         PreferenceManager preferenceManager = App.getPreferenceManager();
         try {
-            switch (preferenceManager.getInt(PreferenceManager.PREF_ST_ENGINE, PreferenceManager.ST_JCC)) {
+            switch (preferenceManager.getNumber(PreferenceManager.PREF_ST_ENGINE, PreferenceManager.ST_JCC).intValue()) {
                 case PreferenceManager.ST_JCC:
                     return JChineseConvertor.getInstance().t2s(s);
                 case PreferenceManager.ST_OPENCC:
@@ -31,7 +31,7 @@ public class STConvertUtils {
     public static String S2T(String s) {
         PreferenceManager preferenceManager = App.getPreferenceManager();
         try {
-            switch (preferenceManager.getInt(PreferenceManager.PREF_ST_ENGINE, PreferenceManager.ST_JCC)) {
+            switch (preferenceManager.getNumber(PreferenceManager.PREF_ST_ENGINE, PreferenceManager.ST_JCC).intValue()) {
                 case PreferenceManager.ST_JCC:
                     return JChineseConvertor.getInstance().s2t(s);
                 case PreferenceManager.ST_OPENCC:
@@ -49,11 +49,11 @@ public class STConvertUtils {
     public static String convert(final String s) {
         PreferenceManager preferenceManager = App.getPreferenceManager();
 
-        switch (preferenceManager.getInt(PreferenceManager.PREF_DETAIL_TEXT_ST, PreferenceManager.DETAIL_TEXT_DEFAULT)) {
+        switch (preferenceManager.getNumber(PreferenceManager.PREF_DETAIL_TEXT_ST, PreferenceManager.DETAIL_TEXT_DEFAULT).intValue()) {
             case PreferenceManager.DETAIL_TEXT_SIMPLE:
                 try {
 
-                    switch (preferenceManager.getInt(PreferenceManager.PREF_ST_ENGINE, PreferenceManager.ST_JCC)) {
+                    switch (preferenceManager.getNumber(PreferenceManager.PREF_ST_ENGINE, PreferenceManager.ST_JCC).intValue()) {
                         case PreferenceManager.ST_JCC:
                             return JChineseConvertor.getInstance().t2s(s);
                         case PreferenceManager.ST_OPENCC:
@@ -69,7 +69,7 @@ public class STConvertUtils {
                 break;
             case PreferenceManager.DETAIL_TEXT_TRADITIONAL:
                 try {
-                    switch (preferenceManager.getInt(PreferenceManager.PREF_ST_ENGINE, PreferenceManager.ST_JCC)) {
+                    switch (preferenceManager.getNumber(PreferenceManager.PREF_ST_ENGINE, PreferenceManager.ST_JCC).intValue()) {
                         case PreferenceManager.ST_JCC:
                             return JChineseConvertor.getInstance().s2t(s);
                         case PreferenceManager.ST_OPENCC:

@@ -178,12 +178,15 @@ public class PreferenceManager {
         return mSharedPreferences.getBoolean(key, defValue);
     }
 
-    public int getInt(String key, int defValue) {
-        return mSharedPreferences.getInt(key, defValue);
-    }
+    public Number getNumber(String key, Number defValue) {
+        Map<String, ?> map = mSharedPreferences.getAll();
+        Object value = map.get(key);
 
-    public long getLong(String key, long defValue) {
-        return mSharedPreferences.getLong(key, defValue);
+        if (value instanceof Number) {
+            return (Number) value;
+        }
+
+        return defValue;
     }
 
     public void putString(String key, String value) {
@@ -194,12 +197,26 @@ public class PreferenceManager {
         mSharedPreferences.edit().putBoolean(key, value).apply();
     }
 
-    public void putInt(String key, int value) {
-        mSharedPreferences.edit().putInt(key, value).apply();
-    }
+    public void putNumber(String key, Number value) {
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
 
-    public void putLong(String key, long value) {
-        mSharedPreferences.edit().putLong(key, value).apply();
+        if (value instanceof Integer) {
+            editor.putInt(key, value.intValue());
+        }
+        else if (value instanceof Long) {
+            editor.putLong(key, value.longValue());
+        }
+        else if (value instanceof Float) {
+            editor.putFloat(key, value.floatValue());
+        }
+        else if (value instanceof Double) {
+            editor.putFloat(key, value.floatValue()); // SharedPreferences 没有 double
+        }
+        else {
+            editor.putLong(key, value.longValue());
+        }
+
+        editor.apply();
     }
 
     public Map<String, ?> getAll() {
@@ -207,15 +224,31 @@ public class PreferenceManager {
     }
 
     public void putObject(String key, Object value) {
-        if (value instanceof Boolean)
-            mSharedPreferences.edit().putBoolean(key, (Boolean) value).apply();
-        else if (value instanceof Float)
-            mSharedPreferences.edit().putFloat(key, (Float) value).apply();
-        else if (value instanceof Integer)
-            mSharedPreferences.edit().putInt(key, (Integer) value).apply();
-        else if (value instanceof Long)
-            mSharedPreferences.edit().putLong(key, (Long) value).apply();
-        else if (value instanceof String)
-            mSharedPreferences.edit().putString(key, ((String) value)).apply();
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+
+        if (value instanceof Boolean) {
+            editor.putBoolean(key, (Boolean) value);
+        }
+        else if (value instanceof String) {
+            editor.putString(key, (String) value);
+        }
+        else if (value instanceof Number num) {
+
+            // 判断是否整数
+            double d = num.doubleValue();
+            if (d == Math.floor(d)) {
+                long l = num.longValue();
+
+                if (l >= Integer.MIN_VALUE && l <= Integer.MAX_VALUE) {
+                    editor.putInt(key, (int) l);
+                } else {
+                    editor.putLong(key, l);
+                }
+            } else {
+                editor.putFloat(key, num.floatValue());
+            }
+        }
+
+        editor.apply();
     }
 }
