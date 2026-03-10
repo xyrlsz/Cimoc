@@ -47,7 +47,7 @@ forked from https://github.com/Haleydu/Cimoc
 - [RxAndroid](https://github.com/ReactiveX/RxAndroid)
 - [Rhino](https://github.com/mozilla/rhino)
 - [AppUpdater](https://gitee.com/jenly1314/AppUpdater)
-- [Opencc4j](https://github.com/houbb/opencc4j)
+- [android-opencc](https://github.com/xyrlsz/android-opencc)
 - [sardine-android](https://github.com/thegrizzlylabs/sardine-android)
 
 # 应用截图
