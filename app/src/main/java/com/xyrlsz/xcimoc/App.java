@@ -1,5 +1,8 @@
 package com.xyrlsz.xcimoc;
 
+import static com.xyrlsz.xcimoc.utils.TrustAllSslUtils.createSSLSocketFactory;
+import static com.xyrlsz.xcimoc.utils.TrustAllSslUtils.getTrustAllCerts;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -39,21 +42,12 @@ import com.xyrlsz.xcimoc.utils.HintUtils;
 import com.xyrlsz.xcimoc.utils.KomiicUtils;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
+import com.xyrlsz.xcimoc.utils.TrustAllSslUtils;
 import com.xyrlsz.xcimoc.utils.ZaiManhuaSignUtils;
 
 import org.greenrobot.greendao.identityscope.IdentityScopeType;
 
-import java.security.SecureRandom;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.Objects;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
 import okhttp3.Headers;
 import okhttp3.OkHttpClient;
@@ -63,7 +57,7 @@ import okhttp3.OkHttpClient;
  */
 public class App extends MultiDexApplication implements AppGetter, Thread.UncaughtExceptionHandler {
 
-    private static final TrustAllCerts trustAllCerts = new TrustAllCerts();
+
     public static int mWidthPixels;
     public static int mHeightPixels;
     public static int mCoverWidthPixels;
@@ -122,8 +116,8 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         if (mHttpClient == null || mHttpClient.getClass() == DisabledOkHttpClient.class) {
             // 3.OkHttp访问https的Client实例
             mHttpClient = new OkHttpClient().newBuilder()
-                    .sslSocketFactory(createSSLSocketFactory(), trustAllCerts)
-                    .hostnameVerifier(new TrustAllHostnameVerifier())
+                    .sslSocketFactory(createSSLSocketFactory(), getTrustAllCerts())
+                    .hostnameVerifier(new TrustAllSslUtils.TrustAllHostnameVerifier())
                     .followRedirects(true)
                     .followSslRedirects(true)
                     .retryOnConnectionFailure(true)
@@ -133,20 +127,6 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         return mHttpClient;
     }
 
-    private static SSLSocketFactory createSSLSocketFactory() {
-        SSLSocketFactory ssfFactory;
-
-        try {
-            SSLContext sc = SSLContext.getInstance("TLS");
-            sc.init(null, new TrustManager[]{trustAllCerts}, new SecureRandom());
-
-            ssfFactory = sc.getSocketFactory();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-        return ssfFactory;
-    }
 
     public static void goActivity(Class<?> cls) {
         Intent intent = new Intent(mApp.getApplicationContext(), cls);
@@ -397,39 +377,4 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         MultiDex.install(this);
     }
 
-    // 1.实现X509TrustManager接口
-    private static class TrustAllCerts implements X509TrustManager {
-        @Override
-        public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-        }
-
-        @Override
-        public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-        }
-
-        @Override
-        public X509Certificate[] getAcceptedIssuers() {
-            return new X509Certificate[0];
-        }
-    }
-//
-//    private void initXCrash(){
-//        //异常捕捉框架,xcrash的native捕捉会导致系统死机，将之去掉不使用20200817
-//        XCrash.InitParameters initParameters = new XCrash.InitParameters();
-//        //不处理native层的崩溃异常
-//        initParameters.setLogDir(Environment.getExternalStorageDirectory().getAbsolutePath()+CRASH_FILE_PATH);
-//        initParameters.disableNativeCrashHandler();
-//        //java崩溃异常文件的最大数量
-//        initParameters.setJavaLogCountMax(200);
-//        initParameters.setJavaDumpAllThreadsCountMax(25);
-//        XCrash.init(this, initParameters);
-//    }
-
-    // 2.实现HostnameVerifier接口
-    private static class TrustAllHostnameVerifier implements HostnameVerifier {
-        @Override
-        public boolean verify(String hostname, SSLSession session) {
-            return true;
-        }
-    }
 }

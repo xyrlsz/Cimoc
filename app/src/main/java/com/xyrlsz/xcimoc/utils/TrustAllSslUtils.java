@@ -12,22 +12,32 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-public class RxUtils {
+public class TrustAllSslUtils {
+    private static final TrustAllCerts trustAllCerts = new TrustAllCerts();
+
+    public static TrustAllCerts getTrustAllCerts() {
+        return trustAllCerts;
+    }
 
     @SuppressLint("TrulyRandom")
     public static SSLSocketFactory createSSLSocketFactory() {
-        SSLSocketFactory sSLSocketFactory = null;
+        SSLSocketFactory ssfFactory;
+
         try {
             SSLContext sc = SSLContext.getInstance("TLS");
-            sc.init(null, new TrustManager[]{new TrustAllManager()},
-                    new SecureRandom());
-            sSLSocketFactory = sc.getSocketFactory();
-        } catch (Exception ignored) {
+            sc.init(null, new TrustManager[]{trustAllCerts}, new SecureRandom());
+
+            ssfFactory = sc.getSocketFactory();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        return sSLSocketFactory;
+
+        return ssfFactory;
     }
 
-    public static class TrustAllManager implements X509TrustManager {
+
+    @SuppressLint("CustomX509TrustManager")
+    public static class TrustAllCerts implements X509TrustManager {
         @SuppressLint("TrustAllX509TrustManager")
         @Override
         public void checkClientTrusted(X509Certificate[] chain, String authType) {
