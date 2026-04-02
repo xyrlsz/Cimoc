@@ -30,6 +30,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -43,6 +44,7 @@ public class HotManga extends MangaParser {
     public static final int TYPE = 102;
     public static final String DEFAULT_TITLE = "热辣漫画";
     public static final String website = "https://www.manga2026.com";
+    public static final String api = "https://api.2024manga.com";
 
     public HotManga(Source source) {
         init(source, new Category());
@@ -56,10 +58,10 @@ public class HotManga extends MangaParser {
     public Request getSearchRequest(String keyword, int page) {
         String url;
         if (page == 1) {
-            url = StringUtils.format("%s/api/v3/search/comic?platform=1&limit=30&offset=0&q=%s", website, keyword);
+            url = StringUtils.format("%s/api/v3/search/comic?platform=1&limit=30&offset=0&q=%s", api, keyword);
             return new Request.Builder()
                     .url(url)
-                    .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
+                    .headers(getHeader())
                     .build();
         }
         return null;
@@ -112,10 +114,10 @@ public class HotManga extends MangaParser {
 
     @Override
     public Request getInfoRequest(String cid) {
-        String url = StringUtils.format("%s/api/v3/comic2/%s", website, cid);
+        String url = StringUtils.format("%s/api/v3/comic2/%s", api, cid);
         return new Request.Builder()
                 .url(url)
-                .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
+                .headers(getHeader())
                 .build();
     }
 
@@ -152,10 +154,10 @@ public class HotManga extends MangaParser {
 
     @Override
     public Request getChapterRequest(String html, String cid) {
-        String url = String.format("%s/api/v3/comic/%s/group/default/chapters?limit=500&offset=0", website, cid);
+        String url = String.format("%s/api/v3/comic/%s/group/default/chapters?limit=500&offset=0", api, cid);
         return new Request.Builder()
                 .url(url)
-                .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
+                .headers(getHeader())
                 .build();
     }
 
@@ -178,11 +180,11 @@ public class HotManga extends MangaParser {
                 if (key.equals("default")) continue;
                 String path_word = groups.getJSONObject(key).getString("path_word");
                 String PathName = groups.getJSONObject(key).getString("name");
-                String url = String.format("%s/api/v3/comic/%s/group/%s/chapters?limit=500&offset=0", website, comic.getCid(), path_word);
+                String url = String.format("%s/api/v3/comic/%s/group/%s/chapters?limit=500&offset=0", api, comic.getCid(), path_word);
                 Request request = new Request.Builder()
                         .url(url)
-                        .addHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36")
-                        .build();
+                        .headers(getHeader())
+                          .build();
                 html = getResponseBody(App.getHttpClient(), request);
                 jsonObject = new JSONObject(html);
                 array = jsonObject.getJSONObject("results").getJSONArray("list");
@@ -209,10 +211,10 @@ public class HotManga extends MangaParser {
 
     @Override
     public Request getImagesRequest(String cid, String path) {
-        String url = StringUtils.format("%s/api/v3/comic/%s/chapter/%s", website, cid, path);
+        String url = StringUtils.format("%s/api/v3/comic/%s/chapter/%s", api, cid, path);
         return new Request.Builder()
                 .url(url)
-                .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
+                .headers(getHeader())
                 .build();
     }
 
@@ -256,7 +258,15 @@ public class HotManga extends MangaParser {
 
     @Override
     public Headers getHeader() {
-        return Headers.of("Referer", website);
+        Map<String, String> headers = new HashMap<>();
+        headers.put("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0");
+        headers.put("Authorization","");
+        headers.put("Accept", "application/json");
+        headers.put("webp", "1");
+        headers.put("platform", "3");
+        headers.put("version", "2024.04.28");
+        headers.put("X-Requested-With", "com.manga2020.app");
+        return Headers.of(headers);
     }
 
     @Override
@@ -275,7 +285,7 @@ public class HotManga extends MangaParser {
                         map.get(CATEGORY_SUBJECT) +
                         "&ordering=" +
                         map.get(CATEGORY_ORDER) +
-                        "&_update=true", website);
+                        "&_update=true", api);
 
         return new Request.Builder().headers(getHeader()).url(url).build();
 
