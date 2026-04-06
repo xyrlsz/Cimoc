@@ -24,28 +24,31 @@ import okhttp3.Headers;
  */
 
 public record CopyMangaHeaderBuilder(String token, String deviceInfo, String device,
-                                     String pseudoId, String copyRegion) {
+                                     String pseudoId, String copyRegion,String copyVersion) {
 
     // 固定参数
     private static final String SECRET_BASE64 = "M2FmMDg1OTAzMTEwMzJlZmUwNjYwNTUwYTA1NjNhNTM=";
-    private static final String USER_AGENT = "COPY/3.0.6";
+
     private static final String SOURCE = "copyApp";
     private static final String PLATFORM = "3";
-    private static final String REFERER = "com.copymanga.app-3.0.6";
-    private static final String VERSION = "3.0.6";
     private static final String UMSTRING = "b4c89ca4104ea9a97750314d791520ac";
     private static final String REGION = "1";
+    private static String USER_AGENT = "";
+    private static String REFERER = "";
 
-    public CopyMangaHeaderBuilder(String token, String deviceInfo, String device, String pseudoId) {
-        this(token, deviceInfo, device, pseudoId, REGION);
+    public CopyMangaHeaderBuilder(String token, String deviceInfo, String device, String pseudoId,String copyVersion) {
+        this(token, deviceInfo, device, pseudoId, REGION, copyVersion);
     }
 
-    public CopyMangaHeaderBuilder(String token, String deviceInfo, String device, String pseudoId, String copyRegion) {
+    public CopyMangaHeaderBuilder(String token, String deviceInfo, String device, String pseudoId, String copyRegion, String copyVersion) {
         this.token = token != null ? token : "";
         this.deviceInfo = deviceInfo;
         this.device = device;
         this.pseudoId = pseudoId;
         this.copyRegion = copyRegion != null ? copyRegion : REGION;
+        this.copyVersion = copyVersion != null ? copyVersion : "3.0.6";
+        USER_AGENT = "COPY/"+ copyVersion;
+        REFERER = "com.copymanga.app-"+ copyVersion;
     }
 
     /**
@@ -133,7 +136,7 @@ public record CopyMangaHeaderBuilder(String token, String deviceInfo, String dev
         headers.put("dt", dt);
         headers.put("platform", PLATFORM);
         headers.put("referer", REFERER);
-        headers.put("version", VERSION);
+        headers.put("version", copyVersion);
         headers.put("device", device);
         headers.put("pseudoid", pseudoId);
         headers.put("Accept", "application/json");

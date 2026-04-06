@@ -11,6 +11,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Pair;
 
+import androidx.annotation.NonNull;
+
 import com.google.common.collect.Lists;
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.Constants;
@@ -33,6 +35,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -41,6 +44,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.Headers;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -59,15 +64,40 @@ public class CopyMH extends MangaParser {
     private final String deviceInfo = CopyMangaHeaderBuilder.generateDeviceInfo();
     private final String pseudoId = CopyMangaHeaderBuilder.generatePseudoId();
 
+    private String version = "3.0.6";
 
     public CopyMH(Source source) {
         init(source, new Category());
+        updateVersion();
     }
 
     public static Source getDefaultSource() {
         return new Source(null, DEFAULT_TITLE, TYPE, true, website);
     }
 
+    private void updateVersion() {
+        String url = "https://api.copy-manga.com/api/v3/system/appVersion/last?format=json&platform=3";
+        Request request = new Request.Builder()
+                .url(url)
+                .headers(getHeader())
+                .build();
+        App.getHttpClient().newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                try {
+                    JSONObject jsonObject = new JSONObject(response.body().string());
+                    version = jsonObject.getJSONObject("results").getJSONObject("android").getString("version");
+                } catch (JSONException ignored) {
+
+                }
+            }
+        });
+    }
 
     @Override
     public Request getSearchRequest(String keyword, int page) {
@@ -366,7 +396,7 @@ public class CopyMH extends MangaParser {
         SharedPreferences prefs = App.getAppContext().getSharedPreferences(Constants.COPYMG_SHARED, Context.MODE_PRIVATE);
         String region = String.valueOf(prefs.getInt(Constants.COPYMG_SHARED_REGION, 0));
         CopyMangaHeaderBuilder builder =
-                new CopyMangaHeaderBuilder(null, deviceInfo, device, pseudoId, region);
+                new CopyMangaHeaderBuilder(null, deviceInfo, device, pseudoId, region, version);
         try {
             return builder.genHeaders();
         } catch (Exception e) {
