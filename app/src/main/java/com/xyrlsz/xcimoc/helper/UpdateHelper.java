@@ -13,6 +13,7 @@ import com.xyrlsz.xcimoc.model.SourceDao;
 import com.xyrlsz.xcimoc.source.Baozi;
 import com.xyrlsz.xcimoc.source.BuKa;
 import com.xyrlsz.xcimoc.source.CopyMH;
+import com.xyrlsz.xcimoc.source.CopyMHWeb;
 import com.xyrlsz.xcimoc.source.DM5;
 import com.xyrlsz.xcimoc.source.DongManManHua;
 import com.xyrlsz.xcimoc.source.DuManWu;
@@ -96,6 +97,7 @@ public class UpdateHelper {
             ComicSourceTable.put(ManWa.TYPE, ManWa.getDefaultSource());
             ComicSourceTable.put(MH5.TYPE, MH5.getDefaultSource());
             ComicSourceTable.put(DuManWuApp.TYPE, DuManWuApp.getDefaultSource());
+            ComicSourceTable.put(CopyMHWeb.TYPE, CopyMHWeb.getDefaultSource());
         }
     }
 

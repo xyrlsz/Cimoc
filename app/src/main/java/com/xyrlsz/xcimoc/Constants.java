@@ -27,6 +27,7 @@ public final class Constants {
 
     public static final String COPYMG_SHARED = "copyMh";
     public static final String COPYMG_SHARED_REGION = "region";
+    public static final String COPYMG_SHARED_VERSION = "version";
     public static final String COPYMG_SHARED_REQID = "request_id";
     public static final String COPYMG_SHARED_REQID_time = "request_id_time";
     public static final String COPYMG_SHARED_IMG_QUALITY = "img_quality";

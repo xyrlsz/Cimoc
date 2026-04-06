@@ -11,6 +11,7 @@ import com.xyrlsz.xcimoc.parser.MangaParser;
 import com.xyrlsz.xcimoc.source.Baozi;
 import com.xyrlsz.xcimoc.source.BuKa;
 import com.xyrlsz.xcimoc.source.CopyMH;
+import com.xyrlsz.xcimoc.source.CopyMHWeb;
 import com.xyrlsz.xcimoc.source.DM5;
 import com.xyrlsz.xcimoc.source.DongManManHua;
 import com.xyrlsz.xcimoc.source.DuManWu;
@@ -204,6 +205,9 @@ public class SourceManager {
                     break;
                 case DuManWuApp.TYPE:
                     parser = new DuManWuApp(source);
+                    break;
+                case CopyMHWeb.TYPE:
+                    parser = new CopyMHWeb(source);
                     break;
                 default:
                     parser = new Null();

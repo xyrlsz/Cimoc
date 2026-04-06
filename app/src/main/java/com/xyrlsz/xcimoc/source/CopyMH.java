@@ -58,16 +58,18 @@ import okhttp3.Response;
 public class CopyMH extends MangaParser {
     public static final int TYPE = 26;
     public static final String DEFAULT_TITLE = "拷贝漫画";
-    public static final String website = "https://www.2025copy.com";
+    public static final String website = "https://www.2026copy.com";
     public static final String apiBaseUrl = "https://api.copy2000.online";
     private final String device = CopyMangaHeaderBuilder.generateDevice();
     private final String deviceInfo = CopyMangaHeaderBuilder.generateDeviceInfo();
     private final String pseudoId = CopyMangaHeaderBuilder.generatePseudoId();
 
-    private String version = "3.0.6";
+    private String version;
 
     public CopyMH(Source source) {
         init(source, new Category());
+        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.COPYMG_SHARED, Context.MODE_PRIVATE);
+        version = sharedPreferences.getString(Constants.COPYMG_SHARED_VERSION, "3.0.7");
         updateVersion();
     }
 
@@ -92,6 +94,17 @@ public class CopyMH extends MangaParser {
                 try {
                     JSONObject jsonObject = new JSONObject(response.body().string());
                     version = jsonObject.getJSONObject("results").getJSONObject("android").getString("version");
+                    SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.COPYMG_SHARED, Context.MODE_PRIVATE);
+                    if (!sharedPreferences.getString(Constants.COPYMG_SHARED_VERSION, "").equals(version)) {
+                        App.getAppContext().getSharedPreferences(Constants.COPYMG_SHARED, Context.MODE_PRIVATE)
+                                .edit()
+                                .putString(Constants.COPYMG_SHARED_VERSION, version)
+                                .apply();
+                        App.getAppContext().getSharedPreferences(Constants.COPYMG_SHARED, Context.MODE_PRIVATE)
+                                .edit()
+                                .putString(Constants.COPYMG_SHARED_VERSION, System.currentTimeMillis() + "")
+                                .apply();
+                    }
                 } catch (JSONException ignored) {
 
                 }
@@ -131,6 +144,7 @@ public class CopyMH extends MangaParser {
         filter.add(new UrlFilter("www.mangacopy.com", "comic/(\\w+)", 1));
         filter.add(new UrlFilter("www.copy20.com", "comic/(\\w+)", 1));
         filter.add(new UrlFilter("www.2025copy.com", "comic/(\\w+)", 1));
+        filter.add(new UrlFilter("www.2026copy.com", "comic/(\\w+)", 1));
     }
 
     @Override

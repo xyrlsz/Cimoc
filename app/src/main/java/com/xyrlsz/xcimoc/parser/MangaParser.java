@@ -239,4 +239,8 @@ public abstract class MangaParser implements Parser, AppGetter {
     public void setParseImagesLazyUseWebParser(boolean parseImagesLazyUseWebParser) {
         this.parseImagesLazyUseWebParser = parseImagesLazyUseWebParser;
     }
+
+    public String getUA() {
+        return "";
+    }
 }
