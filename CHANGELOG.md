@@ -1,12 +1,11 @@
 ### fix
 
-- 修复漫画源 
-- 更改OpenCC
+- 修改热辣漫画API
 
 <!-- ### feat -->
 
 ### build
-- 不再使用fastjson
+- 更新依赖
 
 <!-- ### ui -->
 
