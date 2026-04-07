@@ -194,7 +194,7 @@ public class ZaiManhua extends MangaParser {
             for (int i = 0; i < allJsonArray.length(); i++) {
                 JSONArray JSONArray = allJsonArray.getJSONObject(i).getJSONArray("data");
                 String tag = allJsonArray.getJSONObject(i).getString("title");
-                for (int j = 0; j != JSONArray.length(); ++j) {
+                for (int j = 0; j < JSONArray.length(); ++j) {
                     JSONObject chapter = JSONArray.getJSONObject(j);
                     String title = chapter.getString("chapter_title");
                     String chapter_id = chapter.getString("chapter_id");

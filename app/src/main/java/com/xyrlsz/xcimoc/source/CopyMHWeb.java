@@ -62,10 +62,13 @@ public class CopyMHWeb extends MangaParser {
 
     @Override
     public Request getSearchRequest(String keyword, int page) {
-        String url = website + "/search?q=" + keyword + "&q_type=";
-        return new Request.Builder()
-                .url(url)
-                .build();
+        if (page == 1) {
+            String url = website + "/search?q=" + keyword + "&q_type=";
+            return new Request.Builder()
+                    .url(url)
+                    .build();
+        }
+        return null;
     }
 
     @Override
@@ -223,8 +226,8 @@ public class CopyMHWeb extends MangaParser {
         if (targetDiv.get() != null) {
             String listAttr = targetDiv.attr("list");
             String jsonString = listAttr
-                    .replace("&#x27;", "\"") // 将 JSON 中的单引号转义符（文档中用的）替换为标准双引号
-                    .replace("&quot;", "\""); // 如果有双引号转义
+                    .replace("&#x27;", "\"")
+                    .replace("&quot;", "\"");
             try {
                 JSONArray array = new JSONArray(jsonString);
                 for (int i = 0; i < array.length(); i++) {
