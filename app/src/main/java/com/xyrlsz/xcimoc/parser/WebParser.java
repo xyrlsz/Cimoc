@@ -21,9 +21,9 @@ import okhttp3.Headers;
 public class WebParser {
 
     // 参数（可调）
-    private static final int MAX_SCROLL = 30;   // 最多滚动次数
+    private static final int MAX_SCROLL = 512;   // 最多滚动次数
     private static final int SAME_LIMIT = 3;    // 高度连续不变次数
-    private static final int SCROLL_DELAY = 300;
+    private static final int SCROLL_DELAY = 50;
     private final String url;
     private final Headers headers;
     private final CountDownLatch latch;
