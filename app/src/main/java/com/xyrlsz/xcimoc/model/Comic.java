@@ -11,7 +11,6 @@ import org.greenrobot.greendao.annotation.Transient;
  */
 @Entity
 public class Comic {
-
     @Transient
     public Object note;
     @Id(autoincrement = true)
@@ -39,12 +38,11 @@ public class Comic {
     private String url;
     private Integer chapterCount;
     private String intro;
-
     private String author;
 
     public Comic(int source, String cid, String title, String cover, String update, String author) {
         this(null, source, cid, title, cover == null ? "" : cover, false, false, update,
-                null, null, null, null, null, null, null, null, 0, null,null);
+                null, null, null, null, null, null, null, null, 0, null, null);
         this.author = author;
     }
 
@@ -55,13 +53,13 @@ public class Comic {
 
     public Comic(int source, String cid, String title, String cover, long download) {
         this(null, source, cid, title, cover == null ? "" : cover, false, false, null,
-                null, null, null, download, null, null, null, null, 0, null,null);
+                null, null, null, download, null, null, null, null, 0, null, null);
     }
 
     @Generated(hash = 1294342162)
     public Comic(Long id, int source, @NotNull String cid, @NotNull String title, @NotNull String cover, boolean highlight,
-            boolean local, String update, Boolean finish, Long favorite, Long history, Long download, String last, Integer page,
-            String chapter, String url, Integer chapterCount, String intro, String author) {
+                 boolean local, String update, Boolean finish, Long favorite, Long history, Long download, String last, Integer page,
+                 String chapter, String url, Integer chapterCount, String intro, String author) {
         this.id = id;
         this.source = source;
         this.cid = cid;
@@ -85,6 +83,10 @@ public class Comic {
 
     @Generated(hash = 1347984162)
     public Comic() {
+    }
+
+    public void copyFrom(Comic comic) {
+        this.setInfo(comic.getTitle(), comic.getCover(), comic.getUpdate(), comic.getIntro(), comic.getAuthor(), comic.getFinish());
     }
 
     @Override

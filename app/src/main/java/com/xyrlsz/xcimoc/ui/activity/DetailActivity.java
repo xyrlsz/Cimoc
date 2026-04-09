@@ -247,6 +247,13 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // 每次回到详情页，强制同步一次数据库状态
+        mPresenter.checkDatabaseStatus();
+    }
+
     @OnClick(R.id.coordinator_action_button2)
     void onActionButton2Click() {
         if (!mDetailAdapter.getDateSet().isEmpty()) {

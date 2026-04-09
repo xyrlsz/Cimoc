@@ -69,13 +69,52 @@ public class DetailPresenter extends BasePresenter<DetailView> {
         addSubscription(RxEvent.EVENT_COMIC_UPDATE_INFO, new Action1<RxEvent>() {
             @Override
             public void call(RxEvent rxEvent) {
-                if (mComic.getId() != null) {
-                    Comic comic = (Comic) rxEvent.getData();
-                    mComicManager.insertOrReplace(comic);
-                    mComic = mComicManager.load(comic.getId());
+                Comic eventComic = (Comic) rxEvent.getData();
+                // 必须增加 ID 或 Source+Cid 的双重判断！
+                if (mComic != null && mComic.getSource() == eventComic.getSource()
+                        && mComic.getCid().equals(eventComic.getCid())) {
+                    mComicManager.insertOrReplace(eventComic);
+                    // 尽量不要直接重新赋值 mComic，而是更新其属性
+                    mComic.copyFrom(eventComic);
                 }
             }
         });
+        // 监听收藏事件
+        addSubscription(RxEvent.EVENT_COMIC_FAVORITE, new Action1<RxEvent>() {
+            @Override
+            public void call(RxEvent rxEvent) {
+                MiniComic miniComic = (MiniComic) rxEvent.getData();
+                if (mComic != null && mComic.getSource() == miniComic.getSource()
+                        && mComic.getCid().equals(miniComic.getCid())) {
+                    // 重新从数据库加载最新状态，确保 ID 和收藏状态同步
+                    mComic = mComicManager.load(miniComic.getSource(), miniComic.getCid());
+                    mBaseView.onComicLoadSuccess(mComic); // 触发 Activity 更新图标
+                }
+            }
+        });
+
+        // 监听取消收藏事件
+        addSubscription(RxEvent.EVENT_COMIC_UNFAVORITE, new Action1<RxEvent>() {
+            @Override
+            public void call(RxEvent rxEvent) {
+                long id = (long) rxEvent.getData();
+                if (mComic != null && mComic.getId() != null && mComic.getId() == id) {
+                    // 更新本地内存状态
+                    mComic.setFavorite(null);
+                    mBaseView.onComicLoadSuccess(mComic); // 触发 Activity 更新图标
+                }
+            }
+        });
+    }
+
+    public void checkDatabaseStatus() {
+        if (mComic != null) {
+            Comic latest = mComicManager.load(mComic.getSource(), mComic.getCid());
+            if (latest != null) {
+                mComic = latest;
+                mBaseView.onComicLoadSuccess(mComic);
+            }
+        }
     }
 
     public void load(long id, int source, String cid) {

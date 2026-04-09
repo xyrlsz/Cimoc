@@ -34,6 +34,8 @@ public class ComicManager {
             synchronized (ComicManager.class) {
                 if (mInstance == null) {
                     mInstance = new ComicManager(getter);
+                    // 清理脏数据以免闪退
+                    mInstance.cleanDuplicateCids();
                 }
             }
         }
@@ -146,9 +148,14 @@ public class ComicManager {
     }
 
     public Comic load(int source, String cid) {
-        return mComicDao.queryBuilder()
+//        return mComicDao.queryBuilder()
+//                .where(Properties.Source.eq(source), Properties.Cid.eq(cid))
+//                .unique();
+        List<Comic> list = mComicDao.queryBuilder()
                 .where(Properties.Source.eq(source), Properties.Cid.eq(cid))
-                .unique();
+                .limit(1) // 只取第一条
+                .list();
+        return list.isEmpty() ? null : list.get(0);
     }
 
     public Comic loadOrCreate(int source, String cid) {
@@ -169,12 +176,36 @@ public class ComicManager {
         mComicDao.getDatabase().execSQL("UPDATE \"COMIC\" SET \"HIGHLIGHT\" = 0 WHERE \"HIGHLIGHT\" = 1");
     }
 
+    //    public void updateOrInsert(Comic comic) {
+//        if (comic.getId() == null) {
+//            insert(comic);
+//        } else {
+//            update(comic);
+//        }
+//    }
     public void updateOrInsert(Comic comic) {
         if (comic.getId() == null) {
-            insert(comic);
-        } else {
-            update(comic);
+            // 先根据 source 和 cid 找一下，防止重复插入
+            Comic existing = load(comic.getSource(), comic.getCid());
+            if (existing != null) {
+                comic.setId(existing.getId());
+            }
         }
+        insertOrReplace(comic);
+    }
+
+    public void cleanDuplicateCids() {
+
+        runInTx(() -> {
+            try {
+                String sql = "DELETE FROM \"COMIC\" WHERE \"_id\" NOT IN (" +
+                        "SELECT MAX(\"_id\") FROM \"COMIC\" GROUP BY \"SOURCE\", \"CID\")";
+                mComicDao.getDatabase().execSQL(sql);
+                android.util.Log.d("ComicManager", "重复数据清洗完成");
+            } catch (Exception e) {
+                android.util.Log.e("ComicManager", "清洗重复数据失败", e);
+            }
+        });
     }
 
     public void update(Comic comic) {
