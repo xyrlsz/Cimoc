@@ -262,7 +262,9 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
     public void onItemClick(View view, int position) {
         if (position != 0) {
             String path = mDetailAdapter.getItem(position - 1).getPath();
-            startReader(path);
+            if (!StringUtils.isEmpty(path)) {
+                startReader(path);
+            }
         }
     }
 
