@@ -204,6 +204,16 @@ public class Komiic extends MangaParser {
             String title = jsonList.get(i).getString("serial");
             String path = jsonList.get(i).getString("id");
             String type = jsonList.get(i).getString("type");
+            switch (type) {
+                case "chapter":
+                    type = "话";
+                    break;
+                case "book":
+                    type = "卷";
+                    break;
+                default:
+                    break;
+            }
             list.add(new Chapter(null, sourceComic, title, path, type));
         }
         list = Lists.reverse(list);

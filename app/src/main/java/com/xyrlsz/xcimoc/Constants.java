@@ -31,6 +31,7 @@ public final class Constants {
     public static final String COPYMG_SHARED_REQID = "request_id";
     public static final String COPYMG_SHARED_REQID_time = "request_id_time";
     public static final String COPYMG_SHARED_IMG_QUALITY = "img_quality";
+    public static final String COPYMG_SHARED_SEARCH_API = "web_search_api";
     public static final String HOTMG_SHARED = "hotmg";
     public static final String HOTMG_SHARED_IMG_QUALITY = "img_quality";
     public static final String BAOZI_SHARED = "baozi";

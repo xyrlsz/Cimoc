@@ -6,16 +6,22 @@ import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_PROGRESS;
 import static com.xyrlsz.xcimoc.parser.Category.CATEGORY_SUBJECT;
 import static com.xyrlsz.xcimoc.parser.MangaCategory.getParseFormatMap;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Pair;
 
+import androidx.annotation.NonNull;
+
 import com.google.common.collect.Lists;
+import com.xyrlsz.xcimoc.App;
+import com.xyrlsz.xcimoc.Constants;
 import com.xyrlsz.xcimoc.model.Chapter;
 import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.ImageUrl;
 import com.xyrlsz.xcimoc.model.Source;
+import com.xyrlsz.xcimoc.parser.JsonIterator;
 import com.xyrlsz.xcimoc.parser.MangaCategory;
 import com.xyrlsz.xcimoc.parser.MangaParser;
-import com.xyrlsz.xcimoc.parser.NodeIterator;
 import com.xyrlsz.xcimoc.parser.SearchIterator;
 import com.xyrlsz.xcimoc.parser.UrlFilter;
 import com.xyrlsz.xcimoc.soup.Node;
@@ -26,13 +32,19 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.Headers;
 import okhttp3.Request;
+import okhttp3.Response;
 
 /**
  * 拷贝漫画
@@ -43,32 +55,46 @@ public class CopyMHWeb extends MangaParser {
     public static final int TYPE = 27;
     public static final String DEFAULT_TITLE = "拷贝漫画Web";
     public static final String website = "https://www.2026copy.com";
+    private final SharedPreferences sharedPreferences;
+    public String searchApi;
 
     public CopyMHWeb(Source source) {
         init(source, new Category());
-        setGetSearchUseWebParser(true);
         setParseInfoUseWebParser(true);
         setParseImagesUseWebParser(true);
+        sharedPreferences = App.getAppContext().getSharedPreferences(Constants.COPYMG_SHARED, Context.MODE_PRIVATE);
+        searchApi = sharedPreferences.getString(Constants.COPYMG_SHARED_SEARCH_API, "/api/kb/web/searchci/comics");
+        refreshSearchApi();
     }
 
     public static Source getDefaultSource() {
         return new Source(null, DEFAULT_TITLE, TYPE, true, website);
     }
 
-    @Override
-    public String getUA() {
-        return "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36 Edg/146.0.0.0";
-    }
+    private void refreshSearchApi() {
+        String url = website + "/search?q=a&q_type=";
+        Request request = new Request.Builder()
+                .headers(getHeader())
+                .url(url)
+                .build();
+        App.getHttpClient().newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
 
-    @Override
-    public Request getSearchRequest(String keyword, int page) {
-        if (page == 1) {
-            String url = website + "/search?q=" + keyword + "&q_type=";
-            return new Request.Builder()
-                    .url(url)
-                    .build();
-        }
-        return null;
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                String text = response.body().string();
+
+                Pattern pattern = Pattern.compile("const countApi = \"([^\"]+)\"");
+                Matcher matcher = pattern.matcher(text);
+                if (matcher.find()) {
+                    searchApi = matcher.group(1);
+                    sharedPreferences.edit().putString(Constants.COPYMG_SHARED_SEARCH_API, searchApi).apply();
+                }
+            }
+        });
     }
 
     @Override
@@ -85,16 +111,40 @@ public class CopyMHWeb extends MangaParser {
     }
 
     @Override
+    public String getUA() {
+        return "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36 Edg/146.0.0.0";
+    }
+
+
+    @Override
+    public Request getSearchRequest(String keyword, int page) {
+        if (page == 1) {
+            String url = website + searchApi + "?offset=0&platform=2&limit=12&q=" + keyword + "&q_type=";
+            return new Request.Builder()
+                    .headers(getHeader())
+                    .url(url)
+                    .build();
+        }
+        return null;
+    }
+
+    @Override
     public SearchIterator getSearchIterator(String html, int page) throws JSONException {
-        Node body = new Node(html);
-        return new NodeIterator(body.list(".exemptComic_Item")) {
+        JSONObject data = new JSONObject(html);
+        return new JsonIterator(data.getJSONObject("results").getJSONArray("list")) {
             @Override
-            protected Comic parse(Node node) {
-                String cid = node.hrefWithSplit(".hoverImage > a", 1);
-                String title = node.text(".exemptComicItem-txt > a > p");
-                String cover = node.attr(".hoverImage > a > img", "data-src");
-                String author = node.text(".exemptComicItem-txt-span").replace("作者：", "");
-                return new Comic(TYPE, cid, title, cover, "", author);
+            protected Comic parse(JSONObject object) throws JSONException {
+                String cid = object.getString("path_word");
+                String title = object.getString("name");
+                String cover = object.getString("cover");
+                String author = "";
+                for (int i = 0; i < object.getJSONArray("author").length(); ++i) {
+                    author += object.getJSONArray("author").getJSONObject(i).getString("name").trim();
+                    if (i < object.getJSONArray("author").length() - 1) {
+                        author += ",";
+                    }
+                }
+                return new Comic(TYPE, cid, title, cover, null, author);
             }
         };
 
@@ -102,14 +152,14 @@ public class CopyMHWeb extends MangaParser {
 
     @Override
     public Request getInfoRequest(String cid) {
-        return new Request.Builder().url(getUrl(cid)).build();
+        return new Request.Builder().headers(getHeader()).url(getUrl(cid)).build();
     }
 
     @Override
     public Comic parseInfo(String html, Comic comic) {
         Node body = new Node(html);
         String title = body.text("div.comicParticulars-title-right > ul > li > h6");
-        String cover = body.attr("div.comicParticulars-left-img > img", "src");
+        String cover = body.attr("div.comicParticulars-left-img > img", "data-src");
         String update = body.text("div.comicParticulars-title-right ul li:contains(最後更新：) span.comicParticulars-right-txt");
         List<Node> authorList = body.list("div.comicParticulars-title-right ul li:contains(作者：) a");
         StringBuilder author = new StringBuilder();
@@ -125,6 +175,7 @@ public class CopyMHWeb extends MangaParser {
         comic.setInfo(title, cover, update, intro, author.toString(), status);
         return comic;
     }
+
 
     @Override
     public List<Chapter> parseChapter(String html, Comic comic, Long sourceComic)
@@ -168,6 +219,7 @@ public class CopyMHWeb extends MangaParser {
         }
         return list;
     }
+
 
     @Override
     public Request getImagesRequest(String cid, String path) {
