@@ -10,6 +10,7 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.xyrlsz.xcimoc.source.CopyMHWeb;
 import com.xyrlsz.xcimoc.utils.StringUtils;
 
 import java.util.HashMap;
@@ -96,8 +97,25 @@ public class WebParser {
         webView.evaluateJavascript("(function(){return document.readyState})()", value -> {
             if (value != null && value.contains("complete")) {
                 // 给 JS 一点时间
-                new Handler(Looper.getMainLooper()).postDelayed(this::autoScroll, 300);
+                if (url.contains(CopyMHWeb.website) && url.contains("/comic/") && !url.contains("/chapter/")) {
+                    // 修改重点在这里：使用 for 循环遍历所有找到的按钮
+                    String jsCode = "javascript:(function() { " +
+                            "var btns = document.getElementsByClassName('next-all'); " +
+                            "for(var i = 0; i < btns.length; i++) { " +
+                            "   btns[i].click(); " +
+                            "} " +
+                            "})()";
+
+                    webView.evaluateJavascript(jsCode, s -> {
+                        // 点击操作执行完毕后，延迟执行自动滚动
+                        new Handler(Looper.getMainLooper()).postDelayed(this::autoScroll, 500);
+                    });
+                } else {
+                    // 非目标页面也保持原有的自动滚动逻辑
+                    new Handler(Looper.getMainLooper()).postDelayed(this::autoScroll, 300);
+                }
             } else {
+                // DOM 未完成加载，继续轮询
                 new Handler(Looper.getMainLooper()).postDelayed(this::waitForDomReady, 100);
             }
         });

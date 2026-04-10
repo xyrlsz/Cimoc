@@ -211,6 +211,17 @@ public class CopyMHWeb extends MangaParser {
 
 
     @Override
+    public Request getCheckRequest(String cid) {
+        return getInfoRequest(cid);
+    }
+
+    @Override
+    public String parseCheck(String html) {
+        Node body = new Node(html);
+        return body.text("div.comicParticulars-title-right ul li:contains(最後更新：) span.comicParticulars-right-txt");
+    }
+
+    @Override
     public Request getImagesRequest(String cid, String path) {
         String url = website + path;
         return new Request.Builder().url(url).build();
