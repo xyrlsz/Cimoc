@@ -183,9 +183,12 @@ public class CopyMHWeb extends MangaParser {
 
         List<Chapter> list = new LinkedList<>();
         Node body = new Node(html);
-        Node defaultAllTab = body.getChild("#default全部");
-        if (defaultAllTab.get() != null) {
-            List<Node> chapterNodes = defaultAllTab.list("ul > a");
+        List<Node> tabGroup = body.list(".table-default-box");
+        List<Node> tabGroupName = body.list(".upLoop > span");
+        for (int i = 0; i < tabGroup.size(); i++) {
+            Node tabNode = tabGroup.get(i);
+            Node allTab = tabNode.list(".tab-content > .tab-pane").get(0);
+            List<Node> chapterNodes = allTab.list("ul > a");
             chapterNodes = Lists.reverse(chapterNodes);
             for (Node node : chapterNodes) {
                 String title = node.attr("title");
@@ -194,40 +197,11 @@ public class CopyMHWeb extends MangaParser {
                 }
                 String path = node.href();
                 if (!title.isEmpty()) {
-                    list.add(new Chapter(null, sourceComic, title, path, "默认"));
+                    list.add(new Chapter(null, sourceComic, title, path, tabGroupName.get(i).text()));
                 }
             }
         }
-        Node tankobonAllTab = body.getChild("#tankobon全部");
-        if (tankobonAllTab.get() != null) {
-            List<Node> volumeNodes = tankobonAllTab.list("ul > a");
-            volumeNodes = Lists.reverse(volumeNodes);
-            for (Node node : volumeNodes) {
-                String title = node.attr("title");
-                if (title == null || title.isEmpty()) {
-                    title = node.text("li").trim();
-                }
-                String path = node.href();
-                if (!title.isEmpty()) {
-                    list.add(new Chapter(null, sourceComic, title, path, "单行本"));
-                }
-            }
-        }
-        Node otherHonyakuchimuAllTab = body.getChild("#other_honyakuchimu全部");
-        if (otherHonyakuchimuAllTab.get() != null) {
-            List<Node> otherNodes = otherHonyakuchimuAllTab.list("ul > a");
-            otherNodes = Lists.reverse(otherNodes);
-            for (Node node : otherNodes) {
-                String title = node.attr("title");
-                if (title == null || title.isEmpty()) {
-                    title = node.text("li").trim();
-                }
-                String path = node.href();
-                if (!title.isEmpty()) {
-                    list.add(new Chapter(null, sourceComic, title, path, "其他汉化版"));
-                }
-            }
-        }
+
         for (int j = 0; j < list.size(); j++) {
             Long id = IdCreator.createChapterId(sourceComic, j);
             list.get(j).setId(id);
