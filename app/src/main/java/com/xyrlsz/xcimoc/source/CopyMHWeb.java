@@ -213,6 +213,21 @@ public class CopyMHWeb extends MangaParser {
                 }
             }
         }
+        Node otherHonyakuchimuAllTab = body.getChild("#other_honyakuchimu全部");
+        if (otherHonyakuchimuAllTab.get() != null) {
+            List<Node> otherNodes = otherHonyakuchimuAllTab.list("ul > a");
+            otherNodes = Lists.reverse(otherNodes);
+            for (Node node : otherNodes) {
+                String title = node.attr("title");
+                if (title == null || title.isEmpty()) {
+                    title = node.text("li").trim();
+                }
+                String path = node.href();
+                if (!title.isEmpty()) {
+                    list.add(new Chapter(null, sourceComic, title, path, "其他汉化版"));
+                }
+            }
+        }
         for (int j = 0; j < list.size(); j++) {
             Long id = IdCreator.createChapterId(sourceComic, j);
             list.get(j).setId(id);

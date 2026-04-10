@@ -6,6 +6,7 @@ import com.xyrlsz.xcimoc.model.ComicDao;
 import com.xyrlsz.xcimoc.model.ComicDao.Properties;
 import com.xyrlsz.xcimoc.model.TagRef;
 import com.xyrlsz.xcimoc.model.TagRefDao;
+import com.xyrlsz.xcimoc.utils.ThreadRunUtils;
 
 import org.greenrobot.greendao.query.QueryBuilder;
 
@@ -34,8 +35,10 @@ public class ComicManager {
             synchronized (ComicManager.class) {
                 if (mInstance == null) {
                     mInstance = new ComicManager(getter);
-                    // 清理脏数据以免闪退
-                    mInstance.cleanDuplicateCids();
+                    ThreadRunUtils.runOnIOThread(() -> {
+                        // 清理脏数据以免闪退
+                        mInstance.cleanDuplicateCids();
+                    });
                 }
             }
         }
@@ -51,96 +54,57 @@ public class ComicManager {
     }
 
     public List<Comic> listDownload() {
-        return mComicDao.queryBuilder()
-                .where(Properties.Download.isNotNull())
-                .list();
+        return mComicDao.queryBuilder().where(Properties.Download.isNotNull()).list();
     }
 
     public List<Comic> listLocal() {
-        return mComicDao.queryBuilder()
-                .where(Properties.Local.eq(true))
-                .list();
+        return mComicDao.queryBuilder().where(Properties.Local.eq(true)).list();
     }
 
     public Observable<List<Comic>> listLocalInRx() {
-        return mComicDao.queryBuilder()
-                .where(Properties.Local.eq(true))
-                .rx()
-                .list();
+        return mComicDao.queryBuilder().where(Properties.Local.eq(true)).rx().list();
     }
 
     public Observable<List<Comic>> listFavoriteOrHistoryInRx() {
-        return mComicDao.queryBuilder()
-                .whereOr(Properties.Favorite.isNotNull(), Properties.History.isNotNull())
-                .rx()
-                .list();
+        return mComicDao.queryBuilder().whereOr(Properties.Favorite.isNotNull(), Properties.History.isNotNull()).rx().list();
     }
 
     public List<Comic> listFavorite() {
-        return mComicDao.queryBuilder()
-                .where(Properties.Favorite.isNotNull())
-                .list();
+        return mComicDao.queryBuilder().where(Properties.Favorite.isNotNull()).list();
     }
 
     public Observable<List<Comic>> listFavoriteInRx() {
-        return mComicDao.queryBuilder()
-                .where(Properties.Favorite.isNotNull())
-                .orderDesc(Properties.Highlight, Properties.Favorite)
-                .rx()
-                .list();
+        return mComicDao.queryBuilder().where(Properties.Favorite.isNotNull()).orderDesc(Properties.Highlight, Properties.Favorite).rx().list();
     }
 
     public Observable<List<Comic>> listFinishInRx() {
-        return mComicDao.queryBuilder()
-                .where(Properties.Favorite.isNotNull(), Properties.Finish.eq(true))
-                .orderDesc(Properties.Highlight, Properties.Favorite)
-                .rx()
-                .list();
+        return mComicDao.queryBuilder().where(Properties.Favorite.isNotNull(), Properties.Finish.eq(true)).orderDesc(Properties.Highlight, Properties.Favorite).rx().list();
     }
 
     public Observable<List<Comic>> listContinueInRx() {
-        return mComicDao.queryBuilder()
-                .where(Properties.Favorite.isNotNull(), Properties.Finish.notEq(true))
-                .orderDesc(Properties.Highlight, Properties.Favorite)
-                .rx()
-                .list();
+        return mComicDao.queryBuilder().where(Properties.Favorite.isNotNull(), Properties.Finish.notEq(true)).orderDesc(Properties.Highlight, Properties.Favorite).rx().list();
     }
 
     public Observable<List<Comic>> listHistoryInRx() {
-        return mComicDao.queryBuilder()
-                .where(Properties.History.isNotNull())
-                .orderDesc(Properties.History)
-                .rx()
-                .list();
+        return mComicDao.queryBuilder().where(Properties.History.isNotNull()).orderDesc(Properties.History).rx().list();
     }
 
     public Observable<List<Comic>> listDownloadInRx() {
-        return mComicDao.queryBuilder()
-                .where(Properties.Download.isNotNull())
-                .orderDesc(Properties.Download)
-                .rx()
-                .list();
+        return mComicDao.queryBuilder().where(Properties.Download.isNotNull()).orderDesc(Properties.Download).rx().list();
     }
 
     public Observable<List<Comic>> listFavoriteByTag(long id) {
         QueryBuilder<Comic> queryBuilder = mComicDao.queryBuilder();
         queryBuilder.join(TagRef.class, TagRefDao.Properties.Cid).where(TagRefDao.Properties.Tid.eq(id));
-        return queryBuilder.orderDesc(Properties.Highlight, Properties.Favorite)
-                .rx()
-                .list();
+        return queryBuilder.orderDesc(Properties.Highlight, Properties.Favorite).rx().list();
     }
 
     public Observable<List<Comic>> listFavoriteNotIn(Collection<Long> collections) {
-        return mComicDao.queryBuilder()
-                .where(Properties.Favorite.isNotNull(), Properties.Id.notIn(collections))
-                .rx()
-                .list();
+        return mComicDao.queryBuilder().where(Properties.Favorite.isNotNull(), Properties.Id.notIn(collections)).rx().list();
     }
 
     public long countBySource(int type) {
-        return mComicDao.queryBuilder()
-                .where(Properties.Source.eq(type), Properties.Favorite.isNotNull())
-                .count();
+        return mComicDao.queryBuilder().where(Properties.Source.eq(type), Properties.Favorite.isNotNull()).count();
     }
 
     public Comic load(long id) {
@@ -151,9 +115,7 @@ public class ComicManager {
 //        return mComicDao.queryBuilder()
 //                .where(Properties.Source.eq(source), Properties.Cid.eq(cid))
 //                .unique();
-        List<Comic> list = mComicDao.queryBuilder()
-                .where(Properties.Source.eq(source), Properties.Cid.eq(cid))
-                .limit(1) // 只取第一条
+        List<Comic> list = mComicDao.queryBuilder().where(Properties.Source.eq(source), Properties.Cid.eq(cid)).limit(1) // 只取第一条
                 .list();
         return list.isEmpty() ? null : list.get(0);
     }
@@ -164,12 +126,7 @@ public class ComicManager {
     }
 
     public Observable<Comic> loadLast() {
-        return mComicDao.queryBuilder()
-                .where(Properties.History.isNotNull())
-                .orderDesc(Properties.History)
-                .limit(1)
-                .rx()
-                .unique();
+        return mComicDao.queryBuilder().where(Properties.History.isNotNull()).orderDesc(Properties.History).limit(1).rx().unique();
     }
 
     public void cancelHighlight() {
@@ -198,8 +155,7 @@ public class ComicManager {
 
         runInTx(() -> {
             try {
-                String sql = "DELETE FROM \"COMIC\" WHERE \"_id\" NOT IN (" +
-                        "SELECT MAX(\"_id\") FROM \"COMIC\" GROUP BY \"SOURCE\", \"CID\")";
+                String sql = "DELETE FROM \"COMIC\" WHERE \"_id\" NOT IN (" + "SELECT MAX(\"_id\") FROM \"COMIC\" GROUP BY \"SOURCE\", \"CID\")";
                 mComicDao.getDatabase().execSQL(sql);
                 android.util.Log.d("ComicManager", "重复数据清洗完成");
             } catch (Exception e) {
