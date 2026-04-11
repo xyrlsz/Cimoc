@@ -15,7 +15,6 @@ buildscript {
         // in the individual module build.gradle files
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.20"
         classpath 'io.objectbox:objectbox-gradle-plugin:5.4.1'
-//        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.9.5'
     }
 }
 
