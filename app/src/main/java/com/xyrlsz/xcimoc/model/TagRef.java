@@ -1,39 +1,41 @@
 package com.xyrlsz.xcimoc.model;
 
-import org.greenrobot.greendao.annotation.Entity;
-import org.greenrobot.greendao.annotation.Generated;
-import org.greenrobot.greendao.annotation.Id;
-import org.greenrobot.greendao.annotation.NotNull;
+import io.objectbox.annotation.Entity;
+import io.objectbox.annotation.Id;
+import io.objectbox.annotation.Index;
 
 /**
  * Created by Hiroshi on 2016/10/10.
  */
 @Entity
 public class TagRef {
-
-    @Id(autoincrement = true)
-    private Long id;
-    @NotNull
+    @Id
+    private long id;
+    @Index
     private long tid;
-    @NotNull
+    @Index
     private long cid;
 
-    @Generated(hash = 1744842042)
-    public TagRef(Long id, long tid, long cid) {
+    public TagRef(long id, long tid, long cid) {
         this.id = id;
         this.tid = tid;
         this.cid = cid;
     }
 
-    @Generated(hash = 942776696)
+    public TagRef(Long id, long tid, long cid) {
+        this.id = id == null ? 0 : id;
+        this.tid = tid;
+        this.cid = cid;
+    }
+
     public TagRef() {
     }
 
-    public Long getId() {
+    public long getId() {
         return this.id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -52,5 +54,4 @@ public class TagRef {
     public void setCid(long cid) {
         this.cid = cid;
     }
-
 }

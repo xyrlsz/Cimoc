@@ -1,46 +1,45 @@
 package com.xyrlsz.xcimoc.model;
 
-import org.greenrobot.greendao.annotation.Entity;
-import org.greenrobot.greendao.annotation.Generated;
-import org.greenrobot.greendao.annotation.Id;
-import org.greenrobot.greendao.annotation.NotNull;
+import io.objectbox.annotation.Entity;
+import io.objectbox.annotation.Id;
 
 /**
  * Created by Hiroshi on 2016/10/10.
  */
 @Entity
 public class Tag {
-
-    @Id(autoincrement = true)
-    private Long id;
-    @NotNull
+    @Id
+    private long id;
     private String title;
 
-    @Generated(hash = 836804519)
-    public Tag(Long id, @NotNull String title) {
+    public Tag(long id, String title) {
         this.id = id;
         this.title = title;
     }
 
-    @Generated(hash = 1605720318)
+    public Tag(Long id, String title) {
+        this.id = id == null ? 0 : id;
+        this.title = title;
+    }
+
     public Tag() {
     }
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof Tag && ((Tag) o).id.equals(id);
+        return o instanceof Tag && ((Tag) o).id == id;
     }
 
     @Override
     public int hashCode() {
-        return id == null ? super.hashCode() : id.hashCode();
+        return Long.hashCode(id);
     }
 
-    public Long getId() {
+    public long getId() {
         return this.id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -51,5 +50,4 @@ public class Tag {
     public void setTitle(String title) {
         this.title = title;
     }
-
 }

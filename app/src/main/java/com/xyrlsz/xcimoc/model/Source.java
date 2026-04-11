@@ -1,34 +1,26 @@
 package com.xyrlsz.xcimoc.model;
 
-import org.greenrobot.greendao.annotation.Entity;
-import org.greenrobot.greendao.annotation.Generated;
-import org.greenrobot.greendao.annotation.Id;
-import org.greenrobot.greendao.annotation.NotNull;
-import org.greenrobot.greendao.annotation.Unique;
+import io.objectbox.annotation.Entity;
+import io.objectbox.annotation.Id;
+import io.objectbox.annotation.Unique;
 
 /**
  * Created by Hiroshi on 2016/8/11.
  */
 @Entity
 public class Source {
-
-    @Id
-    private Long id;
-    @NotNull
+    @Id(assignable = true)
+    private long id;
     private String title;
     @Unique
     private int type;
-    @NotNull
     private boolean enable;
     private String baseUrl;
-
 
     public Source() {
     }
 
-    @Generated(hash = 341481004)
-    public Source(Long id, @NotNull String title, int type, boolean enable,
-                  String baseUrl) {
+    public Source(long id, String title, int type, boolean enable, String baseUrl) {
         this.id = id;
         this.title = title;
         this.type = type;
@@ -36,26 +28,33 @@ public class Source {
         this.baseUrl = baseUrl;
     }
 
-    public Source(Long id, @NotNull String title, int type, boolean enable) {
+    public Source(long id, String title, int type, boolean enable) {
         this(id, title, type, enable, null);
     }
 
+    public Source(Long id, String title, int type, boolean enable) {
+        this(id == null ? 0 : id, title, type, enable, null);
+    }
+
+    public Source(Long o, Object title, int type, boolean enable, Object baseUrl) {
+        this(o == null ? 0 : o, title == null ? null : title.toString(), type, enable, baseUrl == null ? null : baseUrl.toString());
+    }
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof Source && ((Source) o).id.equals(id);
+        return o instanceof Source && ((Source) o).id == id;
     }
 
     @Override
     public int hashCode() {
-        return id == null ? super.hashCode() : id.hashCode();
+        return Long.hashCode(id);
     }
 
-    public Long getId() {
+    public long getId() {
         return this.id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 

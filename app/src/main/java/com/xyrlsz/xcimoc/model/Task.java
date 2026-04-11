@@ -3,18 +3,17 @@ package com.xyrlsz.xcimoc.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import org.greenrobot.greendao.annotation.Entity;
-import org.greenrobot.greendao.annotation.Generated;
-import org.greenrobot.greendao.annotation.Id;
-import org.greenrobot.greendao.annotation.NotNull;
-import org.greenrobot.greendao.annotation.Transient;
+import io.objectbox.annotation.Entity;
+import io.objectbox.annotation.Id;
+import io.objectbox.annotation.Index;
+import io.objectbox.annotation.Transient;
+
 
 /**
  * Created by Hiroshi on 2016/9/1.
  */
 @Entity
 public class Task implements Parcelable {
-
     public static final int STATE_FINISH = 0;
     public static final int STATE_PAUSE = 1;
     public static final int STATE_PARSE = 2;
@@ -32,22 +31,18 @@ public class Task implements Parcelable {
             return new Task[size];
         }
     };
-    @Id(autoincrement = true)
-    private Long id;
-    @NotNull
-    private long key;      // 漫画主键
-    @NotNull
+    @Id
+    private long id;
+    @Index
+    private long key; // 漫画主键
     private String path;
-    @NotNull
     private String title;
-    @NotNull
     private int progress;
-    @NotNull
     private int max;
     @Transient
     private int source;
     @Transient
-    private String cid;  // 漫画 ID
+    private String cid; // 漫画 ID
     @Transient
     private int state;
 
@@ -63,9 +58,7 @@ public class Task implements Parcelable {
         this.state = source.readInt();
     }
 
-    @Generated(hash = 1668809946)
-    public Task(Long id, long key, @NotNull String path, @NotNull String title, int progress,
-                int max) {
+    public Task(long id, long key, String path, String title, int progress, int max) {
         this.id = id;
         this.key = key;
         this.path = path;
@@ -74,25 +67,28 @@ public class Task implements Parcelable {
         this.max = max;
     }
 
-    @Generated(hash = 733837707)
     public Task() {
+    }
+
+    public Task(Long o, int key, String path, String title, int count, int count1) {
+        this(o == null ? 0 : o, key, path, title, count, count1);
     }
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof Task && ((Task) o).id.equals(id);
+        return o instanceof Task && ((Task) o).id == id;
     }
 
     @Override
     public int hashCode() {
-        return id == null ? super.hashCode() : id.hashCode();
+        return Long.hashCode(id);
     }
 
-    public Long getId() {
+    public long getId() {
         return this.id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -181,5 +177,4 @@ public class Task implements Parcelable {
         dest.writeString(cid);
         dest.writeInt(state);
     }
-
 }

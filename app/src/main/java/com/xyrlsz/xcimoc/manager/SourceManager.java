@@ -5,8 +5,7 @@ import android.util.SparseArray;
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.component.AppGetter;
 import com.xyrlsz.xcimoc.model.Source;
-import com.xyrlsz.xcimoc.model.SourceDao;
-import com.xyrlsz.xcimoc.model.SourceDao.Properties;
+import com.xyrlsz.xcimoc.model.Source_;
 import com.xyrlsz.xcimoc.parser.MangaParser;
 import com.xyrlsz.xcimoc.source.Baozi;
 import com.xyrlsz.xcimoc.source.BuKa;
@@ -38,21 +37,29 @@ import com.xyrlsz.xcimoc.source.ZaiManhua;
 
 import java.util.List;
 
+import io.objectbox.Box;
+import io.objectbox.BoxStore;
+import io.objectbox.query.QueryBuilder;
 import okhttp3.Headers;
 import rx.Observable;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by Hiroshi on 2016/8/11.
+ * Modified to use ObjectBox (参照 ComicManager)
  */
 public class SourceManager {
 
     private static SourceManager mInstance;
 
-    private final SourceDao mSourceDao;
+    // 1. 修改：使用 ObjectBox 的 Box 替代 SourceDao
+    private final Box<Source> mSourceBox;
     private final SparseArray<MangaParser> mParserArray = new SparseArray<>();
 
     private SourceManager(AppGetter getter) {
-        mSourceDao = getter.getAppInstance().getDaoSession().getSourceDao();
+        // 2. 修改：从 BoxStore 获取 Box
+        BoxStore boxStore = getter.getAppInstance().getBoxStore();
+        mSourceBox = boxStore.boxFor(Source.class);
     }
 
     public static SourceManager getInstance(AppGetter getter) {
@@ -66,42 +73,52 @@ public class SourceManager {
         return mInstance;
     }
 
+    // 3. 修改：使用 ObjectBox Query 查询，包装在 Observable 中
     public Observable<List<Source>> list() {
-        return mSourceDao.queryBuilder()
-                .orderAsc(Properties.Type)
-                .rx()
-                .list();
+        return Observable.fromCallable(() ->
+                mSourceBox.query()
+                        .order(Source_.type) // 升序
+                        .build()
+                        .find()
+        ).subscribeOn(Schedulers.io());
     }
 
     public Observable<List<Source>> listEnableInRx() {
-        return mSourceDao.queryBuilder()
-                .where(Properties.Enable.eq(true))
-                .orderAsc(Properties.Type)
-                .rx()
-                .list();
+        return Observable.fromCallable(() ->
+                mSourceBox.query()
+                        .equal(Source_.enable, true)
+                        .order(Source_.type)
+                        .build()
+                        .find()
+        ).subscribeOn(Schedulers.io());
     }
 
     public List<Source> listEnable() {
-        return mSourceDao.queryBuilder()
-                .where(Properties.Enable.eq(true))
-                .orderAsc(Properties.Type)
-                .list();
+        return mSourceBox.query()
+                .equal(Source_.enable, true)
+                .order(Source_.type)
+                .build()
+                .find();
     }
 
+    // 4. 修改：load 方法。ObjectBox 没有直接的 unique 方法，使用 findFirst
     public Source load(int type) {
-        return mSourceDao.queryBuilder()
-                .where(Properties.Type.eq(type))
-                .unique();
+        return mSourceBox.query()
+                .equal(Source_.type, type)
+                .build()
+                .findFirst();
     }
 
+    // 5. 修改：CRUD 操作
     public long insert(Source source) {
-        return mSourceDao.insert(source);
+        return mSourceBox.put(source); // put 返回 id
     }
 
     public void update(Source source) {
-        mSourceDao.update(source);
+        mSourceBox.put(source);
     }
 
+    // 6. 保持不变：解析器管理逻辑（这部分与数据库无关）
     public MangaParser getParser(int type) {
         MangaParser parser = mParserArray.get(type);
         if (parser == null) {
@@ -116,28 +133,16 @@ public class SourceManager {
                 case Locality.TYPE:
                     parser = new Locality();
                     break;
-
-                //feilong
+                // ... 其他 case 保持不变 ...
                 case Tencent.TYPE:
                     parser = new Tencent(source);
                     break;
                 case BuKa.TYPE:
                     parser = new BuKa(source);
                     break;
-//                case Cartoonmad.TYPE:
-//                    parser = new Cartoonmad(source);
-//                    break;
-//                case Animx2.TYPE:
-//                    parser = new Animx2(source);
-//                    break;
                 case Manhuatai.TYPE:
                     parser = new Manhuatai(source);
                     break;
-
-                //haleydu
-//                case Mangakakalot.TYPE:
-//                    parser = new Mangakakalot(source);
-//                    break;
                 case CopyMH.TYPE:
                     parser = new CopyMH(source);
                     break;
@@ -153,8 +158,6 @@ public class SourceManager {
                 case YKMH.TYPE:
                     parser = new YKMH(source);
                     break;
-
-                // xyrlsz
                 case Baozi.TYPE:
                     parser = new Baozi(source);
                     break;
@@ -164,9 +167,6 @@ public class SourceManager {
                 case DuManWu.TYPE:
                     parser = new DuManWu(source);
                     break;
-//                case DuManWuOrg.TYPE:
-//                    parser = new DuManWuOrg(source);
-//                    break;
                 case Komiic.TYPE:
                     parser = new Komiic(source);
                     break;
@@ -176,18 +176,12 @@ public class SourceManager {
                 case GoDaManHua.TYPE:
                     parser = new GoDaManHua(source);
                     break;
-//                case TTKMH.TYPE:
-//                    parser = new TTKMH(source);
-//                    break;
                 case Vomicmh.TYPE:
                     parser = new Vomicmh(source);
                     break;
                 case YYManHua.TYPE:
                     parser = new YYManHua(source);
                     break;
-//                case DmzjV4.TYPE:
-//                    parser = new DmzjV4(source);
-//                    break;
                 case ZaiManhua.TYPE:
                     parser = new ZaiManhua(source);
                     break;
@@ -218,21 +212,18 @@ public class SourceManager {
         return parser;
     }
 
+    // 内部类保持不变
     public class TitleGetter {
-
         public String getTitle(int type) {
             return getParser(type).getTitle();
         }
-
     }
 
     public class HeaderGetter {
-
         public Headers getHeader(int type) {
             Headers headers = getParser(type).getHeader();
             App.setHeaders(headers);
             return headers;
         }
-
     }
 }

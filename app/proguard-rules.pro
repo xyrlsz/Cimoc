@@ -56,15 +56,22 @@
 -dontwarn com.android.volley.toolbox.**
 -dontwarn com.facebook.infer.**
 
-# greenDAO
--keepclassmembers class * extends org.greenrobot.greendao.AbstractDao {
-public static java.lang.String TABLENAME;
-}
-#ref: https://juejin.im/post/5d5fb53b51882554a13f8b6a
 -keep class **$Properties
 -keep class **$Properties{*;}
--dontwarn org.greenrobot.greendao.database.**
--dontwarn org.greenrobot.greendao.rx.**
+
+# ObjectBox
+-keep class io.objectbox.** {
+    *;
+}
+-keep class **_ {
+    *;
+}
+-keep class * implements io.objectbox.converter.PropertyConverter {
+    *;
+}
+-keepclassmembers class * {
+    @io.objectbox.annotation.* *;
+}
 
 # ButterKnife
 # Retain generated class which implement Unbinder.

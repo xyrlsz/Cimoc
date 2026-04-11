@@ -1,5 +1,7 @@
 package com.xyrlsz.xcimoc.presenter;
 
+import android.util.Log;
+
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.core.Backup;
 import com.xyrlsz.xcimoc.core.Download;
@@ -57,7 +59,7 @@ public class DetailPresenter extends BasePresenter<DetailView> {
         addSubscription(RxEvent.EVENT_COMIC_UPDATE, new Action1<RxEvent>() {
             @Override
             public void call(RxEvent rxEvent) {
-                if (mComic.getId() != null && mComic.getId() == (long) rxEvent.getData()) {
+                if (mComic.getId() > 0 && mComic.getId() == (long) rxEvent.getData()) {
                     Comic comic = mComicManager.load(mComic.getId());
                     mComic.setPage(comic.getPage());
                     mComic.setLast(comic.getLast());
@@ -73,7 +75,7 @@ public class DetailPresenter extends BasePresenter<DetailView> {
                 // 必须增加 ID 或 Source+Cid 的双重判断！
                 if (mComic != null && mComic.getSource() == eventComic.getSource()
                         && mComic.getCid().equals(eventComic.getCid())) {
-                    mComicManager.insertOrReplace(eventComic);
+                    mComicManager.updateOrInsert(eventComic);
                     // 尽量不要直接重新赋值 mComic，而是更新其属性
                     mComic.copyFrom(eventComic);
                 }
@@ -98,7 +100,7 @@ public class DetailPresenter extends BasePresenter<DetailView> {
             @Override
             public void call(RxEvent rxEvent) {
                 long id = (long) rxEvent.getData();
-                if (mComic != null && mComic.getId() != null && mComic.getId() == id) {
+                if (mComic != null && mComic.getId() > 0 && mComic.getId() == id) {
                     // 更新本地内存状态
                     mComic.setFavorite(null);
                     mBaseView.onComicLoadSuccess(mComic); // 触发 Activity 更新图标
@@ -149,14 +151,14 @@ public class DetailPresenter extends BasePresenter<DetailView> {
     }
 
     public void preLoad() {
-        if (mComic.getId() == null) {
+        if (mComic.getId() == 0) {
             return;
         }
         mCompositeSubscription.add(mChapterManager.getListChapter(Long.parseLong(mComic.getSource() + "0" + mComic.getId()))
                 .doOnNext(new Action1<List<Chapter>>() {
                     @Override
                     public void call(List<Chapter> list) {
-                        if (mComic.getId() != null && list.size() != 0) {
+                        if (mComic.getId() > 0 && !list.isEmpty()) {
                             updateChapterList(list);
                         }
                     }
@@ -165,7 +167,7 @@ public class DetailPresenter extends BasePresenter<DetailView> {
                 .subscribe(new Action1<List<Chapter>>() {
                     @Override
                     public void call(List<Chapter> list) {
-                        if (list != null && list.size() != 0) {
+                        if (list != null && !list.isEmpty()) {
                             mBaseView.onPreLoadSuccess(list, mComic);
                         }
                     }
@@ -183,7 +185,7 @@ public class DetailPresenter extends BasePresenter<DetailView> {
                 .doOnNext(new Action1<List<Chapter>>() {
                     @Override
                     public void call(List<Chapter> list) {
-                        if (mComic.getId() != null) {
+                        if (mComic.getId() > 0) {
                             updateChapterList(list);
                         }
                     }
@@ -249,7 +251,10 @@ public class DetailPresenter extends BasePresenter<DetailView> {
                                 file, list);
                     }
                 })
-                .subscribe();
+                .subscribe(
+                        result -> {},
+                        throwable -> Log.e("RX", "Chapter error", throwable)
+                );
     }
 
     public void favoriteComic() {
@@ -290,7 +295,7 @@ public class DetailPresenter extends BasePresenter<DetailView> {
                     public void call(Subscriber<? super ArrayList<Task>> subscriber) {
                         List<Chapter> dchapterList = new LinkedList<>();
                         List<Chapter> cchapterList = new LinkedList<>();
-                        if (mComic.getId() == null) {
+                        if (mComic.getId() == 0) {
                             ComicManager.getInstance(App.getApp()).updateOrInsert(mComic);
                         }
                         for (Chapter chapter : dList) {

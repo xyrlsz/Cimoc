@@ -86,34 +86,26 @@ public class DownloadPresenter extends BasePresenter<DownloadView> {
                 .doOnNext(new Action1<Long>() {
                     @Override
                     public void call(final Long id) {
-                        Comic comic = mComicManager.callInTx(new Callable<Comic>() {
-                            @Override
-                            public Comic call() throws Exception {
-                                Comic comic = mComicManager.load(id);
+                        Comic comic;
+                        try {
+                            comic = mComicManager.callInTx(() -> {
+                                Comic comic1 = mComicManager.load(id);
                                 mTaskManager.deleteByComicId(id);
-                                comic.setDownload(null);
-                                int res = mComicManager.updateOrDelete(comic);
+                                comic1.setDownload(null);
+                                int res = mComicManager.updateOrDelete(comic1);
                                 if (res == ComicManager.RESULT_DELETE) {
-                                    mChapterManager.deleteBySourceComic(IdCreator.createSourceComic(comic));
+                                    mChapterManager.deleteBySourceComic(IdCreator.createSourceComic(comic1));
                                 }
-                                return comic;
-                            }
-                        });
+                                return comic1;
+                            });
+                        } catch (Exception e) {
+                             return;
+                        }
                         Download.delete(mBaseView.getAppInstance().getDocumentFile(), comic, mSourceManager.getParser(comic.getSource()).getTitle());
                     }
                 }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Long>() {
-                    @Override
-                    public void call(Long id) {
-                        mBaseView.onDownloadDeleteSuccess(id);
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        mBaseView.onExecuteFail();
-                    }
-                }));
+                .subscribe(id1 -> mBaseView.onDownloadDeleteSuccess(id1), throwable -> mBaseView.onExecuteFail()));
     }
 
     public Comic load(long id) {
@@ -122,24 +114,9 @@ public class DownloadPresenter extends BasePresenter<DownloadView> {
 
     public void load() {
         mCompositeSubscription.add(mComicManager.listDownloadInRx()
-                .compose(new ToAnotherList<>(new Func1<Comic, Object>() {
-                    @Override
-                    public MiniComic call(Comic comic) {
-                        return new MiniComic(comic);
-                    }
-                }))
+                .compose(new ToAnotherList<>((Func1<Comic, Object>) MiniComic::new))
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<Object>>() {
-                    @Override
-                    public void call(List<Object> list) {
-                        mBaseView.onComicLoadSuccess(list);
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        mBaseView.onComicLoadFail();
-                    }
-                }));
+                .subscribe(list -> mBaseView.onComicLoadSuccess(list), throwable -> mBaseView.onComicLoadFail()));
     }
 
     public void loadTask() {
