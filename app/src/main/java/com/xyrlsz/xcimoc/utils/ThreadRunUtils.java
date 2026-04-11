@@ -1,5 +1,7 @@
 package com.xyrlsz.xcimoc.utils;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import rx.Observable;
@@ -7,22 +9,10 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 public class ThreadRunUtils {
+    private static final Handler MAIN = new Handler(Looper.getMainLooper());
 
-    public static void runOnMainThread(Runnable runnable, TaskCallback callback) {
-        Observable.create(subscriber -> {
-                    try {
-                        runnable.run();
-                        subscriber.onNext(null); // Notify completion
-                        subscriber.onCompleted();
-                    } catch (Throwable e) {
-                        subscriber.onError(e); // Pass error directly to RxJava error handler
-                    }
-                })
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        result -> callback.onSuccess(),
-                        err -> callback.onError("Error on Main Thread: " + Log.getStackTraceString(err))
-                );
+    public static void runOnMainThread(Runnable r) {
+        MAIN.post(r);
     }
 
     public static void runOnIOThread(Runnable runnable, TaskCallback callback) {
@@ -43,20 +33,6 @@ public class ThreadRunUtils {
                 );
     }
 
-    public static void runOnMainThread(Runnable runnable) {
-        runOnMainThread(runnable, new TaskCallback() {
-            @Override
-            public void onSuccess() {
-                Log.println(Log.INFO, "ThreadRunUtils", "runOnMainThread success");
-            }
-
-            @Override
-            public void onError(String msg) {
-                Log.e("ThreadRunUtils", "runOnMainThread error: " + msg);
-            }
-        });
-    }
-
     public static void runOnIOThread(Runnable runnable) {
         runOnIOThread(runnable, new TaskCallback() {
             @Override
@@ -71,30 +47,6 @@ public class ThreadRunUtils {
         });
     }
 
-    public static void runTaskObserveOnUI(Runnable io, Runnable ui, TaskCallback callback) {
-        Observable.create(subscriber -> {
-                    try {
-                        io.run();
-                        subscriber.onNext(null); // Notify completion
-                        subscriber.onCompleted();
-                    } catch (Throwable e) {
-                        subscriber.onError(e); // Handle any errors
-                    }
-                })
-                .subscribeOn(Schedulers.io()) // Do IO work on IO thread
-                .observeOn(AndroidSchedulers.mainThread()) // Switch back to main thread for UI updates
-                .subscribe(
-                        result -> {
-                            try {
-                                ui.run();
-                                callback.onSuccess();
-                            } catch (Throwable e) {
-                                callback.onError("UI error: " + Log.getStackTraceString(e));
-                            }
-                        },
-                        err -> callback.onError("RxJava error: " + err.getMessage())
-                );
-    }
 
     public interface TaskCallback {
         void onSuccess();

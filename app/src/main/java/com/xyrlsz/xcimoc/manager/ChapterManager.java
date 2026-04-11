@@ -1,7 +1,5 @@
 package com.xyrlsz.xcimoc.manager;
 
-import android.util.Log;
-
 import com.xyrlsz.xcimoc.component.AppGetter;
 import com.xyrlsz.xcimoc.model.Chapter;
 import com.xyrlsz.xcimoc.model.Chapter_;
@@ -12,14 +10,13 @@ import java.util.concurrent.Callable;
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import rx.Observable;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 /**
  * Created by Hiroshi on 2016/7/9.
  */
 public class ChapterManager {
-    private static ChapterManager mInstance;
+    private static volatile ChapterManager mInstance;
 
     private final Box<Chapter> mChapterBox;
 
@@ -78,53 +75,21 @@ public class ChapterManager {
         return mChapterBox.get(id);
     }
 
-
     public void updateOrInsert(List<Chapter> chapterList) {
-        Observable.from(chapterList)
-                .flatMap((Func1<Chapter, Observable<?>>) chapter
-                                -> Observable
-                                .fromCallable(new Callable<Void>() {
-                                    @Override
-                                    public Void call() {
-                                        if (chapter.getId() == 0) {
-                                            runInTx(() -> insert(chapter));
-                                        } else {
-                                            runInTx(() -> update(chapter));
-                                        }
-                                        return null;
-                                    }
-                                })
-                                .subscribeOn(Schedulers.io()),
-                        10)
-                .subscribe(
-                        result -> {},
-                        throwable -> Log.e("RX", "Chapter error", throwable)
-                );
+        Observable
+                .fromCallable(() -> {
+                    mChapterBox.put(chapterList);
+                    return null;
+                })
+                .subscribeOn(Schedulers.io())
+                .subscribe();
     }
 
-    public void insertOrReplace(List<Chapter> chapterList) {
-        Observable.from(chapterList)
-                .filter(chapter -> chapter.getId() != 0)
-                .flatMap((Func1<Chapter, Observable<?>>) chapter
-                                -> Observable
-                                .fromCallable(new Callable<Void>() {
-                                    @Override
-                                    public Void call() {
-                                        runInTx(() -> mChapterBox.put(chapter));
-                                        return null;
-                                    }
-                                })
-                                .subscribeOn(Schedulers.io()),
-                        10)
-                .subscribe(
-                        result -> {},
-                        throwable -> Log.e("RX", "Chapter error", throwable)
-                );
-    }
 
     public void update(Chapter chapter) {
         if (chapter.getId() != 0) {
-            mChapterBox.put(chapter);
+            long res = mChapterBox.put(chapter);
+            System.out.println("update:" + res);
         }
     }
 

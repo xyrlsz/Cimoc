@@ -9,7 +9,7 @@ import io.objectbox.annotation.Index;
  */
 @Entity
 public class TagRef {
-    @Id
+    @Id(assignable = true)
     private long id;
     @Index
     private long tid;

@@ -211,7 +211,7 @@ public class ReaderPresenter extends BasePresenter<ReaderView> {
                 .subscribe(new Action1<List<ImageUrl>>() {
                     @Override
                     public void call(List<ImageUrl> list) {
-                        mImageUrlManager.insertOrReplace(list);
+                        mImageUrlManager.updateOrInsert(list);
                         Chapter chapter;
                         switch (status) {
                             case LOAD_INIT:

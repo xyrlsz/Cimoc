@@ -31,7 +31,7 @@ public class Task implements Parcelable {
             return new Task[size];
         }
     };
-    @Id
+    @Id(assignable = true)
     private long id;
     @Index
     private long key; // 漫画主键

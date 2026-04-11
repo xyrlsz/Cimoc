@@ -14,11 +14,10 @@ import rx.schedulers.Schedulers;
 
 /**
  * Created by Hiroshi on 2016/9/4.
- * Modified to use ObjectBox (参照 ComicManager)
  */
 public class TaskManager {
 
-    private static TaskManager mInstance;
+    private static volatile TaskManager mInstance;
 
     // 1. 修改：使用 ObjectBox 的 Box 替代 TaskDao
     private final Box<Task> mTaskBox;
@@ -82,7 +81,11 @@ public class TaskManager {
 
     // ObjectBox put 支持 Iterable 且默认在事务中运行
     public void insertInTx(Iterable<Task> entities) {
-        mTaskBox.put((Task) entities);
+        mTaskBox.getStore().runInTx(() -> {
+            for (Task task : entities) {
+                mTaskBox.put(task);
+            }
+        });
     }
 
     public void update(Task task) {
@@ -99,7 +102,12 @@ public class TaskManager {
     }
 
     public void deleteInTx(Iterable<Task> entities) {
-        mTaskBox.remove((Task) entities);
+
+        mTaskBox.getStore().runInTx(() -> {
+            for (Task task : entities) {
+                mTaskBox.remove(task);
+            }
+        });
     }
 
     public void deleteByComicId(long id) {

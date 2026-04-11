@@ -216,30 +216,7 @@ public class Manhuatai extends MangaParser {
             } else {
                 return null; // 未找到匹配内容
             }
-//            JSONObject object = new JSONObject(html);
-//            if (object.getInt("status") != 0) {
-//                return list;
-//            }
-//
-//            JSONArray chapters = object.getJSONObject("data").getJSONArray("comic_chapter");
-//            JSONObject chapterNew = null;
-//            for (int i = 0; i < chapters.length(); i++) {
-//                chapterNew = chapters.getJSONObject(i);
-//                String a = chapterNew.getString("chapter_id");
-//                if(a.equals(_path)) {
-//                    break;
-//                }
-//            }
-//
-//            String ImagePattern = "http://mhpic." + chapterNew.getString("chapter_domain") + chapterNew.getString("rule") + "-mht.low.webp";
-//
-//            for (int index = chapterNew.getInt("start_num"); index <= chapterNew.getInt("end_num"); index++) {
-//                Long comicChapter = chapter.getId();
-//                Long id = Long.parseLong(comicChapter + "0" + index);
-//
-//                String image = ImagePattern.replaceFirst("\\$\\$", Integer.toString(index));
-//                list.add(new ImageUrl(id, comicChapter, index, image, false));
-//            }
+
         } catch (JSONException ex) {
             // ignore
         }

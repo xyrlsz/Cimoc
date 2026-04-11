@@ -203,7 +203,7 @@ public class CopyMHWeb extends MangaParser {
         }
 
         for (int j = 0; j < list.size(); j++) {
-            Long id = IdCreator.createChapterId(sourceComic, j);
+            long id = IdCreator.createChapterId(sourceComic, j);
             list.get(j).setId(id);
         }
         return list;
@@ -233,8 +233,8 @@ public class CopyMHWeb extends MangaParser {
         Node body = new Node(html);
         List<Node> imageNodes = body.list("ul.comicContent-list > li");
         for (int i = 1; i <= imageNodes.size(); i++) {
-            Long comicChapter = chapter.getId();
-            Long id = IdCreator.createImageId(comicChapter, i);
+            long comicChapter = chapter.getId();
+            long id = IdCreator.createImageId(comicChapter, i);
             String imgUrl = imageNodes.get(i - 1).list("img").get(0).attr("data-src");
             imgUrl = imgUrl.replaceAll("c\\d+x\\.[a-zA-Z]+$", "c" + 1500 + "x.webp");
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false));

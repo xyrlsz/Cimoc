@@ -110,8 +110,7 @@ public class ZaiManhua extends MangaParser {
                         String title = object.getString("title");
                         String cover = object.getString("cover");
                         String author = object.optString("authors");
-//                        long time = Long.parseLong(object.getString("last_updatetime")) * 1000;
-//                        String update = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date(time));
+ 
                         return new Comic(TYPE, cid, title, cover, null, author);
                     } catch (Exception e) {
                         e.printStackTrace();

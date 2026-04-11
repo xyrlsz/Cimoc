@@ -15,14 +15,13 @@ import rx.schedulers.Schedulers;
 
 /**
  * Created by Hiroshi on 2016/10/10.
- * Modified to use ObjectBox (参照 ComicManager)
  */
 public class TagManager {
 
     public static final long TAG_CONTINUE = -101;
     public static final long TAG_FINISH = -100;
 
-    private static TagManager mInstance;
+    private static volatile TagManager mInstance;
 
     // 1. 修改：使用 ObjectBox 的 Box 替代 TagDao
     private final Box<Tag> mTagBox;

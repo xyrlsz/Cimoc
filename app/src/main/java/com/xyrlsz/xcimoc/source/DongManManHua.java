@@ -164,7 +164,7 @@ public class DongManManHua extends MangaParser {
         int i = 1;
         for (Node node : body.list("div#_imageList > img")) {
             Long comicChapter = chapter.getId();
-            Long id = Long.parseLong(comicChapter + "0" + i);
+            Long id = IdCreator.createImageId(comicChapter, i);
             String url = node.attr("img", "data-url");
             list.add(new ImageUrl(id, comicChapter, i++, url, false, getHeader()));
         }

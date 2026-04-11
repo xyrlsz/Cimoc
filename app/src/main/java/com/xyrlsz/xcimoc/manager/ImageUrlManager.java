@@ -1,7 +1,5 @@
 package com.xyrlsz.xcimoc.manager;
 
-import android.util.Log;
-
 import com.xyrlsz.xcimoc.component.AppGetter;
 import com.xyrlsz.xcimoc.model.ImageUrl;
 import com.xyrlsz.xcimoc.model.ImageUrl_;
@@ -12,15 +10,13 @@ import java.util.concurrent.Callable;
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import rx.Observable;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 /**
  * Created by HaleyDu on 2020/8/27.
- * Modified to use ObjectBox (参照 ComicManager)
  */
 public class ImageUrlManager {
-    private static ImageUrlManager mInstance;
+    private static volatile ImageUrlManager mInstance;
 
     // 1. 修改：使用 ObjectBox 的 Box 替代 Dao
     private final Box<ImageUrl> mImageUrlBox;
@@ -75,34 +71,15 @@ public class ImageUrlManager {
 
     // 6. 修改：updateOrInsert 逻辑
     public void updateOrInsert(List<ImageUrl> imageUrlList) {
-        Observable.from(imageUrlList)
-                .flatMap((Func1<ImageUrl, Observable<?>>) imageUrl ->
-                        Observable.fromCallable(() -> {
-                            // ObjectBox 的 put 会自动判断插入或更新
-                            // 如果 ID 为 0 或 null (取决于定义)，则插入；否则更新
-                            mImageUrlBox.put(imageUrl);
-                            return null;
-                        }).subscribeOn(Schedulers.io()), 10)
-                .subscribe(
-                        result -> {},
-                        throwable -> Log.e("RX", "Chapter error", throwable)
-                );
+        Observable
+                .fromCallable(() -> {
+                    mImageUrlBox.put(imageUrlList);
+                    return null;
+                })
+                .subscribeOn(Schedulers.io())
+                .subscribe();
     }
 
-    // 7. 修改：insertOrReplace (ObjectBox 的 put 类似于 insertOrReplace)
-    public void insertOrReplace(List<ImageUrl> imageUrlList) {
-        Observable.from(imageUrlList)
-                .filter(imageUrl -> imageUrl.getId() != 0) // 假设 ID 为 long 基本类型，0 代表无效
-                .flatMap((Func1<ImageUrl, Observable<?>>) imageUrl ->
-                        Observable.fromCallable(() -> {
-                            runInTx(() -> mImageUrlBox.put(imageUrl));
-                            return null;
-                        }).subscribeOn(Schedulers.io()), 10)
-                .subscribe(
-                        result -> {},
-                        throwable -> Log.e("RX", "Chapter error", throwable)
-                );
-    }
 
     // 8. 修改：单独的 update
     public void update(ImageUrl imageurl) {

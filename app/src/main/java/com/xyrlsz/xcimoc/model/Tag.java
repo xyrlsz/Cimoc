@@ -8,7 +8,7 @@ import io.objectbox.annotation.Id;
  */
 @Entity
 public class Tag {
-    @Id
+    @Id(assignable = true)
     private long id;
     private String title;
 

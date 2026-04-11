@@ -177,20 +177,7 @@ public class BuKa extends MangaParser {
             Long id = IdCreator.createImageId(comicChapter, i);
             list.add(new ImageUrl(id, comicChapter, ++i, n.attr("data-src"), false));
         }
-        //        Matcher m = Pattern.compile("<img class=\"lazy\" data-original=\"(http.*?jpg)\"
-        //        />").matcher(html); if (m.find()) {
-        //            try {
-        //                int i = 0;
-        //                do {
-        //                    Long comicChapter = chapter.getId();
-        //                    Long id = Long.parseLong(comicChapter + "0" + i);
-        //                    list.add(new ImageUrl(id, comicChapter, ++i,
-        //                    StringUtils.match("http.*jpg", m.group(0), 0), false));
-        //                } while (m.find());
-        //            } catch (Exception e) {
-        //                e.printStackTrace();
-        //            }
-        //        }
+
         return list;
     }
 

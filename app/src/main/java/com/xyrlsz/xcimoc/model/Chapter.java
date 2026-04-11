@@ -27,7 +27,7 @@ public class Chapter implements Parcelable {
             return new Chapter[size];
         }
     };
-    @Id
+    @Id(assignable = true)
     private long id;
     @Index
     private long sourceComic;

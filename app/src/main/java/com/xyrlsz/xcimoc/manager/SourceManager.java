@@ -46,11 +46,10 @@ import rx.schedulers.Schedulers;
 
 /**
  * Created by Hiroshi on 2016/8/11.
- * Modified to use ObjectBox (参照 ComicManager)
  */
 public class SourceManager {
 
-    private static SourceManager mInstance;
+    private static volatile SourceManager mInstance;
 
     // 1. 修改：使用 ObjectBox 的 Box 替代 SourceDao
     private final Box<Source> mSourceBox;
@@ -123,90 +122,35 @@ public class SourceManager {
         MangaParser parser = mParserArray.get(type);
         if (parser == null) {
             Source source = load(type);
-            switch (type) {
-                case IKanman.TYPE:
-                    parser = new IKanman(source);
-                    break;
-                case DM5.TYPE:
-                    parser = new DM5(source);
-                    break;
-                case Locality.TYPE:
-                    parser = new Locality();
-                    break;
-                // ... 其他 case 保持不变 ...
-                case Tencent.TYPE:
-                    parser = new Tencent(source);
-                    break;
-                case BuKa.TYPE:
-                    parser = new BuKa(source);
-                    break;
-                case Manhuatai.TYPE:
-                    parser = new Manhuatai(source);
-                    break;
-                case CopyMH.TYPE:
-                    parser = new CopyMH(source);
-                    break;
-                case HotManga.TYPE:
-                    parser = new HotManga(source);
-                    break;
-                case MangaBZ.TYPE:
-                    parser = new MangaBZ(source);
-                    break;
-                case DongManManHua.TYPE:
-                    parser = new DongManManHua(source);
-                    break;
-                case YKMH.TYPE:
-                    parser = new YKMH(source);
-                    break;
-                case Baozi.TYPE:
-                    parser = new Baozi(source);
-                    break;
-                case MYCOMIC.TYPE:
-                    parser = new MYCOMIC(source);
-                    break;
-                case DuManWu.TYPE:
-                    parser = new DuManWu(source);
-                    break;
-                case Komiic.TYPE:
-                    parser = new Komiic(source);
-                    break;
-                case Manhuayu.TYPE:
-                    parser = new Manhuayu(source);
-                    break;
-                case GoDaManHua.TYPE:
-                    parser = new GoDaManHua(source);
-                    break;
-                case Vomicmh.TYPE:
-                    parser = new Vomicmh(source);
-                    break;
-                case YYManHua.TYPE:
-                    parser = new YYManHua(source);
-                    break;
-                case ZaiManhua.TYPE:
-                    parser = new ZaiManhua(source);
-                    break;
-                case ManBen.TYPE:
-                    parser = new ManBen(source);
-                    break;
-                case GFMH.TYPE:
-                    parser = new GFMH(source);
-                    break;
-                case ManWa.TYPE:
-                    parser = new ManWa(source);
-                    break;
-                case MH5.TYPE:
-                    parser = new MH5(source);
-                    break;
-                case DuManWuApp.TYPE:
-                    parser = new DuManWuApp(source);
-                    break;
-                case CopyMHWeb.TYPE:
-                    parser = new CopyMHWeb(source);
-                    break;
-                default:
-                    parser = new Null();
-                    break;
-            }
+            parser = switch (type) {
+                case IKanman.TYPE -> new IKanman(source);
+                case DM5.TYPE -> new DM5(source);
+                case Locality.TYPE -> new Locality();
+                case Tencent.TYPE -> new Tencent(source);
+                case BuKa.TYPE -> new BuKa(source);
+                case Manhuatai.TYPE -> new Manhuatai(source);
+                case CopyMH.TYPE -> new CopyMH(source);
+                case HotManga.TYPE -> new HotManga(source);
+                case MangaBZ.TYPE -> new MangaBZ(source);
+                case DongManManHua.TYPE -> new DongManManHua(source);
+                case YKMH.TYPE -> new YKMH(source);
+                case Baozi.TYPE -> new Baozi(source);
+                case MYCOMIC.TYPE -> new MYCOMIC(source);
+                case DuManWu.TYPE -> new DuManWu(source);
+                case Komiic.TYPE -> new Komiic(source);
+                case Manhuayu.TYPE -> new Manhuayu(source);
+                case GoDaManHua.TYPE -> new GoDaManHua(source);
+                case Vomicmh.TYPE -> new Vomicmh(source);
+                case YYManHua.TYPE -> new YYManHua(source);
+                case ZaiManhua.TYPE -> new ZaiManhua(source);
+                case ManBen.TYPE -> new ManBen(source);
+                case GFMH.TYPE -> new GFMH(source);
+                case ManWa.TYPE -> new ManWa(source);
+                case MH5.TYPE -> new MH5(source);
+                case DuManWuApp.TYPE -> new DuManWuApp(source);
+                case CopyMHWeb.TYPE -> new CopyMHWeb(source);
+                default -> new Null();
+            };
             mParserArray.put(type, parser);
         }
         return parser;

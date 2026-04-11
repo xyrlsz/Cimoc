@@ -12,7 +12,7 @@ import io.objectbox.annotation.Transient;
 public class Comic {
     @Transient
     public Object note;
-    @Id
+    @Id(assignable = true)
     private long id;
     @Index
     private int source;

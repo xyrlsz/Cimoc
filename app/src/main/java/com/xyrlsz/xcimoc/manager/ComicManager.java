@@ -23,7 +23,7 @@ import rx.Observable;
 public class ComicManager {
     public static int RESULT_DELETE = 0;
     public static int RESULT_UPDATE = 1;
-    private static ComicManager mInstance;
+    private static volatile ComicManager mInstance;
     private final Box<Comic> mComicBox;
     private final Box<TagRef> mTagRefBox;
 

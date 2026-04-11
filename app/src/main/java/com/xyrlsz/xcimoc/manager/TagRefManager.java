@@ -13,11 +13,10 @@ import rx.schedulers.Schedulers;
 
 /**
  * Created by Hiroshi on 2017/1/16.
- * Modified to use ObjectBox (参照 ComicManager)
  */
 public class TagRefManager {
 
-    private static TagRefManager mInstance;
+    private static volatile TagRefManager mInstance;
 
     // 1. 修改：使用 ObjectBox 的 Box 替代 TagRefDao
     private final Box<TagRef> mRefBox;
@@ -80,18 +79,13 @@ public class TagRefManager {
         return mRefBox.put(ref);
     }
 
-    // ObjectBox 的 put 支持 Iterable，且自动在事务中运行
-    public void insert(Iterable<TagRef> entities) {
-        mRefBox.put((TagRef) entities);
-    }
-
     public void insertInTx(Iterable<TagRef> entities) {
-        mRefBox.put((TagRef) entities);
+        mRefBox.getStore().runInTx(() -> {
+            for (TagRef tagRef : entities) {
+                mRefBox.put(tagRef);
+            }
+        });
     }
-
-    // 7. 修改：删除操作
-    // ObjectBox 不支持直接 buildDelete，通常做法是 query().build().remove()
-    // 或者先 findIds() 再 remove(ids) 以提高性能
 
     public void deleteByTag(long tid) {
         mRefBox.query()

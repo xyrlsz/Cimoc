@@ -1,16 +1,16 @@
 package com.xyrlsz.xcimoc.model;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
 import io.objectbox.annotation.Convert;
 import io.objectbox.annotation.Entity;
 import io.objectbox.annotation.Id;
 import io.objectbox.annotation.Index;
 import io.objectbox.annotation.Transient;
 import io.objectbox.converter.PropertyConverter;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
 import okhttp3.Headers;
 
 /**
@@ -18,12 +18,14 @@ import okhttp3.Headers;
  */
 @Entity
 public class ImageUrl {
-    public static final int STATE_NULL   = 0;
+    public static final int STATE_NULL = 0;
     public static final int STATE_PAGE_1 = 1;
     public static final int STATE_PAGE_2 = 2;
 
-    @Id private long id; // 唯一标识
-    @Index private long comicChapter;
+    @Id(assignable = true)
+    private long id; // 唯一标识
+    @Index
+    private long comicChapter;
     private int num; // 章节的第几页
     @Convert(dbType = String.class, converter = StringConverter.class)
     private List<String> urls;
@@ -35,64 +37,66 @@ public class ImageUrl {
     private boolean loading; // 正在懒加载
     private boolean success; // 图片显示成功
     private boolean download; // 下载的图片
-    @Transient private Headers headers;
+    @Transient
+    private Headers headers;
 
     public ImageUrl(long id, long comicChapter, int num, String[] urls, String chapter, int state,
-        boolean lazy) {
+                    boolean lazy) {
         this(id, comicChapter, num, urls, chapter, state, 0, 0, lazy, false, false, false, null);
     }
 
     public ImageUrl(long id, long comicChapter, int num, String url, boolean lazy) {
-        this(id, comicChapter, num, new String[] {url}, null, STATE_NULL, 0, 0, lazy, false, false,
-            false, null);
+        this(id, comicChapter, num, new String[]{url}, null, STATE_NULL, 0, 0, lazy, false, false,
+                false, null);
     }
 
     public ImageUrl(long id, long comicChapter, int num, String[] urls, String chapter, int state,
-        boolean lazy, Headers headers) {
+                    boolean lazy, Headers headers) {
         this(id, comicChapter, num, urls, chapter, state, 0, 0, lazy, false, false, false, headers);
     }
 
     public ImageUrl(
-        long id, long comicChapter, int num, String url, boolean lazy, Headers headers) {
-        this(id, comicChapter, num, new String[] {url}, null, STATE_NULL, 0, 0, lazy, false, false,
-            false, headers);
+            long id, long comicChapter, int num, String url, boolean lazy, Headers headers) {
+        this(id, comicChapter, num, new String[]{url}, null, STATE_NULL, 0, 0, lazy, false, false,
+                false, headers);
     }
 
     public ImageUrl(long id, long comicChapter, int num, String[] urls, String chapter, int state,
-        int height, int width, boolean lazy, boolean loading, boolean success, boolean download) {
-        this.id           = id;
+                    int height, int width, boolean lazy, boolean loading, boolean success, boolean download) {
+        this.id = id;
         this.comicChapter = comicChapter;
-        this.num          = num;
-        this.urls         = Arrays.asList(urls);
-        this.chapter      = chapter;
-        this.state        = state;
-        this.height       = height;
-        this.width        = width;
-        this.lazy         = lazy;
-        this.loading      = loading;
-        this.success      = success;
-        this.download     = download;
+        this.num = num;
+        this.urls = Arrays.asList(urls);
+        this.chapter = chapter;
+        this.state = state;
+        this.height = height;
+        this.width = width;
+        this.lazy = lazy;
+        this.loading = loading;
+        this.success = success;
+        this.download = download;
     }
 
     public ImageUrl(long id, long comicChapter, int num, String[] urls, String chapter, int state,
-        int height, int width, boolean lazy, boolean loading, boolean success, boolean download,
-        Headers headers) {
-        this.id           = id;
+                    int height, int width, boolean lazy, boolean loading, boolean success, boolean download,
+                    Headers headers) {
+        this.id = id;
         this.comicChapter = comicChapter;
-        this.num          = num;
-        this.urls         = Arrays.asList(urls);
-        this.chapter      = chapter;
-        this.state        = state;
-        this.height       = height;
-        this.width        = width;
-        this.lazy         = lazy;
-        this.loading      = loading;
-        this.success      = success;
-        this.download     = download;
-        this.headers      = headers;
+        this.num = num;
+        this.urls = Arrays.asList(urls);
+        this.chapter = chapter;
+        this.state = state;
+        this.height = height;
+        this.width = width;
+        this.lazy = lazy;
+        this.loading = loading;
+        this.success = success;
+        this.download = download;
+        this.headers = headers;
     }
 
-    public ImageUrl() {}
+    public ImageUrl() {
+    }
 
     public long getId() {
         return id;

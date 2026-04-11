@@ -101,7 +101,7 @@ public class GFMH extends MangaParser {
         for (Node chapterNode : chapterNodes) {
             String title = chapterNode.text();
             String path = chapterNode.href().split("/")[2].replace(".html", "");
-            list.add(new Chapter(Long.parseLong(sourceComic + "0" + i++), sourceComic, title, path));
+            list.add(new Chapter(IdCreator.createChapterId(sourceComic, i++), sourceComic, title, path));
         }
 
         return list;
