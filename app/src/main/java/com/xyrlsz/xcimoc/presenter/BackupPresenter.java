@@ -123,7 +123,7 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                     public Integer call(List<Comic> list) {
                         return Backup.saveComic(mContentResolver, root, list);
                     }
-                })
+                }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<Integer>() {
                     @Override
