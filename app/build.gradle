@@ -4,12 +4,10 @@ apply plugin: 'io.objectbox'
 
 def getGitTagName = { ->
     try {
-        def stdout = new ByteArrayOutputStream()
-        exec {
-            commandLine 'git', 'describe', '--tags'
-            standardOutput = stdout
-        }
-        return stdout.toString().trim()
+        def process = 'git describe --tags'.execute()
+        process.waitFor()
+        def output = process.text.trim()
+        return output ? output : "v1.0.0"
     } catch (Exception ignored) {
         return "v1.0.0"
     }
@@ -17,12 +15,11 @@ def getGitTagName = { ->
 
 def getGitCommitCount = { ->
     try {
-        def stdout = new ByteArrayOutputStream()
-        exec {
-            commandLine 'git', 'rev-list', '--count', 'HEAD'
-            standardOutput = stdout
-        }
-        return stdout.toString().trim().toInteger()
+        // 使用 Groovy 原生的 execute() 方法
+        def process = 'git rev-list --count HEAD'.execute()
+        process.waitFor()
+        def output = process.text.trim()
+        return output ? output.toInteger() : 1
     } catch (Exception ignored) {
         return 1 // 默认提交计数
     }
