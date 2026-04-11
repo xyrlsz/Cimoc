@@ -36,6 +36,8 @@ public class WebParser {
     private int sameCount = 0;
     private int scrollCount = 0;
 
+    private int errTimes = 0;
+
     public WebParser(Context context, String url, Headers headers) {
         this(context, url, headers, "");
     }
@@ -139,13 +141,12 @@ public class WebParser {
                 if (value == null)
                     return;
 
-                // 解析 JS 返回的数据
                 String[] parts = value.replace("\"", "").split(",");
-                int currentScrollHeight = Integer.parseInt(parts[0]);
-                int clientHeight = Integer.parseInt(parts[1]);
-                int currentScrollTop = Integer.parseInt(parts[2]);
+                double currentScrollHeight = Double.parseDouble(parts[0]);
+                double clientHeight = Double.parseDouble(parts[1]);
+                double currentScrollTop = Double.parseDouble(parts[2]);
 
-                int distanceToBottom = currentScrollHeight - (currentScrollTop + clientHeight);
+                double distanceToBottom = currentScrollHeight - (currentScrollTop + clientHeight);
 
                 // 1. 如果剩余距离已经很小（例如小于 100px），说明到底了，直接结束
                 if (distanceToBottom <= 100) {
@@ -158,7 +159,7 @@ public class WebParser {
                     sameCount++;
                 } else {
                     sameCount = 0;
-                    lastHeight = currentScrollHeight;
+                    lastHeight = (int) currentScrollHeight;
                 }
 
                 scrollCount++;
@@ -173,7 +174,13 @@ public class WebParser {
                 new Handler(Looper.getMainLooper()).postDelayed(this::autoScroll, nextDelay);
 
             } catch (Exception ignored) {
-                new Handler(Looper.getMainLooper()).postDelayed(this::autoScroll, SCROLL_DELAY);
+                if (errTimes <= 5) {
+                    new Handler(Looper.getMainLooper()).postDelayed(this::autoScroll, SCROLL_DELAY);
+                    errTimes++;
+                } else {
+                    latch.countDown();
+                    htmlStr = null;
+                }
             }
         });
     }
