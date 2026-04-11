@@ -88,8 +88,7 @@ public class ChapterManager {
 
     public void update(Chapter chapter) {
         if (chapter.getId() != 0) {
-            long res = mChapterBox.put(chapter);
-            System.out.println("update:" + res);
+            mChapterBox.put(chapter);
         }
     }
 
@@ -103,10 +102,5 @@ public class ChapterManager {
         if (!chapters.isEmpty()) {
             mChapterBox.remove(chapters);
         }
-    }
-
-    public void insert(Chapter chapter) {
-        long id = mChapterBox.put(chapter);
-        chapter.setId(id);
     }
 }

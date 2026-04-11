@@ -1,9 +1,14 @@
 package com.xyrlsz.xcimoc.model;
 
+import android.util.Pair;
+
+import io.objectbox.annotation.Convert;
 import io.objectbox.annotation.Entity;
 import io.objectbox.annotation.Id;
 import io.objectbox.annotation.Index;
 import io.objectbox.annotation.Transient;
+import io.objectbox.annotation.Unique;
+import io.objectbox.converter.PropertyConverter;
 
 /**
  * Created by Hiroshi on 2016/7/20.
@@ -14,6 +19,9 @@ public class Comic {
     public Object note;
     @Id(assignable = true)
     private long id;
+    @Convert(dbType = String.class, converter = SourceCidConverter.class)
+    @Unique
+    private Pair<Integer, String> sourceCid;
     @Index
     private int source;
     private String cid;
@@ -81,6 +89,7 @@ public class Comic {
         this.chapterCount = chapterCount;
         this.intro = intro;
         this.author = author;
+        this.sourceCid = new Pair<>(source, cid);
     }
 
     public Comic() {
@@ -265,5 +274,34 @@ public class Comic {
 
     public void setChapterCount(Integer count) {
         this.chapterCount = count;
+    }
+
+    public Pair<Integer, String> getSourceCid() {
+        return this.sourceCid;
+    }
+
+    public void setSourceCid(Pair<Integer, String> sourceCid) {
+        this.sourceCid = sourceCid;
+    }
+
+    public static class SourceCidConverter implements PropertyConverter<Pair<Integer, String>, String> {
+        private static final String SPLIT = "##XCimoc:SourceCid##";
+
+        @Override
+        public Pair<Integer, String> convertToEntityProperty(String databaseValue) {
+            if (databaseValue == null) {
+                return null;
+            }
+            String[] split = databaseValue.split(SPLIT);
+            return new Pair<>(Integer.parseInt(split[0]), split[1]);
+        }
+
+        @Override
+        public String convertToDatabaseValue(Pair<Integer, String> entityProperty) {
+            if (entityProperty == null) {
+                return null;
+            }
+            return entityProperty.first + SPLIT + entityProperty.second;
+        }
     }
 }

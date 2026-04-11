@@ -81,11 +81,6 @@ public class ImageUrlManager {
     }
 
 
-    // 8. 修改：单独的 update
-    public void update(ImageUrl imageurl) {
-        mImageUrlBox.put(imageurl);
-    }
-
     // 9. 修改：删除单个
     public void deleteByKey(long key) {
         mImageUrlBox.remove(key);
@@ -104,9 +99,4 @@ public class ImageUrlManager {
         }
     }
 
-    // 11. 修改：插入
-    public void insert(ImageUrl imageurl) {
-        long id = mImageUrlBox.put(imageurl);
-        imageurl.setId(id);
-    }
 }

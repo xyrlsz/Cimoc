@@ -236,7 +236,7 @@ public class ImageUrl {
     }
 
     public static class StringConverter implements PropertyConverter<List<String>, String> {
-        private static final String SPLIT = "##Cimoc##";
+        private static final String SPLIT = "##XCimoc:ImageUrl##";
 
         @Override
         public List<String> convertToEntityProperty(String databaseValue) {

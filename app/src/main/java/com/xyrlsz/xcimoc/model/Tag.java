@@ -2,6 +2,7 @@ package com.xyrlsz.xcimoc.model;
 
 import io.objectbox.annotation.Entity;
 import io.objectbox.annotation.Id;
+import io.objectbox.annotation.Unique;
 
 /**
  * Created by Hiroshi on 2016/10/10.
@@ -10,6 +11,7 @@ import io.objectbox.annotation.Id;
 public class Tag {
     @Id(assignable = true)
     private long id;
+    @Unique
     private String title;
 
     public Tag(long id, String title) {

@@ -1,11 +1,12 @@
 package com.xyrlsz.xcimoc.manager;
 
+import android.util.Pair;
+
 import com.xyrlsz.xcimoc.component.AppGetter;
 import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.Comic_;
 import com.xyrlsz.xcimoc.model.TagRef;
 import com.xyrlsz.xcimoc.model.TagRef_;
-import com.xyrlsz.xcimoc.utils.ThreadRunUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,6 +15,7 @@ import java.util.concurrent.Callable;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
+import io.objectbox.exception.UniqueViolationException;
 import io.objectbox.query.QueryBuilder;
 import rx.Observable;
 
@@ -38,10 +40,6 @@ public class ComicManager {
             synchronized (ComicManager.class) {
                 if (mInstance == null) {
                     mInstance = new ComicManager(getter);
-                    ThreadRunUtils.runOnIOThread(() -> {
-                        // 清理脏数据以免闪退
-                        mInstance.cleanDuplicateCids();
-                    });
                 }
             }
         }
@@ -184,8 +182,9 @@ public class ComicManager {
     }
 
     public Comic load(int source, String cid) {
+        String key = new Comic.SourceCidConverter().convertToDatabaseValue(new Pair<>(source, cid));
         List<Comic> list =
-                mComicBox.query(Comic_.cid.equal(cid)).equal(Comic_.source, source).build().find();
+                mComicBox.query(Comic_.sourceCid.equal(key)).build().find();
         return list.isEmpty() ? null : list.get(0);
     }
 
@@ -213,31 +212,22 @@ public class ComicManager {
     }
 
     public void updateOrInsert(Comic comic) {
-        long id = comic.getId();
-
-        if (id <= 0) {
-            Comic existing = load(comic.getSource(), comic.getCid());
-            id = (existing != null) ? existing.getId() : 0;
-        }
-
-        comic.setId(id);
-
-        mComicBox.put(comic);
-    }
-
-    public void cleanDuplicateCids() {
         runInTx(() -> {
+            Comic existing = load(comic.getSource(), comic.getCid());
+
+            if (existing != null) {
+                comic.setId(existing.getId());
+            }
             try {
-                // 这里简化处理，实际项目中可能需要更复杂的去重逻辑
-                android.util.Log.d("ComicManager", "重复数据清洗完成");
-            } catch (Exception e) {
-                android.util.Log.e("ComicManager", "清洗重复数据失败", e);
+                mComicBox.put(comic);
+            } catch (UniqueViolationException ignored) {
+
             }
         });
     }
 
     public void update(Comic comic) {
-        mComicBox.put(comic);
+        updateOrInsert(comic);
     }
 
     public void delete(Comic comic) {
@@ -261,7 +251,6 @@ public class ComicManager {
     }
 
     public void insert(Comic comic) {
-        long id = mComicBox.put(comic);
-        comic.setId(id);
+        updateOrInsert(comic);
     }
 }
