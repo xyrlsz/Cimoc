@@ -1,7 +1,5 @@
 package com.xyrlsz.xcimoc.manager;
 
-import android.util.Pair;
-
 import com.xyrlsz.xcimoc.component.AppGetter;
 import com.xyrlsz.xcimoc.model.Comic;
 import com.xyrlsz.xcimoc.model.Comic_;
@@ -182,9 +180,11 @@ public class ComicManager {
     }
 
     public Comic load(int source, String cid) {
-        String key = new Comic.SourceCidConverter().convertToDatabaseValue(new Pair<>(source, cid));
         List<Comic> list =
-                mComicBox.query(Comic_.sourceCid.equal(key)).build().find();
+                mComicBox.query(Comic_.cid.equal(cid)).equal(Comic_.source, source)
+                        .order(Comic_.id)
+                        .build()
+                        .find();
         return list.isEmpty() ? null : list.get(0);
     }
 
@@ -220,8 +220,8 @@ public class ComicManager {
             }
             try {
                 mComicBox.put(comic);
-            } catch (UniqueViolationException ignored) {
-
+            } catch (UniqueViolationException e) {
+                throw new RuntimeException(e);
             }
         });
     }
