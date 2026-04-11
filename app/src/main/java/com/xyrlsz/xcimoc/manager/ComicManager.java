@@ -57,7 +57,7 @@ public class ComicManager {
     }
 
     public List<Comic> listDownload() {
-        return mComicBox.query().equal(Comic_.download, true).build().find();
+        return mComicBox.query().notNull(Comic_.download).build().find();
     }
 
     public List<Comic> listLocal() {
@@ -70,10 +70,8 @@ public class ComicManager {
 
     public Observable<List<Comic>> listFavoriteOrHistoryInRx() {
         return Observable.fromCallable(() -> {
-            QueryBuilder<Comic> queryBuilder = mComicBox.query(
-                    Comic_.favorite.notNull()
-                            .or(Comic_.history.notNull())
-            );
+            QueryBuilder<Comic> queryBuilder =
+                    mComicBox.query(Comic_.favorite.notNull().or(Comic_.history.notNull()));
             return queryBuilder.build().find();
         });
     }
@@ -83,7 +81,8 @@ public class ComicManager {
     }
 
     public Observable<List<Comic>> listFavoriteInRx() {
-        return Observable.fromCallable(() -> mComicBox.query(Comic_.favorite.notNull())
+        return Observable.fromCallable(()
+                -> mComicBox.query(Comic_.favorite.notNull())
                 .orderDesc(Comic_.highlight)
                 .orderDesc(Comic_.favorite)
                 .build()
@@ -102,7 +101,8 @@ public class ComicManager {
     }
 
     public Observable<List<Comic>> listContinueInRx() {
-        return Observable.fromCallable(() -> mComicBox.query(Comic_.favorite.notNull())
+        return Observable.fromCallable(()
+                -> mComicBox.query(Comic_.favorite.notNull())
                 .notEqual(Comic_.finish, true)
                 .orderDesc(Comic_.highlight)
                 .orderDesc(Comic_.favorite)
@@ -111,7 +111,8 @@ public class ComicManager {
     }
 
     public Observable<List<Comic>> listHistoryInRx() {
-        return Observable.fromCallable(() -> mComicBox.query(Comic_.history.notNull())
+        return Observable.fromCallable(()
+                -> mComicBox.query(Comic_.history.notNull())
                 .orderDesc(Comic_.history)
                 .build()
                 .find());
@@ -120,7 +121,7 @@ public class ComicManager {
     public Observable<List<Comic>> listDownloadInRx() {
         return Observable.fromCallable(() -> {
             return mComicBox.query()
-                    .equal(Comic_.download, true)
+                    .notNull(Comic_.download)
                     .orderDesc(Comic_.download)
                     .build()
                     .find();
@@ -183,10 +184,8 @@ public class ComicManager {
     }
 
     public Comic load(int source, String cid) {
-        List<Comic> list = mComicBox.query(Comic_.cid.equal(cid))
-                .equal(Comic_.source, source)
-                .build()
-                .find();
+        List<Comic> list =
+                mComicBox.query(Comic_.cid.equal(cid)).equal(Comic_.source, source).build().find();
         return list.isEmpty() ? null : list.get(0);
     }
 
@@ -197,10 +196,8 @@ public class ComicManager {
 
     public Observable<Comic> loadLast() {
         return Observable.fromCallable(() -> {
-            List<Comic> list = mComicBox.query(Comic_.history.notNull())
-                    .orderDesc(Comic_.history)
-                    .build()
-                    .find();
+            List<Comic> list =
+                    mComicBox.query(Comic_.history.notNull()).orderDesc(Comic_.history).build().find();
             return list.isEmpty() ? null : list.get(0);
         });
     }
@@ -216,7 +213,6 @@ public class ComicManager {
     }
 
     public void updateOrInsert(Comic comic) {
-
         long id = comic.getId();
 
         if (id <= 0) {
@@ -243,8 +239,6 @@ public class ComicManager {
     public void update(Comic comic) {
         mComicBox.put(comic);
     }
-
-
 
     public void delete(Comic comic) {
         mComicBox.remove(comic);

@@ -20,7 +20,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -28,12 +27,12 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
+
 /**
  * Created by Hiroshi on 2017/5/14.
  */
 
 public class LocalPresenter extends BasePresenter<LocalView> {
-
     private ComicManager mComicManager;
     private TaskManager mTaskManager;
 
@@ -50,24 +49,11 @@ public class LocalPresenter extends BasePresenter<LocalView> {
 
     public void load() {
         mCompositeSubscription.add(mComicManager.listLocalInRx()
-                .compose(new ToAnotherList<>(new Func1<Comic, Object>() {
-                    @Override
-                    public MiniComic call(Comic comic) {
-                        return new MiniComic(comic);
-                    }
-                }))
+                .compose(new ToAnotherList<>((Func1<Comic, Object>) comic -> new MiniComic(comic)))
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<Object>>() {
-                    @Override
-                    public void call(List<Object> list) {
-                        mBaseView.onComicLoadSuccess(list);
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        mBaseView.onComicLoadFail();
-                    }
-                }));
+                .subscribe(
+                        list -> mBaseView.onComicLoadSuccess(list),
+                        throwable -> mBaseView.onComicLoadFail()));
     }
 
     private Pair<Map<String, Comic>, Set<String>> buildHash() {
@@ -124,20 +110,21 @@ public class LocalPresenter extends BasePresenter<LocalView> {
                 .map(this::processScanResult)
                 .compose(new ToAnotherList<>((Func1<Comic, Object>) MiniComic::new))
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(list -> mBaseView.onLocalScanSuccess(list), throwable -> mBaseView.onExecuteFail()));
+                .subscribe(list
+                                -> mBaseView.onLocalScanSuccess(list),
+                        throwable -> mBaseView.onExecuteFail()));
     }
 
     public void deleteComic(long id) {
         mCompositeSubscription.add(Observable.just(id)
-                .doOnNext(id1 -> mComicManager.runInTx(new Runnable() {
-                    @Override
-                    public void run() {
-                        mTaskManager.deleteByComicId(id1);
-                        mComicManager.deleteByKey(id1);
-                    }
-                })).subscribeOn(Schedulers.io())
+                .doOnNext(id1 -> mComicManager.runInTx(() -> {
+                    mTaskManager.deleteByComicId(id1);
+                    mComicManager.deleteByKey(id1);
+                }))
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(id2 -> mBaseView.onLocalDeleteSuccess(id2), throwable -> mBaseView.onExecuteFail()));
+                .subscribe(id2
+                                -> mBaseView.onLocalDeleteSuccess(id2),
+                        throwable -> mBaseView.onExecuteFail()));
     }
-
 }
