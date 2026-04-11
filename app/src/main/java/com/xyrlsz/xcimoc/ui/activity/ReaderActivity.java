@@ -375,7 +375,8 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
     @Override
     public void onPicturePaging(ImageUrl image) {
         int pos = mReaderAdapter.getPositionById(image.getId());
-        mReaderAdapter.add(pos + 1, new ImageUrl(image.getId() + 900, image.getComicChapter(), image.getNum(), image.getUrls(),
+        String[] urls = image.getUrls().toArray(new String[0]);
+        mReaderAdapter.add(pos + 1, new ImageUrl(image.getId() + 900, image.getComicChapter(), image.getNum(), urls,
                 image.getChapter(), ImageUrl.STATE_PAGE_2, false));
     }
 
@@ -702,7 +703,7 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
             position = mLayoutManager.findFirstVisibleItemPosition();
         }
         ImageUrl imageUrl = mReaderAdapter.getItem(position);
-        String[] urls = imageUrl.getUrls();
+        String[] urls = imageUrl.getUrls().toArray(new String[0]);
         try {
             String title = mChapterTitle.getText().toString();
             for (String url : urls) {

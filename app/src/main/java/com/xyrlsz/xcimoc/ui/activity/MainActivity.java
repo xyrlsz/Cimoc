@@ -63,6 +63,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 import okhttp3.Request;
 import okhttp3.Response;
 
@@ -170,6 +171,16 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
 
 
     private void initDrawerToggle() {
+        android.util.Log.d("MainActivity", "mDrawerLayout = " + mDrawerLayout);
+        android.util.Log.d("MainActivity", "mToolbar = " + mToolbar);
+        if (mDrawerLayout == null) {
+            // 如果 DrawerLayout 还是 null，尝试重新绑定
+            ButterKnife.bind(this);
+            if (mDrawerLayout == null) {
+                return; // 或者抛出更明确的错误
+            }
+        }
+
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, 0, 0) {
             @Override
             public void onDrawerClosed(View drawerView) {

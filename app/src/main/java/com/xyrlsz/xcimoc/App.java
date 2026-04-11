@@ -13,26 +13,22 @@ import android.os.Build;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.WindowManager;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.multidex.MultiDex;
 import androidx.multidex.MultiDexApplication;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.xyrlsz.opencc.android.lib.ChineseConverter;
 import com.xyrlsz.xcimoc.component.AppGetter;
 import com.xyrlsz.xcimoc.core.DisabledOkHttpClient;
 import com.xyrlsz.xcimoc.core.Storage;
 import com.xyrlsz.xcimoc.core.WebDavConf;
 import com.xyrlsz.xcimoc.fresco.ControllerBuilderProvider;
-import com.xyrlsz.xcimoc.helper.DBOpenHelper;
 import com.xyrlsz.xcimoc.helper.UpdateHelper;
 import com.xyrlsz.xcimoc.manager.PreferenceManager;
 import com.xyrlsz.xcimoc.manager.SourceManager;
 import com.xyrlsz.xcimoc.misc.ActivityLifecycle;
-import com.xyrlsz.xcimoc.model.DaoMaster;
-import com.xyrlsz.xcimoc.model.DaoSession;
+import com.xyrlsz.xcimoc.model.MyObjectBox;
 import com.xyrlsz.xcimoc.saf.CimocDocumentFile;
 import com.xyrlsz.xcimoc.ui.activity.MainActivity;
 import com.xyrlsz.xcimoc.ui.adapter.GridAdapter;
@@ -44,11 +40,8 @@ import com.xyrlsz.xcimoc.utils.StringUtils;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
 import com.xyrlsz.xcimoc.utils.TrustAllSslUtils;
 import com.xyrlsz.xcimoc.utils.ZaiManhuaSignUtils;
-
-import org.greenrobot.greendao.identityscope.IdentityScopeType;
-
+import io.objectbox.BoxStore;
 import java.util.Objects;
-
 import okhttp3.Headers;
 import okhttp3.OkHttpClient;
 
@@ -56,8 +49,6 @@ import okhttp3.OkHttpClient;
  * Created by Hiroshi on 2016/7/5.
  */
 public class App extends MultiDexApplication implements AppGetter, Thread.UncaughtExceptionHandler {
-
-
     public static int mWidthPixels;
     public static int mHeightPixels;
     public static int mCoverWidthPixels;
@@ -70,11 +61,11 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
     private static Headers mHeaders;
     // 默认Github源
     private static String UPDATE_CURRENT_URL = Constants.UPDATE_GITHUB_URL;
-    private static boolean isNormalExited = false;
+    private static boolean isNormalExited    = false;
     private CimocDocumentFile mCimocDocumentFile;
     private ControllerBuilderProvider mBuilderProvider;
     private RecyclerView.RecycledViewPool mRecycledPool;
-    private DaoSession mDaoSession;
+    private BoxStore mBoxStore;
     private ActivityLifecycle mActivityLifecycle;
 
     public static Context getAppContext() {
@@ -88,7 +79,6 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
     public static Resources getAppResources() {
         return mApp.getResources();
     }
-
 
     public static WifiManager getManager_wifi() {
         return manager_wifi;
@@ -107,26 +97,26 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
     }
 
     public static OkHttpClient getHttpClient() {
-
         // 仅WiFi联网
-        boolean onlyWifi = mPreferenceManager.getBoolean(PreferenceManager.PREF_OTHER_CONNECT_ONLY_WIFI, false);
+        boolean onlyWifi =
+            mPreferenceManager.getBoolean(PreferenceManager.PREF_OTHER_CONNECT_ONLY_WIFI, false);
         if (!manager_wifi.isWifiEnabled() && onlyWifi) {
             return new DisabledOkHttpClient();
         }
         if (mHttpClient == null || mHttpClient.getClass() == DisabledOkHttpClient.class) {
             // 3.OkHttp访问https的Client实例
-            mHttpClient = new OkHttpClient().newBuilder()
-                    .sslSocketFactory(createSSLSocketFactory(), getTrustAllCerts())
-                    .hostnameVerifier(new TrustAllSslUtils.TrustAllHostnameVerifier())
-                    .followRedirects(true)
-                    .followSslRedirects(true)
-                    .retryOnConnectionFailure(true)
-                    .build();
+            mHttpClient = new OkHttpClient()
+                              .newBuilder()
+                              .sslSocketFactory(createSSLSocketFactory(), getTrustAllCerts())
+                              .hostnameVerifier(new TrustAllSslUtils.TrustAllHostnameVerifier())
+                              .followRedirects(true)
+                              .followSslRedirects(true)
+                              .retryOnConnectionFailure(true)
+                              .build();
         }
 
         return mHttpClient;
     }
-
 
     public static void goActivity(Class<?> cls) {
         Intent intent = new Intent(mApp.getApplicationContext(), cls);
@@ -136,7 +126,7 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
 
     public static void restartApp() {
         Context context = getAppContext();
-        Intent intent = new Intent(context, MainActivity.class);
+        Intent intent   = new Intent(context, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
         if (context instanceof Activity) {
@@ -176,29 +166,34 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
     @Override
     public void onCreate() {
         super.onCreate();
-        //initXCrash();
+        // initXCrash();
         Thread.setDefaultUncaughtExceptionHandler(this);
         mActivityLifecycle = new ActivityLifecycle();
         registerActivityLifecycleCallbacks(mActivityLifecycle);
         mPreferenceManager = new PreferenceManager(this);
-        DBOpenHelper helper = new DBOpenHelper(this, "cimoc.db");
-        mDaoSession = new DaoMaster(helper.getWritableDatabase()).newSession(IdentityScopeType.None);
-        UpdateHelper.update(mPreferenceManager, mDaoSession, getApplicationContext());
+
+        // 初始化ObjectBox
+        mBoxStore = MyObjectBox.builder().androidContext(this).build();
+
+        UpdateHelper.update(mPreferenceManager, mBoxStore, getApplicationContext());
         initPixels();
 
         manager_wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        //获取栈顶Activity以及当前App上下文
+        // 获取栈顶Activity以及当前App上下文
         mApp = this;
 
         // 检测并且关闭TestMode
         SharedPreferences testShared = getSharedPreferences(Constants.APP_SHARED, MODE_PRIVATE);
-        boolean isTestMode = testShared.getBoolean(Constants.APP_SHARED_TEST_MODE, false);
+        boolean isTestMode           = testShared.getBoolean(Constants.APP_SHARED_TEST_MODE, false);
         if (isTestMode) {
             testShared.edit().putBoolean(Constants.APP_SHARED_TEST_MODE, false).apply();
         }
 
         // 深色模式设置
-        int darkMode = mPreferenceManager.getNumber(PreferenceManager.PREF_OTHER_DARK_MOD, PreferenceManager.DARK_MODE_FALLOW_SYSTEM).intValue();
+        int darkMode = mPreferenceManager
+                           .getNumber(PreferenceManager.PREF_OTHER_DARK_MOD,
+                               PreferenceManager.DARK_MODE_FALLOW_SYSTEM)
+                           .intValue();
         switch (darkMode) {
             case PreferenceManager.DARK_MODE_FALLOW_SYSTEM:
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
@@ -222,11 +217,12 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         ChineseConverter.init(getApplicationContext());
 
         // 再漫画检查登录与自动签到
-        SharedPreferences zaiSharedPreferences = getApplicationContext().getSharedPreferences(Constants.ZAI_SHARED, Context.MODE_PRIVATE);
-        long timestamp = System.currentTimeMillis() / 1000;
-        long exp = zaiSharedPreferences.getLong(Constants.ZAI_SHARED_EXP, 0);
-        boolean autoSign = zaiSharedPreferences.getBoolean(Constants.ZAI_SHARED_AUTO_SIGN, false);
-        String username = zaiSharedPreferences.getString(Constants.ZAI_SHARED_USERNAME, "");
+        SharedPreferences zaiSharedPreferences = getApplicationContext().getSharedPreferences(
+            Constants.ZAI_SHARED, Context.MODE_PRIVATE);
+        long timestamp     = System.currentTimeMillis() / 1000;
+        long exp           = zaiSharedPreferences.getLong(Constants.ZAI_SHARED_EXP, 0);
+        boolean autoSign   = zaiSharedPreferences.getBoolean(Constants.ZAI_SHARED_AUTO_SIGN, false);
+        String username    = zaiSharedPreferences.getString(Constants.ZAI_SHARED_USERNAME, "");
         String passwordMd5 = zaiSharedPreferences.getString(Constants.ZAI_SHARED_PASSWD_MD5, "");
         if (timestamp > exp) {
             ZaiManhuaSignUtils.Login(this, new ZaiManhuaSignUtils.LoginCallback() {
@@ -261,43 +257,43 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
             KomiicUtils.refresh(this);
         }
 
-//        this.registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
-//            @Override
-//            public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-////                Log.d("ActivityLifecycle:",activity+"onActivityCreated");
-//            }
-//
-//            @Override
-//            public void onActivityStarted(Activity activity) {
-////                Log.d("ActivityLifecycle:",activity+"onActivityStarted");
-////
-//            }
-//
-//            @Override
-//            public void onActivityResumed(Activity activity) {
-//
-//            }
-//
-//            @Override
-//            public void onActivityPaused(Activity activity) {
-//
-//            }
-//
-//            @Override
-//            public void onActivityStopped(Activity activity) {
-//
-//            }
-//
-//            @Override
-//            public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-//
-//            }
-//
-//            @Override
-//            public void onActivityDestroyed(Activity activity) {
-//
-//            }
-//        });
+        //        this.registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
+        //            @Override
+        //            public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+        ////                Log.d("ActivityLifecycle:",activity+"onActivityCreated");
+        //            }
+        //
+        //            @Override
+        //            public void onActivityStarted(Activity activity) {
+        ////                Log.d("ActivityLifecycle:",activity+"onActivityStarted");
+        ////
+        //            }
+        //
+        //            @Override
+        //            public void onActivityResumed(Activity activity) {
+        //
+        //            }
+        //
+        //            @Override
+        //            public void onActivityPaused(Activity activity) {
+        //
+        //            }
+        //
+        //            @Override
+        //            public void onActivityStopped(Activity activity) {
+        //
+        //            }
+        //
+        //            @Override
+        //            public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
+        //
+        //            }
+        //
+        //            @Override
+        //            public void onActivityDestroyed(Activity activity) {
+        //
+        //            }
+        //        });
         FrescoUtils.init(this, 512);
     }
 
@@ -313,10 +309,12 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
             sb.append(element.toString());
         }
         try {
-            CimocDocumentFile doc = getDocumentFile();
-            CimocDocumentFile dir = DocumentUtils.getOrCreateSubDirectory(doc, "log");
-            CimocDocumentFile file = DocumentUtils.getOrCreateFile(Objects.requireNonNull(dir), StringUtils.getDateStringWithSuffix("log"));
-            DocumentUtils.writeStringToFile(getContentResolver(), Objects.requireNonNull(file), sb.toString());
+            CimocDocumentFile doc  = getDocumentFile();
+            CimocDocumentFile dir  = DocumentUtils.getOrCreateSubDirectory(doc, "log");
+            CimocDocumentFile file = DocumentUtils.getOrCreateFile(
+                Objects.requireNonNull(dir), StringUtils.getDateStringWithSuffix("log"));
+            DocumentUtils.writeStringToFile(
+                getContentResolver(), Objects.requireNonNull(file), sb.toString());
         } catch (Exception ex) {
             Log.e("UncaughtException", "Error while saving crash log", ex);
         }
@@ -332,15 +330,15 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
     private void initPixels() {
         DisplayMetrics metrics = new DisplayMetrics();
         ((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay().getMetrics(metrics);
-        mWidthPixels = metrics.widthPixels;
-        mHeightPixels = metrics.heightPixels;
-        mCoverWidthPixels = mWidthPixels / 3;
+        mWidthPixels       = metrics.widthPixels;
+        mHeightPixels      = metrics.heightPixels;
+        mCoverWidthPixels  = mWidthPixels / 3;
         mCoverHeightPixels = mHeightPixels * mCoverWidthPixels / mWidthPixels;
-        mLargePixels = 3 * metrics.widthPixels * metrics.heightPixels;
+        mLargePixels       = 3 * metrics.widthPixels * metrics.heightPixels;
     }
 
     public void initRootDocumentFile() {
-        String uri = mPreferenceManager.getString(PreferenceManager.PREF_OTHER_STORAGE);
+        String uri         = mPreferenceManager.getString(PreferenceManager.PREF_OTHER_STORAGE);
         mCimocDocumentFile = Storage.initRoot(this, uri);
     }
 
@@ -351,8 +349,8 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         return mCimocDocumentFile;
     }
 
-    public DaoSession getDaoSession() {
-        return mDaoSession;
+    public BoxStore getBoxStore() {
+        return mBoxStore;
     }
 
     public RecyclerView.RecycledViewPool getGridRecycledPool() {
@@ -365,8 +363,8 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
 
     public ControllerBuilderProvider getBuilderProvider() {
         if (mBuilderProvider == null) {
-            mBuilderProvider = new ControllerBuilderProvider(getApplicationContext(),
-                    SourceManager.getInstance(this).new HeaderGetter(), true);
+            mBuilderProvider = new ControllerBuilderProvider(
+                getApplicationContext(), SourceManager.getInstance(this).new HeaderGetter(), true);
         }
         return mBuilderProvider;
     }
@@ -376,5 +374,4 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         super.attachBaseContext(base);
         MultiDex.install(this);
     }
-
 }

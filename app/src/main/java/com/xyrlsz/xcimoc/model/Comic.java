@@ -1,10 +1,9 @@
 package com.xyrlsz.xcimoc.model;
 
-import org.greenrobot.greendao.annotation.Entity;
-import org.greenrobot.greendao.annotation.Generated;
-import org.greenrobot.greendao.annotation.Id;
-import org.greenrobot.greendao.annotation.NotNull;
-import org.greenrobot.greendao.annotation.Transient;
+import io.objectbox.annotation.Entity;
+import io.objectbox.annotation.Id;
+import io.objectbox.annotation.Index;
+import io.objectbox.annotation.Transient;
 
 /**
  * Created by Hiroshi on 2016/7/20.
@@ -13,19 +12,14 @@ import org.greenrobot.greendao.annotation.Transient;
 public class Comic {
     @Transient
     public Object note;
-    @Id(autoincrement = true)
-    private Long id;
-    @NotNull
+    @Id
+    private long id;
+    @Index
     private int source;
-    @NotNull
     private String cid;
-    @NotNull
     private String title;
-    @NotNull
     private String cover;
-    @NotNull
     private boolean highlight;
-    @NotNull
     private boolean local;
     private String update;
     private Boolean finish;
@@ -41,8 +35,8 @@ public class Comic {
     private String author;
 
     public Comic(int source, String cid, String title, String cover, String update, String author) {
-        this(null, source, cid, title, cover == null ? "" : cover, false, false, update,
-                null, null, null, null, null, null, null, null, 0, null, null);
+        this(0, source, cid, title, cover == null ? "" : cover, false, false, update, null, null,
+                null, null, null, null, null, null, 0, null, null);
         this.author = author;
     }
 
@@ -52,14 +46,22 @@ public class Comic {
     }
 
     public Comic(int source, String cid, String title, String cover, long download) {
-        this(null, source, cid, title, cover == null ? "" : cover, false, false, null,
-                null, null, null, download, null, null, null, null, 0, null, null);
+        this(0, source, cid, title, cover == null ? "" : cover, false, false, null, null, null,
+                null, download, null, null, null, null, 0, null, null);
     }
 
-    @Generated(hash = 1294342162)
-    public Comic(Long id, int source, @NotNull String cid, @NotNull String title, @NotNull String cover, boolean highlight,
-                 boolean local, String update, Boolean finish, Long favorite, Long history, Long download, String last, Integer page,
-                 String chapter, String url, Integer chapterCount, String intro, String author) {
+    public Comic(Long id, int source, String cid, String title, String cover, boolean highlight,
+                 boolean local, String update, Boolean finish, Long favorite, Long history, Long download,
+                 String last, Integer page, String chapter, String url, Integer chapterCount, String intro,
+                 String author) {
+        this(id == null ? 0 : id, source, cid, title, cover, highlight, local, update, finish, favorite, history, download, last, page, chapter, url, chapterCount, intro, author);
+
+    }
+
+    public Comic(long id, int source, String cid, String title, String cover, boolean highlight,
+                 boolean local, String update, Boolean finish, Long favorite, Long history, Long download,
+                 String last, Integer page, String chapter, String url, Integer chapterCount, String intro,
+                 String author) {
         this.id = id;
         this.source = source;
         this.cid = cid;
@@ -81,20 +83,21 @@ public class Comic {
         this.author = author;
     }
 
-    @Generated(hash = 1347984162)
     public Comic() {
     }
 
     public void copyFrom(Comic comic) {
-        this.setInfo(comic.getTitle(), comic.getCover(), comic.getUpdate(), comic.getIntro(), comic.getAuthor(), comic.getFinish());
+        this.setInfo(comic.getTitle(), comic.getCover(), comic.getUpdate(), comic.getIntro(),
+                comic.getAuthor(), comic.getFinish());
     }
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof Comic && ((Comic) o).id.equals(id);
+        return o instanceof Comic && ((Comic) o).id == (id);
     }
 
-    public void setInfo(String title, String cover, String update, String intro, String author, boolean finish) {
+    public void setInfo(
+            String title, String cover, String update, String intro, String author, boolean finish) {
         if (title != null) {
             this.title = title;
         }
@@ -200,11 +203,11 @@ public class Comic {
         this.source = source;
     }
 
-    public Long getId() {
+    public long getId() {
         return this.id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -263,5 +266,4 @@ public class Comic {
     public void setChapterCount(Integer count) {
         this.chapterCount = count;
     }
-
 }

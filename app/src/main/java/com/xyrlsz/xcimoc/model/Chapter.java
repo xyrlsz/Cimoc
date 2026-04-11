@@ -5,10 +5,9 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
-import org.greenrobot.greendao.annotation.Entity;
-import org.greenrobot.greendao.annotation.Id;
-import org.greenrobot.greendao.annotation.NotNull;
-import org.greenrobot.greendao.annotation.Generated;
+import io.objectbox.annotation.Entity;
+import io.objectbox.annotation.Id;
+import io.objectbox.annotation.Index;
 
 /**
  * Created by Hiroshi on 2016/7/2.
@@ -17,7 +16,6 @@ import org.greenrobot.greendao.annotation.Generated;
  */
 @Entity
 public class Chapter implements Parcelable {
-
     public final static Parcelable.Creator<Chapter> CREATOR = new Parcelable.Creator<Chapter>() {
         @Override
         public Chapter createFromParcel(Parcel source) {
@@ -29,10 +27,10 @@ public class Chapter implements Parcelable {
             return new Chapter[size];
         }
     };
-    @Id(autoincrement = true)
-    private Long id;
-    @NotNull
-    private Long sourceComic;
+    @Id
+    private long id;
+    @Index
+    private long sourceComic;
     private String title;
     private String path;
     private int count;
@@ -41,17 +39,28 @@ public class Chapter implements Parcelable {
     private long tid;
     private String sourceGroup;
 
-    public Chapter(Long id, Long sourceComic, String title, String path, long tid) {
+    public Chapter(long id, long sourceComic, String title, String path, long tid) {
         this(id, sourceComic, title, path, 0, false, false, tid, "");
     }
 
-    public Chapter(Long id, Long sourceComic, String title, String path, String sourceGroup) {
-        this(id, sourceComic, title, path, 0, false, false, -1, sourceGroup);
-
+    public Chapter(Long id, long sourceComic, String title, String path, long tid) {
+        this(id == null ? 0L : id, sourceComic, title, path, 0, false, false, tid, "");
     }
 
-    public Chapter(Long id, Long sourceComic, String title, String path) {
+    public Chapter(long id, long sourceComic, String title, String path, String sourceGroup) {
+        this(id, sourceComic, title, path, 0, false, false, -1, sourceGroup);
+    }
+
+    public Chapter(Long id, long sourceComic, String title, String path, String sourceGroup) {
+        this(id == null ? 0L : id, sourceComic, title, path, 0, false, false, -1, sourceGroup);
+    }
+
+    public Chapter(long id, long sourceComic, String title, String path) {
         this(id, sourceComic, title, path, 0, false, false, -1, "");
+    }
+
+    public Chapter(Long id, long sourceComic, String title, String path) {
+        this(id == null ? 0L : id, sourceComic, title, path, 0, false, false, -1, "");
     }
 
     public Chapter(String title, String path) {
@@ -64,16 +73,18 @@ public class Chapter implements Parcelable {
     }
 
     public Chapter(Parcel source) {
-        this(source.readLong(), source.readLong(), source.readString(), source.readString(), source.readInt(), source.readByte() == 1, source.readByte() == 1, source.readLong(), "");
+        this(source.readLong(), source.readLong(), source.readString(), source.readString(),
+                source.readInt(), source.readByte() == 1, source.readByte() == 1, source.readLong(),
+                "");
     }
 
-    public Chapter(Long id, Long sourceComic, String title, String path, int progress, boolean b, boolean b1, Long id1) {
+    public Chapter(long id, long sourceComic, String title, String path, int progress, boolean b,
+                   boolean b1, long id1) {
         this(id, sourceComic, title, path, progress, b, b1, id1, "");
-
     }
 
-    @Generated(hash = 1726293378)
-    public Chapter(Long id, @NotNull Long sourceComic, String title, String path, int count, boolean complete, boolean download, long tid, String sourceGroup) {
+    public Chapter(long id, long sourceComic, String title, String path, int count,
+                   boolean complete, boolean download, long tid, String sourceGroup) {
         this.id = id;
         this.sourceComic = sourceComic;
         this.title = title;
@@ -85,6 +96,25 @@ public class Chapter implements Parcelable {
         this.sourceGroup = sourceGroup;
     }
 
+    public Chapter() {
+    }
+
+    public Chapter(Long id, Long sourceComic, String title, String path) {
+        this(id == null ? 0L : id, sourceComic == null ? 0L : sourceComic, title, path);
+    }
+
+    public Chapter(long id, Long sourceComic, String title, String path) {
+        this(id, sourceComic == null ? 0L : sourceComic, title, path);
+    }
+
+    public Chapter(Long id, Long sourceComic, String title, String path, String sourceGroup) {
+        this(id, sourceComic == null ? 0L : sourceComic, title, path, sourceGroup);
+    }
+
+    public Chapter(Long id, Long sourceComic, String title, String path, long tid) {
+        this(id, sourceComic == null ? 0L : sourceComic, title, path, tid);
+    }
+
     public String getSourceGroup() {
         return sourceGroup == null ? "" : sourceGroup;
     }
@@ -93,16 +123,20 @@ public class Chapter implements Parcelable {
         this.sourceGroup = sourceGroup;
     }
 
-    @Generated(hash = 393170288)
-    public Chapter() {
-    }
-
     public String getTitle() {
         return title;
     }
 
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     public String getPath() {
         return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 
     public int getCount() {
@@ -117,16 +151,8 @@ public class Chapter implements Parcelable {
         return complete;
     }
 
-    public void setComplete(boolean complete) {
-        this.complete = complete;
-    }
-
     public boolean isDownload() {
         return download;
-    }
-
-    public void setDownload(boolean download) {
-        this.download = download;
     }
 
     public long getTid() {
@@ -137,19 +163,19 @@ public class Chapter implements Parcelable {
         this.tid = tid;
     }
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
-    public Long getSourceComic() {
+    public long getSourceComic() {
         return sourceComic;
     }
 
-    public void setSourceComic(Long sourceComic) {
+    public void setSourceComic(long sourceComic) {
         this.sourceComic = sourceComic;
     }
 
@@ -170,16 +196,8 @@ public class Chapter implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        if (id !=null) {
-            dest.writeLong(id);
-        }else {
-            dest.writeLong(0L);
-        }
-        if (sourceComic !=null){
-            dest.writeLong(sourceComic);
-        } else {
-            dest.writeLong(0L);
-        }
+        dest.writeLong(id);
+        dest.writeLong(sourceComic);
         dest.writeString(title);
         dest.writeString(path);
         dest.writeInt(count);
@@ -188,20 +206,19 @@ public class Chapter implements Parcelable {
         dest.writeLong(tid);
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
     public boolean getComplete() {
         return this.complete;
+    }
+
+    public void setComplete(boolean complete) {
+        this.complete = complete;
     }
 
     public boolean getDownload() {
         return this.download;
     }
 
+    public void setDownload(boolean download) {
+        this.download = download;
+    }
 }

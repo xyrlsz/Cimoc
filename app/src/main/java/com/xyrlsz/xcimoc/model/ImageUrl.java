@@ -1,15 +1,16 @@
 package com.xyrlsz.xcimoc.model;
 
-import org.greenrobot.greendao.annotation.Convert;
-import org.greenrobot.greendao.annotation.Entity;
-import org.greenrobot.greendao.annotation.Generated;
-import org.greenrobot.greendao.annotation.Id;
-import org.greenrobot.greendao.annotation.NotNull;
-import org.greenrobot.greendao.annotation.Transient;
-import org.greenrobot.greendao.converter.PropertyConverter;
+import io.objectbox.annotation.Convert;
+import io.objectbox.annotation.Entity;
+import io.objectbox.annotation.Id;
+import io.objectbox.annotation.Index;
+import io.objectbox.annotation.Transient;
+import io.objectbox.converter.PropertyConverter;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
-
 import okhttp3.Headers;
 
 /**
@@ -17,91 +18,87 @@ import okhttp3.Headers;
  */
 @Entity
 public class ImageUrl {
-
-    public static final int STATE_NULL = 0;
+    public static final int STATE_NULL   = 0;
     public static final int STATE_PAGE_1 = 1;
     public static final int STATE_PAGE_2 = 2;
 
-    @Id(autoincrement = true)
-    private Long id; // 唯一标识
-    @NotNull
-    private Long comicChapter;
-    private int num;    // 章节的第几页
-    @Convert(columnType = String.class, converter = StringConverter.class)
-    private String[] urls;
+    @Id private long id; // 唯一标识
+    @Index private long comicChapter;
+    private int num; // 章节的第几页
+    @Convert(dbType = String.class, converter = StringConverter.class)
+    private List<String> urls;
     private String chapter; // 所属章节
-    private int state;  // 切图时表示状态 这里可以改为编号 比如长图可以切为多张方便加载
+    private int state; // 切图时表示状态 这里可以改为编号 比如长图可以切为多张方便加载
     private int height; // 图片高度
-    private int width;  // 图片宽度
-    private boolean lazy;   // 懒加载
-    private boolean loading;    // 正在懒加载
-    private boolean success;    // 图片显示成功
-    private boolean download;   // 下载的图片
-    @Transient
-    private Headers headers;
+    private int width; // 图片宽度
+    private boolean lazy; // 懒加载
+    private boolean loading; // 正在懒加载
+    private boolean success; // 图片显示成功
+    private boolean download; // 下载的图片
+    @Transient private Headers headers;
 
-    public ImageUrl(Long id, Long comicChapter, int num, String[] urls, String chapter, int state, boolean lazy) {
-        this(id, comicChapter, num, urls, chapter, state, 0, 0, lazy,
-                false, false, false, null);
+    public ImageUrl(long id, long comicChapter, int num, String[] urls, String chapter, int state,
+        boolean lazy) {
+        this(id, comicChapter, num, urls, chapter, state, 0, 0, lazy, false, false, false, null);
     }
 
-    public ImageUrl(Long id, Long comicChapter, int num, String url, boolean lazy) {
-        this(id, comicChapter, num, new String[]{url}, null, STATE_NULL,
-                0, 0, lazy, false, false, false, null);
+    public ImageUrl(long id, long comicChapter, int num, String url, boolean lazy) {
+        this(id, comicChapter, num, new String[] {url}, null, STATE_NULL, 0, 0, lazy, false, false,
+            false, null);
     }
 
-    public ImageUrl(Long id, Long comicChapter, int num, String[] urls, String chapter, int state, boolean lazy, Headers headers) {
-        this(id, comicChapter, num, urls, chapter, state, 0, 0, lazy,
-                false, false, false, headers);
+    public ImageUrl(long id, long comicChapter, int num, String[] urls, String chapter, int state,
+        boolean lazy, Headers headers) {
+        this(id, comicChapter, num, urls, chapter, state, 0, 0, lazy, false, false, false, headers);
     }
 
-    public ImageUrl(Long id, Long comicChapter, int num, String url, boolean lazy, Headers headers) {
-        this(id, comicChapter, num, new String[]{url}, null, STATE_NULL,
-                0, 0, lazy, false, false, false, headers);
+    public ImageUrl(
+        long id, long comicChapter, int num, String url, boolean lazy, Headers headers) {
+        this(id, comicChapter, num, new String[] {url}, null, STATE_NULL, 0, 0, lazy, false, false,
+            false, headers);
     }
 
-    @Generated(hash = 254698487)
-    public ImageUrl(Long id, @NotNull Long comicChapter, int num, String[] urls, String chapter, int state, int height, int width,
-                    boolean lazy, boolean loading, boolean success, boolean download) {
-        this.id = id;
+    public ImageUrl(long id, long comicChapter, int num, String[] urls, String chapter, int state,
+        int height, int width, boolean lazy, boolean loading, boolean success, boolean download) {
+        this.id           = id;
         this.comicChapter = comicChapter;
-        this.num = num;
-        this.urls = urls;
-        this.chapter = chapter;
-        this.state = state;
-        this.height = height;
-        this.width = width;
-        this.lazy = lazy;
-        this.loading = loading;
-        this.success = success;
-        this.download = download;
+        this.num          = num;
+        this.urls         = Arrays.asList(urls);
+        this.chapter      = chapter;
+        this.state        = state;
+        this.height       = height;
+        this.width        = width;
+        this.lazy         = lazy;
+        this.loading      = loading;
+        this.success      = success;
+        this.download     = download;
     }
 
-    public ImageUrl(Long id, Long comicChapter, int num, String[] urls, String chapter, int state, int height, int width,
-                    boolean lazy, boolean loading, boolean success, boolean download, Headers headers) {
-        this.id = id;
+    public ImageUrl(long id, long comicChapter, int num, String[] urls, String chapter, int state,
+        int height, int width, boolean lazy, boolean loading, boolean success, boolean download,
+        Headers headers) {
+        this.id           = id;
         this.comicChapter = comicChapter;
-        this.num = num;
-        this.urls = urls;
-        this.chapter = chapter;
-        this.state = state;
-        this.height = height;
-        this.width = width;
-        this.lazy = lazy;
-        this.loading = loading;
-        this.success = success;
-        this.download = download;
-        this.headers = headers;
+        this.num          = num;
+        this.urls         = Arrays.asList(urls);
+        this.chapter      = chapter;
+        this.state        = state;
+        this.height       = height;
+        this.width        = width;
+        this.lazy         = lazy;
+        this.loading      = loading;
+        this.success      = success;
+        this.download     = download;
+        this.headers      = headers;
     }
 
-    public ImageUrl() {
-    }
+    public ImageUrl() {}
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -113,20 +110,20 @@ public class ImageUrl {
         this.num = num;
     }
 
-    public String[] getUrls() {
+    public List<String> getUrls() {
         return urls;
     }
 
     public void setUrls(String[] urls) {
-        this.urls = urls;
+        this.urls = Arrays.asList(urls);
     }
 
     public String getUrl() {
-        return urls[0];
+        return urls.get(0);
     }
 
     public void setUrl(String url) {
-        this.urls = new String[]{url};
+        this.urls = Collections.singletonList(url);
     }
 
     public String getChapter() {
@@ -186,11 +183,11 @@ public class ImageUrl {
         return o instanceof ImageUrl && Objects.equals(((ImageUrl) o).id, id);
     }
 
-    public Long getComicChapter() {
+    public long getComicChapter() {
         return this.comicChapter;
     }
 
-    public void setComicChapter(Long comicChapter) {
+    public void setComicChapter(long comicChapter) {
         this.comicChapter = comicChapter;
     }
 
@@ -234,31 +231,23 @@ public class ImageUrl {
         this.headers = headers;
     }
 
-    public static class StringConverter implements PropertyConverter<String[], String> {
+    public static class StringConverter implements PropertyConverter<List<String>, String> {
         private static final String SPLIT = "##Cimoc##";
 
         @Override
-        public String[] convertToEntityProperty(String databaseValue) {
-            if (databaseValue == null) {
-                return null;
-            } else {
-                return databaseValue.split(SPLIT);
-            }
+        public List<String> convertToEntityProperty(String databaseValue) {
+            if (databaseValue == null) return null;
+            return Arrays.asList(databaseValue.split(SPLIT));
         }
 
         @Override
-        public String convertToDatabaseValue(String[] entityProperty) {
-            if (entityProperty == null) {
-                return null;
-            } else {
-                StringBuilder sb = new StringBuilder();
-                for (String str : entityProperty) {
-                    sb.append(str).append(SPLIT);
-                }
-                return sb.toString();
+        public String convertToDatabaseValue(List<String> entityProperty) {
+            if (entityProperty == null) return null;
+            StringBuilder sb = new StringBuilder();
+            for (String str : entityProperty) {
+                sb.append(str).append(SPLIT);
             }
-
+            return sb.toString();
         }
-
     }
 }

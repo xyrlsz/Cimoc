@@ -1,16 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'org.greenrobot.greendao'
-//apply plugin: 'com.google.protobuf'
-
-//def getGitCommitHash = { ->
-//    def stdout = new ByteArrayOutputStream()
-//    exec {
-//        commandLine 'git', 'rev-parse', '--short', 'HEAD'
-//        standardOutput = stdout
-//    }
-//    return stdout.toString().trim()
-//}
+apply plugin: 'io.objectbox'
 
 def getGitTagName = { ->
     try {
@@ -45,9 +35,10 @@ if (System.getenv("CI_BUILD_NUMBER") != null) { // 兼容 CI/CD
     buildVersion = System.getenv("CI_BUILD_NUMBER").toInteger()
 }
 
-// if(System.getenv("GIT_COMMIT_HASH")!=null){
-//     version = getGitTagName()+"-"+System.getenv("GIT_COMMIT_HASH")
-// }
+// 从环境变量获取签名配置（用于 CI）
+def _keystorePassword = System.getenv("KEYSTORE_PASSWORD")
+def _keyAlias = System.getenv("KEY_ALIAS")
+def _keyPassword = System.getenv("KEY_PASSWORD")
 
 android {
     compileSdk 36
@@ -76,10 +67,28 @@ android {
 
     signingConfigs {
         release {
-            storeFile file("../xcimoc.jks")
-            storePassword '123456'
-            keyAlias 'xc'
-            keyPassword '123456'
+            // 优先使用环境变量（CI 环境），否则使用本地文件（本地开发）
+            if (_keystorePassword != null && _keyAlias != null && _keyPassword != null) {
+                // CI 环境：使用从 secrets 创建的 keystore 文件
+                def keystoreFile = file("../xcimoc.jks")
+                if (keystoreFile.exists()) {
+                    storeFile keystoreFile
+                    storePassword _keystorePassword
+                    keyAlias _keyAlias
+                    keyPassword _keyPassword
+                } else {
+                    println "Warning: Keystore file not found at ${keystoreFile.absolutePath}"
+                }
+            } else {
+                // 本地开发环境：使用本地 keystore
+                def localKeystoreFile = file("../xcimoc.jks")
+                if (localKeystoreFile.exists()) {
+                    storeFile localKeystoreFile
+                    storePassword '123456'
+                    keyAlias 'xc'
+                    keyPassword '123456'
+                }
+            }
             enableV1Signing true
             enableV2Signing true
             enableV3Signing true
@@ -96,6 +105,7 @@ android {
             enableV4Signing true
         }
     }
+
     buildFeatures {
         buildConfig true
     }
@@ -131,33 +141,8 @@ android {
     }
     sourceSets {
         main {
-//            proto {
-//                srcDir 'src/main/proto' // proto 文件目录
-//            }
         }
     }
-}
-//protobuf {
-//    protoc {
-//        artifact = 'com.google.protobuf:protoc:4.33.1' // 使用与依赖相同的版本
-//    }
-//
-//    generateProtoTasks {
-//        all().each { task ->
-//            task.builtins {
-//                java {
-//                    option "lite"
-//                }
-//                kotlin {
-//                    option "lite"
-//                }
-//            }
-//        }
-//    }
-//}
-
-greendao {
-    schemaVersion 12
 }
 
 dependencies {
@@ -169,10 +154,10 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
     implementation 'com.google.android.material:material:1.13.0'
     implementation 'com.jakewharton:butterknife:10.2.3'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.3'
+    kapt  'com.jakewharton:butterknife-compiler:10.2.3'
     //noinspection GradleDependency uses-sdk:minSdkVersion 21 cannot be smaller than version 23 declared in library [androidx.activity:activity:1.12.0]
     implementation 'androidx.activity:activity-ktx:1.11.0'
-    implementation 'org.greenrobot:greendao:3.3.0'
+    implementation 'io.objectbox:objectbox-android:5.0.1'
     implementation 'com.squareup.okhttp3:okhttp:5.3.2'
     //noinspection NewerVersionAvailable
     implementation 'org.mozilla:rhino:1.8.1'

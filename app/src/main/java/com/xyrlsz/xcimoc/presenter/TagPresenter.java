@@ -59,15 +59,15 @@ public class TagPresenter extends BasePresenter<TagView> {
 
     public void delete(final Tag tag) {
         mCompositeSubscription.add(mTagRefManager.runInRx(new Runnable() {
-            @Override
-            public void run() {
-                mTagRefManager.deleteByTag(tag.getId());
-                mTagManager.delete(tag);
-            }
-        }).observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Void>() {
                     @Override
-                    public void call(Void aVoid) {
+                    public void run() {
+                        mTagRefManager.deleteByTag(tag.getId());
+                        mTagManager.delete(tag);
+                    }
+                }).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<Object>() {
+                    @Override
+                    public void call(Object aVoid) {
                         mBaseView.onTagDeleteSuccess(tag);
                     }
                 }, new Action1<Throwable>() {

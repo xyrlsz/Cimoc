@@ -1,7 +1,8 @@
 package com.xyrlsz.xcimoc.presenter;
 
-import androidx.collection.LongSparseArray;
 import android.util.Pair;
+
+import androidx.collection.LongSparseArray;
 
 import com.xyrlsz.xcimoc.core.Local;
 import com.xyrlsz.xcimoc.manager.ComicManager;
@@ -89,9 +90,8 @@ public class LocalPresenter extends BasePresenter<LocalView> {
     }
 
     private List<Comic> processScanResult(final List<Pair<Comic, ArrayList<Task>>> pairs) {
-        return mComicManager.callInTx(new Callable<List<Comic>>() {
-            @Override
-            public List<Comic> call() throws Exception {
+        try {
+            return mComicManager.callInTx(() -> {
                 Pair<Map<String, Comic>, Set<String>> hash = buildHash();
                 List<Comic> result = new ArrayList<>();
                 for (Pair<Comic, ArrayList<Task>> pr : pairs) {
@@ -113,64 +113,31 @@ public class LocalPresenter extends BasePresenter<LocalView> {
                     }
                 }
                 return result;
-            }
-        });
+            });
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
     }
 
     public void scan(CimocDocumentFile doc) {
         mCompositeSubscription.add(Local.scan(doc)
-                .map(new Func1<List<Pair<Comic, ArrayList<Task>>>, List<Comic>>() {
-                    @Override
-                    public List<Comic> call(List<Pair<Comic, ArrayList<Task>>> pairs) {
-                        return processScanResult(pairs);
-                    }
-                })
-                .compose(new ToAnotherList<>(new Func1<Comic, Object>() {
-                    @Override
-                    public MiniComic call(Comic comic) {
-                        return new MiniComic(comic);
-                    }
-                }))
+                .map(this::processScanResult)
+                .compose(new ToAnotherList<>((Func1<Comic, Object>) MiniComic::new))
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<Object>>() {
-                    @Override
-                    public void call(List<Object> list) {
-                        mBaseView.onLocalScanSuccess(list);
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        mBaseView.onExecuteFail();
-                    }
-                }));
+                .subscribe(list -> mBaseView.onLocalScanSuccess(list), throwable -> mBaseView.onExecuteFail()));
     }
 
     public void deleteComic(long id) {
         mCompositeSubscription.add(Observable.just(id)
-                .doOnNext(new Action1<Long>() {
+                .doOnNext(id1 -> mComicManager.runInTx(new Runnable() {
                     @Override
-                    public void call(final Long id) {
-                        mComicManager.runInTx(new Runnable() {
-                            @Override
-                            public void run() {
-                                mTaskManager.deleteByComicId(id);
-                                mComicManager.deleteByKey(id);
-                            }
-                        });
+                    public void run() {
+                        mTaskManager.deleteByComicId(id1);
+                        mComicManager.deleteByKey(id1);
                     }
-                }).subscribeOn(Schedulers.io())
+                })).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Long>() {
-                    @Override
-                    public void call(Long id) {
-                        mBaseView.onLocalDeleteSuccess(id);
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        mBaseView.onExecuteFail();
-                    }
-                }));
+                .subscribe(id2 -> mBaseView.onLocalDeleteSuccess(id2), throwable -> mBaseView.onExecuteFail()));
     }
 
 }

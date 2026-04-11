@@ -170,7 +170,7 @@ public class ReaderAdapter extends BaseAdapter<ImageUrl> {
                 break;
         }
 
-        String[] urls = imageUrl.getUrls();
+        String[] urls = imageUrl.getUrls().toArray(new String[0]);
         ImageRequest[] request = new ImageRequest[urls.length];
         for (int i = 0; i != urls.length; ++i) {
             final String url = urls[i];
@@ -299,7 +299,7 @@ public class ReaderAdapter extends BaseAdapter<ImageUrl> {
     public int getPositionById(Long id) {
         int size = mDataSet.size();
         for (int i = 0; i < size; ++i) {
-            if (mDataSet.get(i).getId().equals(id)) {
+            if (mDataSet.get(i).getId() == (id)) {
                 return i;
             }
         }
@@ -309,7 +309,7 @@ public class ReaderAdapter extends BaseAdapter<ImageUrl> {
     public void update(Long id, String url) {
         for (int i = 0; i < mDataSet.size(); ++i) {
             ImageUrl imageUrl = mDataSet.get(i);
-            if (imageUrl.getId().equals(id) && imageUrl.isLoading()) {
+            if (imageUrl.getId() == (id) && imageUrl.isLoading()) {
                 if (url == null) {
                     imageUrl.setLoading(false);
                     return;

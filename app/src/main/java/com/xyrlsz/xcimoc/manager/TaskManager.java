@@ -2,26 +2,31 @@ package com.xyrlsz.xcimoc.manager;
 
 import com.xyrlsz.xcimoc.component.AppGetter;
 import com.xyrlsz.xcimoc.model.Task;
-import com.xyrlsz.xcimoc.model.TaskDao;
-import com.xyrlsz.xcimoc.model.TaskDao.Properties;
-
-import org.greenrobot.greendao.query.QueryBuilder;
+import com.xyrlsz.xcimoc.model.Task_;
 
 import java.util.List;
 
+import io.objectbox.Box;
+import io.objectbox.BoxStore;
 import rx.Observable;
+import rx.schedulers.Schedulers;
+
 
 /**
  * Created by Hiroshi on 2016/9/4.
+ * Modified to use ObjectBox (参照 ComicManager)
  */
 public class TaskManager {
 
     private static TaskManager mInstance;
 
-    private TaskDao mTaskDao;
+    // 1. 修改：使用 ObjectBox 的 Box 替代 TaskDao
+    private final Box<Task> mTaskBox;
 
     private TaskManager(AppGetter getter) {
-        mTaskDao = getter.getAppInstance().getDaoSession().getTaskDao();
+        // 2. 修改：从 BoxStore 获取 Box
+        BoxStore boxStore = getter.getAppInstance().getBoxStore();
+        mTaskBox = boxStore.boxFor(Task.class);
     }
 
     public static TaskManager getInstance(AppGetter getter) {
@@ -35,77 +40,90 @@ public class TaskManager {
         return mInstance;
     }
 
+    // 3. 修改：查询方法
     public List<Task> list() {
-        return mTaskDao.queryBuilder().list();
+        return mTaskBox.getAll();
     }
 
     public List<Task> listValid() {
-        return mTaskDao.queryBuilder()
-                .where(Properties.Max.notEq(0))
-                .list();
+        return mTaskBox.query()
+                .notEqual(Task_.max, 0) // 对应 .notEq(0)
+                .build()
+                .find();
     }
 
     public List<Task> list(long key) {
-        return mTaskDao.queryBuilder()
-                .where(Properties.Key.eq(key))
-                .list();
+        return mTaskBox.query()
+                .equal(Task_.key, key)
+                .build()
+                .find();
     }
 
+    // 4. 修改：RxJava 查询
     public Observable<List<Task>> listInRx(long key) {
-        return mTaskDao.queryBuilder()
-                .where(Properties.Key.eq(key))
-                .rx()
-                .list();
+        return Observable.fromCallable(() ->
+                mTaskBox.query()
+                        .equal(Task_.key, key)
+                        .build()
+                        .find()
+        ).subscribeOn(Schedulers.io());
     }
 
     public Observable<List<Task>> listInRx() {
-        return mTaskDao.queryBuilder()
-                .rx()
-                .list();
+        return Observable.fromCallable(mTaskBox::getAll
+        ).subscribeOn(Schedulers.io());
     }
 
+    // 5. 修改：插入操作
     public void insert(Task task) {
-        long id = mTaskDao.insert(task);
+        long id = mTaskBox.put(task);
         task.setId(id);
     }
 
+    // ObjectBox put 支持 Iterable 且默认在事务中运行
     public void insertInTx(Iterable<Task> entities) {
-        mTaskDao.insertInTx(entities);
+        mTaskBox.put((Task) entities);
     }
 
     public void update(Task task) {
-        mTaskDao.update(task);
+        mTaskBox.put(task);
     }
 
+    // 6. 修改：删除操作
     public void delete(Task task) {
-        mTaskDao.delete(task);
+        mTaskBox.remove(task);
     }
 
     public void delete(long id) {
-        mTaskDao.deleteByKey(id);
+        mTaskBox.remove(id);
     }
 
     public void deleteInTx(Iterable<Task> entities) {
-        mTaskDao.deleteInTx(entities);
+        mTaskBox.remove((Task) entities);
     }
 
     public void deleteByComicId(long id) {
-        mTaskDao.queryBuilder()
-                .where(Properties.Key.eq(id))
-                .buildDelete()
-                .executeDeleteWithoutDetachingEntities();
+        // ObjectBox 没有 buildDelete，使用 query().build().remove()
+        mTaskBox.query()
+                .equal(Task_.key, id)
+                .build()
+                .remove();
     }
 
+    // 7. 修改：insertIfNotExist 逻辑
+    // 使用 Store.runInTx 包裹循环查询和插入
     public void insertIfNotExist(final Iterable<Task> entities) {
-        mTaskDao.getSession().runInTx(new Runnable() {
-            @Override
-            public void run() {
-                for (Task task : entities) {
-                    QueryBuilder<Task> builder = mTaskDao.queryBuilder()
-                            .where(Properties.Key.eq(task.getKey()), Properties.Path.eq(task.getPath()));
-                    if (builder.unique() == null) {
-                        mTaskDao.insert(task);
-                    }
+        mTaskBox.getStore().runInTx(() -> {
+            for (Task task : entities) {
+                // 查询是否存在相同的 Key 和 Path
+                Task existing = mTaskBox.query(Task_.path.equal(task.getPath()))
+                        .equal(Task_.key, task.getKey())
+
+                        .build()
+                        .findFirst();
+
+                if (existing == null) {
+                    mTaskBox.put(task);
                 }
             }
         });

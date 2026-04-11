@@ -14,22 +14,20 @@ import com.xyrlsz.xcimoc.rx.RxEvent;
 import com.xyrlsz.xcimoc.rx.ToAnotherList;
 import com.xyrlsz.xcimoc.ui.view.TaskView;
 import com.xyrlsz.xcimoc.utils.IdCreator;
-
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
+
 /**
  * Created by Hiroshi on 2016/9/7.
  */
 public class TaskPresenter extends BasePresenter<TaskView> {
-
     private TaskManager mTaskManager;
     private ComicManager mComicManager;
     private SourceManager mSourceManager;
@@ -38,9 +36,9 @@ public class TaskPresenter extends BasePresenter<TaskView> {
 
     @Override
     protected void onViewAttach() {
-        mTaskManager = TaskManager.getInstance(mBaseView);
-        mComicManager = ComicManager.getInstance(mBaseView);
-        mSourceManager = SourceManager.getInstance(mBaseView);
+        mTaskManager    = TaskManager.getInstance(mBaseView);
+        mComicManager   = ComicManager.getInstance(mBaseView);
+        mSourceManager  = SourceManager.getInstance(mBaseView);
         mChapterManager = ChapterManager.getInstance(mBaseView);
     }
 
@@ -75,7 +73,7 @@ public class TaskPresenter extends BasePresenter<TaskView> {
             @Override
             public void call(RxEvent rxEvent) {
                 List<Task> list = (List<Task>) rxEvent.getData(1);
-                Task task = list.get(0);
+                Task task       = list.get(0);
                 if (task.getKey() == mComic.getId()) {
                     mBaseView.onTaskAdd(list);
                 }
@@ -84,7 +82,7 @@ public class TaskPresenter extends BasePresenter<TaskView> {
         addSubscription(RxEvent.EVENT_COMIC_UPDATE, new Action1<RxEvent>() {
             @Override
             public void call(RxEvent rxEvent) {
-                if (mComic.getId() != null && mComic.getId() == (long) rxEvent.getData()) {
+                if (mComic.getId() > 0 && mComic.getId() == (long) rxEvent.getData()) {
                     Comic comic = mComicManager.load(mComic.getId());
                     mComic.setPage(comic.getPage());
                     mComic.setLast(comic.getLast());
@@ -115,14 +113,18 @@ public class TaskPresenter extends BasePresenter<TaskView> {
                     public void call(List<Task> list) {
                         updateTaskList(list);
                         if (!mComic.getLocal()) {
-                            final List<String> sList = Download.getComicIndex(mBaseView.getAppInstance().getContentResolver(),
-                                    mBaseView.getAppInstance().getDocumentFile(), mComic, mSourceManager.getParser(mComic.getSource()).getTitle());
+                            final List<String> sList = Download.getComicIndex(
+                                mBaseView.getAppInstance().getContentResolver(),
+                                mBaseView.getAppInstance().getDocumentFile(), mComic,
+                                mSourceManager.getParser(mComic.getSource()).getTitle());
                             if (sList != null) {
                                 Collections.sort(list, new Comparator<Task>() {
                                     @Override
                                     public int compare(Task lhs, Task rhs) {
-                                        return asc ? sList.indexOf(rhs.getPath()) - sList.indexOf(lhs.getPath()) :
-                                                sList.indexOf(lhs.getPath()) - sList.indexOf(rhs.getPath());
+                                        return asc ? sList.indexOf(rhs.getPath())
+                                                - sList.indexOf(lhs.getPath())
+                                                   : sList.indexOf(lhs.getPath())
+                                                - sList.indexOf(rhs.getPath());
                                     }
                                 });
                             }
@@ -130,25 +132,27 @@ public class TaskPresenter extends BasePresenter<TaskView> {
                             Collections.sort(list, new Comparator<Task>() {
                                 @Override
                                 public int compare(Task lhs, Task rhs) {
-                                    return asc ? lhs.getTitle().compareTo(rhs.getTitle()) :
-                                            rhs.getTitle().compareTo(lhs.getTitle());
+                                    return asc ? lhs.getTitle().compareTo(rhs.getTitle())
+                                               : rhs.getTitle().compareTo(lhs.getTitle());
                                 }
                             });
                         }
                     }
                 })
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<Task>>() {
-                    @Override
-                    public void call(List<Task> list) {
-                        mBaseView.onTaskLoadSuccess(list, mComic.getLocal());
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        mBaseView.onTaskLoadFail();
-                    }
-                }));
+                .subscribe(
+                    new Action1<List<Task>>() {
+                        @Override
+                        public void call(List<Task> list) {
+                            mBaseView.onTaskLoadSuccess(list, mComic.getLocal());
+                        }
+                    },
+                    new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            mBaseView.onTaskLoadFail();
+                        }
+                    }));
     }
 
     public void deleteTask(List<Chapter> list, final boolean isEmpty) {
@@ -161,11 +165,13 @@ public class TaskPresenter extends BasePresenter<TaskView> {
                         deleteFromDatabase(list, isEmpty);
                         if (!mComic.getLocal()) {
                             if (isEmpty) {
-                                Download.delete(mBaseView.getAppInstance().getDocumentFile(), mComic,
-                                        mSourceManager.getParser(mComic.getSource()).getTitle());
+                                Download.delete(mBaseView.getAppInstance().getDocumentFile(),
+                                    mComic,
+                                    mSourceManager.getParser(mComic.getSource()).getTitle());
                             } else {
-                                Download.delete(mBaseView.getAppInstance().getDocumentFile(), mComic,
-                                        list, mSourceManager.getParser(mComic.getSource()).getTitle());
+                                Download.delete(mBaseView.getAppInstance().getDocumentFile(),
+                                    mComic, list,
+                                    mSourceManager.getParser(mComic.getSource()).getTitle());
                             }
                         }
                     }
@@ -177,20 +183,23 @@ public class TaskPresenter extends BasePresenter<TaskView> {
                     }
                 }))
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<Long>>() {
-                    @Override
-                    public void call(List<Long> list) {
-                        if (isEmpty) {
-                            RxBus.getInstance().post(new RxEvent(RxEvent.EVENT_DOWNLOAD_REMOVE, id));
+                .subscribe(
+                    new Action1<List<Long>>() {
+                        @Override
+                        public void call(List<Long> list) {
+                            if (isEmpty) {
+                                RxBus.getInstance().post(
+                                    new RxEvent(RxEvent.EVENT_DOWNLOAD_REMOVE, id));
+                            }
+                            mBaseView.onTaskDeleteSuccess(list);
                         }
-                        mBaseView.onTaskDeleteSuccess(list);
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        mBaseView.onTaskDeleteFail();
-                    }
-                }));
+                    },
+                    new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            mBaseView.onTaskDeleteFail();
+                        }
+                    }));
     }
 
     private void deleteFromDatabase(final List<Chapter> list, final boolean isEmpty) {
@@ -207,7 +216,7 @@ public class TaskPresenter extends BasePresenter<TaskView> {
                         mChapterManager.deleteBySourceComic(IdCreator.createSourceComic(mComic));
                     }
                     Download.delete(mBaseView.getAppInstance().getDocumentFile(), mComic,
-                            mSourceManager.getParser(mComic.getSource()).getTitle());
+                        mSourceManager.getParser(mComic.getSource()).getTitle());
                 }
             }
         });
@@ -223,8 +232,8 @@ public class TaskPresenter extends BasePresenter<TaskView> {
             mComic.setPage(1);
         }
         mComicManager.update(mComic);
-        RxBus.getInstance().post(new RxEvent(RxEvent.EVENT_COMIC_READ, new MiniComic(mComic), false));
+        RxBus.getInstance().post(
+            new RxEvent(RxEvent.EVENT_COMIC_READ, new MiniComic(mComic), false));
         return mComic.getId();
     }
-
 }

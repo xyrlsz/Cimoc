@@ -1,15 +1,10 @@
 package com.xyrlsz.xcimoc.helper;
 
 import android.content.Context;
-
 import com.xyrlsz.opencc.android.lib.ChineseConverter;
 import com.xyrlsz.xcimoc.BuildConfig;
 import com.xyrlsz.xcimoc.manager.PreferenceManager;
-import com.xyrlsz.xcimoc.model.Comic;
-import com.xyrlsz.xcimoc.model.ComicDao;
-import com.xyrlsz.xcimoc.model.DaoSession;
 import com.xyrlsz.xcimoc.model.Source;
-import com.xyrlsz.xcimoc.model.SourceDao;
 import com.xyrlsz.xcimoc.source.Baozi;
 import com.xyrlsz.xcimoc.source.BuKa;
 import com.xyrlsz.xcimoc.source.CopyMH;
@@ -35,8 +30,8 @@ import com.xyrlsz.xcimoc.source.Vomicmh;
 import com.xyrlsz.xcimoc.source.YKMH;
 import com.xyrlsz.xcimoc.source.YYManHua;
 import com.xyrlsz.xcimoc.source.ZaiManhua;
-
-import org.greenrobot.greendao.database.Database;
+import io.objectbox.Box;
+import io.objectbox.BoxStore;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,7 +43,6 @@ import java.util.Map;
  */
 
 public class UpdateHelper {
-
     // 1.04.08.008
     private static final int VERSION = BuildConfig.VERSION_CODE;
 
@@ -65,17 +59,16 @@ public class UpdateHelper {
      * 初始化图源
      */
     private static void initComicSourceTable() {
-
         if (ComicSourceTable.isEmpty()) {
-//            ComicSourceTable.put(Animx2.TYPE, Animx2.getDefaultSource());
+            //            ComicSourceTable.put(Animx2.TYPE, Animx2.getDefaultSource());
             ComicSourceTable.put(Baozi.TYPE, Baozi.getDefaultSource());
             ComicSourceTable.put(BuKa.TYPE, BuKa.getDefaultSource());
-//            ComicSourceTable.put(Cartoonmad.TYPE, Cartoonmad.getDefaultSource());
+            //            ComicSourceTable.put(Cartoonmad.TYPE, Cartoonmad.getDefaultSource());
             ComicSourceTable.put(CopyMH.TYPE, CopyMH.getDefaultSource());
             ComicSourceTable.put(DM5.TYPE, DM5.getDefaultSource());
             ComicSourceTable.put(HotManga.TYPE, HotManga.getDefaultSource());
             ComicSourceTable.put(IKanman.TYPE, IKanman.getDefaultSource());
-//            ComicSourceTable.put(Mangakakalot.TYPE, Mangakakalot.getDefaultSource());
+            //            ComicSourceTable.put(Mangakakalot.TYPE, Mangakakalot.getDefaultSource());
             ComicSourceTable.put(MangaBZ.TYPE, MangaBZ.getDefaultSource());
             ComicSourceTable.put(Manhuatai.TYPE, Manhuatai.getDefaultSource());
             ComicSourceTable.put(MYCOMIC.TYPE, MYCOMIC.getDefaultSource());
@@ -83,14 +76,14 @@ public class UpdateHelper {
             ComicSourceTable.put(DongManManHua.TYPE, DongManManHua.getDefaultSource());
             ComicSourceTable.put(YKMH.TYPE, YKMH.getDefaultSource());
             ComicSourceTable.put(DuManWu.TYPE, DuManWu.getDefaultSource());
-//            ComicSourceTable.put(DuManWuOrg.TYPE, DuManWuOrg.getDefaultSource());
+            //            ComicSourceTable.put(DuManWuOrg.TYPE, DuManWuOrg.getDefaultSource());
             ComicSourceTable.put(Komiic.TYPE, Komiic.getDefaultSource());
             ComicSourceTable.put(Manhuayu.TYPE, Manhuayu.getDefaultSource());
             ComicSourceTable.put(GoDaManHua.TYPE, GoDaManHua.getDefaultSource());
-//            ComicSourceTable.put(TTKMH.TYPE, TTKMH.getDefaultSource());
+            //            ComicSourceTable.put(TTKMH.TYPE, TTKMH.getDefaultSource());
             ComicSourceTable.put(Vomicmh.TYPE, Vomicmh.getDefaultSource());
             ComicSourceTable.put(YYManHua.TYPE, YYManHua.getDefaultSource());
-//            ComicSourceTable.put(DmzjV4.TYPE, DmzjV4.getDefaultSource());
+            //            ComicSourceTable.put(DmzjV4.TYPE, DmzjV4.getDefaultSource());
             ComicSourceTable.put(ZaiManhua.TYPE, ZaiManhua.getDefaultSource());
             ComicSourceTable.put(ManBen.TYPE, ManBen.getDefaultSource());
             ComicSourceTable.put(GFMH.TYPE, GFMH.getDefaultSource());
@@ -101,74 +94,24 @@ public class UpdateHelper {
         }
     }
 
-    public static void update(PreferenceManager manager, final DaoSession session, Context context) {
+    public static void update(PreferenceManager manager, final BoxStore boxStore, Context context) {
         int version = manager.getNumber(PreferenceManager.PREF_APP_VERSION, 0).intValue();
 
         if (version != VERSION) {
-            if (version < 963 && version != 0) {
-                updateChapterTable(session);
-            }
-            if (version < 1027 && version != 0) {
-                updateSourceTable(session);
-            }
-//            initSource(session);
+            // ObjectBox会自动处理 schema 变更，不需要手动添加列
             initComicSourceTable();
             manager.putNumber(PreferenceManager.PREF_APP_VERSION, VERSION);
-            updateComicSource(session);
+            updateComicSource(boxStore);
             ChineseConverter.clearDictDataFolder(context);
             ChineseConverter.init(context);
         }
-
     }
 
-    private static void addChapterCountColumn(Database db) {
-        db.beginTransaction();
-        db.execSQL("ALTER TABLE COMIC ADD COLUMN CHAPTER_COUNT INTEGER DEFAULT 0");
-        db.setTransactionSuccessful();
-        db.endTransaction();
-    }
-
-    private static void addSourceBaseUrlColumn(Database db) {
-        db.beginTransaction();
-        db.execSQL("ALTER TABLE SOURCE ADD COLUMN BASE_URL TEXT DEFAULT ''");
-        db.setTransactionSuccessful();
-        db.endTransaction();
-    }
-
-    /**
-     * app: 1.4.8.0 -> 1.4.8.1
-     * 删除本地漫画中 download 字段的值
-     */
-    private static void deleteDownloadFromLocal(final DaoSession session) {
-        session.runInTx(new Runnable() {
-            @Override
-            public void run() {
-                ComicDao dao = session.getComicDao();
-                List<Comic> list = dao.queryBuilder().where(ComicDao.Properties.Local.eq(true)).list();
-                if (!list.isEmpty()) {
-                    for (Comic comic : list) {
-                        comic.setDownload(null);
-                    }
-                    dao.updateInTx(list);
-                }
-            }
-        });
-    }
-
-
-    private static void updateChapterTable(final DaoSession session) {
-        addChapterCountColumn(session.getDatabase());
-    }
-
-    private static void updateSourceTable(final DaoSession session) {
-        addSourceBaseUrlColumn(session.getDatabase());
-    }
-
-    private static void updateComicSource(DaoSession session) {
-        SourceDao sourceDao = session.getSourceDao();
-        List<Source> sourceList = sourceDao.loadAll();
+    private static void updateComicSource(BoxStore boxStore) {
+        Box<Source> sourceBox        = boxStore.boxFor(Source.class);
+        List<Source> sourceList      = sourceBox.getAll();
         List<Source> sourcesToDelete = new ArrayList<>();
-        List<Source> sourcesToAdd = new ArrayList<>();
+        List<Source> sourcesToAdd    = new ArrayList<>();
         for (Source source : sourceList) {
             if (!ComicSourceTable.containsKey(source.getType())) {
                 sourcesToDelete.add(source);
@@ -187,33 +130,33 @@ public class UpdateHelper {
             }
         }
         if (!sourcesToDelete.isEmpty()) {
-            sourceDao.deleteInTx(sourcesToDelete);
+            sourceBox.remove(sourcesToDelete);
         }
         if (!sourcesToAdd.isEmpty()) {
-            sourceDao.insertOrReplaceInTx(sourcesToAdd);
+            sourceBox.put(sourcesToAdd);
         }
-        sourceList = sourceDao.loadAll();
+        sourceList = sourceBox.getAll();
         for (Source source : sourceList) {
             if (ComicSourceTable.containsKey(source.getType())) {
                 Source sourceToUpdate = ComicSourceTable.get(source.getType());
                 if (sourceToUpdate != null) {
-                    String title1 = source.getTitle();
-                    String title2 = sourceToUpdate.getTitle();
+                    String title1   = source.getTitle();
+                    String title2   = sourceToUpdate.getTitle();
                     String baseUrl1 = source.getBaseUrl();
                     String baseUrl2 = sourceToUpdate.getBaseUrl();
 
-                    boolean titleDiff = (title1 == null && title2 != null) || (title1 != null && !title1.equals(title2));
-                    boolean baseUrlDiff = (baseUrl1 == null && baseUrl2 != null) || (baseUrl1 != null && !baseUrl1.equals(baseUrl2));
+                    boolean titleDiff = (title1 == null && title2 != null)
+                        || (title1 != null && !title1.equals(title2));
+                    boolean baseUrlDiff = (baseUrl1 == null && baseUrl2 != null)
+                        || (baseUrl1 != null && !baseUrl1.equals(baseUrl2));
 
                     if (titleDiff || baseUrlDiff) {
                         source.setTitle(title2);
                         source.setBaseUrl(baseUrl2);
-                        sourceDao.update(source);
+                        sourceBox.put(source);
                     }
                 }
-
             }
         }
     }
-
 }
