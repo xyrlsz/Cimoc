@@ -13,8 +13,8 @@ import android.webkit.WebViewClient;
 import com.xyrlsz.xcimocob.source.CopyMHWeb;
 import com.xyrlsz.xcimocob.utils.StringUtils;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.CountDownLatch;
 
 import okhttp3.Headers;
@@ -81,23 +81,14 @@ public class WebParser {
         if (!StringUtils.isEmpty(UA)) {
             webView.getSettings().setUserAgentString(UA);
         }
-
-        Map<String, String> headersMap = new HashMap<>();
+        // 使用 TreeMap 并指定忽略大小写的比较器 这样写就可以直接匹配到 "user-agent" 或 "User-Agent"
+        Map<String, String> headersMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         if (headers != null) {
             for (String key : headers.names()) {
                 headersMap.put(key, headers.get(key));
             }
-            // 如果UA是空并且Headers里面有UA，User-Agent大小写都行
-            if (StringUtils.isEmpty(UA)) {
-                // 在 Map 的 keySet 中查找忽略大小写等于 "user-agent" 的键
-                String realKey = headersMap.keySet().stream()
-                        .filter(k -> k.equalsIgnoreCase("user-agent"))
-                        .findFirst()
-                        .orElse(null);
-
-                if (realKey != null) {
-                    webView.getSettings().setUserAgentString(headersMap.get(realKey));
-                }
+            if (StringUtils.isEmpty(UA) && headersMap.containsKey("User-Agent")) {
+                webView.getSettings().setUserAgentString(headersMap.get("User-Agent"));
             }
         }
 
