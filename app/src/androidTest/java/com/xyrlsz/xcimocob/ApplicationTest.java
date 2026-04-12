@@ -12,9 +12,9 @@ import com.xyrlsz.xcimocob.test.SearchTest;
 import com.xyrlsz.xcimocob.test.TestCallBack;
 import com.xyrlsz.xcimocob.test.WebSocketLogger;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.FixMethodOrder;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 
@@ -26,7 +26,7 @@ public class ApplicationTest {
     private App application;
     private WebSocketLogger webSocketLogger;
 
-    @Before
+    @BeforeEach
     public void setUp() {
 
         application = ApplicationProvider.getApplicationContext();
@@ -34,7 +34,7 @@ public class ApplicationTest {
         webSocketLogger.connect();
     }
 
-    @Test
+    @org.junit.jupiter.api.Test
     public void test0_ApplicationNotNull() {
         assertNotNull(application);
     }
