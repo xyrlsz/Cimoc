@@ -187,8 +187,6 @@ dependencies {
 
     // noinspection GradleDependency
     implementation "androidx.core:core-ktx:1.17.0"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.3.20"
-
     implementation 'com.king.app:app-updater:1.0.8-androidx'
     implementation 'com.king.app:app-dialog:1.0.8-androidx'
 
