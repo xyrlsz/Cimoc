@@ -39,7 +39,7 @@ def _keyPassword = System.getenv("KEY_PASSWORD")
 
 android {
     compileSdk 36
-    namespace "com.xyrlsz.xcimoc"
+    namespace "com.xyrlsz.xcimocob"
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
@@ -49,7 +49,7 @@ android {
         jvmTarget = "17"
     }
     defaultConfig {
-        applicationId "com.xyrlsz.xcimoc"
+        applicationId "com.xyrlsz.xcimocob"
         minSdkVersion 21
         targetSdkVersion 36
         versionCode buildVersion // 动态生成的版本号

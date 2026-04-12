@@ -38,7 +38,7 @@
                         android:textColor="?attr/colorPrimary"
                         android:textSize="14sp" />
 
-                    <com.xyrlsz.xcimoc.ui.widget.Option
+                    <com.xyrlsz.xcimocob.ui.widget.Option
                         android:id="@+id/backup_cloud_config"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -51,49 +51,49 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:visibility="gone">
-                        <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
+                        <com.xyrlsz.xcimocob.ui.widget.preference.CheckBoxPreference
                             android:id="@+id/backup_cloud_sync"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             app:summary="@string/backup_cloud_sync_tag_summary"
                             app:title="@string/backup_cloud_sync_tag" />
 
-                        <com.xyrlsz.xcimoc.ui.widget.Option
+                        <com.xyrlsz.xcimocob.ui.widget.Option
                             android:id="@+id/backup_cloud_backup"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             app:summary="@string/backup_cloud_backup_tag_summary"
                             app:title="@string/backup_cloud_backup_tag" />
 
-                        <com.xyrlsz.xcimoc.ui.widget.Option
+                        <com.xyrlsz.xcimocob.ui.widget.Option
                             android:id="@+id/backup_cloud_restore"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             app:summary="@string/backup_cloud_restore_tag_summary"
                             app:title="@string/backup_cloud_restore_tag" />
 
-                        <com.xyrlsz.xcimoc.ui.widget.Option
+                        <com.xyrlsz.xcimocob.ui.widget.Option
                             android:id="@+id/backup_save_settings_cloud"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             app:title="@string/backup_save_settings_cloud"
                             app:summary="@string/backup_save_settings_cloud_summary"/>
 
-                        <com.xyrlsz.xcimoc.ui.widget.Option
+                        <com.xyrlsz.xcimocob.ui.widget.Option
                             android:id="@+id/backup_restore_settings_cloud"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             app:title="@string/backup_restore_settings_cloud"
                             app:summary="@string/backup_restore_settings_cloud_summary"/>
 
-                        <com.xyrlsz.xcimoc.ui.widget.Option
+                        <com.xyrlsz.xcimocob.ui.widget.Option
                             android:id="@+id/backup_cloud_upload"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             app:summary="@string/backup_cloud_upload_tag_summary"
                             app:title="@string/backup_cloud_upload_tag" />
 
-                        <com.xyrlsz.xcimoc.ui.widget.Option
+                        <com.xyrlsz.xcimocob.ui.widget.Option
                             android:id="@+id/backup_cloud_clear"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -113,14 +113,14 @@
                         android:textColor="?attr/colorPrimary"
                         android:textSize="14sp" />
 
-                    <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
+                    <com.xyrlsz.xcimocob.ui.widget.preference.CheckBoxPreference
                         android:id="@+id/backup_save_comic_auto"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:summary="@string/backup_save_comic_auto_summary"
                         app:title="@string/backup_save_comic_auto" />
 
-                    <com.xyrlsz.xcimoc.ui.widget.Option
+                    <com.xyrlsz.xcimocob.ui.widget.Option
                         android:id="@+id/backup_save_comic"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -128,7 +128,7 @@
                         app:title="@string/backup_save_comic" />
 
 
-                    <com.xyrlsz.xcimoc.ui.widget.Option
+                    <com.xyrlsz.xcimocob.ui.widget.Option
                         android:visibility="gone"
                         android:id="@+id/backup_save_tag"
                         android:layout_width="match_parent"
@@ -136,7 +136,7 @@
                         app:title="@string/backup_save_tag"
                         app:summary="@string/backup_save_tag_summary"/>
 
-                    <com.xyrlsz.xcimoc.ui.widget.Option
+                    <com.xyrlsz.xcimocob.ui.widget.Option
                         android:id="@+id/backup_save_settings"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -162,7 +162,7 @@
                         android:textColor="?attr/colorPrimary"
                         android:textSize="14sp" />
 
-                    <com.xyrlsz.xcimoc.ui.widget.Option
+                    <com.xyrlsz.xcimocob.ui.widget.Option
                         android:id="@+id/backup_restore_comic"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -170,7 +170,7 @@
                         app:title="@string/backup_restore_comic" />
 
 
-                    <com.xyrlsz.xcimoc.ui.widget.Option
+                    <com.xyrlsz.xcimocob.ui.widget.Option
                         android:visibility="gone"
                         android:id="@+id/backup_restore_tag"
                         android:layout_width="match_parent"
@@ -178,7 +178,7 @@
                         app:title="@string/backup_restore_tag"
                         app:summary="@string/backup_restore_tag_summary"/>
 
-                    <com.xyrlsz.xcimoc.ui.widget.Option
+                    <com.xyrlsz.xcimocob.ui.widget.Option
                         android:id="@+id/backup_restore_settings"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -203,7 +203,7 @@
                         android:textColor="?attr/colorPrimary"
                         android:textSize="14sp" />
 
-                    <com.xyrlsz.xcimoc.ui.widget.Option
+                    <com.xyrlsz.xcimocob.ui.widget.Option
                         android:id="@+id/backup_clear_record"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"

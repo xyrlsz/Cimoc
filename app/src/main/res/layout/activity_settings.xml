@@ -34,7 +34,7 @@
                     android:textColor="?attr/colorPrimary"
                     android:textSize="14sp" />
 
-                <com.xyrlsz.xcimoc.ui.widget.Option
+                <com.xyrlsz.xcimocob.ui.widget.Option
                     android:id="@+id/settings_comic_source_login"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -57,7 +57,7 @@
                             android:visibility="gone" />
 
                     </RelativeLayout>
-                </com.xyrlsz.xcimoc.ui.widget.Option>
+                </com.xyrlsz.xcimocob.ui.widget.Option>
 
 
                 <TextView
@@ -72,104 +72,104 @@
                     android:textColor="?attr/colorPrimary"
                     android:textSize="14sp" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.ChoicePreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.ChoicePreference
                     android:id="@+id/settings_reader_mode"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:title="@string/settings_reader_mode" />
 
-                <com.xyrlsz.xcimoc.ui.widget.Option
+                <com.xyrlsz.xcimocob.ui.widget.Option
                     android:id="@+id/settings_reader_config"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:summary="@string/settings_reader_config_summary"
                     app:title="@string/settings_reader_config" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.CheckBoxPreference
                     android:id="@+id/settings_reader_keep_bright"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:summary="@string/settings_reader_keep_bright_summary"
                     app:title="@string/settings_reader_keep_bright" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.CheckBoxPreference
                     android:id="@+id/settings_reader_show_topbar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:summary="@string/settings_reader_show_topbar_summary"
                     app:title="@string/settings_reader_show_topbar" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.CheckBoxPreference
                     android:id="@+id/settings_reader_hide_info"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:summary="@string/settings_reader_hide_info_summary"
                     app:title="@string/settings_reader_hide_info" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.CheckBoxPreference
                     android:id="@+id/settings_reader_hide_nav"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:summary="@string/settings_reader_hide_nav_summary"
                     app:title="@string/settings_reader_hide_nav" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.CheckBoxPreference
                     android:id="@+id/settings_reader_ban_double_click"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:summary="@string/settings_reader_ban_double_click_summary"
                     app:title="@string/settings_reader_ban_double_click" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.CheckBoxPreference
                     android:id="@+id/settings_reader_paging"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:summary="@string/settings_reader_paging_summary"
                     app:title="@string/settings_reader_paging" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.CheckBoxPreference
                     android:id="@+id/settings_reader_closeautoresizeimage"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:summary="@string/settings_reader_closeautoresizeimage_summary"
                     app:title="@string/settings_reader_closeautoresizeimage" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.CheckBoxPreference
                     android:id="@+id/settings_reader_paging_reverse"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:summary="@string/settings_reader_paging_reverse_summary"
                     app:title="@string/settings_reader_paging_reverse" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.CheckBoxPreference
                     android:id="@+id/settings_reader_paging_stream_off"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:summary="@string/settings_reader_paging_steam_off"
                     app:title="@string/settings_reader_paging_steam_off" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.CheckBoxPreference
                     android:id="@+id/settings_reader_white_edge"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:summary="@string/settings_reader_white_edge_summary"
                     app:title="@string/settings_reader_white_edge" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.CheckBoxPreference
                     android:id="@+id/settings_reader_white_background"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:summary="@string/settings_reader_white_background_summary"
                     app:title="@string/settings_reader_white_background" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.CheckBoxPreference
                     android:id="@+id/settings_reader_volume_key"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:summary="@string/settings_reader_volume_key_controls_summary"
                     app:title="@string/settings_reader_volume_key_controls" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.SliderPreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.SliderPreference
                     android:id="@+id/settings_reader_scale_factor"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -177,7 +177,7 @@
                     app:min="100"
                     app:title="@string/settings_reader_scale_factor" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.SliderPreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.SliderPreference
                     android:id="@+id/settings_reader_controller_trig_threshold"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -198,7 +198,7 @@
                     android:textColor="?attr/colorPrimary"
                     android:textSize="14sp" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.SliderPreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.SliderPreference
                     android:id="@+id/settings_download_thread"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -206,7 +206,7 @@
                     app:min="1"
                     app:title="@string/settings_download_thread" />
 
-                <com.xyrlsz.xcimoc.ui.widget.Option
+                <com.xyrlsz.xcimocob.ui.widget.Option
                     android:id="@+id/settings_download_scan"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -225,7 +225,7 @@
                     android:textColor="?attr/colorPrimary"
                     android:textSize="14sp" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.CheckBoxPreference
                     android:id="@+id/settings_search_auto_complete"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -244,41 +244,41 @@
                     android:textColor="?attr/colorPrimary"
                     android:textSize="14sp" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.ChoicePreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.ChoicePreference
                     android:id="@+id/settings_detail_text_st"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:title="@string/settings_detail_text_st" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.ChoicePreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.ChoicePreference
                     android:id="@+id/settings_st_engine"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:title="@string/settings_st_engine" />
 
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.CheckBoxPreference
                     android:id="@+id/settings_other_connect_only_wifi"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:summary="@string/settings_other_connect_only_wifi_summary"
                     app:title="@string/settings_other_connect_only_wifi" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.CheckBoxPreference
                     android:id="@+id/settings_other_loadcover_only_wifi"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:summary="@string/settings_other_loadcover_only_wifi_summary"
                     app:title="@string/settings_other_loadcover_only_wifi" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.CheckBoxPreference
                     android:id="@+id/settings_other_check_update"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:summary="@string/settings_other_check_update_summary"
                     app:title="@string/settings_other_check_update" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.CheckBoxPreference
                     android:id="@+id/settings_check_update"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -300,25 +300,25 @@
                 <!--                    app:title="@string/settings_other_reduce_ad" />-->
 
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.ChoicePreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.ChoicePreference
                     android:id="@+id/settings_other_launch"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:title="@string/settings_other_launch" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.ChoicePreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.ChoicePreference
                     android:id="@+id/settings_other_theme"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:title="@string/settings_other_theme" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.ChoicePreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.ChoicePreference
                     android:id="@+id/settings_other_dark_mod"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:title="@string/settings_other_dark_mod" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.SliderPreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.SliderPreference
                     android:id="@+id/settings_other_night_alpha"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -326,14 +326,14 @@
                     app:min="100"
                     app:title="@string/settings_other_night_alpha" />
 
-                <com.xyrlsz.xcimoc.ui.widget.Option
+                <com.xyrlsz.xcimocob.ui.widget.Option
                     android:id="@+id/settings_other_storage"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:summary="@string/settings_other_storage_summary"
                     app:title="@string/settings_other_storage" />
 
-                <com.xyrlsz.xcimoc.ui.widget.Option
+                <com.xyrlsz.xcimocob.ui.widget.Option
                     android:id="@+id/settings_other_clear_cache"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

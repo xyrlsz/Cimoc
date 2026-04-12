@@ -35,7 +35,7 @@
                     android:textSize="14sp"
                     android:visibility="gone" />
 
-                <com.xyrlsz.xcimoc.ui.widget.Option
+                <com.xyrlsz.xcimocob.ui.widget.Option
                     android:id="@+id/comic_login_dmzj_login"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -59,7 +59,7 @@
                             android:visibility="gone" />
 
                     </RelativeLayout>
-                </com.xyrlsz.xcimoc.ui.widget.Option>
+                </com.xyrlsz.xcimocob.ui.widget.Option>
 
                 <TextView
                     android:id="@+id/comic_login_komiic"
@@ -73,7 +73,7 @@
                     android:textColor="?attr/colorPrimary"
                     android:textSize="14sp" />
 
-                <com.xyrlsz.xcimoc.ui.widget.Option
+                <com.xyrlsz.xcimocob.ui.widget.Option
                     android:id="@+id/comic_login_komiic_login"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -95,7 +95,7 @@
                             android:src="@drawable/ic_logout"
                             android:visibility="gone" />
                     </RelativeLayout>
-                </com.xyrlsz.xcimoc.ui.widget.Option>
+                </com.xyrlsz.xcimocob.ui.widget.Option>
 
                 <TextView
                     android:id="@+id/comic_login_vomicmh"
@@ -109,7 +109,7 @@
                     android:textColor="?attr/colorPrimary"
                     android:textSize="14sp" />
 
-                <com.xyrlsz.xcimoc.ui.widget.Option
+                <com.xyrlsz.xcimocob.ui.widget.Option
                     android:id="@+id/comic_login_vomicmh_login"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -132,7 +132,7 @@
                             android:visibility="gone" />
 
                     </RelativeLayout>
-                </com.xyrlsz.xcimoc.ui.widget.Option>
+                </com.xyrlsz.xcimocob.ui.widget.Option>
 
                 <TextView
                     android:id="@+id/comic_login_zai"
@@ -146,7 +146,7 @@
                     android:textColor="?attr/colorPrimary"
                     android:textSize="14sp" />
 
-                <com.xyrlsz.xcimoc.ui.widget.Option
+                <com.xyrlsz.xcimocob.ui.widget.Option
                     android:id="@+id/comic_login_zai_login"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -169,9 +169,9 @@
                             android:visibility="gone" />
 
                     </RelativeLayout>
-                </com.xyrlsz.xcimoc.ui.widget.Option>
+                </com.xyrlsz.xcimocob.ui.widget.Option>
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.CheckBoxPreference
                     android:id="@+id/comic_login_zai_auto_sign"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -193,7 +193,7 @@
                     android:textColor="?attr/colorPrimary"
                     android:textSize="14sp" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.ChoicePreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.ChoicePreference
                     android:id="@+id/comic_login_copy_region"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -201,7 +201,7 @@
                     android:focusable="true"
                     app:title="@string/copy_region_title" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.ChoicePreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.ChoicePreference
                     android:id="@+id/comic_login_copy_image_quality"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -221,7 +221,7 @@
                     android:textColor="?attr/colorPrimary"
                     android:textSize="14sp" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.ChoicePreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.ChoicePreference
                     android:id="@+id/comic_login_hot_image_quality"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -241,7 +241,7 @@
                     android:textColor="?attr/colorPrimary"
                     android:textSize="14sp" />
 
-                <com.xyrlsz.xcimoc.ui.widget.preference.ChoicePreference
+                <com.xyrlsz.xcimocob.ui.widget.preference.ChoicePreference
                     android:id="@+id/comic_login_baozi_image_quality"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
