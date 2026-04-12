@@ -3,6 +3,7 @@ package com.xyrlsz.xcimocob.soup;
 import com.xyrlsz.xcimocob.utils.StringUtils;
 
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
@@ -15,30 +16,51 @@ import java.util.Objects;
  */
 public class Node {
 
-    private Element element;
+    private final Element element;
+    private final Document document;
 
     public Node(String html) {
         this.element = Jsoup.parse(html).body();
+        this.document = Jsoup.parse(html);
     }
 
     public Node(Element element) {
         this.element = element;
+        this.document = element.ownerDocument();
+    }
+
+    static public String splitHref(String str, int index) {
+        if (str == null) {
+            return null;
+        }
+        str = str.replaceFirst(".*\\..*?/", "");
+        str = str.replaceAll("[/.=?]", " ");
+        str = str.trim();
+        return StringUtils.split(str, "\\s+", index);
     }
 
     public Node id(String id) {
-        return new Node(element.getElementById(id));
+        return new Node(Objects.requireNonNull(element.getElementById(id)));
     }
 
     public Node getParent(String cssQuery) {
-        return new Node(Objects.requireNonNull(get().select(cssQuery).first()).parent());
+        return new Node(Objects.requireNonNull(Objects.requireNonNull(get().select(cssQuery).first()).parent()));
     }
 
     public Node getChild(String cssQuery) {
-        return new Node(get().select(cssQuery).first());
+        return new Node(Objects.requireNonNull(get().select(cssQuery).first()));
     }
 
     public Node getLastChild(String cssQuery) {
-        return new Node(get().select(cssQuery).last());
+        return new Node(Objects.requireNonNull(get().select(cssQuery).last()));
+    }
+
+    public String attrFromDoc(String cssQuery, String attr) {
+        try {
+            return Objects.requireNonNull(document.select(cssQuery).first()).attr(attr).trim();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public List<Node> list(String cssQuery) {
@@ -170,16 +192,6 @@ public class Node {
 
     public String hrefWithSplit(String cssQuery, int index) {
         return splitHref(href(cssQuery), index);
-    }
-
-    static public String splitHref(String str, int index) {
-        if (str == null) {
-            return null;
-        }
-        str = str.replaceFirst(".*\\..*?/", "");
-        str = str.replaceAll("[/\\.=\\?]", " ");
-        str = str.trim();
-        return StringUtils.split(str, "\\s+", index);
     }
 
 }

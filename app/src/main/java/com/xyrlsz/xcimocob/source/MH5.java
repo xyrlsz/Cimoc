@@ -97,7 +97,10 @@ public class MH5 extends MangaParser {
         String author = body.text("p.author");
         String intro = body.text(".detail-desc");
         String update = body.text(".detail-info-btips .tips:nth-child(1) b");
-        comic.setInfo(title, cover, update, intro, author, isFinish(html));
+        // 修正点：获取状态文本并进行中文判断
+        String statusText = body.attrFromDoc("meta[property=og:novel:status]", "content");
+        comic.setInfo(title, cover, update, intro, author, isFinish(statusText));
+
         return comic;
     }
 
