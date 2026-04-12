@@ -109,7 +109,7 @@ public class Manga {
                     Random random = new Random();
                     String html;
                     if (parser.isGetSearchUseWebParser()) {
-                        WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers(), parser.getUA());
+                        WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
                         html = webParser.getHtmlStrSync();
                     } else {
                         html = getResponseBody(App.getHttpClient(), request);
@@ -146,7 +146,7 @@ public class Manga {
                     Random random = new Random();
                     String html;
                     if (parser.isGetSearchUseWebParser()) {
-                        WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers(), parser.getUA());
+                        WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
                         html = webParser.getHtmlStrSync();
                     } else {
                         html = getResponseBody(App.getHttpClient(), request);
@@ -209,7 +209,7 @@ public class Manga {
                         Request request = parser.getInfoRequest(comic.getCid());
                         String html;
                         if (parser.isParseInfoUseWebParser()) {
-                            WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers(), parser.getUA());
+                            WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
                             html = webParser.getHtmlStrSync();
                         } else {
                             html = getResponseBody(App.getHttpClient(), request);
@@ -219,7 +219,7 @@ public class Manga {
                         request = parser.getChapterRequest(html, comic.getCid());
                         if (request != null) {
                             if (parser.isParseChapterUseWebParser()) {
-                                WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers(), parser.getUA());
+                                WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
                                 html = webParser.getHtmlStrSync();
                             } else {
                                 html = getResponseBody(App.getHttpClient(), request);
@@ -287,7 +287,7 @@ public class Manga {
                         Request request = parser.getImagesRequest(cid, path);
                         if (parser.isParseImagesUseWebParser()) {
                             String url = request.url().toString();
-                            WebParser webParser = new WebParser(App.getAppContext(), url, request.headers(), parser.getUA());
+                            WebParser webParser = new WebParser(App.getAppContext(), url, request.headers());
 
                             html = webParser.getHtmlStrSync(); // 同步获取 HTML
                             list = parser.parseImages(html, chapter);
@@ -345,7 +345,7 @@ public class Manga {
                     throw new NetworkErrorException();
                 }
             } else {
-                WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers(), parser.getUA());
+                WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
 
                 String html = webParser.getHtmlStrSync();
                 List<Chapter> chapter = mChapterManager.getChapter(path, title);
@@ -376,7 +376,7 @@ public class Manga {
             response = Objects.requireNonNull(App.getHttpClient()).newCall(request).execute();
             if (response.isSuccessful()) {
                 if (parser.isParseImagesLazyUseWebParser()) {
-                    WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers(), parser.getUA());
+                    WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
                     return parser.parseLazy(webParser.getHtmlStrSync(), url);
                 }
                 return parser.parseLazy(response.body().string(), url);
@@ -403,7 +403,7 @@ public class Manga {
                 String newUrl = null;
                 try {
                     if (parser.isParseImagesLazyUseWebParser()) {
-                        WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers(), parser.getUA());
+                        WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
                         newUrl = parser.parseLazy(webParser.getHtmlStrSync(), url);
                     } else {
                         newUrl = parser.parseLazy(getResponseBody(App.getHttpClient(), request), url);

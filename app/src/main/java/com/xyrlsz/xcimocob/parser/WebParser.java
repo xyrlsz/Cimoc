@@ -87,6 +87,18 @@ public class WebParser {
             for (String key : headers.names()) {
                 headersMap.put(key, headers.get(key));
             }
+            // 如果UA是空并且Headers里面有UA，User-Agent大小写都行
+            if (StringUtils.isEmpty(UA)) {
+                // 在 Map 的 keySet 中查找忽略大小写等于 "user-agent" 的键
+                String realKey = headersMap.keySet().stream()
+                        .filter(k -> k.equalsIgnoreCase("user-agent"))
+                        .findFirst()
+                        .orElse(null);
+
+                if (realKey != null) {
+                    webView.getSettings().setUserAgentString(headersMap.get(realKey));
+                }
+            }
         }
 
         webView.loadUrl(url, headersMap);
