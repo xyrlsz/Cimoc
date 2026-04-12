@@ -76,7 +76,7 @@ public class OkHttpNetworkFetcher extends
     @Override
     public void fetch(@NonNull OkHttpNetworkFetchState fetchState, @NonNull Callback callback) {
         fetchState.submitTime = SystemClock.elapsedRealtime();
-        Headers headers = App.getHeaders();
+        Headers headers = ComicFrescoHeaders.getHeaders();
         final Uri uri = fetchState.getUri();
         Request request = new Request.Builder()
                 .cacheControl(new CacheControl.Builder().noStore().build())
@@ -93,12 +93,7 @@ public class OkHttpNetworkFetcher extends
                         if (Looper.myLooper() != Looper.getMainLooper()) {
                             call.cancel();
                         } else {
-                            mCancellationExecutor.execute(new Runnable() {
-                                @Override
-                                public void run() {
-                                    call.cancel();
-                                }
-                            });
+                            mCancellationExecutor.execute(call::cancel);
                         }
                     }
                 });

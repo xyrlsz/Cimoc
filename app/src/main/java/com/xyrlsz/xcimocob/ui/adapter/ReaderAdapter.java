@@ -23,6 +23,7 @@ import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.xyrlsz.xcimocob.App;
 import com.xyrlsz.xcimocob.R;
+import com.xyrlsz.xcimocob.fresco.ComicFrescoHeaders;
 import com.xyrlsz.xcimocob.fresco.ControllerBuilderSupplierFactory;
 import com.xyrlsz.xcimocob.fresco.ImagePipelineFactoryBuilder;
 import com.xyrlsz.xcimocob.fresco.processor.MangaPostprocessor;
@@ -103,7 +104,7 @@ public class ReaderAdapter extends BaseAdapter<ImageUrl> {
         final DraweeView draweeView = ((ImageHolder) holder).draweeView;
 
         Headers currHeaders = imageUrl.getHeaders();
-        App.setHeaders(imageUrl.getHeaders());
+        ComicFrescoHeaders.setHeaders(imageUrl.getHeaders());
         if (currHeaders != null) {
             Context context = App.getAppContext();
             ImagePipelineFactory mImagePipelineFactory = ImagePipelineFactoryBuilder
@@ -126,7 +127,7 @@ public class ReaderAdapter extends BaseAdapter<ImageUrl> {
                 ((PhotoDraweeView) draweeView).setScaleFactor(mScaleFactor);
                 ((PhotoDraweeView) draweeView).setScrollMode(isVertical ?
                         PhotoDraweeView.MODE_VERTICAL : PhotoDraweeView.MODE_HORIZONTAL);
-                builder.setControllerListener(new BaseControllerListener<ImageInfo>() {
+                builder.setControllerListener(new BaseControllerListener<>() {
                     @Override
                     public void onFinalImageSet(String id, ImageInfo imageInfo, Animatable animatable) {
                         if (imageInfo != null) {
@@ -145,7 +146,7 @@ public class ReaderAdapter extends BaseAdapter<ImageUrl> {
                 });
                 break;
             case READER_STREAM:
-                builder.setControllerListener(new BaseControllerListener<ImageInfo>() {
+                builder.setControllerListener(new BaseControllerListener<>() {
                     @Override
                     public void onFinalImageSet(String id, ImageInfo imageInfo, Animatable animatable) {
                         if (imageInfo != null) {

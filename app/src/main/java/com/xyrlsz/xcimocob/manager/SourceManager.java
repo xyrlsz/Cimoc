@@ -2,8 +2,8 @@ package com.xyrlsz.xcimocob.manager;
 
 import android.util.SparseArray;
 
-import com.xyrlsz.xcimocob.App;
 import com.xyrlsz.xcimocob.component.AppGetter;
+import com.xyrlsz.xcimocob.fresco.ComicFrescoHeaders;
 import com.xyrlsz.xcimocob.model.Source;
 import com.xyrlsz.xcimocob.model.Source_;
 import com.xyrlsz.xcimocob.parser.MangaParser;
@@ -165,7 +165,7 @@ public class SourceManager {
     public class HeaderGetter {
         public Headers getHeader(int type) {
             Headers headers = getParser(type).getHeader();
-            App.setHeaders(headers);
+            ComicFrescoHeaders.setHeaders(headers);
             return headers;
         }
     }
