@@ -152,7 +152,10 @@ public class CopyMHWeb extends MangaParser {
 
     @Override
     public Request getInfoRequest(String cid) {
-        return new Request.Builder().headers(getHeader()).url(getUrl(cid)).build();
+        return new Request.Builder()
+                .headers(getHeader())
+                .url(getUrl(cid))
+                .build();
     }
 
     @Override
@@ -224,7 +227,10 @@ public class CopyMHWeb extends MangaParser {
     @Override
     public Request getImagesRequest(String cid, String path) {
         String url = website + path;
-        return new Request.Builder().url(url).build();
+        return new Request.Builder()
+                .headers(getHeader())
+                .url(url)
+                .build();
     }
 
     @Override
@@ -267,7 +273,10 @@ public class CopyMHWeb extends MangaParser {
                         "&limit=" +
                         limit,
                 website);
-        return new Request.Builder().headers(getHeader()).url(url).build();
+        return new Request.Builder()
+                .headers(getHeader())
+                .url(url)
+                .build();
     }
 
     @Override
