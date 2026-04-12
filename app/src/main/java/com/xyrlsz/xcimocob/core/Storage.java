@@ -30,16 +30,19 @@ import rx.schedulers.Schedulers;
  */
 
 public class Storage {
-
     private static final String DOWNLOAD = "download";
     private static final String PICTURE = "picture";
     private static final String BACKUP = "backup";
 
     public static CimocDocumentFile initRoot(Context context, String uri) {
         if (uri == null || uri.isEmpty()) {
-//            File file = new File(Environment.getExternalStorageDirectory(), "Cimoc");
-            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "Cimoc");
-//            File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "Cimoc");
+            //            File file = new File(Environment.getExternalStorageDirectory(), "Cimoc");
+            File file = new File(
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
+                    "Cimoc");
+            //            File file = new
+            //            File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS),
+            //            "Cimoc");
             if (file.exists() || file.mkdirs()) {
                 return CimocDocumentFile.fromFile(file);
             } else {
@@ -48,7 +51,8 @@ public class Storage {
         } else if (uri.startsWith("content")) {
             return CimocDocumentFile.fromTreeUri(context, Uri.parse(uri));
         } else if (uri.startsWith("file")) {
-            return CimocDocumentFile.fromFile(new File(Objects.requireNonNull(Uri.parse(uri).getPath())));
+            return CimocDocumentFile.fromFile(
+                    new File(Objects.requireNonNull(Uri.parse(uri).getPath())));
         } else {
             return CimocDocumentFile.fromFile(new File(uri, "Cimoc"));
         }
@@ -58,7 +62,8 @@ public class Storage {
                                     CimocDocumentFile parent, Subscriber<? super String> subscriber) {
         CimocDocumentFile file = DocumentUtils.getOrCreateFile(parent, src.getName());
         if (file != null) {
-            subscriber.onNext(StringUtils.format("正在移动 %s...", src.getUri().getLastPathSegment()));
+            subscriber.onNext(
+                    StringUtils.format("正在移动 %s...", src.getUri().getLastPathSegment()));
             try {
                 DocumentUtils.writeBinaryToFile(resolver, src, file);
                 return true;
@@ -95,87 +100,144 @@ public class Storage {
         return true;
     }
 
-    private static void deleteDir(CimocDocumentFile parent, String name, Subscriber<? super String> subscriber) {
+    private static void deleteDir(
+            CimocDocumentFile parent, String name, Subscriber<? super String> subscriber) {
         CimocDocumentFile file = parent.findFile(name);
         if (file != null && file.isDirectory()) {
-            subscriber.onNext(StringUtils.format("正在删除 %s", file.getUri().getLastPathSegment()));
+            subscriber.onNext(
+                    StringUtils.format("正在删除 %s", file.getUri().getLastPathSegment()));
             file.delete();
         }
     }
 
     private static boolean isDirSame(CimocDocumentFile root, CimocDocumentFile dst) {
-        return Objects.requireNonNull(root.getUri().getScheme()).equals("file") && Objects.requireNonNull(dst.getUri().getPath()).endsWith("primary:Cimoc") ||
-                Objects.requireNonNull(root.getUri().getPath()).equals(dst.getUri().getPath());
+        return Objects.requireNonNull(root.getUri().getScheme()).equals("file")
+                && Objects.requireNonNull(dst.getUri().getPath()).endsWith("primary:Cimoc")
+                || Objects.requireNonNull(root.getUri().getPath()).equals(dst.getUri().getPath());
     }
 
-    public static Observable<String> moveRootDir(final ContentResolver resolver, final CimocDocumentFile root, final CimocDocumentFile dst) {
-        return Observable.create(new Observable.OnSubscribe<String>() {
-            @Override
-            public void call(Subscriber<? super String> subscriber) {
-                if (dst.canRead() && !isDirSame(root, dst)) {
-                    root.refresh();
-                    if (copyDir(resolver, root, dst, BACKUP, subscriber) &&
-                            copyDir(resolver, root, dst, DOWNLOAD, subscriber) &&
-                            copyDir(resolver, root, dst, PICTURE, subscriber)) {
-                        deleteDir(root, BACKUP, subscriber);
-                        deleteDir(root, DOWNLOAD, subscriber);
-                        deleteDir(root, PICTURE, subscriber);
-                        subscriber.onCompleted();
+    public static Observable<String> moveRootDir(
+            final ContentResolver resolver, final CimocDocumentFile root, final CimocDocumentFile dst) {
+        return Observable
+                .create((Observable.OnSubscribe<String>) subscriber -> {
+                    if (dst.canRead() && !isDirSame(root, dst)) {
+                        root.refresh();
+                        if (copyDir(resolver, root, dst, BACKUP, subscriber)
+                                && copyDir(resolver, root, dst, DOWNLOAD, subscriber)
+                                && copyDir(resolver, root, dst, PICTURE, subscriber)) {
+                            deleteDir(root, BACKUP, subscriber);
+                            deleteDir(root, DOWNLOAD, subscriber);
+                            deleteDir(root, PICTURE, subscriber);
+                            subscriber.onCompleted();
+                        }
                     }
-                }
-                subscriber.onError(new Exception());
-            }
-        }).subscribeOn(Schedulers.io());
+                    subscriber.onError(new Exception());
+                })
+                .subscribeOn(Schedulers.io());
     }
 
-    public static Observable<Uri> savePicture(final ContentResolver resolver, final CimocDocumentFile root,
-                                              final InputStream stream, final String filename) {
-        return Observable.create(new Observable.OnSubscribe<Uri>() {
-            @Override
-            public void call(Subscriber<? super Uri> subscriber) {
-                try {
-                    CimocDocumentFile dir = DocumentUtils.getOrCreateSubDirectory(root, PICTURE);
-                    if (dir != null) {
-                        CimocDocumentFile file = DocumentUtils.getOrCreateFile(dir, filename);
-                        DocumentUtils.writeBinaryToFile(resolver, Objects.requireNonNull(file), stream);
-                        subscriber.onNext(file.getUri());
-                        subscriber.onCompleted();
+    public static Observable<Uri> savePicture(final ContentResolver resolver,
+                                              final CimocDocumentFile root, final InputStream stream, final String filename) {
+        return Observable
+                .create((Observable.OnSubscribe<Uri>) subscriber -> {
+                    try {
+                        CimocDocumentFile dir = DocumentUtils.getOrCreateSubDirectory(root, PICTURE);
+                        if (dir != null) {
+                            CimocDocumentFile file = DocumentUtils.getOrCreateFile(dir, filename);
+                            DocumentUtils.writeBinaryToFile(
+                                    resolver, Objects.requireNonNull(file), stream);
+                            subscriber.onNext(file.getUri());
+                            subscriber.onCompleted();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                subscriber.onError(new Exception());
-            }
-        }).subscribeOn(Schedulers.io());
+                    subscriber.onError(new Exception());
+                })
+                .subscribeOn(Schedulers.io());
     }
 
-    public static List<ImageUrl> buildImageUrlFromDocumentFile(List<CimocDocumentFile> list, String chapterStr, int max, Chapter chapter) {
+    public static List<ImageUrl> buildImageUrlFromDocumentFile(
+            List<CimocDocumentFile> list, String chapterStr, int max, Chapter chapter) {
         int count = 0;
         List<ImageUrl> result = new ArrayList<>(list.size());
+
+        // 并行处理图片尺寸获取
+        List<ImageInfo> imageInfos = new ArrayList<>(list.size());
         for (CimocDocumentFile file : list) {
-            BitmapFactory.Options opts = new BitmapFactory.Options();
-            opts.inJustDecodeBounds = true;
-            try {
-                BitmapFactory.decodeStream(file.openInputStream(), null, opts);
-                String uri = file.getUri().toString();
-                if (uri.startsWith("file")) {   // content:// 解码会出错 file:// 中文路径如果不解码 Fresco 读取不了
-                    uri = DecryptionUtils.urlDecrypt(uri);
+            imageInfos.add(new ImageInfo(file, count++));
+        }
+
+        // 使用并行流处理
+        imageInfos.parallelStream().forEach(info -> {
+            String uri = info.file.getUri().toString();
+            if (uri.startsWith("file")) {
+                // file:// 类型，获取尺寸并解码中文路径
+                BitmapFactory.Options opts = new BitmapFactory.Options();
+                opts.inJustDecodeBounds = true;
+                try {
+                    BitmapFactory.decodeStream(info.file.openInputStream(), null, opts);
+                    info.width = opts.outWidth;
+                    info.height = opts.outHeight;
+                    info.uri = DecryptionUtils.urlDecrypt(uri);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    info.uri = uri;
                 }
-                Long comicChapter = chapter.getId();
-                Long id = IdCreator.createImageId(comicChapter, count);
-                ImageUrl image = new ImageUrl(id, comicChapter, ++count, uri, false);
-                image.setHeight(opts.outHeight);
-                image.setWidth(opts.outWidth);
-                image.setChapter(chapterStr);
-                result.add(image);
-            } catch (Exception e) {
-                e.printStackTrace();
+            } else if (uri.startsWith("content")) {
+                // content:// 类型，尝试快速获取尺寸
+                BitmapFactory.Options opts = new BitmapFactory.Options();
+                opts.inJustDecodeBounds = true;
+                opts.inSampleSize = 8; // 使用较大的采样率，减少内存使用
+                try {
+                    InputStream is = info.file.openInputStream();
+                    BitmapFactory.decodeStream(is, null, opts);
+                    is.close();
+                    info.width = opts.outWidth * 8; // 恢复原始尺寸
+                    info.height = opts.outHeight * 8;
+                    info.uri = uri;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    info.uri = uri;
+                }
+            } else {
+                // 其他类型
+                info.uri = uri;
             }
+        });
+
+        // 按原始顺序构建结果
+        count = 0;
+        for (ImageInfo info : imageInfos) {
+            Long comicChapter = chapter.getId();
+            Long id = IdCreator.createImageId(comicChapter, count);
+            ImageUrl image = new ImageUrl(id, comicChapter, ++count, info.uri, false);
+            image.setHeight(info.height);
+            image.setWidth(info.width);
+            image.setChapter(chapterStr);
+            result.add(image);
+
             if (count >= max) {
                 break;
             }
         }
+
         return result;
     }
 
+    private static class ImageInfo {
+        CimocDocumentFile file;
+        int index;
+        int width;
+        int height;
+        String uri;
+
+        ImageInfo(CimocDocumentFile file, int index) {
+            this.file = file;
+            this.index = index;
+            this.width = 0;
+            this.height = 0;
+            this.uri = null;
+        }
+    }
 }
