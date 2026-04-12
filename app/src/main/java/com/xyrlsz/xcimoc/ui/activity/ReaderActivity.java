@@ -21,8 +21,6 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.facebook.binaryresource.BinaryResource;
-import com.facebook.cache.common.SimpleCacheKey;
 import com.facebook.imagepipeline.core.ImagePipelineFactory;
 import com.xyrlsz.xcimoc.App;
 import com.xyrlsz.xcimoc.R;
@@ -43,6 +41,7 @@ import com.xyrlsz.xcimoc.ui.widget.OnTapGestureListener;
 import com.xyrlsz.xcimoc.ui.widget.PreCacheLayoutManager;
 import com.xyrlsz.xcimoc.ui.widget.RetryDraweeView;
 import com.xyrlsz.xcimoc.ui.widget.ReverseSeekBar;
+import com.xyrlsz.xcimoc.utils.FrescoUtils;
 import com.xyrlsz.xcimoc.utils.HintUtils;
 import com.xyrlsz.xcimoc.utils.STConvertUtils;
 import com.xyrlsz.xcimoc.utils.StringUtils;
@@ -54,6 +53,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -714,16 +714,19 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
                     mPresenter.savePicture(getContentResolver().openInputStream(Uri.parse(url)), url, title, progress);
                     return;
                 } else {
-                    ImagePipelineFactory factory = imageUrl.getSize() > App.mLargePixels ?
-                            mLargeImagePipelineFactory : mImagePipelineFactory;
-                    BinaryResource resource = factory
-                            .getDiskCachesStoreSupplier()
-                            .get()
-                            .getMainFileCache().getResource(new SimpleCacheKey(url));
-                    if (resource != null) {
-                        mPresenter.savePicture(resource.openStream(), url, title, progress);
-                        return;
-                    }
+//                    ImagePipelineFactory factory = imageUrl.getSize() > App.mLargePixels ?
+//                            mLargeImagePipelineFactory : mImagePipelineFactory;
+//                    BinaryResource resource = factory
+//                            .getDiskCachesStoreSupplier()
+//                            .get()
+//                            .getMainFileCache().getResource(new SimpleCacheKey(url));
+//                    if (resource != null) {
+//                        mPresenter.savePicture(resource.openStream(), url, title, progress);
+//                        return;
+//                    }
+                    InputStream inputStream = FrescoUtils.getCacheFileInputStream(url);
+                    mPresenter.savePicture(inputStream, url, title, progress);
+                    return;
                 }
             }
         } catch (IOException e) {

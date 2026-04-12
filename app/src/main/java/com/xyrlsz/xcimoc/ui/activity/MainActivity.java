@@ -296,7 +296,12 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
         if (itemId != mCheckItem) {
             switch (itemId) {
                 case R.id.drawer_comic:
-                    Objects.requireNonNull(mToolbarTitle).setText(mComicFragment.getCurrTitle());
+                    String title = "";
+                    if (mComicFragment == null) {
+                        mComicFragment = new ComicFragment(getBaseContext());
+                        title = mComicFragment.getCurrTitle();
+                    }
+                    Objects.requireNonNull(mToolbarTitle).setText(title.isEmpty() ? mComicFragment.getCurrTitle() : title);
                 case R.id.drawer_source:
 //                case R.id.drawer_tag:
                     mCheckItem = itemId;

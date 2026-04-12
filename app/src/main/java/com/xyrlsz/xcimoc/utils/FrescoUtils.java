@@ -40,6 +40,7 @@ import com.xyrlsz.xcimoc.saf.CimocDocumentFile;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -448,6 +449,21 @@ public class FrescoUtils {
                 .getMainFileCache().hasKey(cacheKey);
     }
 
+
+    /**
+     * 从缓存中获取InputStream
+     */
+    public static InputStream getCacheFileInputStream(String url) {
+        if (isCached(url)) {
+            File file = getFileFromDiskCache(url);
+            try {
+                return new FileInputStream(file);
+            } catch (FileNotFoundException e) {
+                return null;
+            }
+        }
+        return null;
+    }
 
     /**
      * 文件下载到文件夹中：将图片缓存到本地后，将缓存的图片文件copy到另一个文件夹中

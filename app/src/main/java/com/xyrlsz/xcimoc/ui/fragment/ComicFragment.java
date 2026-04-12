@@ -3,6 +3,7 @@ package com.xyrlsz.xcimoc.ui.fragment;
 import static com.xyrlsz.xcimoc.ui.activity.BrowserFilter.URL_KEY;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
@@ -39,6 +40,7 @@ import com.xyrlsz.xcimoc.ui.fragment.recyclerview.grid.LocalFragment;
 import com.xyrlsz.xcimoc.ui.view.ComicView;
 import com.xyrlsz.xcimoc.ui.widget.ComicFilterDialog;
 import com.xyrlsz.xcimoc.utils.HintUtils;
+import com.xyrlsz.xcimoc.utils.StringUtils;
 import com.xyrlsz.xcimoc.utils.ThemeUtils;
 
 import java.util.ArrayList;
@@ -63,6 +65,15 @@ public class ComicFragment extends BaseFragment implements ComicView {
     private TabPagerAdapter mTabAdapter;
     private List<Tag> mTagList;
     private String currTitle;
+    private Context mContext;
+
+    public ComicFragment(Context context) {
+        mContext = context;
+    }
+
+    public ComicFragment() {
+
+    }
 
     @Override
     protected BasePresenter initPresenter() {
@@ -309,6 +320,10 @@ public class ComicFragment extends BaseFragment implements ComicView {
     }
 
     public String getCurrTitle() {
+//        return currTitle;
+        if (StringUtils.isEmpty(currTitle) && mContext != null) {
+            return mContext.getResources().getString(R.string.comic_tab_favorite);
+        }
         return currTitle;
     }
 

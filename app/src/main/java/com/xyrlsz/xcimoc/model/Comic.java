@@ -98,6 +98,7 @@ public class Comic {
     public void copyFrom(Comic comic) {
         this.setInfo(comic.getTitle(), comic.getCover(), comic.getUpdate(), comic.getIntro(),
                 comic.getAuthor(), comic.getFinish());
+        this.setUrl(comic.getUrl());
     }
 
     @Override
