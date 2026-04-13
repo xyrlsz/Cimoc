@@ -220,8 +220,8 @@ public class ComicManager {
             }
             try {
                 mComicBox.put(comic);
-            } catch (UniqueViolationException e) {
-                throw new RuntimeException(e);
+            } catch (UniqueViolationException ignored) {
+
             }
         });
     }
