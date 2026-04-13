@@ -37,7 +37,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
-import butterknife.BindView;
 import okhttp3.Headers;
 
 /**
@@ -50,6 +49,8 @@ public class ReaderAdapter extends BaseAdapter<ImageUrl> {
 
     private static final int TYPE_LOADING = 2016101214;
     private static final int TYPE_IMAGE = 2016101215;
+    private static final int TYPE_IMAGE_PAGE = 0;
+    private static final int TYPE_IMAGE_STREAM = 1;
     private static @ReaderMode int reader;
     private PipelineDraweeControllerBuilderSupplier mControllerSupplier;
     private PipelineDraweeControllerBuilderSupplier mLargeControllerSupplier;
@@ -71,28 +72,43 @@ public class ReaderAdapter extends BaseAdapter<ImageUrl> {
 
     @Override
     public int getItemViewType(int position) {
-        return mDataSet.get(position).isLazy() ? TYPE_LOADING : TYPE_IMAGE;
+//        return mDataSet.get(position).isLazy() ? TYPE_LOADING : TYPE_IMAGE;
+        if (mDataSet.get(position).isLazy()) return TYPE_LOADING;
+
+        return reader == READER_PAGE ? TYPE_IMAGE_PAGE : TYPE_IMAGE_STREAM;
     }
 
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        boolean isWhiteBackground = App.getPreferenceManager().getBoolean(PreferenceManager.PREF_READER_WHITE_BACKGROUND, false);
+        boolean isWhiteBackground = App.getPreferenceManager()
+                .getBoolean(PreferenceManager.PREF_READER_WHITE_BACKGROUND, false);
+
         int resId;
-        if (isWhiteBackground) {
-            resId = viewType == TYPE_IMAGE ? (reader == READER_PAGE ?
-                    R.layout.item_picture_black : R.layout.item_picture_stream_black) : R.layout.item_loading_black;
-        } else {
-            resId = viewType == TYPE_IMAGE ? (reader == READER_PAGE ?
-                    R.layout.item_picture : R.layout.item_picture_stream) : R.layout.item_loading;
+
+        if (viewType == TYPE_LOADING) {
+            resId = isWhiteBackground ? R.layout.item_loading_black : R.layout.item_loading;
+            View view = mInflater.inflate(resId, parent, false);
+            return new LoadingHolder(view);
         }
+
+        if (viewType == TYPE_IMAGE_PAGE) {
+            resId = isWhiteBackground ? R.layout.item_picture_black : R.layout.item_picture;
+            View view = mInflater.inflate(resId, parent, false);
+            return new PageHolder(view); // 👈 用 PhotoDraweeView
+        }
+
+        // TYPE_IMAGE_STREAM
+        resId = isWhiteBackground ? R.layout.item_picture_stream_black : R.layout.item_picture_stream;
         View view = mInflater.inflate(resId, parent, false);
-        return new ImageHolder(view);
+        return new StreamHolder(view); // 👈 用 RetryDraweeView
     }
 
     @Override
-    public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         final ImageUrl imageUrl = mDataSet.get(position);
+
+        // 处理懒加载占位
         if (imageUrl.isLazy()) {
             if (!imageUrl.isLoading() && mLazyLoadListener != null) {
                 imageUrl.setLoading(true);
@@ -101,105 +117,148 @@ public class ReaderAdapter extends BaseAdapter<ImageUrl> {
             return;
         }
 
-        final DraweeView draweeView = ((ImageHolder) holder).draweeView;
+        // 根据 holder 类型获取 draweeView
+        DraweeView draweeView;
+        boolean isPageMode;
 
+        if (holder instanceof PageHolder) {
+            PhotoDraweeView photoView = ((PageHolder) holder).draweeView;
+            draweeView = photoView;
+            isPageMode = true;
+
+            // Page 模式特有配置
+            photoView.setTapListenerListener(mTapGestureListener);
+            photoView.setAlwaysBlockParent(isBanTurn);
+            photoView.setDoubleTap(isDoubleTap);
+            photoView.setScaleFactor(mScaleFactor);
+            photoView.setScrollMode(isVertical ?
+                    PhotoDraweeView.MODE_VERTICAL :
+                    PhotoDraweeView.MODE_HORIZONTAL);
+
+        } else if (holder instanceof StreamHolder) {
+            draweeView = ((StreamHolder) holder).draweeView;
+            isPageMode = false;
+
+        } else {
+            // LoadingHolder 不会走到这里，但保留兜底
+            return;
+        }
+
+        // 设置 Headers
         Headers currHeaders = imageUrl.getHeaders();
-        ComicFrescoHeaders.setHeaders(imageUrl.getHeaders());
+        ComicFrescoHeaders.setHeaders(currHeaders);
+
         if (currHeaders != null) {
             Context context = App.getAppContext();
-            ImagePipelineFactory mImagePipelineFactory = ImagePipelineFactoryBuilder
+            ImagePipelineFactory normalFactory = ImagePipelineFactoryBuilder
                     .build(context, imageUrl.isDownload() ? null : currHeaders, false);
-            ImagePipelineFactory mLargeImagePipelineFactory = ImagePipelineFactoryBuilder
+            ImagePipelineFactory largeFactory = ImagePipelineFactoryBuilder
                     .build(context, imageUrl.isDownload() ? null : currHeaders, true);
-            setControllerSupplier(ControllerBuilderSupplierFactory.get(context, mImagePipelineFactory),
-                    ControllerBuilderSupplierFactory.get(context, mLargeImagePipelineFactory));
 
+            setControllerSupplier(
+                    ControllerBuilderSupplierFactory.get(context, normalFactory),
+                    ControllerBuilderSupplierFactory.get(context, largeFactory)
+            );
         }
 
-        PipelineDraweeControllerBuilder builder = isNeedResize(imageUrl) ?
-                mLargeControllerSupplier.get() : mControllerSupplier.get();
+        // 选择 ControllerBuilder
+        PipelineDraweeControllerBuilder builder = isNeedResize(imageUrl)
+                ? mLargeControllerSupplier.get()
+                : mControllerSupplier.get();
 
-        switch (reader) {
-            case READER_PAGE:
-                ((PhotoDraweeView) draweeView).setTapListenerListener(mTapGestureListener);
-                ((PhotoDraweeView) draweeView).setAlwaysBlockParent(isBanTurn);
-                ((PhotoDraweeView) draweeView).setDoubleTap(isDoubleTap);
-                ((PhotoDraweeView) draweeView).setScaleFactor(mScaleFactor);
-                ((PhotoDraweeView) draweeView).setScrollMode(isVertical ?
-                        PhotoDraweeView.MODE_VERTICAL : PhotoDraweeView.MODE_HORIZONTAL);
-                builder.setControllerListener(new BaseControllerListener<>() {
-                    @Override
-                    public void onFinalImageSet(String id, ImageInfo imageInfo, Animatable animatable) {
-                        if (imageInfo != null) {
-                            imageUrl.setSuccess(true);
-                            ((PhotoDraweeView) draweeView).update(imageUrl.getId());
+        // 设置 ControllerListener
+        if (isPageMode) {
+            PhotoDraweeView photoView = (PhotoDraweeView) draweeView;
+            builder.setControllerListener(new BaseControllerListener<ImageInfo>() {
+                @Override
+                public void onFinalImageSet(String id, ImageInfo imageInfo, Animatable animatable) {
+                    if (imageInfo != null) {
+                        imageUrl.setSuccess(true);
+                        photoView.update(imageUrl.getId());
+                    }
+                }
+
+                @Override
+                public void onFailure(String id, Throwable throwable) {
+                    imageUrl.setSuccess(false);
+                    android.util.Log.e("ReaderAdapter",
+                            "图片加载失败: " + id + " URL: " + imageUrl.getUrl(),
+                            throwable);
+                }
+            });
+        } else {
+            builder.setControllerListener(new BaseControllerListener<ImageInfo>() {
+                @Override
+                public void onFinalImageSet(String id, ImageInfo imageInfo, Animatable animatable) {
+                    if (imageInfo != null) {
+                        imageUrl.setSuccess(true);
+
+                        if (isVertical) {
+                            draweeView.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                        } else {
+                            draweeView.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
                         }
-                    }
 
-                    @Override
-                    public void onFailure(String id, Throwable throwable) {
-                        imageUrl.setSuccess(false); // 标记加载失败
-                        throwable.printStackTrace(); // 打印异常信息
-                        // 或者使用 Log 输出
-                        android.util.Log.e("ReaderAdapter", "图片加载失败: " + id + " URL: " + imageUrl.getUrl(), throwable);
+                        draweeView.setAspectRatio(
+                                (float) imageInfo.getWidth() / imageInfo.getHeight()
+                        );
                     }
-                });
-                break;
-            case READER_STREAM:
-                builder.setControllerListener(new BaseControllerListener<>() {
-                    @Override
-                    public void onFinalImageSet(String id, ImageInfo imageInfo, Animatable animatable) {
-                        if (imageInfo != null) {
-                            imageUrl.setSuccess(true);
-                            if (isVertical) {
-                                draweeView.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                            } else {
-                                draweeView.getLayoutParams().width = ViewGroup.LayoutParams.WRAP_CONTENT;
-                            }
-                            draweeView.setAspectRatio((float) imageInfo.getWidth() / imageInfo.getHeight());
-                        }
-                    }
+                }
 
-                    @Override
-                    public void onFailure(String id, Throwable throwable) {
-                        imageUrl.setSuccess(false); // 标记加载失败
-                        throwable.printStackTrace(); // 打印异常信息
-                        // 或者使用 Log 输出
-                        android.util.Log.e("ReaderAdapter", "图片加载失败: " + id + " URL: " + imageUrl.getUrl(), throwable);
-                    }
-                });
-                break;
+                @Override
+                public void onFailure(String id, Throwable throwable) {
+                    imageUrl.setSuccess(false);
+                    android.util.Log.e("ReaderAdapter",
+                            "图片加载失败: " + id + " URL: " + imageUrl.getUrl(),
+                            throwable);
+                }
+            });
         }
 
+        // 构建 ImageRequest 数组
         String[] urls = imageUrl.getUrls().toArray(new String[0]);
-        ImageRequest[] request = new ImageRequest[urls.length];
-        for (int i = 0; i != urls.length; ++i) {
-            final String url = urls[i];
-            if (url == null) {
-                continue;
-            }
-            ImageRequestBuilder imageRequestBuilder = ImageRequestBuilder
+        ImageRequest[] requests = new ImageRequest[urls.length];
+
+        for (int i = 0; i < urls.length; i++) {
+            String url = urls[i];
+            if (url == null) continue;
+
+            ImageRequestBuilder reqBuilder = ImageRequestBuilder
                     .newBuilderWithSource(Uri.parse(url))
                     .setProgressiveRenderingEnabled(true);
 
-            // TODO 切图后可能需要修改图片高度和宽度
-            MangaPostprocessor processor = new MangaPostprocessor(imageUrl, isPaging, isPagingReverse, isWhiteEdge);
-            imageRequestBuilder.setPostprocessor(processor);
+            MangaPostprocessor processor = new MangaPostprocessor(
+                    imageUrl, isPaging, isPagingReverse, isWhiteEdge);
+            reqBuilder.setPostprocessor(processor);
+
             if (!isCloseAutoResizeImage) {
-                @SuppressWarnings("SuspiciousNameCombination") ResizeOptions options = isVertical ? new ResizeOptions(App.mWidthPixels, App.mHeightPixels) :
-                        new ResizeOptions(App.mHeightPixels, App.mWidthPixels);
-                imageRequestBuilder.setResizeOptions(options);
+                ResizeOptions options = isVertical
+                        ? new ResizeOptions(App.mWidthPixels, App.mHeightPixels)
+                        : new ResizeOptions(App.mHeightPixels, App.mWidthPixels);
+
+                reqBuilder.setResizeOptions(options);
             }
-            imageRequestBuilder.setRequestListener(new BaseRequestListener() {
+
+            reqBuilder.setRequestListener(new BaseRequestListener() {
                 @Override
-                public void onRequestSuccess(@NonNull ImageRequest request, @NonNull String requestId, boolean isPrefetch) {
+                public void onRequestSuccess(@NonNull ImageRequest request,
+                                             @NonNull String requestId,
+                                             boolean isPrefetch) {
                     imageUrl.setUrl(url);
                 }
             });
-            request[i] = imageRequestBuilder.build();
+
+            requests[i] = reqBuilder.build();
         }
-        builder.setOldController(draweeView.getController()).setTapToRetryEnabled(true).setRetainImageOnFailure(true);
-        draweeView.setController(builder.setFirstAvailableImageRequests(request).build());
+
+        // 绑定 Controller
+        builder.setOldController(draweeView.getController())
+                .setTapToRetryEnabled(true)
+                .setRetainImageOnFailure(true);
+
+        draweeView.setController(
+                builder.setFirstAvailableImageRequests(requests).build()
+        );
     }
 
     public void setControllerSupplier(PipelineDraweeControllerBuilderSupplier normal,
@@ -333,13 +392,31 @@ public class ReaderAdapter extends BaseAdapter<ImageUrl> {
         void onLoad(ImageUrl imageUrl);
     }
 
-    public static class ImageHolder extends BaseViewHolder {
-        public @BindView(R.id.reader_image_view)
-        RetryDraweeView draweeView;
 
-        ImageHolder(View view) {
-            super(view);
+    // 👇 Page模式（支持缩放）
+    public static class PageHolder extends RecyclerView.ViewHolder {
+        public PhotoDraweeView draweeView;
+
+        public PageHolder(View itemView) {
+            super(itemView);
+            draweeView = itemView.findViewById(R.id.reader_image_view);
         }
     }
 
+    // 👇 Stream模式（普通图）
+    public static class StreamHolder extends RecyclerView.ViewHolder {
+        public RetryDraweeView draweeView;
+
+        public StreamHolder(View itemView) {
+            super(itemView);
+            draweeView = itemView.findViewById(R.id.reader_image_view);
+        }
+    }
+
+    // 👇 Loading
+    public static class LoadingHolder extends RecyclerView.ViewHolder {
+        public LoadingHolder(View itemView) {
+            super(itemView);
+        }
+    }
 }

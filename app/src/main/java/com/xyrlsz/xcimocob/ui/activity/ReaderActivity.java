@@ -601,8 +601,25 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
         if (position == -1) {
             position = mLayoutManager.findFirstVisibleItemPosition();
         }
-        RetryDraweeView draweeView = ((ReaderAdapter.ImageHolder)
-                Objects.requireNonNull(mRecyclerView.findViewHolderForAdapterPosition(position))).draweeView;
+
+        RecyclerView.ViewHolder holder = mRecyclerView.findViewHolderForAdapterPosition(position);
+        if (holder == null) {
+            return 0;
+        }
+
+        RetryDraweeView draweeView = null;
+
+        // 根据 holder 类型获取 draweeView
+        if (holder instanceof ReaderAdapter.PageHolder) {
+            draweeView = ((ReaderAdapter.PageHolder) holder).draweeView;
+        } else if (holder instanceof ReaderAdapter.StreamHolder) {
+            draweeView = ((ReaderAdapter.StreamHolder) holder).draweeView;
+        }
+
+        if (draweeView == null) {
+            return 0;
+        }
+
         float limitX = point.x / 3.0f;
         float limitY = point.y / 3.0f;
         if (x < limitX) {
