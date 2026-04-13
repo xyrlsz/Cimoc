@@ -185,16 +185,20 @@ public class Storage {
                     info.uri = uri;
                 }
             } else if (uri.startsWith("content")) {
-                // content:// 类型，尝试快速获取尺寸
                 BitmapFactory.Options opts = new BitmapFactory.Options();
                 opts.inJustDecodeBounds = true;
-                opts.inSampleSize = 8; // 使用较大的采样率，减少内存使用
+                // 【修改点】：去掉 inSampleSize。
+                // 在 Bounds 模式下，它不影响速度（都是只读文件头），但会影响精度。
+
                 try {
                     InputStream is = info.file.openInputStream();
+                    // 这一步非常快，因为它只读取流的前几十个字节（文件头）
                     BitmapFactory.decodeStream(is, null, opts);
                     is.close();
-                    info.width = opts.outWidth * 8; // 恢复原始尺寸
-                    info.height = opts.outHeight * 8;
+
+                    // 直接赋值，精准获取原始尺寸
+                    info.width = opts.outWidth;
+                    info.height = opts.outHeight;
                     info.uri = uri;
                 } catch (Exception e) {
                     e.printStackTrace();
