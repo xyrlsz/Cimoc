@@ -103,6 +103,74 @@ public class DetailPresenter extends BasePresenter<DetailView> {
                 }
             }
         });
+
+        // 监听下载任务添加事件，刷新对应章节的下载状态
+        addSubscription(RxEvent.EVENT_TASK_INSERT, new Action1<RxEvent>() {
+            @Override
+            public void call(RxEvent rxEvent) {
+                MiniComic miniComic = (MiniComic) rxEvent.getData();
+                List<Task> list = (List<Task>) rxEvent.getData(1);
+                if (mComic != null && mComic.getId() > 0 && mComic.getId() == miniComic.getId()) {
+                    refreshChapterDownloadStatus(list);
+                }
+            }
+        });
+
+        // 监听下载删除事件，刷新对应章节的下载状态
+        addSubscription(RxEvent.EVENT_DOWNLOAD_REMOVE, new Action1<RxEvent>() {
+            @Override
+            public void call(RxEvent rxEvent) {
+                long id = (long) rxEvent.getData();
+                if (mComic != null && mComic.getId() > 0 && mComic.getId() == id) {
+                    // 重新加载章节列表，刷新下载状态
+                    reloadChapterList();
+                }
+            }
+        });
+    }
+
+    private void refreshChapterDownloadStatus(List<Task> tasks) {
+        if (mComic == null || mComic.getId() == 0) {
+            return;
+        }
+        mCompositeSubscription.add(
+            mChapterManager.getListChapter(IdCreator.createSourceComic(mComic))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    new Action1<List<Chapter>>() {
+                        @Override
+                        public void call(List<Chapter> list) {
+                            mBaseView.onChapterDownloadStatusChanged(list);
+                        }
+                    },
+                    new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            // ignore
+                        }
+                    }));
+    }
+
+    private void reloadChapterList() {
+        if (mComic == null || mComic.getId() == 0) {
+            return;
+        }
+        mCompositeSubscription.add(
+            mChapterManager.getListChapter(IdCreator.createSourceComic(mComic))
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                    new Action1<List<Chapter>>() {
+                        @Override
+                        public void call(List<Chapter> list) {
+                            mBaseView.onChapterDownloadStatusChanged(list);
+                        }
+                    },
+                    new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            // ignore
+                        }
+                    }));
     }
 
     public void checkDatabaseStatus() {

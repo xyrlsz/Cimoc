@@ -71,13 +71,7 @@ public class ImageUrlManager {
 
     // 6. 修改：updateOrInsert 逻辑
     public void updateOrInsert(List<ImageUrl> imageUrlList) {
-        Observable
-                .fromCallable(() -> {
-                    mImageUrlBox.put(imageUrlList);
-                    return null;
-                })
-                .subscribeOn(Schedulers.io())
-                .subscribe();
+        mImageUrlBox.put(imageUrlList);
     }
 
 

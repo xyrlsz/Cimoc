@@ -350,6 +350,20 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
     }
 
     @Override
+    public void onChapterDownloadStatusChanged(List<Chapter> list) {
+        for (Chapter chapter : list) {
+            for (Chapter adapterChapter : mDetailAdapter.getDateSet()) {
+                if (adapterChapter.getPath().equals(chapter.getPath())) {
+                    adapterChapter.setDownload(chapter.isDownload());
+                    adapterChapter.setComplete(chapter.isComplete());
+                    adapterChapter.setCount(chapter.getCount());
+                }
+            }
+        }
+        mDetailAdapter.notifyDataSetChanged();
+    }
+
+    @Override
     public void onComicLoadSuccess(Comic comic) {
         mDetailAdapter.setInfo(comic.getCover(), comic.getTitle(), comic.getAuthor(),
                 comic.getIntro(), comic.getFinish(), comic.getUpdate(), comic.getLast(), SourceManager.getInstance(getAppInstance()).getParser(comic.getSource()).getTitle());

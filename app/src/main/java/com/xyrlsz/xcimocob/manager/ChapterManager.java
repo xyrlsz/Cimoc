@@ -10,7 +10,6 @@ import java.util.concurrent.Callable;
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import rx.Observable;
-import rx.schedulers.Schedulers;
 
 /**
  * Created by Hiroshi on 2016/7/9.
@@ -76,13 +75,7 @@ public class ChapterManager {
     }
 
     public void updateOrInsert(List<Chapter> chapterList) {
-        Observable
-                .fromCallable(() -> {
-                    mChapterBox.put(chapterList);
-                    return null;
-                })
-                .subscribeOn(Schedulers.io())
-                .subscribe();
+        mChapterBox.put(chapterList);
     }
 
 
