@@ -184,7 +184,7 @@ public class ComicManager {
                 mComicBox.query(Comic_.cid.equal(cid)).equal(Comic_.source, source)
                         .order(Comic_.id)
                         .build()
-                        .find();
+                        .find(0, 1);
         return list.isEmpty() ? null : list.get(0);
     }
 
