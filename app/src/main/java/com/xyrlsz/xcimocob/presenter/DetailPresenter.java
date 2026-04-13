@@ -1,6 +1,7 @@
 package com.xyrlsz.xcimocob.presenter;
 
 import android.util.Log;
+
 import com.xyrlsz.xcimocob.App;
 import com.xyrlsz.xcimocob.core.Backup;
 import com.xyrlsz.xcimocob.core.Download;
@@ -19,11 +20,13 @@ import com.xyrlsz.xcimocob.rx.RxEvent;
 import com.xyrlsz.xcimocob.saf.CimocDocumentFile;
 import com.xyrlsz.xcimocob.ui.view.DetailView;
 import com.xyrlsz.xcimocob.utils.IdCreator;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -43,88 +46,70 @@ public class DetailPresenter extends BasePresenter<DetailView> {
 
     @Override
     protected void onViewAttach() {
-        mComicManager   = ComicManager.getInstance(mBaseView);
+        mComicManager = ComicManager.getInstance(mBaseView);
         mChapterManager = ChapterManager.getInstance(mBaseView);
-        mTaskManager    = TaskManager.getInstance(mBaseView);
-        mTagRefManager  = TagRefManager.getInstance(mBaseView);
-        mSourceManager  = SourceManager.getInstance(mBaseView);
+        mTaskManager = TaskManager.getInstance(mBaseView);
+        mTagRefManager = TagRefManager.getInstance(mBaseView);
+        mSourceManager = SourceManager.getInstance(mBaseView);
     }
 
     @Override
     protected void initSubscription() {
-        addSubscription(RxEvent.EVENT_COMIC_UPDATE, new Action1<RxEvent>() {
-            @Override
-            public void call(RxEvent rxEvent) {
-                if (mComic.getId() > 0 && mComic.getId() == (long) rxEvent.getData()) {
-                    Comic comic = mComicManager.load(mComic.getId());
-                    mComic.setPage(comic.getPage());
-                    mComic.setLast(comic.getLast());
-                    mComic.setChapter(comic.getChapter());
-                    mBaseView.onLastChange(mComic.getLast());
-                }
+        addSubscription(RxEvent.EVENT_COMIC_UPDATE, rxEvent -> {
+            if (mComic.getId() > 0 && mComic.getId() == (long) rxEvent.getData()) {
+                Comic comic = mComicManager.load(mComic.getId());
+                mComic.setPage(comic.getPage());
+                mComic.setLast(comic.getLast());
+                mComic.setChapter(comic.getChapter());
+                mBaseView.onLastChange(mComic.getLast());
             }
         });
-        addSubscription(RxEvent.EVENT_COMIC_UPDATE_INFO, new Action1<RxEvent>() {
-            @Override
-            public void call(RxEvent rxEvent) {
-                Comic eventComic = (Comic) rxEvent.getData();
-                // 必须增加 ID 或 Source+Cid 的双重判断！
-                if (mComic != null && mComic.getSource() == eventComic.getSource()
+        addSubscription(RxEvent.EVENT_COMIC_UPDATE_INFO, rxEvent -> {
+            Comic eventComic = (Comic) rxEvent.getData();
+            // 必须增加 ID 或 Source+Cid 的双重判断！
+            if (mComic != null && mComic.getSource() == eventComic.getSource()
                     && mComic.getCid().equals(eventComic.getCid())) {
-                    mComicManager.updateOrInsert(eventComic);
-                    // 尽量不要直接重新赋值 mComic，而是更新其属性
-                    mComic.copyFrom(eventComic);
-                }
+                mComicManager.updateOrInsert(eventComic);
+                // 尽量不要直接重新赋值 mComic，而是更新其属性
+                mComic.copyFrom(eventComic);
             }
         });
         // 监听收藏事件
-        addSubscription(RxEvent.EVENT_COMIC_FAVORITE, new Action1<RxEvent>() {
-            @Override
-            public void call(RxEvent rxEvent) {
-                MiniComic miniComic = (MiniComic) rxEvent.getData();
-                if (mComic != null && mComic.getSource() == miniComic.getSource()
+        addSubscription(RxEvent.EVENT_COMIC_FAVORITE, rxEvent -> {
+            MiniComic miniComic = (MiniComic) rxEvent.getData();
+            if (mComic != null && mComic.getSource() == miniComic.getSource()
                     && mComic.getCid().equals(miniComic.getCid())) {
-                    // 重新从数据库加载最新状态，确保 ID 和收藏状态同步
-                    mComic = mComicManager.load(miniComic.getSource(), miniComic.getCid());
-                    mBaseView.onComicLoadSuccess(mComic); // 触发 Activity 更新图标
-                }
+                // 重新从数据库加载最新状态，确保 ID 和收藏状态同步
+                mComic = mComicManager.load(miniComic.getSource(), miniComic.getCid());
+                mBaseView.onComicLoadSuccess(mComic); // 触发 Activity 更新图标
             }
         });
 
         // 监听取消收藏事件
-        addSubscription(RxEvent.EVENT_COMIC_UNFAVORITE, new Action1<RxEvent>() {
-            @Override
-            public void call(RxEvent rxEvent) {
-                long id = (long) rxEvent.getData();
-                if (mComic != null && mComic.getId() > 0 && mComic.getId() == id) {
-                    // 更新本地内存状态
-                    mComic.setFavorite(null);
-                    mBaseView.onComicLoadSuccess(mComic); // 触发 Activity 更新图标
-                }
+        addSubscription(RxEvent.EVENT_COMIC_UNFAVORITE, rxEvent -> {
+            long id = (long) rxEvent.getData();
+            if (mComic != null && mComic.getId() > 0 && mComic.getId() == id) {
+                // 更新本地内存状态
+                mComic.setFavorite(null);
+                mBaseView.onComicLoadSuccess(mComic); // 触发 Activity 更新图标
             }
         });
 
         // 监听下载任务添加事件，刷新对应章节的下载状态
-        addSubscription(RxEvent.EVENT_TASK_INSERT, new Action1<RxEvent>() {
-            @Override
-            public void call(RxEvent rxEvent) {
-                MiniComic miniComic = (MiniComic) rxEvent.getData();
-                List<Task> list = (List<Task>) rxEvent.getData(1);
-                if (mComic != null && mComic.getId() > 0 && mComic.getId() == miniComic.getId()) {
-                    refreshChapterDownloadStatus(list);
-                }
+        addSubscription(RxEvent.EVENT_TASK_INSERT, rxEvent -> {
+            MiniComic miniComic = (MiniComic) rxEvent.getData();
+            List<Task> list = TaskManager.getInstance(mBaseView).list(miniComic.getId());
+            if (mComic != null && mComic.getId() > 0 && mComic.getId() == miniComic.getId()) {
+                refreshChapterDownloadStatus(list);
             }
         });
 
         // 监听下载删除事件，刷新对应章节的下载状态
-        addSubscription(RxEvent.EVENT_DOWNLOAD_REMOVE, new Action1<RxEvent>() {
-            @Override
-            public void call(RxEvent rxEvent) {
-                long id = (long) rxEvent.getData();
-                if (mComic != null && mComic.getId() > 0 && mComic.getId() == id) {
-                    // 重新加载章节列表，刷新下载状态
-                    reloadChapterList();
-                }
+        addSubscription(RxEvent.EVENT_DOWNLOAD_REMOVE, rxEvent -> {
+            long id = (long) rxEvent.getData();
+            if (mComic != null && mComic.getId() > 0 && mComic.getId() == id) {
+                // 重新加载章节列表，刷新下载状态
+                reloadChapterList();
             }
         });
     }
@@ -134,21 +119,25 @@ public class DetailPresenter extends BasePresenter<DetailView> {
             return;
         }
         mCompositeSubscription.add(
-            mChapterManager.getListChapter(IdCreator.createSourceComic(mComic))
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                    new Action1<List<Chapter>>() {
-                        @Override
-                        public void call(List<Chapter> list) {
-                            mBaseView.onChapterDownloadStatusChanged(list);
-                        }
-                    },
-                    new Action1<Throwable>() {
-                        @Override
-                        public void call(Throwable throwable) {
-                            // ignore
-                        }
-                    }));
+                mChapterManager.getListChapter(IdCreator.createSourceComic(mComic))
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                list -> {
+                                    for (Chapter chapter : list) {
+                                        for (Task task : tasks) {
+                                            if (chapter.getId() == task.getId()) {
+                                                chapter.setDownload(true);
+                                                chapter.setComplete(task.isFinish());
+                                                chapter.setTid(task.getId());
+                                            }
+                                        }
+                                    }
+                                    mBaseView.onChapterDownloadStatusChanged(list);
+                                },
+                                throwable -> {
+                                    // ignore
+                                }));
+
     }
 
     private void reloadChapterList() {
@@ -156,21 +145,13 @@ public class DetailPresenter extends BasePresenter<DetailView> {
             return;
         }
         mCompositeSubscription.add(
-            mChapterManager.getListChapter(IdCreator.createSourceComic(mComic))
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                    new Action1<List<Chapter>>() {
-                        @Override
-                        public void call(List<Chapter> list) {
-                            mBaseView.onChapterDownloadStatusChanged(list);
-                        }
-                    },
-                    new Action1<Throwable>() {
-                        @Override
-                        public void call(Throwable throwable) {
-                            // ignore
-                        }
-                    }));
+                mChapterManager.getListChapter(IdCreator.createSourceComic(mComic))
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                list -> mBaseView.onChapterDownloadStatusChanged(list),
+                                throwable -> {
+                                    // ignore
+                                }));
     }
 
     public void checkDatabaseStatus() {
@@ -219,72 +200,72 @@ public class DetailPresenter extends BasePresenter<DetailView> {
             return;
         }
         mCompositeSubscription.add(
-            mChapterManager.getListChapter(IdCreator.createSourceComic(mComic))
-                .doOnNext(new Action1<List<Chapter>>() {
-                    @Override
-                    public void call(List<Chapter> list) {
-                        if (mComic.getId() > 0 && !list.isEmpty()) {
-                            updateChapterList(list);
-                        }
-                    }
-                })
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                    new Action1<List<Chapter>>() {
-                        @Override
-                        public void call(List<Chapter> list) {
-                            if (list != null && !list.isEmpty()) {
-                                mBaseView.onPreLoadSuccess(list, mComic);
+                mChapterManager.getListChapter(IdCreator.createSourceComic(mComic))
+                        .doOnNext(new Action1<List<Chapter>>() {
+                            @Override
+                            public void call(List<Chapter> list) {
+                                if (mComic.getId() > 0 && !list.isEmpty()) {
+                                    updateChapterList(list);
+                                }
                             }
-                        }
-                    },
-                    new Action1<Throwable>() {
-                        @Override
-                        public void call(Throwable throwable) {
-                            mBaseView.onComicLoadSuccess(mComic);
-                            mBaseView.onParseError();
-                        }
-                    }));
+                        })
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                new Action1<List<Chapter>>() {
+                                    @Override
+                                    public void call(List<Chapter> list) {
+                                        if (list != null && !list.isEmpty()) {
+                                            mBaseView.onPreLoadSuccess(list, mComic);
+                                        }
+                                    }
+                                },
+                                new Action1<Throwable>() {
+                                    @Override
+                                    public void call(Throwable throwable) {
+                                        mBaseView.onComicLoadSuccess(mComic);
+                                        mBaseView.onParseError();
+                                    }
+                                }));
     }
 
     private void load() {
         mCompositeSubscription.add(
-            Manga.getComicInfo(mSourceManager.getParser(mComic.getSource()), mComic)
-                .doOnNext(new Action1<List<Chapter>>() {
-                    @Override
-                    public void call(List<Chapter> list) {
-                        if (mComic.getId() > 0) {
-                            updateChapterList(list);
-                        }
-                    }
-                })
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                    new Action1<List<Chapter>>() {
-                        @Override
-                        public void call(List<Chapter> list) {
-                            // 确保章节的sourceComic ID正确
-                            if (mComic.getId() > 0) {
-                                Long sourceComic = IdCreator.createSourceComic(mComic);
-                                for (Chapter chapter : list) {
-                                    chapter.setSourceComic(sourceComic);
+                Manga.getComicInfo(mSourceManager.getParser(mComic.getSource()), mComic)
+                        .doOnNext(new Action1<List<Chapter>>() {
+                            @Override
+                            public void call(List<Chapter> list) {
+                                if (mComic.getId() > 0) {
+                                    updateChapterList(list);
                                 }
                             }
-                            mChapterManager.updateOrInsert(list);
-                            mBaseView.onComicLoadSuccess(mComic);
-                            mBaseView.onChapterLoadSuccess(list);
-                        }
-                    },
-                    new Action1<Throwable>() {
-                        @Override
-                        public void call(Throwable throwable) {
-                            List<Chapter> cachedChapters =
-                                mChapterManager.getChapterList(IdCreator.createSourceComic(mComic));
-                            mBaseView.onComicLoadSuccess(mComic);
-                            mBaseView.onChapterLoadSuccess(cachedChapters);
-                            mBaseView.onParseError();
-                        }
-                    }));
+                        })
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                new Action1<List<Chapter>>() {
+                                    @Override
+                                    public void call(List<Chapter> list) {
+                                        // 确保章节的sourceComic ID正确
+                                        if (mComic.getId() > 0) {
+                                            Long sourceComic = IdCreator.createSourceComic(mComic);
+                                            for (Chapter chapter : list) {
+                                                chapter.setSourceComic(sourceComic);
+                                            }
+                                        }
+                                        mChapterManager.updateOrInsert(list);
+                                        mBaseView.onComicLoadSuccess(mComic);
+                                        mBaseView.onChapterLoadSuccess(list);
+                                    }
+                                },
+                                new Action1<Throwable>() {
+                                    @Override
+                                    public void call(Throwable throwable) {
+                                        List<Chapter> cachedChapters =
+                                                mChapterManager.getChapterList(IdCreator.createSourceComic(mComic));
+                                        mBaseView.onComicLoadSuccess(mComic);
+                                        mBaseView.onChapterLoadSuccess(cachedChapters);
+                                        mBaseView.onParseError();
+                                    }
+                                }));
     }
 
     private void cancelHighlight() {
@@ -293,7 +274,7 @@ public class DetailPresenter extends BasePresenter<DetailView> {
             mComic.setFavorite(System.currentTimeMillis());
             mComicManager.update(mComic);
             RxBus.getInstance().post(
-                new RxEvent(RxEvent.EVENT_COMIC_CANCEL_HIGHLIGHT, new MiniComic(mComic)));
+                    new RxEvent(RxEvent.EVENT_COMIC_CANCEL_HIGHLIGHT, new MiniComic(mComic)));
         }
     }
 
@@ -323,14 +304,15 @@ public class DetailPresenter extends BasePresenter<DetailView> {
 
     public void backup(CimocDocumentFile file) {
         mComicManager.listFavoriteOrHistoryInRx()
-            .doOnNext(new Action1<List<Comic>>() {
-                @Override
-                public void call(List<Comic> list) {
-                    Backup.saveComicAuto(
-                        mBaseView.getAppInstance().getContentResolver(), file, list);
-                }
-            })
-            .subscribe(result -> {}, throwable -> Log.e("RX", "Chapter error", throwable));
+                .doOnNext(new Action1<List<Comic>>() {
+                    @Override
+                    public void call(List<Comic> list) {
+                        Backup.saveComicAuto(
+                                mBaseView.getAppInstance().getContentResolver(), file, list);
+                    }
+                })
+                .subscribe(result -> {
+                }, throwable -> Log.e("RX", "Chapter error", throwable));
     }
 
     public void favoriteComic() {
@@ -377,18 +359,18 @@ public class DetailPresenter extends BasePresenter<DetailView> {
                         }
                         for (Chapter chapter : dList) {
                             Long newSourceComic = IdCreator.recreateSourceComic(
-                                chapter.getSourceComic(), mComic.getId());
+                                    chapter.getSourceComic(), mComic.getId());
                             Long newChapterId =
-                                IdCreator.recreateChapterId(newSourceComic, chapter.getId());
+                                    IdCreator.recreateChapterId(newSourceComic, chapter.getId());
                             chapter.setId(newChapterId);
                             chapter.setSourceComic(newSourceComic);
                             dchapterList.add(chapter);
                         }
                         for (Chapter chapter : cList) {
                             Long newSourceComic = IdCreator.recreateSourceComic(
-                                chapter.getSourceComic(), mComic.getId());
+                                    chapter.getSourceComic(), mComic.getId());
                             Long newChapterId =
-                                IdCreator.recreateChapterId(newSourceComic, chapter.getId());
+                                    IdCreator.recreateChapterId(newSourceComic, chapter.getId());
                             chapter.setId(newChapterId);
                             chapter.setSourceComic(newSourceComic);
                             cchapterList.add(chapter);
@@ -398,7 +380,7 @@ public class DetailPresenter extends BasePresenter<DetailView> {
                         mComic.setDownload(System.currentTimeMillis());
                         mComic.setHistory(System.currentTimeMillis());
                         RxBus.getInstance().post(
-                            new RxEvent(RxEvent.EVENT_COMIC_READ, new MiniComic(mComic)));
+                                new RxEvent(RxEvent.EVENT_COMIC_READ, new MiniComic(mComic)));
                         mComicManager.runInTx(new Runnable() {
                             @Override
                             public void run() {
@@ -410,7 +392,7 @@ public class DetailPresenter extends BasePresenter<DetailView> {
                             }
                         });
                         Download.updateComicIndex(mBaseView.getAppInstance().getContentResolver(),
-                            mBaseView.getAppInstance().getDocumentFile(), cList, mComic);
+                                mBaseView.getAppInstance().getDocumentFile(), cList, mComic);
                         subscriber.onNext(result);
                         subscriber.onCompleted();
                     }
@@ -418,19 +400,19 @@ public class DetailPresenter extends BasePresenter<DetailView> {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                    new Action1<ArrayList<Task>>() {
-                        @Override
-                        public void call(ArrayList<Task> list) {
-                            RxBus.getInstance().post(new RxEvent(
-                                RxEvent.EVENT_TASK_INSERT, new MiniComic(mComic), list));
-                            mBaseView.onTaskAddSuccess(list);
-                        }
-                    },
-                    new Action1<Throwable>() {
-                        @Override
-                        public void call(Throwable throwable) {
-                            mBaseView.onTaskAddFail();
-                        }
-                    }));
+                        new Action1<ArrayList<Task>>() {
+                            @Override
+                            public void call(ArrayList<Task> list) {
+                                RxBus.getInstance().post(new RxEvent(
+                                        RxEvent.EVENT_TASK_INSERT, new MiniComic(mComic), list));
+                                mBaseView.onTaskAddSuccess(list);
+                            }
+                        },
+                        new Action1<Throwable>() {
+                            @Override
+                            public void call(Throwable throwable) {
+                                mBaseView.onTaskAddFail();
+                            }
+                        }));
     }
 }
