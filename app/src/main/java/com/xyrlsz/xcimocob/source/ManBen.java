@@ -93,8 +93,17 @@ public class ManBen extends MangaParser {
     public Comic parseInfo(String html, Comic comic) throws UnsupportedEncodingException, JSONException {
         Node body = new Node(html);
         String title = body.text(".info > .title");
+        if (StringUtils.isEmpty(title)) {
+            title = body.text(".title");
+        }
         String cover = body.src(".content > .cover");
+        if (StringUtils.isEmpty(cover)) {
+            cover = body.attr(".content .cover", "src");
+        }
         List<Node> infoList = body.list(".info > .subtitle");
+        if (infoList.isEmpty()) {
+            infoList = body.list(".subtitle");
+        }
         String author = "";
         for (Node info : infoList) {
             if (info.text().contains("作者")) {
