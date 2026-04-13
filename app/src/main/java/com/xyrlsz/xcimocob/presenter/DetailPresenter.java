@@ -104,14 +104,6 @@ public class DetailPresenter extends BasePresenter<DetailView> {
             }
         });
 
-        // 监听下载删除事件，刷新对应章节的下载状态
-        addSubscription(RxEvent.EVENT_DOWNLOAD_REMOVE, rxEvent -> {
-            long id = (long) rxEvent.getData();
-            if (mComic != null && mComic.getId() > 0 && mComic.getId() == id) {
-                // 重新加载章节列表，刷新下载状态
-                reloadChapterList();
-            }
-        });
     }
 
     private void refreshChapterDownloadStatus(List<Task> tasks) {
@@ -138,20 +130,6 @@ public class DetailPresenter extends BasePresenter<DetailView> {
                                     // ignore
                                 }));
 
-    }
-
-    private void reloadChapterList() {
-        if (mComic == null || mComic.getId() == 0) {
-            return;
-        }
-        mCompositeSubscription.add(
-                mChapterManager.getListChapter(IdCreator.createSourceComic(mComic))
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(
-                                list -> mBaseView.onChapterDownloadStatusChanged(list),
-                                throwable -> {
-                                    // ignore
-                                }));
     }
 
     public void checkDatabaseStatus() {

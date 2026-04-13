@@ -6,10 +6,12 @@ import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
-import androidx.appcompat.widget.AppCompatTextView;
 import android.util.AttributeSet;
 
+import androidx.appcompat.widget.AppCompatTextView;
+
 import com.xyrlsz.xcimocob.R;
+import com.xyrlsz.xcimocob.utils.ThemeUtils;
 
 /**
  * Created by Hiroshi on 2016/10/2.
@@ -46,11 +48,6 @@ public class ChapterButton extends AppCompatTextView {
         normalColor = typedArray2.getColor(R.styleable.ThemeAttributes_colorAutoGW, Color.BLACK);
         typedArray.recycle();
         typedArray2.recycle();
-//        normalColor = 0x8A000000;
-//
-//        if(ThemeUtils.isDarkMode(context)){
-//            normalColor = Color.GRAY;
-//        }
 
         setClickable(true);
         download = false;
@@ -84,7 +81,7 @@ public class ChapterButton extends AppCompatTextView {
     public void setDownload(boolean download) {
         if (this.download != download) {
             this.download = download;
-            normalColor = download ? accentColor : 0x8A000000;
+            normalColor = download ? accentColor : ThemeUtils.isDarkMode(getContext()) ? Color.GRAY : Color.BLACK;
             initColorDrawableState();
             initDrawableState();
         }
