@@ -149,8 +149,9 @@ public class Storage {
                             subscriber.onNext(file.getUri());
                             subscriber.onCompleted();
                         }
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        stream.close();
+                    } catch (IOException ignored) {
+
                     }
                     subscriber.onError(new Exception());
                 })

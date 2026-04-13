@@ -32,11 +32,12 @@ import com.xyrlsz.xcimocob.rx.RxBus;
 import com.xyrlsz.xcimocob.rx.RxEvent;
 import com.xyrlsz.xcimocob.saf.CimocDocumentFile;
 import com.xyrlsz.xcimocob.utils.DocumentUtils;
+import com.xyrlsz.xcimocob.utils.FrescoUtils;
 import com.xyrlsz.xcimocob.utils.IdCreator;
-import com.xyrlsz.xcimocob.utils.JMTTUtil;
 import com.xyrlsz.xcimocob.utils.StringUtils;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
@@ -51,11 +52,9 @@ import java.util.concurrent.Future;
 
 import okhttp3.CacheControl;
 import okhttp3.Headers;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
 
 /**
  * Created by Hiroshi on 2016/9/1.
@@ -215,9 +214,12 @@ public class DownloadService extends Service implements AppGetter {
                                 List<String> urls = image.getUrls();
                                 for (int j = 0; !success && j < urls.size(); ++j) {
                                     String url = image.isLazy() ? Manga.getLazyUrl(mParse, urls.get(j)) : urls.get(j);
-                                    Headers imgHeaders = image.getHeaders();
-                                    Request request = buildRequest(imgHeaders == null ? mParse.getHeader(url) : imgHeaders, url);
-                                    success = RequestAndWrite(dir, request, i + 1, url);
+                                    success = GetCacheAndWrite(dir, i + 1, url);
+                                    if (!success) {
+                                        Headers imgHeaders = image.getHeaders();
+                                        Request request = buildRequest(imgHeaders == null ? mParse.getHeader(url) : imgHeaders, url);
+                                        success = RequestAndWrite(dir, request, i + 1, url);
+                                    }
                                 }
                             }
                             if (!success) {     // 单页下载错误
@@ -236,6 +238,8 @@ public class DownloadService extends Service implements AppGetter {
                 }
             } catch (InterruptedIOException e) {
                 RxBus.getInstance().post(new RxEvent(RxEvent.EVENT_TASK_STATE_CHANGE, Task.STATE_PAUSE, mTask.getId()));
+            } catch (IOException e) {
+                RxBus.getInstance().post(new RxEvent(RxEvent.EVENT_TASK_STATE_CHANGE, Task.STATE_ERROR, mTask.getId()));
             }
 
             completeDownload(mTask.getId());
@@ -268,32 +272,42 @@ public class DownloadService extends Service implements AppGetter {
 
         }
 
+        private boolean GetCacheAndWrite(CimocDocumentFile parent, int num, String url) throws IOException {
+            InputStream cacheIs = FrescoUtils.getCacheFileInputStream(url);
+            if (cacheIs != null) {
+                String displayName = buildFileName(num, url);
+                displayName = displayName.replaceAll("[:/(\\\\)(\\?)<>\"(\\|)(\\.)]", "_") + ".jpg";
+                CimocDocumentFile file = DocumentUtils.getOrCreateFile(parent, displayName);
+                DocumentUtils.writeBinaryToFile(mContentResolver, Objects.requireNonNull(file), cacheIs);
+                return true;
+            }
+            return false;
+        }
+
         private boolean RequestAndWrite(CimocDocumentFile parent, Request request, int num, String url) throws InterruptedIOException {
             if (request != null) {
-                Response response = null;
-                try {
-                    if (mTask.getSource() == 72) {
-                        OkHttpClient mJMTTHttpClient = new OkHttpClient().newBuilder()
-                                .followRedirects(true)
-                                .followSslRedirects(true)
-                                .retryOnConnectionFailure(true)
-                                .addInterceptor(chain -> {
-                                    String url1 = chain.request().url().toString();
-                                    Response response1 = chain.proceed(chain.request());
-                                    if (!url1.toLowerCase().contains("media/photos"))
-                                        return response1;
-                                    int cha = Integer.parseInt(url1.substring(url1.indexOf("photos/") + 7, url1.lastIndexOf("/")));
-                                    if (cha < 220980) return response1;
-                                    byte[] res = new JMTTUtil().decodeImage(response1.body().byteStream());
-                                    MediaType mediaType = MediaType.parse("image/avif,image/webp,image/apng,image/*,*/*");
-                                    ResponseBody outputBytes = ResponseBody.create(mediaType, res);
-                                    return response1.newBuilder().body(outputBytes).build();
-                                })
-                                .build();
-                        response = mJMTTHttpClient.newCall(request).execute();
-                    } else {
-                        response = mHttpClient.newCall(request).execute();
-                    }
+                try (Response response = mHttpClient.newCall(request).execute()) {
+//                    if (mTask.getSource() == 72) {
+//                        OkHttpClient mJMTTHttpClient = new OkHttpClient().newBuilder()
+//                                .followRedirects(true)
+//                                .followSslRedirects(true)
+//                                .retryOnConnectionFailure(true)
+//                                .addInterceptor(chain -> {
+//                                    String url1 = chain.request().url().toString();
+//                                    Response response1 = chain.proceed(chain.request());
+//                                    if (!url1.toLowerCase().contains("media/photos"))
+//                                        return response1;
+//                                    int cha = Integer.parseInt(url1.substring(url1.indexOf("photos/") + 7, url1.lastIndexOf("/")));
+//                                    if (cha < 220980) return response1;
+//                                    byte[] res = new JMTTUtil().decodeImage(response1.body().byteStream());
+//                                    MediaType mediaType = MediaType.parse("image/avif,image/webp,image/apng,image/*,*/*");
+//                                    ResponseBody outputBytes = ResponseBody.create(mediaType, res);
+//                                    return response1.newBuilder().body(outputBytes).build();
+//                                })
+//                                .build();
+//                        response = mJMTTHttpClient.newCall(request).execute();
+//                    } else {
+                    //                    }
                     if (response.isSuccessful()) {
                         String displayName = buildFileName(num, url);
                         displayName = displayName.replaceAll("[:/(\\\\)(\\?)<>\"(\\|)(\\.)]", "_") + ".jpg";
@@ -308,10 +322,6 @@ public class DownloadService extends Service implements AppGetter {
                     throw e;
                 } catch (IOException e) {
                     e.printStackTrace();
-                } finally {
-                    if (response != null) {
-                        response.close();
-                    }
                 }
             }
             return false;
