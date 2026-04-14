@@ -132,10 +132,7 @@ android {
             universalApk true // 是否生成包含所有 ABI 的通用 APK
         }
     }
-    lint {
-        abortOnError false
-        disable 'ResourcePrefix'
-    }
+
     sourceSets {
         main {
         }
@@ -151,7 +148,7 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
     implementation 'com.google.android.material:material:1.13.0'
     implementation 'com.jakewharton:butterknife:10.2.3'
-    kapt  'com.jakewharton:butterknife-compiler:10.2.3'
+    kapt 'com.jakewharton:butterknife-compiler:10.2.3'
     //noinspection GradleDependency uses-sdk:minSdkVersion 21 cannot be smaller than version 23 declared in library [androidx.activity:activity:1.12.0]
     implementation 'androidx.activity:activity-ktx:1.11.0'
     implementation 'io.objectbox:objectbox-android:5.0.1'
