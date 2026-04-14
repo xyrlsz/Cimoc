@@ -18,7 +18,7 @@ import com.xyrlsz.xcimocob.source.DuManWuApp;
 import com.xyrlsz.xcimocob.source.GFMH;
 import com.xyrlsz.xcimocob.source.GoDaManHua;
 import com.xyrlsz.xcimocob.source.HotManga;
-import com.xyrlsz.xcimocob.source.IKanman;
+import com.xyrlsz.xcimocob.source.ManHuaGui;
 import com.xyrlsz.xcimocob.source.Komiic;
 import com.xyrlsz.xcimocob.source.Locality;
 import com.xyrlsz.xcimocob.source.MH5;
@@ -122,7 +122,7 @@ public class SourceManager {
         if (parser == null) {
             Source source = load(type);
             parser = switch (type) {
-                case IKanman.TYPE -> new IKanman(source);
+                case ManHuaGui.TYPE -> new ManHuaGui(source);
                 case DM5.TYPE -> new DM5(source);
                 case Locality.TYPE -> new Locality();
                 case Tencent.TYPE -> new Tencent(source);

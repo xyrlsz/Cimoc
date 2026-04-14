@@ -26,7 +26,7 @@ import okhttp3.Request;
 /**
  * Created by Hiroshi on 2016/7/8.
  */
-public class IKanman extends MangaParser {
+public class ManHuaGui extends MangaParser {
 
     // TODO 实测联通4G网络无法使用看漫画
 
@@ -35,7 +35,7 @@ public class IKanman extends MangaParser {
     private static String UA = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36";
     private String referer = "https://tw.manhuagui.com/";
 
-    public IKanman(Source source) {
+    public ManHuaGui(Source source) {
         init(source);
 //        init(source, new Category());
     }

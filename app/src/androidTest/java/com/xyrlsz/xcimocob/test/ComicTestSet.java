@@ -10,7 +10,7 @@ import com.xyrlsz.xcimocob.source.DuManWu;
 
 import com.xyrlsz.xcimocob.source.GoDaManHua;
 import com.xyrlsz.xcimocob.source.HotManga;
-import com.xyrlsz.xcimocob.source.IKanman;
+import com.xyrlsz.xcimocob.source.ManHuaGui;
 import com.xyrlsz.xcimocob.source.Komiic;
 import com.xyrlsz.xcimocob.source.MYCOMIC;
 import com.xyrlsz.xcimocob.source.MangaBZ;
@@ -38,7 +38,7 @@ public class ComicTestSet {
         comicTestSet.put(DM5.TYPE, "manhua-ruoyetongxuexiangrangnimingbaixinyi");
 //        comicTestSet.put(Dmzj.TYPE, "benghuai3rd");
         comicTestSet.put(HotManga.TYPE, "wueyxingxuanlv");
-        comicTestSet.put(IKanman.TYPE, "7580");
+        comicTestSet.put(ManHuaGui.TYPE, "7580");
 //        comicTestSet.put(Mangakakalot.TYPE, "jujutsu-kaisen-168");
         comicTestSet.put(MangaBZ.TYPE, "38bz");
         comicTestSet.put(Manhuatai.TYPE, "27417");

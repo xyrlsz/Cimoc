@@ -16,7 +16,7 @@ import com.xyrlsz.xcimocob.source.DuManWuApp;
 import com.xyrlsz.xcimocob.source.GFMH;
 import com.xyrlsz.xcimocob.source.GoDaManHua;
 import com.xyrlsz.xcimocob.source.HotManga;
-import com.xyrlsz.xcimocob.source.IKanman;
+import com.xyrlsz.xcimocob.source.ManHuaGui;
 import com.xyrlsz.xcimocob.source.Komiic;
 import com.xyrlsz.xcimocob.source.MH5;
 import com.xyrlsz.xcimocob.source.MYCOMIC;
@@ -73,7 +73,7 @@ public class BrowserFilter extends BaseActivity {
         list.add(CopyMHWeb.TYPE);
         list.add(DM5.TYPE);
         list.add(HotManga.TYPE);
-        list.add(IKanman.TYPE);
+        list.add(ManHuaGui.TYPE);
 //        list.add(Mangakakalot.TYPE);
         list.add(MangaBZ.TYPE);
         list.add(Manhuatai.TYPE);
