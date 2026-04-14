@@ -16,7 +16,6 @@ import com.xyrlsz.xcimocob.utils.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,7 +32,7 @@ public class IKanman extends MangaParser {
 
     public static final int TYPE = 0;
     public static final String DEFAULT_TITLE = "漫画柜";
-
+    private static String UA = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36";
     private String referer = "https://tw.manhuagui.com/";
 
     public IKanman(Source source) {
@@ -50,7 +49,7 @@ public class IKanman extends MangaParser {
         if (page == 1) {
             String url = StringUtils.format("https://www.manhuagui.com/s/%s_p%d.html", keyword, page);
             return new Request.Builder()
-                    .addHeader("User-Agent", "Mozilla/5.0 (Linux; Android 4.1.1; Nexus 7 Build/JRO03D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166  Safari/535.19")
+                    .addHeader("User-Agent", UA)
                     .url(url)
                     .build();
         }
@@ -90,7 +89,7 @@ public class IKanman extends MangaParser {
     public Request getInfoRequest(String cid) {
         String url = "https://tw.manhuagui.com/comic/".concat(cid).concat("/");
         return new Request.Builder()
-                .addHeader("User-Agent", "Mozilla/5.0 (Linux; Android 4.1.1; Nexus 7 Build/JRO03D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166  Safari/535.19")
+                .addHeader("User-Agent", UA)
                 .url(url)
                 .build();
     }
@@ -113,10 +112,10 @@ public class IKanman extends MangaParser {
     public List<Chapter> parseChapter(String html, Comic comic, Long sourceComic) {
         List<Chapter> list = new LinkedList<>();
         Node body = new Node(html);
-        String baseText = body.id("__VIEWSTATE").attr("value");
-        if (!StringUtils.isEmpty(baseText)) {
-            body = new Node(DecryptionUtils.LZ64Decrypt(baseText));
-        }
+//        String baseText = body.id("__VIEWSTATE").attr("value");
+//        if (!StringUtils.isEmpty(baseText)) {
+//            body = new Node(DecryptionUtils.LZ64Decrypt(baseText));
+//        }
         int i = 0;
         for (Node node : body.list("div.chapter-list")) {
             List<Node> uls = node.list("ul");
@@ -138,7 +137,7 @@ public class IKanman extends MangaParser {
         String url = StringUtils.format("https://tw.manhuagui.com/comic/%s/%s.html", cid, path);
         referer = url;
         return new Request.Builder()
-                .addHeader("User-Agent", "Mozilla/5.0 (Linux; Android 4.1.1; Nexus 7 Build/JRO03D) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.166  Safari/535.19")
+                .addHeader("User-Agent", UA)
 //            .addHeader("Referer", StringUtils.format("https://m.manhuagui.com/comic/%s/%s.html", cid, path))
                 .url(url)
                 .build();
@@ -187,39 +186,39 @@ public class IKanman extends MangaParser {
         return new Node(html).text("div.chapter-bar > span.fr > span:eq(1)");
     }
 
-    @Override
-    public List<Comic> parseCategory(String html, int page) {
-        List<Comic> list = new ArrayList<>();
-        Node body = new Node(html);
-        for (Node node : body.list("#AspNetPager1 > span.current")) {
-            try {
-                if (Integer.parseInt(node.text()) < page) {
-                    return list;
-                }
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-            }
-        }
-        for (Node node : body.list("#contList > li")) {
-            String cid = node.hrefWithSplit("a", 1);
-            String title = node.attr("a", "title");
-            String cover = node.src("a > img");
-            if (StringUtils.isEmpty(cover)) {
-                cover = node.attr("a > img", "data-src");
-            }
-            String update = node.textWithSubstring("span.updateon", 4, 14);
-            list.add(new Comic(TYPE, cid, title, cover, update, null));
-        }
-        return list;
-    }
 
     @Override
     public Headers getHeader() {
 //        return Headers.of("Referer", "https://tw.manhuagui.com/comic/30449/408812.html",
         return Headers.of("Referer", referer,
-                "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36");
+                "User-Agent", UA);
     }
-
+//
+//    @Override
+//    public List<Comic> parseCategory(String html, int page) {
+//        List<Comic> list = new ArrayList<>();
+//        Node body = new Node(html);
+//        for (Node node : body.list("#AspNetPager1 > span.current")) {
+//            try {
+//                if (Integer.parseInt(node.text()) < page) {
+//                    return list;
+//                }
+//            } catch (NumberFormatException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        for (Node node : body.list("#contList > li")) {
+//            String cid = node.hrefWithSplit("a", 1);
+//            String title = node.attr("a", "title");
+//            String cover = node.src("a > img");
+//            if (StringUtils.isEmpty(cover)) {
+//                cover = node.attr("a > img", "data-src");
+//            }
+//            String update = node.textWithSubstring("span.updateon", 4, 14);
+//            list.add(new Comic(TYPE, cid, title, cover, update, null));
+//        }
+//        return list;
+//    }
 //    private static class Category extends MangaCategory {
 //
 //        @Override
