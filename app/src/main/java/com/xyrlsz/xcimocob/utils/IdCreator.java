@@ -41,4 +41,15 @@ public class IdCreator {
         newSourceComic = newSourceComic == null ? 0 : newSourceComic;
         return (newSourceComic << 16) | (num & 0xFFFFL);
     }
+
+    public static  int getSourceFromSourceComic(Long sourceComic) {
+        return (int) (sourceComic & 0xFFFFL);
+    }
+
+    public static Long getComicIDFromSourceComic(Long sourceComic) {
+        return sourceComic >> 16;
+    }
+    public static Long getSourceComicFromChapter(Long chapterId) {
+        return chapterId >> 16;
+    }
 }

@@ -3,9 +3,11 @@ package com.xyrlsz.xcimocob.manager;
 import com.xyrlsz.xcimocob.component.AppGetter;
 import com.xyrlsz.xcimocob.model.Chapter;
 import com.xyrlsz.xcimocob.model.Chapter_;
+import com.xyrlsz.xcimocob.utils.IdCreator;
 
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
@@ -45,7 +47,16 @@ public class ChapterManager {
 
     public Observable<List<Chapter>> getListChapter(long sourceComic) {
         return Observable.fromCallable(() -> {
-            return mChapterBox.query().equal(Chapter_.sourceComic, sourceComic).build().find();
+
+            Long sourceComic0 = IdCreator.recreateSourceComic(sourceComic, 0L);
+            List<Chapter> list = mChapterBox.query()
+                    .equal(Chapter_.sourceComic, sourceComic)
+                    .build()
+                    .find();
+
+            return list.stream()
+                    .filter(chapter -> !IdCreator.getSourceComicFromChapter(chapter.getId()).equals(sourceComic0))
+                    .collect(Collectors.toList());
         });
     }
 

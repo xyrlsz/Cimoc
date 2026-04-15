@@ -46,11 +46,6 @@ import okhttp3.Headers;
 import okhttp3.Request;
 import okhttp3.Response;
 
-/**
- * 拷贝漫画
- * <a href="https://github.com/venera-app/venera-configs/blob/main/copy_manga.js">...</a>
- */
-
 public class CopyMHWeb extends MangaParser {
     public static final int TYPE = 27;
     public static final String DEFAULT_TITLE = "拷贝漫画Web";
@@ -164,6 +159,9 @@ public class CopyMHWeb extends MangaParser {
         String title = body.text("div.comicParticulars-title-right > ul > li > h6");
         String cover = body.attr("div.comicParticulars-left-img > img", "data-src");
         String update = body.text("div.comicParticulars-title-right ul li:contains(最後更新：) span.comicParticulars-right-txt");
+        if (StringUtils.isEmpty(update)) {
+            update = body.text("div.comicParticulars-title-right ul li:contains(最后更新：) span.comicParticulars-right-txt");
+        }
         List<Node> authorList = body.list("div.comicParticulars-title-right ul li:contains(作者：) a");
         StringBuilder author = new StringBuilder();
         for (int i = 0; i < authorList.size(); i++) {
@@ -221,7 +219,11 @@ public class CopyMHWeb extends MangaParser {
     @Override
     public String parseCheck(String html) {
         Node body = new Node(html);
-        return body.text("div.comicParticulars-title-right ul li:contains(最後更新：) span.comicParticulars-right-txt");
+        String res = body.text("div.comicParticulars-title-right ul li:contains(最後更新：) span.comicParticulars-right-txt");
+        if (StringUtils.isEmpty(res)) {
+            res = body.text("div.comicParticulars-title-right ul li:contains(最后更新：) span.comicParticulars-right-txt");
+        }
+        return res;
     }
 
     @Override

@@ -1,11 +1,10 @@
 package com.xyrlsz.xcimocob.source;
 
-import static com.xyrlsz.xcimocob.core.Manga.getResponseBody;
 import static com.xyrlsz.xcimocob.parser.Category.CATEGORY_AREA;
 import static com.xyrlsz.xcimocob.parser.Category.CATEGORY_ORDER;
+import static com.xyrlsz.xcimocob.parser.Category.CATEGORY_PROGRESS;
 import static com.xyrlsz.xcimocob.parser.Category.CATEGORY_SUBJECT;
 import static com.xyrlsz.xcimocob.parser.MangaCategory.getParseFormatMap;
-import static com.xyrlsz.xcimocob.utils.RandomUtils.randomInt;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -16,7 +15,6 @@ import androidx.annotation.NonNull;
 import com.google.common.collect.Lists;
 import com.xyrlsz.xcimocob.App;
 import com.xyrlsz.xcimocob.Constants;
-import com.xyrlsz.xcimocob.R;
 import com.xyrlsz.xcimocob.model.Chapter;
 import com.xyrlsz.xcimocob.model.Comic;
 import com.xyrlsz.xcimocob.model.ImageUrl;
@@ -26,23 +24,29 @@ import com.xyrlsz.xcimocob.parser.MangaCategory;
 import com.xyrlsz.xcimocob.parser.MangaParser;
 import com.xyrlsz.xcimocob.parser.SearchIterator;
 import com.xyrlsz.xcimocob.parser.UrlFilter;
-import com.xyrlsz.xcimocob.utils.CopyMangaHeaderBuilder;
+import com.xyrlsz.xcimocob.soup.Node;
 import com.xyrlsz.xcimocob.utils.IdCreator;
 import com.xyrlsz.xcimocob.utils.StringUtils;
-import com.xyrlsz.xcimocob.utils.ThreadRunUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -52,36 +56,33 @@ import okhttp3.Response;
 
 /**
  * 拷贝漫画
- * <a href="https://github.com/venera-app/venera-configs/blob/main/copy_manga.js">...</a>
+ * <a href="https://github.com/ccbkv/venera-configs/blob/main/copy_manga.js">...</a>
  */
 
 public class CopyMH extends MangaParser {
     public static final int TYPE = 26;
     public static final String DEFAULT_TITLE = "拷贝漫画";
     public static final String website = "https://www.2026copy.com";
-    public static final String apiBaseUrl = "https://api.copy2000.online";
-    private final String device = CopyMangaHeaderBuilder.generateDevice();
-    private final String deviceInfo = CopyMangaHeaderBuilder.generateDeviceInfo();
-    private final String pseudoId = CopyMangaHeaderBuilder.generatePseudoId();
+    private final SharedPreferences sharedPreferences;
+    public String searchApi;
 
-    private String version;
 
     public CopyMH(Source source) {
         init(source, new Category());
-        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.COPYMG_SHARED, Context.MODE_PRIVATE);
-        version = sharedPreferences.getString(Constants.COPYMG_SHARED_VERSION, "3.0.7");
-        updateVersion();
+        sharedPreferences = App.getAppContext().getSharedPreferences(Constants.COPYMG_SHARED, Context.MODE_PRIVATE);
+        searchApi = sharedPreferences.getString(Constants.COPYMG_SHARED_SEARCH_API, "/api/kb/web/searchci/comics");
+        refreshSearchApi();
     }
 
     public static Source getDefaultSource() {
         return new Source(null, DEFAULT_TITLE, TYPE, true, website);
     }
 
-    private void updateVersion() {
-        String url = "https://api.copy-manga.com/api/v3/system/appVersion/last?format=json&platform=3";
+    private void refreshSearchApi() {
+        String url = website + "/search?q=a&q_type=";
         Request request = new Request.Builder()
-                .url(url)
                 .headers(getHeader())
+                .url(url)
                 .build();
         App.getHttpClient().newCall(request).enqueue(new Callback() {
             @Override
@@ -91,45 +92,16 @@ public class CopyMH extends MangaParser {
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                try {
-                    JSONObject jsonObject = new JSONObject(response.body().string());
-                    version = jsonObject.getJSONObject("results").getJSONObject("android").getString("version");
-                    SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.COPYMG_SHARED, Context.MODE_PRIVATE);
-                    if (!sharedPreferences.getString(Constants.COPYMG_SHARED_VERSION, "").equals(version)) {
-                        App.getAppContext().getSharedPreferences(Constants.COPYMG_SHARED, Context.MODE_PRIVATE)
-                                .edit()
-                                .putString(Constants.COPYMG_SHARED_VERSION, version)
-                                .apply();
-                        App.getAppContext().getSharedPreferences(Constants.COPYMG_SHARED, Context.MODE_PRIVATE)
-                                .edit()
-                                .putString(Constants.COPYMG_SHARED_VERSION, System.currentTimeMillis() + "")
-                                .apply();
-                    }
-                } catch (JSONException ignored) {
+                String text = response.body().string();
 
+                Pattern pattern = Pattern.compile("const countApi = \"([^\"]+)\"");
+                Matcher matcher = pattern.matcher(text);
+                if (matcher.find()) {
+                    searchApi = matcher.group(1);
+                    sharedPreferences.edit().putString(Constants.COPYMG_SHARED_SEARCH_API, searchApi).apply();
                 }
             }
         });
-    }
-
-    @Override
-    public Request getSearchRequest(String keyword, int page) {
-        String url;
-        if (page == 1) {
-            url = StringUtils.format(
-                    "%s/api/v3/search/comic?platform=1&q=%s&limit=30&offset=0&q_type&_update=true&format=json", apiBaseUrl,
-                    keyword);
-            return new Request.Builder()
-                    .url(url)
-//                    .addHeader("User-Agent",
-//                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like "
-//                                    + "Gecko) Chrome/132.0.0.0 Safari/537.36 Edg/132.0.0.0")
-//                    .addHeader("version", "2025.05.09")
-//                    .addHeader("platform", "1")
-                    .headers(getHeader())
-                    .build();
-        }
-        return null;
     }
 
     @Override
@@ -148,180 +120,156 @@ public class CopyMH extends MangaParser {
     }
 
     @Override
-    public SearchIterator getSearchIterator(String html, int page) throws JSONException {
-        try {
-            JSONObject jsonObject = new JSONObject(html);
-            return new JsonIterator(jsonObject.getJSONObject("results").getJSONArray("list")) {
-                @Override
-                protected Comic parse(JSONObject object) {
-                    try {
-                        String cid = object.getString("path_word");
-                        String title = object.getString("name");
-                        String cover = object.getString("cover");
-                        String author = "";
-                        for (int i = 0; i < object.getJSONArray("author").length(); ++i) {
-                            author += object.getJSONArray("author").getJSONObject(i).getString("name").trim();
-                            if (i < object.getJSONArray("author").length() - 1) {
-                                author += ",";
-                            }
-                        }
-//                        String author =
-//                                object.getJSONArray("author").getJSONObject(0).getString("name").trim();
-                        return new Comic(TYPE, cid, title, cover, null, author);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    return null;
-                }
-            };
-        } catch (Exception e) {
-            e.printStackTrace();
+    public Request getSearchRequest(String keyword, int page) {
+        if (page == 1) {
+            String url = website + searchApi + "?offset=0&platform=2&limit=12&q=" + keyword + "&q_type=";
+            return new Request.Builder()
+                    .headers(getHeader())
+                    .url(url)
+                    .build();
         }
         return null;
     }
 
-    private String updateReqId() {
-        Headers headers = getHeader();
-        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.COPYMG_SHARED, Context.MODE_PRIVATE);
-        String lastReqId = sharedPreferences.getString(Constants.COPYMG_SHARED_REQID, "");
-        long nowTime = System.currentTimeMillis() / 1000;
-        String reqIdUrl = "https://marketing.aiacgn.com/api/v2/adopr/query3/?format=json&ident=200100001";
-        Request reqIdReq = new Request.Builder()
-                .url(reqIdUrl)
-                .headers(headers)
-                .addHeader("Content-Type", "application/x-www-form-urlencoded;charset=utf-8")
-                .addHeader("accept", "application/json")
-                .addHeader("accept-encoding", "gzip")
-                .build();
-        String reqId = "";
-        try {
-            Response response = App.getHttpClient().newCall(reqIdReq).execute();
-            if (response.isSuccessful()) {
-                JSONObject data = new JSONObject(response.body().string());
-                reqId = data.getJSONObject("results").getString("request_id");
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putLong(Constants.COPYMG_SHARED_REQID_time, nowTime);
-                editor.putString(Constants.COPYMG_SHARED_REQID, reqId);
-                editor.apply();
+    @Override
+    public SearchIterator getSearchIterator(String html, int page) throws JSONException {
+        JSONObject data = new JSONObject(html);
+        return new JsonIterator(data.getJSONObject("results").getJSONArray("list")) {
+            @Override
+            protected Comic parse(JSONObject object) throws JSONException {
+                String cid = object.getString("path_word");
+                String title = object.getString("name");
+                String cover = object.getString("cover");
+                String author = "";
+                for (int i = 0; i < object.getJSONArray("author").length(); ++i) {
+                    author += object.getJSONArray("author").getJSONObject(i).getString("name").trim();
+                    if (i < object.getJSONArray("author").length() - 1) {
+                        author += ",";
+                    }
+                }
+                return new Comic(TYPE, cid, title, cover, null, author);
             }
-        } catch (Exception e) {
-            return lastReqId;
-        }
-        return reqId;
+        };
+
     }
 
-    private String getReqID() {
-        Headers headers = getHeader();
-        if (Objects.equals(headers.get("region"), "0")) {
-            return "";
-        }
-        SharedPreferences sharedPreferences = App.getAppContext().getSharedPreferences(Constants.COPYMG_SHARED, Context.MODE_PRIVATE);
-        String lastReqId = sharedPreferences.getString(Constants.COPYMG_SHARED_REQID, "");
-        long lastGetReqIdTime = sharedPreferences.getLong(Constants.COPYMG_SHARED_REQID_time, 0L);
-        long nowTime = System.currentTimeMillis() / 1000;
-        if (nowTime - lastGetReqIdTime < 3600 && !lastReqId.isEmpty()) {
-            if (nowTime - lastGetReqIdTime > 120 + randomInt(1, 120)) {
-                ThreadRunUtils.runOnIOThread(this::updateReqId);
-            }
-            return lastReqId;
-        }
-        return updateReqId();
-    }
 
     @Override
     public Request getInfoRequest(String cid) {
-        String url = StringUtils.format("%s/api/v3/comic2/%s?in_mainland=true&platform=3&request_id=%s", apiBaseUrl, cid, getReqID());
         return new Request.Builder()
-                .url(url)
                 .headers(getHeader())
+                .url(getUrl(cid))
                 .build();
     }
 
     @Override
     public Comic parseInfo(String html, Comic comic) {
-        try {
-            JSONObject body;
-            JSONObject comicInfo = new JSONObject(html).getJSONObject("results");
-            body = comicInfo.getJSONObject("comic");
-            String cover = body.getString("cover");
-            String intro = body.getString("brief");
-            String title = body.getString("name");
-            String update = body.getString("datetime_updated");
-//            String author = ((JSONObject) body.getJSONArray("author").get(0)).getString("name");
-            StringBuilder authorBuilder = new StringBuilder();
-            for (int i = 0; i < body.getJSONArray("author").length(); ++i) {
-                authorBuilder.append(((JSONObject) body.getJSONArray("author").get(i)).getString("name"));
-                if (i < body.getJSONArray("author").length() - 1) {
-                    authorBuilder.append(", ");
-                }
+        Node body = new Node(html);
+        String title = body.text("div.comicParticulars-title-right > ul > li > h6");
+        String cover = body.attr("div.comicParticulars-left-img > img", "data-src");
+        String update = body.text("div.comicParticulars-title-right ul li:contains(最後更新：) span.comicParticulars-right-txt");
+        List<Node> authorList = body.list("div.comicParticulars-title-right ul li:contains(作者：) a");
+        StringBuilder author = new StringBuilder();
+        for (int i = 0; i < authorList.size(); i++) {
+            if (i < authorList.size() - 1) {
+                author.append(authorList.get(i).text()).append(",");
+            } else {
+                author.append(authorList.get(i).text());
             }
-            String author = authorBuilder.toString();
-
-            // 连载状态
-            boolean finish = body.getJSONObject("status").getInt("value") != 0;
-            comic.note = comicInfo.getJSONObject("groups");
-            comic.setInfo(title, cover, update, intro, author, finish);
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
-
+        String intro = body.text("p.intro");
+        boolean status = isFinish(html);
+        comic.setInfo(title, cover, update, intro, author.toString(), status);
         return comic;
     }
 
-    @Override
-    public Request getChapterRequest(String html, String cid) {
-        String url = String.format(
-                "%s/api/v3/comic/%s/group/default/chapters?limit=100&offset=0&in_mainland=true&request_id=%s", apiBaseUrl, cid, getReqID());
-        return new Request.Builder()
-                .url(url)
-                .headers(getHeader())
-                .build();
-    }
 
     @Override
     public List<Chapter> parseChapter(String html, Comic comic, Long sourceComic)
             throws JSONException {
         List<Chapter> list = new LinkedList<>();
-        JSONObject jsonObject = new JSONObject(html);
-        JSONArray array = jsonObject.getJSONObject("results").getJSONArray("list");
-        for (int i = 0; i < array.length(); ++i) {
-            String title = array.getJSONObject(i).getString("name");
-            String path = array.getJSONObject(i).getString("uuid");
-            list.add(new Chapter(null, sourceComic, title, path, "默认"));
+        String ccz;
+        Pattern[] cczPatterns = {
+                Pattern.compile("(?:var|let|const)\\s+ccz\\s*=\\s*['\"]([^'\"]+)['\"]"),
+                Pattern.compile("window\\.ccz\\s*=\\s*['\"]([^'\"]+)['\"]"),
+                Pattern.compile("ccz\\s*=\\s*['\"]([^'\"]+)['\"]")
+        };
+        ccz = Arrays.stream(cczPatterns).map(pattern -> pattern.matcher(html)).filter(matcher -> matcher.find() && matcher.group(1) != null).findFirst().map(matcher -> matcher.group(1)).orElse("");
+        Node body = new Node(html);
+        // 2. 提取 dnt
+        String dnt = "";
+        Node dntEl = body.getChild("#dnt");
+        if (dntEl.get() != null) {
+            dnt = dntEl.attr("value");
         }
-        try {
-            JSONObject groups = (JSONObject) comic.note;
-            Iterator<String> keys = groups.keys();
-            while (keys.hasNext()) {
-                String key = keys.next();
-                if (key.equals("default"))
-                    continue;
-                String path_word = groups.getJSONObject(key).getString("path_word");
-                String PathName = groups.getJSONObject(key).getString("name");
-                String url =
-                        String.format("%s/api/v3/comic/%s/group/%s/chapters?limit=100&offset=0&in_mainland=true&request_id=",
-                                apiBaseUrl, comic.getCid(), path_word);
-                Request request =
-                        new Request.Builder()
-                                .url(url)
-                                .headers(getHeader())
-                                .build();
-                html = getResponseBody(App.getHttpClient(), request);
-                jsonObject = new JSONObject(html);
-                array = jsonObject.getJSONObject("results").getJSONArray("list");
-                for (int i = 0; i < array.length(); ++i) {
-                    String title = array.getJSONObject(i).getString("name");
-                    String path = array.getJSONObject(i).getString("uuid");
-                    list.add(new Chapter(null, sourceComic, title, path, PathName));
+
+        if (!ccz.isEmpty() && !dnt.isEmpty()) {
+            String chapterUrl = website + "/comicdetail/" + comic.getCid() + "/chapters?format=json";
+            Request request = new Request.Builder()
+                    .url(chapterUrl)
+                    .headers(getHeader())
+                    .addHeader("Accept", "application/json, text/plain, */*")
+                    .addHeader("Referer", website + "/comic/" + comic.getCid())
+                    .addHeader("dnts", dnt)
+                    .build();
+
+            try {
+                Response response = App.getHttpClient().newCall(request).execute();
+                if (response.isSuccessful()) {
+                    String json = response.body().string();
+                    JSONObject rootObject = new JSONObject(json);
+                    if (rootObject.getInt("code") == 200 && rootObject.has("results")) {
+                        String encrypted = rootObject.getString("results").trim();
+
+                        if (encrypted.length() > 16) {
+                            // 5. AES解密
+                            String ivStr = encrypted.substring(0, 16);
+                            String cipherStr = encrypted.substring(16);
+
+
+                            String plainText = aesDecrypt(cipherStr, ccz, ivStr);
+
+                            // 6. 解析解密后的JSON
+                            JSONObject parsedNode = new JSONObject(plainText);
+                            JSONObject groupsNode = parsedNode.getJSONObject("groups");
+                            if (groupsNode.length() > 0) {
+                                Iterator<String> keys = groupsNode.keys();
+
+                                while (keys.hasNext()) {
+                                    String gKey = keys.next();
+
+                                    JSONObject group = groupsNode.getJSONObject(gKey);
+
+                                    String groupName = group.has("name")
+                                            ? group.getString("name")
+                                            : gKey;
+
+                                    JSONArray chaptersArray = group.optJSONArray("chapters");
+
+                                    if (chaptersArray != null && chaptersArray.length() > 0) {
+                                        // 遍历章节
+                                        for (int i = 0; i < chaptersArray.length(); i++) {
+                                            JSONObject chapter = chaptersArray.getJSONObject(i);
+                                            String title = chapter.getString("name");
+                                            String uuid = chapter.getString("id");
+                                            list.add(new Chapter(null, sourceComic, title, uuid, groupName));
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
+                    }
                 }
+            } catch (Exception ignored) {
+
             }
 
-        } catch (Exception e) {
-            e.printStackTrace();
+
         }
         list = Lists.reverse(list);
         for (int j = 0; j < list.size(); j++) {
-            Long id = IdCreator.createChapterId(sourceComic, j);
+            long id = IdCreator.createChapterId(sourceComic, j);
             list.get(j).setId(id);
         }
         return list;
@@ -329,60 +277,110 @@ public class CopyMH extends MangaParser {
 
     @Override
     public Request getImagesRequest(String cid, String path) {
-        String url = StringUtils.format("%s/api/v3/comic/%s/chapter2/%s?in_mainland=true&request_id=%s", apiBaseUrl, cid, path, getReqID());
+        String chapterUrl = String.format("%s/comic/%s/chapter/%s", website, cid, path);
         return new Request.Builder()
-                .url(url)
                 .headers(getHeader())
+                .url(chapterUrl)
                 .build();
     }
 
     @Override
     public List<ImageUrl> parseImages(String html, Chapter chapter) throws JSONException {
         List<ImageUrl> list = new LinkedList<>();
-        JSONObject object = new JSONObject(html);
-        JSONObject res = object.getJSONObject("results");
-        JSONObject chapterInfo = res.getJSONObject("chapter");
-        JSONArray imgUrls = chapterInfo.getJSONArray("contents");
 
-        JSONArray words = chapterInfo.optJSONArray("words");
-
-        int contentSize = imgUrls.length();
-
-        // 构造 words 索引数组（如果为 null 或长度不足）
-        int[] wordIndices;
-        if (words == null || words.length() < contentSize) {
-            wordIndices = new int[contentSize];
-            for (int i = 0; i < contentSize; i++) {
-                wordIndices[i] = i;
-            }
-        } else {
-            wordIndices = new int[words.length()];
-            for (int i = 0; i < words.length(); i++) {
-                wordIndices[i] = words.getInt(i);
+        // 3. 提取 contentKey
+        String contentKey = "";
+        Pattern[] contentKeyPatterns = {
+                Pattern.compile("(?:var|let|const)\\s+contentKey\\s*=\\s*['\"]([^'\"]+)['\"]"),
+                Pattern.compile("window\\.contentKey\\s*=\\s*['\"]([^'\"]+)['\"]"),
+                Pattern.compile("contentKey\\s*=\\s*['\"]([^'\"]+)['\"]")
+        };
+        for (Pattern pattern : contentKeyPatterns) {
+            Matcher matcher = pattern.matcher(html);
+            if (matcher.find() && matcher.group(1) != null) {
+                contentKey = matcher.group(1);
+                break;
             }
         }
 
-        // 构建顺序 map
-        Map<Integer, String> indexToUrl = new HashMap<>();
-        for (int i = 0; i < contentSize; i++) {
-            int index = wordIndices[i];
-            String url = imgUrls.getJSONObject(i).getString("url");
-            indexToUrl.put(index, url);
+        // 4. 提取 cct
+        String cct = "";
+        Pattern[] cctPatterns = {
+                Pattern.compile("(?:var|let|const)\\s+cct\\s*=\\s*['\"]([^'\"]+)['\"]"),
+                Pattern.compile("window\\.cct\\s*=\\s*['\"]([^'\"]+)['\"]"),
+                Pattern.compile("cct\\s*=\\s*['\"]([^'\"]+)['\"]")
+        };
+        for (Pattern pattern : cctPatterns) {
+            Matcher matcher = pattern.matcher(html);
+            if (matcher.find() && matcher.group(1) != null) {
+                cct = matcher.group(1);
+                break;
+            }
         }
 
-        // 按顺序填入 list
-        for (int i = 0; i < contentSize; i++) {
-            Long comicChapter = chapter.getId();
-            Long id = IdCreator.createImageId(comicChapter, i);
-            String url = indexToUrl.get(i);
-            if (url != null) {
-                SharedPreferences preferences = App.getAppContext().getSharedPreferences(Constants.COPYMG_SHARED, Context.MODE_PRIVATE);
+        // 5. AES解密
+        if (!contentKey.isEmpty() && !cct.isEmpty() && contentKey.length() > 16) {
+            try {
 
-                String imgQuality = App.getAppResources().getStringArray(R.array.copy_img_quality_items)[preferences.getInt(Constants.COPYMG_SHARED_IMG_QUALITY, 2)];
-//                url = url.replaceAll("\\.jpg\\.h\\d+x\\.jpg$", ".jpg.h" + imageQuality + "x.jpg");
-                url = url.replaceAll("c\\d+x\\.[a-zA-Z]+$", "c" + imgQuality + "x.webp");
+                String ivStr = contentKey.substring(0, 16);
+                String cipherStr = contentKey.substring(16);
+
+                byte[] keyBytes = cct.getBytes(StandardCharsets.UTF_8);
+                byte[] ivBytes = ivStr.getBytes(StandardCharsets.UTF_8);
+
+                byte[] cipherBytes;
+                if (cipherStr.matches("^[0-9a-fA-F]+$") && cipherStr.length() % 2 == 0) {
+                    int len = cipherStr.length();
+                    cipherBytes = new byte[len / 2];
+                    for (int i = 0; i < len; i += 2) {
+                        cipherBytes[i / 2] = (byte) Integer.parseInt(cipherStr.substring(i, i + 2), 16);
+                    }
+                } else {
+                    cipherBytes = Base64.getDecoder().decode(cipherStr);
+                }
+
+                // 执行AES/CBC/PKCS5Padding解密
+                Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+                SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");
+                IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
+                cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
+                byte[] plainBytes = cipher.doFinal(cipherBytes);
+                String plainText = new String(plainBytes, StandardCharsets.UTF_8);
+
+                int paddingLength = plainBytes[plainBytes.length - 1];
+                if (paddingLength > 0 && paddingLength <= 16) {
+                    boolean validPadding = true;
+                    for (int i = 0; i < paddingLength; i++) {
+                        if (plainBytes[plainBytes.length - 1 - i] != paddingLength) {
+                            validPadding = false;
+                            break;
+                        }
+                    }
+                    if (validPadding) {
+                        plainBytes = java.util.Arrays.copyOfRange(plainBytes, 0, plainBytes.length - paddingLength);
+                        plainText = new String(plainBytes, StandardCharsets.UTF_8);
+                    }
+                }
+
+                Pattern jsonPattern = Pattern.compile("\\[.*]", Pattern.DOTALL);
+                Matcher jsonMatcher = jsonPattern.matcher(plainText);
+                if (jsonMatcher.find()) {
+                    plainText = jsonMatcher.group(0);
+                }
+
+                assert plainText != null;
+                JSONArray urls = new JSONArray(plainText);
+                for (int i = 0; i < urls.length(); i++) {
+                    JSONObject jsonObject = urls.getJSONObject(i);
+                    String imgUrl = jsonObject.getString("url");
+                    long comicChapter = chapter.getId();
+                    long id = IdCreator.createImageId(comicChapter, i);
+                    imgUrl = imgUrl.replaceAll("c\\d+x\\.[a-zA-Z]+$", "c" + 1500 + "x.webp");
+                    list.add(new ImageUrl(id, comicChapter, i, imgUrl, false));
+                }
+
+            } catch (Exception ignored) {
             }
-            list.add(new ImageUrl(id, comicChapter, i + 1, url, false, getHeader()));
         }
 
         return list;
@@ -395,82 +393,114 @@ public class CopyMH extends MangaParser {
 
     @Override
     public String parseCheck(String html) {
-        try {
-            JSONObject comicInfo = new JSONObject(html).getJSONObject("results");
-            JSONObject body = comicInfo.getJSONObject("comic");
-            return body.getString("datetime_updated");
-        } catch (JSONException e) {
-            e.printStackTrace();
+        Node body = new Node(html);
+        String res = body.text("div.comicParticulars-title-right ul li:contains(最後更新：) span.comicParticulars-right-txt");
+        if (StringUtils.isEmpty(res)) {
+            res = body.text("div.comicParticulars-title-right ul li:contains(最后更新：) span.comicParticulars-right-txt");
         }
-        return "";
+        return res;
     }
 
     @Override
     public Headers getHeader() {
-        SharedPreferences prefs = App.getAppContext().getSharedPreferences(Constants.COPYMG_SHARED, Context.MODE_PRIVATE);
-        String region = String.valueOf(prefs.getInt(Constants.COPYMG_SHARED_REGION, 0));
-        CopyMangaHeaderBuilder builder =
-                new CopyMangaHeaderBuilder(null, deviceInfo, device, pseudoId, region, version);
-        try {
-            return builder.genHeaders();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return Headers.of();
+        Headers.Builder builder = new Headers.Builder()
+                .add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                .add("platform", "2");
+        return builder.build();
     }
 
     @Override
     public Request getCategoryRequest(String format, int page) {
 
         Map<Integer, String> map = getParseFormatMap(format);
-        int limit = 21;
+        int limit = 50;
         int offset = (page - 1) * limit;
-
         String url = StringUtils.format(
-                "%s/api/v3/comics?free_type=1&limit=" +
-                        limit +
-                        "&offset=" +
-                        offset +
-                        "&top=" +
-                        map.get(CATEGORY_AREA) +
-                        "&theme=" +
+                "%s/comics?theme=" +
                         map.get(CATEGORY_SUBJECT) +
+                        "&status=" +
+                        map.get(CATEGORY_PROGRESS) +
+                        "&region=" +
+                        map.get(CATEGORY_AREA) +
                         "&ordering=" +
                         map.get(CATEGORY_ORDER) +
-                        "&_update=true", apiBaseUrl);
-
-        return new Request.Builder().headers(getHeader()).url(url).build();
-
+                        "&offset=" +
+                        offset +
+                        "&limit=" +
+                        limit,
+                website);
+        return new Request.Builder()
+                .headers(getHeader())
+                .url(url)
+                .build();
     }
 
     @Override
     public List<Comic> parseCategory(String html, int page) {
         List<Comic> list = new ArrayList<>();
-        JSONObject data;
-        try {
-            data = new JSONObject(html).getJSONObject("results");
-            JSONArray comics = data.getJSONArray("list");
-            for (int i = 0; i < comics.length(); i++) {
-                JSONObject object = comics.getJSONObject(i);
-                String cid = object.getString("path_word");
-                String title = object.getString("name");
-                String cover = object.getString("cover");
-                list.add(new Comic(TYPE, cid, title, cover, null, null));
-            }
+        Node body = new Node(html);
+        Node targetDiv = body.getChild("div.row.exemptComic-box");
+        if (targetDiv.get() != null) {
+            String listAttr = targetDiv.attr("list");
+            String jsonString = listAttr
+                    .replace("&#x27;", "\"")
+                    .replace("&quot;", "\"");
+            try {
+                JSONArray array = new JSONArray(jsonString);
+                for (int i = 0; i < array.length(); i++) {
+                    JSONObject jsonObject = array.getJSONObject(i);
+                    String cid = jsonObject.getString("path_word");
+                    String title = jsonObject.getString("name");
+                    String cover = jsonObject.getString("cover");
+                    list.add(new Comic(TYPE, cid, title, cover, null, null));
+                }
 
-        } catch (JSONException e) {
-            return list;
+            } catch (JSONException ignored) {
+
+            }
         }
         return list;
     }
 
-    private static class Category extends MangaCategory {
+    /**
+     * 通用 AES/CBC/PKCS5Padding 解密方法
+     *
+     * @param cipherText 密文 (支持 Hex 或 Base64 编码)
+     * @param key        密钥
+     * @param ivStr      初始化向量
+     * @return 解密后的明文字符串
+     * @throws Exception 解密过程中可能出现的异常
+     */
+    private String aesDecrypt(String cipherText, String key, String ivStr) throws Exception {
+        // 1. 处理密文：判断是 Hex 还是 Base64
+        byte[] cipherBytes;
+        if (cipherText.matches("^[0-9a-fA-F]+$") && cipherText.length() % 2 == 0) {
+            // Hex 解码
+            int len = cipherText.length();
+            cipherBytes = new byte[len / 2];
+            for (int i = 0; i < len; i += 2) {
+                cipherBytes[i / 2] = (byte) Integer.parseInt(cipherText.substring(i, i + 2), 16);
+            }
+        } else {
+            // Base64 解码
+            cipherBytes = Base64.getDecoder().decode(cipherText);
+        }
 
+        // 2. 执行 AES 解密
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        SecretKeySpec keySpec = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "AES");
+        IvParameterSpec ivSpec = new IvParameterSpec(ivStr.getBytes(StandardCharsets.UTF_8));
+        cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
+
+        byte[] plainBytes = cipher.doFinal(cipherBytes);
+        return new String(plainBytes, StandardCharsets.UTF_8);
+    }
+
+    private static class Category extends MangaCategory {
         @Override
         public boolean isComposite() {
             return true;
         }
-
 
         @Override
         protected List<Pair<String, String>> getSubject() {
@@ -537,7 +567,6 @@ public class CopyMH extends MangaParser {
             list.add(Pair.create("無修正", "Uncensored"));
             list.add(Pair.create("仙侠", "xianxia"));
             list.add(Pair.create("LoveLive", "loveLive"));
-
             return list;
         }
 
@@ -565,10 +594,24 @@ public class CopyMH extends MangaParser {
         protected List<Pair<String, String>> getArea() {
             List<Pair<String, String>> list = new ArrayList<>();
             list.add(Pair.create("全部", ""));
-            list.add(Pair.create("日漫", "japan"));
-            list.add(Pair.create("韩漫", "korea"));
-            list.add(Pair.create("美漫", "west"));
-            list.add(Pair.create("已完结", "finish"));
+            list.add(Pair.create("日漫", "0"));
+            list.add(Pair.create("韩漫", "1"));
+            list.add(Pair.create("美漫", "2"));
+            return list;
+        }
+
+        @Override
+        protected boolean hasProgress() {
+            return true;
+        }
+
+        @Override
+        protected List<Pair<String, String>> getProgress() {
+            List<Pair<String, String>> list = new ArrayList<>();
+            list.add(Pair.create("全部", ""));
+            list.add(Pair.create("连载中", "0"));
+            list.add(Pair.create("已完结", "1"));
+            list.add(Pair.create("短篇", "2"));
             return list;
         }
     }
