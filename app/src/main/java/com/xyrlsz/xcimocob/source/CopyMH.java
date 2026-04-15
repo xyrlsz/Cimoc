@@ -168,6 +168,9 @@ public class CopyMH extends MangaParser {
         String title = body.text("div.comicParticulars-title-right > ul > li > h6");
         String cover = body.attr("div.comicParticulars-left-img > img", "data-src");
         String update = body.text("div.comicParticulars-title-right ul li:contains(最後更新：) span.comicParticulars-right-txt");
+        if (StringUtils.isEmpty(update)) {
+            update = body.text("div.comicParticulars-title-right ul li:contains(最后更新：) span.comicParticulars-right-txt");
+        }
         List<Node> authorList = body.list("div.comicParticulars-title-right ul li:contains(作者：) a");
         StringBuilder author = new StringBuilder();
         for (int i = 0; i < authorList.size(); i++) {
