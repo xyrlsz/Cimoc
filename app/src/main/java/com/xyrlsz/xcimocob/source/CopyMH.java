@@ -322,67 +322,71 @@ public class CopyMH extends MangaParser {
         }
 
         // 5. AES解密
-        if (!contentKey.isEmpty() && !cct.isEmpty() && contentKey.length() > 16) {
-            try {
+        if (!StringUtils.isEmpty(contentKey) && !StringUtils.isEmpty(cct)) {
+            assert contentKey != null;
+            if (contentKey.length() > 16) {
+                try {
 
-                String ivStr = contentKey.substring(0, 16);
-                String cipherStr = contentKey.substring(16);
+                    String ivStr = contentKey.substring(0, 16);
+                    String cipherStr = contentKey.substring(16);
 
-                byte[] keyBytes = cct.getBytes(StandardCharsets.UTF_8);
-                byte[] ivBytes = ivStr.getBytes(StandardCharsets.UTF_8);
+                    assert cct != null;
+                    byte[] keyBytes = cct.getBytes(StandardCharsets.UTF_8);
+                    byte[] ivBytes = ivStr.getBytes(StandardCharsets.UTF_8);
 
-                byte[] cipherBytes;
-                if (cipherStr.matches("^[0-9a-fA-F]+$") && cipherStr.length() % 2 == 0) {
-                    int len = cipherStr.length();
-                    cipherBytes = new byte[len / 2];
-                    for (int i = 0; i < len; i += 2) {
-                        cipherBytes[i / 2] = (byte) Integer.parseInt(cipherStr.substring(i, i + 2), 16);
+                    byte[] cipherBytes;
+                    if (cipherStr.matches("^[0-9a-fA-F]+$") && cipherStr.length() % 2 == 0) {
+                        int len = cipherStr.length();
+                        cipherBytes = new byte[len / 2];
+                        for (int i = 0; i < len; i += 2) {
+                            cipherBytes[i / 2] = (byte) Integer.parseInt(cipherStr.substring(i, i + 2), 16);
+                        }
+                    } else {
+                        cipherBytes = Base64.getDecoder().decode(cipherStr);
                     }
-                } else {
-                    cipherBytes = Base64.getDecoder().decode(cipherStr);
-                }
 
-                // 执行AES/CBC/PKCS5Padding解密
-                Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-                SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");
-                IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
-                cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
-                byte[] plainBytes = cipher.doFinal(cipherBytes);
-                String plainText = new String(plainBytes, StandardCharsets.UTF_8);
+                    // 执行AES/CBC/PKCS5Padding解密
+                    Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+                    SecretKeySpec keySpec = new SecretKeySpec(keyBytes, "AES");
+                    IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
+                    cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
+                    byte[] plainBytes = cipher.doFinal(cipherBytes);
+                    String plainText = new String(plainBytes, StandardCharsets.UTF_8);
 
-                int paddingLength = plainBytes[plainBytes.length - 1];
-                if (paddingLength > 0 && paddingLength <= 16) {
-                    boolean validPadding = true;
-                    for (int i = 0; i < paddingLength; i++) {
-                        if (plainBytes[plainBytes.length - 1 - i] != paddingLength) {
-                            validPadding = false;
-                            break;
+                    int paddingLength = plainBytes[plainBytes.length - 1];
+                    if (paddingLength > 0 && paddingLength <= 16) {
+                        boolean validPadding = true;
+                        for (int i = 0; i < paddingLength; i++) {
+                            if (plainBytes[plainBytes.length - 1 - i] != paddingLength) {
+                                validPadding = false;
+                                break;
+                            }
+                        }
+                        if (validPadding) {
+                            plainBytes = Arrays.copyOfRange(plainBytes, 0, plainBytes.length - paddingLength);
+                            plainText = new String(plainBytes, StandardCharsets.UTF_8);
                         }
                     }
-                    if (validPadding) {
-                        plainBytes = java.util.Arrays.copyOfRange(plainBytes, 0, plainBytes.length - paddingLength);
-                        plainText = new String(plainBytes, StandardCharsets.UTF_8);
+
+                    Pattern jsonPattern = Pattern.compile("\\[.*]", Pattern.DOTALL);
+                    Matcher jsonMatcher = jsonPattern.matcher(plainText);
+                    if (jsonMatcher.find()) {
+                        plainText = jsonMatcher.group(0);
                     }
-                }
 
-                Pattern jsonPattern = Pattern.compile("\\[.*]", Pattern.DOTALL);
-                Matcher jsonMatcher = jsonPattern.matcher(plainText);
-                if (jsonMatcher.find()) {
-                    plainText = jsonMatcher.group(0);
-                }
+                    assert plainText != null;
+                    JSONArray urls = new JSONArray(plainText);
+                    for (int i = 0; i < urls.length(); i++) {
+                        JSONObject jsonObject = urls.getJSONObject(i);
+                        String imgUrl = jsonObject.getString("url");
+                        long comicChapter = chapter.getId();
+                        long id = IdCreator.createImageId(comicChapter, i);
+                        imgUrl = imgUrl.replaceAll("c\\d+x\\.[a-zA-Z]+$", "c" + 1500 + "x.webp");
+                        list.add(new ImageUrl(id, comicChapter, i, imgUrl, false));
+                    }
 
-                assert plainText != null;
-                JSONArray urls = new JSONArray(plainText);
-                for (int i = 0; i < urls.length(); i++) {
-                    JSONObject jsonObject = urls.getJSONObject(i);
-                    String imgUrl = jsonObject.getString("url");
-                    long comicChapter = chapter.getId();
-                    long id = IdCreator.createImageId(comicChapter, i);
-                    imgUrl = imgUrl.replaceAll("c\\d+x\\.[a-zA-Z]+$", "c" + 1500 + "x.webp");
-                    list.add(new ImageUrl(id, comicChapter, i, imgUrl, false));
+                } catch (Exception ignored) {
                 }
-
-            } catch (Exception ignored) {
             }
         }
 
