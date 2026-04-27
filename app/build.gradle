@@ -151,9 +151,9 @@ dependencies {
     kapt 'com.jakewharton:butterknife-compiler:10.2.3'
     //noinspection GradleDependency uses-sdk:minSdkVersion 21 cannot be smaller than version 23 declared in library [androidx.activity:activity:1.12.0]
     implementation 'androidx.activity:activity-ktx:1.11.0'
-    implementation 'io.objectbox:objectbox-android:5.0.1'
+    implementation 'io.objectbox:objectbox-android:5.4.1'
     implementation 'com.squareup.okhttp3:okhttp:5.3.2'
-    //noinspection NewerVersionAvailable
+    //noinspection NewerVersionAvailable 1.9.0 minSdk 是 26
     implementation 'org.mozilla:rhino:1.8.1'
 
 
@@ -166,21 +166,16 @@ dependencies {
 
     implementation 'com.facebook.infer.annotation:infer-annotation:0.18.0'
 
-    implementation 'org.jsoup:jsoup:1.22.1'
+    implementation 'org.jsoup:jsoup:1.22.2'
     implementation 'com.google.re2j:re2j:1.8'
     implementation 'org.adw.library:discrete-seekbar:1.0.1'
     implementation 'io.reactivex:rxjava:1.3.8'
     implementation 'io.reactivex:rxandroid:1.2.1'
 
-    api 'com.google.guava:guava:33.5.0-android'
+    api 'com.google.guava:guava:33.6.0-android'
     implementation 'androidx.multidex:multidex:2.0.1'
 
-    // noinspection NewerVersionAvailable  fastjson 1.2.83 是最后一个支持 Android 4.0 及以下版本的版本
-    //    implementation 'com.alibaba:fastjson:1.2.83'
-
-    // noinspection NewerVersionAvailable  fastjson 2 以上需要使用.android5来支持安卓8以下
-//    implementation "com.alibaba.fastjson2:fastjson2:2.0.61.android5"
-    implementation 'com.google.code.gson:gson:2.13.2'
+    implementation 'com.google.code.gson:gson:2.14.0'
 
     // noinspection GradleDependency
     implementation "androidx.core:core-ktx:1.17.0"
@@ -188,8 +183,8 @@ dependencies {
     implementation 'com.king.app:app-dialog:1.0.8-androidx'
 
 //    implementation 'com.github.houbb:opencc4j:1.14.0'
-    implementation 'com.github.xyrlsz:android-opencc:1.3.8'
-//    implementation 'com.github.thegrizzlylabs:sardine-android:0.9'
+    implementation 'com.github.xyrlsz:android-opencc:1.4.0'
+
     implementation('com.github.thegrizzlylabs:sardine-android:0.9') {
         exclude group: 'xpp3', module: 'xpp3'
     }
