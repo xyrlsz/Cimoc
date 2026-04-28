@@ -29,6 +29,7 @@ public class BuKa extends MangaParser {
     public static final int TYPE = 52;
     public static final String DEFAULT_TITLE = "布卡漫画";
     private static final String baseUrl = "https://www.bukamh.com";
+    private static final String UA = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36";
 
     public BuKa(Source source) {
         init(source);
@@ -58,7 +59,9 @@ public class BuKa extends MangaParser {
             url = StringUtils.format("%s/search/%s/%d", baseUrl, keyword, page);
         }
 
-        return new Request.Builder().url(url).build();
+        return new Request.Builder()
+                .headers(getHeader())
+                .url(url).build();
     }
 
     @Override
@@ -102,8 +105,7 @@ public class BuKa extends MangaParser {
         String url = baseUrl + "/".concat(cid);
         return new Request
                 .Builder()
-                //                .addHeader("User-Agent", "Mozilla/5.0 (Linux; Android 7.0;)
-                //                Chrome/58.0.3029.110 Mobile")
+                .headers(getHeader())
                 .url(url)
                 .build();
     }
@@ -161,9 +163,8 @@ public class BuKa extends MangaParser {
         String url = StringUtils.format("%s/%s", baseUrl, path);
         return new Request
                 .Builder()
-                //                .addHeader("User-Agent", "Mozilla/5.0 (Linux; Android 7.0;)
-                //                Chrome/58.0.3029.110 Mobile")
                 .url(url)
+                .headers(getHeader())
                 .build();
     }
 
@@ -208,6 +209,6 @@ public class BuKa extends MangaParser {
 
     @Override
     public Headers getHeader() {
-        return Headers.of("Referer", "https://www.bukamh.com");
+        return Headers.of("Referer", "https://www.bukamh.com", "user-agent", UA);
     }
 }
