@@ -193,13 +193,13 @@
                     android:textColor="?attr/colorPrimary"
                     android:textSize="14sp" />
 
-                <com.xyrlsz.xcimocob.ui.widget.preference.ChoicePreference
-                    android:id="@+id/comic_login_copy_region"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:clickable="true"
-                    android:focusable="true"
-                    app:title="@string/copy_region_title" />
+                <!--                <com.xyrlsz.xcimocob.ui.widget.preference.ChoicePreference-->
+                <!--                    android:id="@+id/comic_login_copy_region"-->
+                <!--                    android:layout_width="match_parent"-->
+                <!--                    android:layout_height="wrap_content"-->
+                <!--                    android:clickable="true"-->
+                <!--                    android:focusable="true"-->
+                <!--                    app:title="@string/copy_region_title" />-->
 
                 <com.xyrlsz.xcimocob.ui.widget.preference.ChoicePreference
                     android:id="@+id/comic_login_copy_image_quality"

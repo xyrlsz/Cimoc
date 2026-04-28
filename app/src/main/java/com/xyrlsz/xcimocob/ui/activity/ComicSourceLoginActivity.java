@@ -89,8 +89,8 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
     ImageButton mZaiLogout;
     @BindView(R.id.comic_login_zai_auto_sign)
     CheckBoxPreference mZaiAutoSign;
-    @BindView(R.id.comic_login_copy_region)
-    ChoicePreference mCopyRegion;
+    //    @BindView(R.id.comic_login_copy_region)
+//    ChoicePreference mCopyRegion;
     @BindView(R.id.comic_login_copy_image_quality)
     ChoicePreference mCopyImgQuality;
     @BindView(R.id.comic_login_hot_image_quality)
@@ -109,14 +109,14 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
         // 根据 requestCode 处理不同的对话框结果
         switch (requestCode) {
             case DIALOG_COPY_REGION:
-                int res_copy_region = bundle.getInt(EXTRA_DIALOG_RESULT_INDEX);
-                mCopyRegion.setValue(res_copy_region);
+//                int res_copy_region = bundle.getInt(EXTRA_DIALOG_RESULT_INDEX);
+//                mCopyRegion.setValue(res_copy_region);
                 break;
             case DIALOG_COPY_IMG_QUALITY:
                 int res_copy_img_quality = bundle.getInt(EXTRA_DIALOG_RESULT_INDEX);
                 mCopyImgQuality.setValue(res_copy_img_quality);
                 break;
-                case DIALOG_HOT_IMG_QUALITY:
+            case DIALOG_HOT_IMG_QUALITY:
                 int res_hot_img_quality = bundle.getInt(EXTRA_DIALOG_RESULT_INDEX);
                 mHotImageQuality.setValue(res_hot_img_quality);
                 break;
@@ -200,7 +200,7 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
         super.onCreate(savedInstanceState);
 
         SharedPreferences copySharedPreferences = getSharedPreferences(Constants.COPYMG_SHARED, MODE_PRIVATE);
-        mCopyRegion.bindPreference(getSupportFragmentManager(), copySharedPreferences, Constants.COPYMG_SHARED_REGION, 0, R.array.copy_region_items, DIALOG_COPY_REGION);
+//        mCopyRegion.bindPreference(getSupportFragmentManager(), copySharedPreferences, Constants.COPYMG_SHARED_REGION, 0, R.array.copy_region_items, DIALOG_COPY_REGION);
         mCopyImgQuality.bindPreference(getSupportFragmentManager(), copySharedPreferences, Constants.COPYMG_SHARED_IMG_QUALITY, 2, R.array.copy_img_quality_items, DIALOG_COPY_IMG_QUALITY);
 
         SharedPreferences hotSharedPreferences = getSharedPreferences(Constants.HOTMG_SHARED, MODE_PRIVATE);
