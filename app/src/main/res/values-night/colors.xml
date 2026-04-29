@@ -2,13 +2,15 @@
 <resources>
     <color name="colorBackgroundTrans">#AA9A9A9A</color>
     <color name="colorAutoWG">#343434</color>
-    <color name="colorAutoGW">#A9A9A9</color>
+    <color name="colorAutoG_GW">#A9A9A9</color>
+    <color name="colorAutoWB">@color/black</color>
+    <color name="colorAutoBW">@color/white</color>
 
     <color name="colorPrimaryBlue">#3A7AD1</color>
     <color name="colorPrimaryBlueDark">#3A6AC1</color>
 
-<!--    <color name="colorPrimaryGrey">#515151</color>-->
-<!--    <color name="colorPrimaryGreyDark">#424242</color>-->
+    <!--    <color name="colorPrimaryGrey">#515151</color>-->
+    <!--    <color name="colorPrimaryGreyDark">#424242</color>-->
     <color name="colorPrimaryGrey">#658A94</color>
     <color name="colorPrimaryGreyDark">#90ADBB</color>
 
@@ -28,6 +30,6 @@
     <color name="colorPrimaryOrangeDark">#B97300</color>
 
 
-    <color name="colorBackground">#121212</color>  
+    <color name="colorBackground">#121212</color>
 
 </resources>

@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -288,14 +289,17 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
             textViewMessage.setTextIsSelectable(true);
             textViewTitle.setTextIsSelectable(true);
 
-            if (ThemeUtils.isDarkMode(this)) {
-                textViewTitle.setTextColor(Color.WHITE);
-                textViewMessage.setTextColor(Color.WHITE);
-            } else {
-                textViewTitle.setTextColor(Color.BLACK);
-                textViewMessage.setTextColor(Color.BLACK);
-            }
+//            if (ThemeUtils.isDarkMode(this)) {
+//                textViewTitle.setTextColor(Color.WHITE);
+//                textViewMessage.setTextColor(Color.WHITE);
+//            } else {
+//                textViewTitle.setTextColor(Color.BLACK);
+//                textViewMessage.setTextColor(Color.BLACK);
+//            }
 
+            textViewTitle.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.colorAutoBW));
+            textViewMessage.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.colorAutoBW));
+           
             builder.setView(dialogView)
                     .setPositiveButton(R.string.dialog_close, null)
                     .show();

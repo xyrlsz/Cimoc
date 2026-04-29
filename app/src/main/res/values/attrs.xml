@@ -14,6 +14,8 @@
     <declare-styleable name="ThemeAttributes">
         <attr name="colorBackgroundTrans" format="color" />
         <attr name="colorAutoWG" format="color" />
-        <attr name="colorAutoGW" format="color" />
+        <attr name="colorAutoG_GW" format="color" />
+        <attr name="colorAutoBW" format="color" />
+        <attr name="colorAutoWB" format="color" />
     </declare-styleable>
 </resources>

@@ -12,7 +12,6 @@ import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.content.ContextCompat;
 
 import com.xyrlsz.xcimocob.R;
-import com.xyrlsz.xcimocob.utils.ThemeUtils;
 
 /**
  * Created by Hiroshi on 2016/10/2.
@@ -45,9 +44,9 @@ public class ChapterButton extends AppCompatTextView {
                 attrs, R.styleable.ChapterButton, 0, 0);
         TypedArray typedArray2 = context.getTheme().obtainStyledAttributes(
                 attrs, R.styleable.ThemeAttributes, 0, 0);
-        int defaultColor = ContextCompat.getColor(context, R.color.colorAutoGW);
+        int defaultColor = ContextCompat.getColor(context, R.color.colorAutoG_GW);
         accentColor = typedArray.getColor(R.styleable.ChapterButton_selected_color, defaultColor);
-        normalColor = typedArray2.getColor(R.styleable.ThemeAttributes_colorAutoGW, defaultColor);
+        normalColor = typedArray2.getColor(R.styleable.ThemeAttributes_colorAutoG_GW, defaultColor);
         typedArray.recycle();
         typedArray2.recycle();
 
@@ -83,7 +82,7 @@ public class ChapterButton extends AppCompatTextView {
     public void setDownload(boolean download) {
         if (this.download != download) {
             this.download = download;
-            normalColor = download ? accentColor : ContextCompat.getColor(getContext(), R.color.colorAutoGW);
+            normalColor = download ? accentColor : ContextCompat.getColor(getContext(), R.color.colorAutoG_GW);
             initColorDrawableState();
             initDrawableState();
         }
