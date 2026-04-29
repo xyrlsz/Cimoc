@@ -71,8 +71,9 @@
     <string name="comic_search">搜尋</string>
     <string name="comic_cancel_highlight">全部標記已讀</string>
     <string name="comic_load_tag_fail">讀取標籤失敗</string>
-    <string name="comic_status_continue">連載</string>
+    <string name="comic_status_continue">連載中</string>
     <string name="comic_status_finish">完結</string>
+    <string name="comic_last_update">最後更新</string>
     <string name="comic_inverse_selection">反選</string>
     <string name="comic_all_selection">全選</string>
     <string name="comic_all_deselect">全不選</string>

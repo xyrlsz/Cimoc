@@ -88,7 +88,7 @@ public class DetailAdapter extends BaseAdapter<Chapter> {
             public void onDraw(@NonNull Canvas c, @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
                 super.onDraw(c, parent, state);
                 if (parent.getAdapter() != null) {
-                    RecyclerView.Adapter adapter = parent.getAdapter();
+//                    RecyclerView.Adapter adapter = parent.getAdapter();
                     int count = parent.getChildCount();
                     for (int i = 1; i < count; i++) {
                         View view = parent.getChildAt(i);
@@ -195,10 +195,10 @@ public class DetailAdapter extends BaseAdapter<Chapter> {
                     headerHolder.mComicAuthor.setSelected(true);
 
                     if (finish != null) {
-                        headerHolder.mComicStatus.setText(finish ? "完结" : "连载中");
+                        headerHolder.mComicStatus.setText(finish ? mContext.getString(R.string.comic_status_finish) : mContext.getString(R.string.comic_status_continue));
                     }
                     if (update != null && !update.isEmpty()) {
-                        headerHolder.mComicUpdate.setText("最后更新：".concat(update));
+                        headerHolder.mComicUpdate.setText(mContext.getString(R.string.comic_last_update).concat(update));
                     }
                     headerHolder.mComicAuthor.setText(author);
                     headerHolder.mComicSource.setText(STConvertUtils.convert(source));
@@ -214,8 +214,8 @@ public class DetailAdapter extends BaseAdapter<Chapter> {
                     viewHolder.chapterButton.setSelected(false);
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignored) {
+
         }
 
     }
@@ -280,6 +280,7 @@ public class DetailAdapter extends BaseAdapter<Chapter> {
         TextView mComicAuthor;
         @BindView(R.id.item_header_comic_source)
         TextView mComicSource;
+
         HeaderHolder(View view) {
             super(view);
         }
