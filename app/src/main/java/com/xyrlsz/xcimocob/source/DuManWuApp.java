@@ -91,6 +91,7 @@ public class DuManWuApp extends MangaParser {
         JSONObject data = new JSONObject(html);
         String responseData = data.getString("responseData");
         String aes128Decrypt = Aes128Decrypt(g8bh4z, responseData);
+        assert aes128Decrypt != null;
         JSONObject searchData = new JSONObject(aes128Decrypt);
         return new JsonIterator(searchData.getJSONArray("updata")) {
             @Override
@@ -123,6 +124,7 @@ public class DuManWuApp extends MangaParser {
         JSONObject data = new JSONObject(html);
         String responseData = data.getString("responseData");
         String aes128Decrypt = Aes128Decrypt(g8bh4z, responseData);
+        assert aes128Decrypt != null;
         JSONObject bookDetail = new JSONObject(aes128Decrypt).getJSONObject("bookdetailed");
         String title = bookDetail.getString("bookName");
         String cover = bookDetail.getString("coverPic");
@@ -157,6 +159,7 @@ public class DuManWuApp extends MangaParser {
         JSONObject data = new JSONObject(html);
         String responseData = data.getString("responseData");
         String aes128Decrypt = Aes128Decrypt(g8bh4z, responseData);
+        assert aes128Decrypt != null;
         JSONObject chapterData = new JSONObject(aes128Decrypt);
         JSONArray chapList = chapterData.getJSONArray("chaplist");
         List<Chapter> list = new LinkedList<>();
@@ -164,10 +167,14 @@ public class DuManWuApp extends MangaParser {
             JSONObject item = chapList.getJSONObject(i);
             String title = item.getString("chaptername");
             String path = item.getString("chapterid");
-            Long id = IdCreator.createChapterId(sourceComic, chapList.length() - i);
-            list.add(new Chapter(id, sourceComic, title, path));
+            list.add(new Chapter(null, sourceComic, title, path));
         }
-        return Lists.reverse(list);
+        list = Lists.reverse(list);
+        for (int j = 0; j < list.size(); j++) {
+            long id = IdCreator.createChapterId(sourceComic, j);
+            list.get(j).setId(id);
+        }
+        return list;
     }
 
     @Override
@@ -202,11 +209,12 @@ public class DuManWuApp extends MangaParser {
         JSONObject data = new JSONObject(html);
         String responseData = data.getString("responseData");
         String aes128Decrypt = Aes128Decrypt(g8bh4z, responseData);
-        JSONArray imgsList = new JSONObject(aes128Decrypt).getJSONArray("piclist");
-        for (int i = 1; i <= imgsList.length(); i++) {
-            Long comicChapter = chapter.getId();
-            Long id = IdCreator.createImageId(comicChapter, i);
-            String imgUrl = imgsList.get(i - 1).toString();
+        assert aes128Decrypt != null;
+        JSONArray imgList = new JSONObject(aes128Decrypt).getJSONArray("piclist");
+        for (int i = 1; i <= imgList.length(); i++) {
+            long comicChapter = chapter.getId();
+            long id = IdCreator.createImageId(comicChapter, i);
+            String imgUrl = imgList.getString(i - 1);
             list.add(new ImageUrl(id, comicChapter, i, imgUrl, false));
         }
 
