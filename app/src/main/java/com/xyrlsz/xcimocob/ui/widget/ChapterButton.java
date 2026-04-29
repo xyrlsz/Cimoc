@@ -9,6 +9,7 @@ import android.graphics.drawable.StateListDrawable;
 import android.util.AttributeSet;
 
 import androidx.appcompat.widget.AppCompatTextView;
+import androidx.core.content.ContextCompat;
 
 import com.xyrlsz.xcimocob.R;
 import com.xyrlsz.xcimocob.utils.ThemeUtils;
@@ -44,8 +45,9 @@ public class ChapterButton extends AppCompatTextView {
                 attrs, R.styleable.ChapterButton, 0, 0);
         TypedArray typedArray2 = context.getTheme().obtainStyledAttributes(
                 attrs, R.styleable.ThemeAttributes, 0, 0);
-        accentColor = typedArray.getColor(R.styleable.ChapterButton_selected_color, Color.BLACK);
-        normalColor = typedArray2.getColor(R.styleable.ThemeAttributes_colorAutoGW, Color.BLACK);
+        int defaultColor = ContextCompat.getColor(context, R.color.colorAutoGW);
+        accentColor = typedArray.getColor(R.styleable.ChapterButton_selected_color, defaultColor);
+        normalColor = typedArray2.getColor(R.styleable.ThemeAttributes_colorAutoGW, defaultColor);
         typedArray.recycle();
         typedArray2.recycle();
 
@@ -81,7 +83,7 @@ public class ChapterButton extends AppCompatTextView {
     public void setDownload(boolean download) {
         if (this.download != download) {
             this.download = download;
-            normalColor = download ? accentColor : ThemeUtils.isDarkMode(getContext()) ? Color.GRAY : Color.BLACK;
+            normalColor = download ? accentColor : ContextCompat.getColor(getContext(), R.color.colorAutoGW);
             initColorDrawableState();
             initDrawableState();
         }
