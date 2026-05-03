@@ -17,9 +17,9 @@ import com.xyrlsz.xcimocob.ui.view.SettingsView;
 
 import java.util.List;
 
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
-import rx.functions.Action1;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.functions.Action;
 
 /**
  * Created by Hiroshi on 2016/7/22.
@@ -43,19 +43,19 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
         mCompositeSubscription.add(Storage.moveRootDir(mBaseView.getAppInstance().getContentResolver(),
                 mBaseView.getAppInstance().getDocumentFile(), dst)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<String>() {
+                .subscribe(new Consumer<String>() {
                     @Override
-                    public void call(String msg) {
+                    public void accept(String msg) {
                         RxBus.getInstance().post(new RxEvent(RxEvent.EVENT_DIALOG_PROGRESS, msg));
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         mBaseView.onExecuteFail();
                     }
-                }, new Action0() {
+                }, new Action() {
                     @Override
-                    public void call() {
+                    public void run() {
                         mBaseView.onFileMoveSuccess();
                     }
                 }));
@@ -70,9 +70,9 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
     public void scanTask() {
         // Todo 重写一下
         mCompositeSubscription.add(Download.scan(mBaseView.getAppInstance().getContentResolver(), mBaseView.getAppInstance().getDocumentFile())
-                .doOnNext(new Action1<Pair<Comic, List<Task>>>() {
+                .doOnNext(new Consumer<Pair<Comic, List<Task>>>() {
                     @Override
-                    public void call(Pair<Comic, List<Task>> pair) {
+                    public void accept(Pair<Comic, List<Task>> pair) {
                         Comic comic = mComicManager.load(pair.first.getSource(), pair.first.getCid());
                         if (comic == null) {
                             mComicManager.insert(pair.first);
@@ -90,18 +90,18 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
                     }
                 })
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Pair<Comic, List<Task>>>() {
+                .subscribe(new Consumer<Pair<Comic, List<Task>>>() {
                     @Override
-                    public void call(Pair<Comic, List<Task>> pair) {
+                    public void accept(Pair<Comic, List<Task>> pair) {
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         mBaseView.onExecuteFail();
                     }
-                }, new Action0() {
+                }, new Action() {
                     @Override
-                    public void call() {
+                    public void run() {
                         mBaseView.onExecuteSuccess();
                     }
                 }));

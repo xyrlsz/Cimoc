@@ -9,8 +9,8 @@ import java.util.List;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
-import rx.Observable;
-import rx.schedulers.Schedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 
 /**

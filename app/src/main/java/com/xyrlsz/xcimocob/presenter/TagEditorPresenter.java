@@ -14,11 +14,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.functions.Function;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
  * Created by Hiroshi on 2016/12/2.
@@ -41,29 +41,29 @@ public class TagEditorPresenter extends BasePresenter<TagEditorView> {
     public void load(long id) {
         mComicId = id;
         mCompositeSubscription.add(mTagManager.listInRx()
-                .doOnNext(new Action1<List<Tag>>() {
+                .doOnNext(new Consumer<List<Tag>>() {
                     @Override
-                    public void call(List<Tag> list) {
+                    public void accept(List<Tag> list) {
                         for (TagRef ref : mTagRefManager.listByComic(mComicId)) {
                             mTagSet.add(ref.getTid());
                         }
                     }
                 })
-                .compose(new ToAnotherList<>(new Func1<Tag, Switcher<Tag>>() {
+                .compose(new ToAnotherList<>(new Function<Tag, Switcher<Tag>>() {
                     @Override
-                    public Switcher<Tag> call(Tag tag) {
+                    public Switcher<Tag> apply(Tag tag) {
                         return new Switcher<>(tag, mTagSet.contains(tag.getId()));
                     }
                 }))
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<Switcher<Tag>>>() {
+                .subscribe(new Consumer<List<Switcher<Tag>>>() {
                     @Override
-                    public void call(List<Switcher<Tag>> list) {
+                    public void accept(List<Switcher<Tag>> list) {
                         mBaseView.onTagLoadSuccess(list);
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         mBaseView.onTagLoadFail();
                     }
                 }));
@@ -88,24 +88,24 @@ public class TagEditorPresenter extends BasePresenter<TagEditorView> {
 
     public void updateRef(List<Long> list) {
         mCompositeSubscription.add(Observable.just(list)
-                .doOnNext(new Action1<List<Long>>() {
+                .doOnNext(new Consumer<List<Long>>() {
                     @Override
-                    public void call(List<Long> list) {
+                    public void accept(List<Long> list) {
                         updateInTx(list);
                         mTagSet.clear();
                         mTagSet.addAll(list);
                     }
                 }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<Long>>() {
+                .subscribe(new Consumer<List<Long>>() {
                     @Override
-                    public void call(List<Long> list) {
+                    public void accept(List<Long> list) {
                         mBaseView.onTagUpdateSuccess();
                         RxBus.getInstance().post(new RxEvent(RxEvent.EVENT_TAG_UPDATE, mComicId, list));
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         mBaseView.onTagUpdateFail();
                     }
                 }));

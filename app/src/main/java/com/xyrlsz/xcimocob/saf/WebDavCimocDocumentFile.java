@@ -18,10 +18,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import rx.Observable;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 
 public class WebDavCimocDocumentFile extends CimocDocumentFile {
@@ -40,37 +39,23 @@ public class WebDavCimocDocumentFile extends CimocDocumentFile {
         }
 
         // 使用 RxJava 异步获取 DavResource
-        Observable.create((Observable.OnSubscribe<DavResource>) subscriber -> {
+        Observable.create((io.reactivex.rxjava3.core.ObservableOnSubscribe<DavResource>) emitter -> {
                     try {
                         List<DavResource> resources = mSardine.list(mWebDavUrl, 0);
                         if (!resources.isEmpty()) {
-                            subscriber.onNext(resources.get(0));
-                        } else {
-                            subscriber.onNext(null);
+                            emitter.onNext(resources.get(0));
                         }
-                        subscriber.onCompleted();
+                        emitter.onComplete();
                     } catch (IOException e) {
-                        subscriber.onError(e);
+                        emitter.onError(e);
                     }
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<>() {
-                    @Override
-                    public void onNext(DavResource resource) {
-                        mDavResource = resource;
-                    }
-
-                    @Override
-                    public void onCompleted() {
-
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        e.printStackTrace();
-                    }
-                });
+                .subscribe(
+                    resource -> mDavResource = resource,
+                    Throwable::printStackTrace
+                );
     }
 
     // 传入currPath
@@ -91,40 +76,26 @@ public class WebDavCimocDocumentFile extends CimocDocumentFile {
             path = path.substring(0, path.length() - 1);
         }
         mCurrentPath = parent.getCurrentPath() + "/" + path;
-        Observable.create((Observable.OnSubscribe<DavResource>) subscriber -> {
+        Observable.create((io.reactivex.rxjava3.core.ObservableOnSubscribe<DavResource>) emitter -> {
                     try {
                         if (!mSardine.exists(mCurrentPath)) {
                             mSardine.createDirectory(mCurrentPath);
                         }
                         List<DavResource> resources = mSardine.list(mCurrentPath, 0);
                         if (!resources.isEmpty()) {
-                            subscriber.onNext(resources.get(0));
-                        } else {
-                            subscriber.onNext(null);
+                            emitter.onNext(resources.get(0));
                         }
-                        subscriber.onCompleted();
+                        emitter.onComplete();
                     } catch (IOException e) {
-                        subscriber.onError(e);
+                        emitter.onError(e);
                     }
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Subscriber<>() {
-                    @Override
-                    public void onNext(DavResource resource) {
-                        mDavResource = resource;
-                    }
-
-                    @Override
-                    public void onCompleted() {
-
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        e.printStackTrace();
-                    }
-                });
+                .subscribe(
+                    resource -> mDavResource = resource,
+                    Throwable::printStackTrace
+                );
 
     }
 

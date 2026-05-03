@@ -26,9 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import rx.Observable;
-import rx.Subscriber;
-import rx.schedulers.Schedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
  * Created by Hiroshi on 2016/7/22.
@@ -92,20 +91,17 @@ public class Backup {
     }
 
     private static Observable<String[]> load(final CimocDocumentFile root, final String... suffix) {
-        return Observable.create(new Observable.OnSubscribe<String[]>() {
-            @Override
-            public void call(Subscriber<? super String[]> subscriber) {
-                CimocDocumentFile dir = DocumentUtils.getOrCreateSubDirectory(root, BACKUP);
-                if (dir != null) {
-                    String[] files = DocumentUtils.listFilesWithSuffix(dir, suffix);
-                    if (files.length != 0) {
-                        Arrays.sort(files);
-                        subscriber.onNext(files);
-                        subscriber.onCompleted();
-                    }
+        return Observable.create((io.reactivex.rxjava3.core.ObservableOnSubscribe<String[]>) emitter -> {
+            CimocDocumentFile dir = DocumentUtils.getOrCreateSubDirectory(root, BACKUP);
+            if (dir != null) {
+                String[] files = DocumentUtils.listFilesWithSuffix(dir, suffix);
+                if (files.length != 0) {
+                    Arrays.sort(files);
+                    emitter.onNext(files);
+                    emitter.onComplete();
                 }
-                subscriber.onError(new Exception());
             }
+            emitter.onError(new Exception());
         }).subscribeOn(Schedulers.io());
     }
 
@@ -230,9 +226,7 @@ public class Backup {
     }
 
     public static Observable<List<Pair<Tag, List<Comic>>>> restoreTag(final ContentResolver resolver, final CimocDocumentFile root, final String filename) {
-        return Observable.create(new Observable.OnSubscribe<List<Pair<Tag, List<Comic>>>>() {
-            @Override
-            public void call(Subscriber<? super List<Pair<Tag, List<Comic>>>> subscriber) {
+        return Observable.create((io.reactivex.rxjava3.core.ObservableOnSubscribe<List<Pair<Tag, List<Comic>>>>) emitter -> {
                 List<Pair<Tag, List<Comic>>> result = new LinkedList<>();
                 String jsonString = readBackupFile(resolver, root, filename);
                 try {
@@ -247,19 +241,16 @@ public class Backup {
                             result.addAll(loadTagArray(object.getJSONArray(JSON_KEY_TAG_ARRAY)));
                             break;
                     }
-                    subscriber.onNext(result);
-                    subscriber.onCompleted();
+                    emitter.onNext(result);
+                    emitter.onComplete();
                 } catch (JSONException e) {
-                    subscriber.onError(e);
+                    emitter.onError(e);
                 }
-            }
         }).subscribeOn(Schedulers.io());
     }
 
     public static Observable<List<Comic>> restoreComic(final ContentResolver resolver, final CimocDocumentFile root, final String filename) {
-        return Observable.create(new Observable.OnSubscribe<List<Comic>>() {
-            @Override
-            public void call(Subscriber<? super List<Comic>> subscriber) {
+        return Observable.create((io.reactivex.rxjava3.core.ObservableOnSubscribe<List<Comic>>) emitter -> {
                 List<Comic> list = new LinkedList<>();
                 String jsonString = readBackupFile(resolver, root, filename);
                 try {
@@ -269,61 +260,44 @@ public class Backup {
                         JSONObject object = new JSONObject(jsonString);
                         list.addAll(loadComicArray(object.getJSONArray(JSON_KEY_COMIC_ARRAY), SUFFIX_CFBF));
                     }
-                    subscriber.onNext(list);
-                    subscriber.onCompleted();
+                    emitter.onNext(list);
+                    emitter.onComplete();
                 } catch (JSONException e) {
-                    subscriber.onError(e);
+                    emitter.onError(e);
                 }
-            }
         }).subscribeOn(Schedulers.io());
     }
 
     public static Observable<Integer> deleteBackup(final CimocDocumentFile root, final String filename) {
-        return Observable.create(new Observable.OnSubscribe<Integer>() {
-            @Override
-            public void call(Subscriber<? super Integer> subscriber) {
+        return Observable.create((io.reactivex.rxjava3.core.ObservableOnSubscribe<Integer>) emitter -> {
                 CimocDocumentFile dir = DocumentUtils.getOrCreateSubDirectory(root, BACKUP);
                 if (dir != null) {
                     CimocDocumentFile file = dir.findFile(filename);
                     if (file != null) file.delete();
                 }
-                subscriber.onNext(1);
-                subscriber.onCompleted();
-            }
+                emitter.onNext(1);
+                emitter.onComplete();
         }).subscribeOn(Schedulers.io());
     }
 
     public static Observable<Integer> clearBackup(final CimocDocumentFile root) {
-        return Observable.create(new Observable.OnSubscribe<Integer>() {
-            @Override
-            public void call(Subscriber<? super Integer> subscriber) {
+        return Observable.create((io.reactivex.rxjava3.core.ObservableOnSubscribe<Integer>) emitter -> {
                 CimocDocumentFile dir = DocumentUtils.getOrCreateSubDirectory(root, BACKUP);
                 if (dir != null) dir.delete();
-                subscriber.onNext(1);
-                subscriber.onCompleted();
-            }
+                emitter.onNext(1);
+                emitter.onComplete();
         }).subscribeOn(Schedulers.io());
     }
 
     public static Observable<Map<String, ?>> restoreSetting(final ContentResolver resolver, final CimocDocumentFile root, final String filename) {
-        return Observable.create(new Observable.OnSubscribe<Map<String, ?>>() {
-            @Override
-            public void call(Subscriber<? super Map<String, ?>> subscriber) {
-
+        return Observable.create((io.reactivex.rxjava3.core.ObservableOnSubscribe<Map<String, ?>>) emitter -> {
                 String jsonString = readBackupFile(resolver, root, filename);
-
-                // 将jsonStr转为Map
-//                Map<String, ?> entries = JSON.parseObject(
-//                        jsonString, new TypeReference<Map<String, ?>>() {
-//                        });
                 Gson gson = new GsonBuilder()
                         .setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
                         .create();
-
                 Type type = new TypeToken<Map<String, ?>>() {
                 }.getType();
                 Map<String, ?> entries = gson.fromJson(jsonString, type);
-
                 if (filename.endsWith(SUFFIX_CSBF)) {
                     for (Map.Entry<String, ?> entry : Objects.requireNonNull(entries).entrySet()) {
                         if (!entry.getKey().equals(PreferenceManager.PREF_OTHER_STORAGE)) {
@@ -331,9 +305,8 @@ public class Backup {
                         }
                     }
                 }
-                subscriber.onNext(entries);
-                subscriber.onCompleted();
-            }
+                emitter.onNext(entries);
+                emitter.onComplete();
         }).subscribeOn(Schedulers.io());
     }
 

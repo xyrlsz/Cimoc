@@ -6,8 +6,8 @@ import com.xyrlsz.xcimocob.ui.view.SourceView;
 
 import java.util.List;
 
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.functions.Consumer;
 
 /**
  * Created by Hiroshi on 2016/8/11.
@@ -24,14 +24,14 @@ public class SourcePresenter extends BasePresenter<SourceView> {
     public void load() {
         mCompositeSubscription.add(mSourceManager.list()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<Source>>() {
+                .subscribe(new Consumer<List<Source>>() {
                     @Override
-                    public void call(List<Source> list) {
+                    public void accept(List<Source> list) {
                         mBaseView.onSourceLoadSuccess(list);
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         mBaseView.onSourceLoadFail();
                     }
                 }));

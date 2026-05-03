@@ -22,8 +22,8 @@ import org.json.JSONObject;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import rx.Observable;
-import rx.schedulers.Schedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 //import com.azhon.appupdate.config.UpdateConfiguration;
 //import com.azhon.appupdate.manager.DownloadManager;
@@ -41,20 +41,19 @@ public class Update {
 //    private static final String LIST = "list";
 
     public static Observable<String> check() {
-        return Observable.create((Observable.OnSubscribe<String>) subscriber -> {
+        return Observable.create((io.reactivex.rxjava3.core.ObservableOnSubscribe<String>) emitter -> {
             OkHttpClient client = App.getHttpClient();
             Request request = new Request.Builder().url(UPDATE_GITHUB_URL).build();
             Response response = null;
-            boolean checkGithubOk = false;
+            boolean checkSuccess = false;
             try {
                 response = client.newCall(request).execute();
                 if (response.isSuccessful()) {
                     String json = response.body().string();
-//                        JSONObject object = new JSONObject(json).getJSONArray(LIST).getJSONObject(0);
                     String version = new JSONObject(json).getString(SERVER_FILENAME);
-                    subscriber.onNext(version);
-                    subscriber.onCompleted();
-                    checkGithubOk = true;
+                    emitter.onNext(version);
+                    emitter.onComplete();
+                    checkSuccess = true;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -63,16 +62,16 @@ public class Update {
                     response.close();
                 }
             }
-            if (!checkGithubOk) {
+            if (!checkSuccess && !emitter.isDisposed()) {
                 request = new Request.Builder().url(UPDATE_GITEE_URL).build();
                 try {
                     response = client.newCall(request).execute();
                     if (response.isSuccessful()) {
                         String json = response.body().string();
-//                              JSONObject object = new JSONObject(json).getJSONArray(LIST).getJSONObject(0);
                         String version = new JSONObject(json).getString(SERVER_FILENAME);
-                        subscriber.onNext(version);
-                        subscriber.onCompleted();
+                        emitter.onNext(version);
+                        emitter.onComplete();
+                        checkSuccess = true;
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -82,7 +81,9 @@ public class Update {
                     }
                 }
             }
-            subscriber.onError(new Exception());
+            if (!checkSuccess && !emitter.isDisposed()) {
+                emitter.tryOnError(new Exception());
+            }
         }).subscribeOn(Schedulers.io());
     }
 

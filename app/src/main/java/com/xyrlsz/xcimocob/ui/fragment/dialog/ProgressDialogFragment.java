@@ -21,8 +21,9 @@ import com.xyrlsz.xcimocob.utils.ThemeUtils;
 import java.util.Objects;
 
 
-import rx.functions.Action1;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.disposables.Disposable;
 
 /**
  * Created by Hiroshi on 2016/10/14.
@@ -32,7 +33,7 @@ public class ProgressDialogFragment extends DialogFragment {
 
     ProgressBar mProgressBar;
     TextView mTextView;
-    private CompositeSubscription mCompositeSubscription;
+    private CompositeDisposable mCompositeSubscription;
 
     public static ProgressDialogFragment newInstance() {
         return new ProgressDialogFragment();
@@ -48,20 +49,21 @@ public class ProgressDialogFragment extends DialogFragment {
         setCancelable(false);
         int resId = ThemeUtils.getResourceId(requireActivity(), R.attr.colorAccent);
         mProgressBar.getIndeterminateDrawable().setColorFilter(ContextCompat.getColor(getActivity(), resId), PorterDuff.Mode.SRC_ATOP);
-        mCompositeSubscription = new CompositeSubscription();
-        mCompositeSubscription.add(RxBus.getInstance().toObservable(RxEvent.EVENT_DIALOG_PROGRESS).subscribe(new Action1<RxEvent>() {
+        mCompositeSubscription = new CompositeDisposable();
+        Disposable disposable = RxBus.getInstance().toObservable(RxEvent.EVENT_DIALOG_PROGRESS).subscribe(new Consumer<RxEvent>() {
             @Override
-            public void call(RxEvent rxEvent) {
+            public void accept(RxEvent rxEvent) {
                 mTextView.setText((String) rxEvent.getData());
             }
-        }));
+        });
+        mCompositeSubscription.add(disposable);
         return view;
     }
 
     @Override
     public void onDestroyView() {
         if (mCompositeSubscription != null) {
-            mCompositeSubscription.unsubscribe();
+            mCompositeSubscription.dispose();
         }
         super.onDestroyView();
     }

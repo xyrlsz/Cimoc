@@ -27,11 +27,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import rx.Observable;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
  * Created by Hiroshi on 2016/7/4.
@@ -179,9 +178,9 @@ public class DetailPresenter extends BasePresenter<DetailView> {
         }
         mCompositeSubscription.add(
                 mChapterManager.getListChapter(IdCreator.createSourceComic(mComic))
-                        .doOnNext(new Action1<List<Chapter>>() {
+                        .doOnNext(new Consumer<List<Chapter>>() {
                             @Override
-                            public void call(List<Chapter> list) {
+                            public void accept(List<Chapter> list) {
                                 if (mComic.getId() > 0 && !list.isEmpty()) {
                                     updateChapterList(list);
                                 }
@@ -189,17 +188,17 @@ public class DetailPresenter extends BasePresenter<DetailView> {
                         })
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(
-                                new Action1<List<Chapter>>() {
+                                new Consumer<List<Chapter>>() {
                                     @Override
-                                    public void call(List<Chapter> list) {
+                                    public void accept(List<Chapter> list) {
                                         if (list != null && !list.isEmpty()) {
                                             mBaseView.onPreLoadSuccess(list, mComic);
                                         }
                                     }
                                 },
-                                new Action1<Throwable>() {
+                                new Consumer<Throwable>() {
                                     @Override
-                                    public void call(Throwable throwable) {
+                                    public void accept(Throwable throwable) {
                                         mBaseView.onComicLoadSuccess(mComic);
                                         mBaseView.onParseError();
                                     }
@@ -209,9 +208,9 @@ public class DetailPresenter extends BasePresenter<DetailView> {
     private void load() {
         mCompositeSubscription.add(
                 Manga.getComicInfo(mSourceManager.getParser(mComic.getSource()), mComic)
-                        .doOnNext(new Action1<List<Chapter>>() {
+                        .doOnNext(new Consumer<List<Chapter>>() {
                             @Override
-                            public void call(List<Chapter> list) {
+                            public void accept(List<Chapter> list) {
                                 if (mComic.getId() > 0) {
                                     updateChapterList(list);
                                 }
@@ -219,9 +218,9 @@ public class DetailPresenter extends BasePresenter<DetailView> {
                         })
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(
-                                new Action1<List<Chapter>>() {
+                                new Consumer<List<Chapter>>() {
                                     @Override
-                                    public void call(List<Chapter> list) {
+                                    public void accept(List<Chapter> list) {
                                         // 确保章节的sourceComic ID正确
                                         if (mComic.getId() > 0) {
                                             Long sourceComic = IdCreator.createSourceComic(mComic);
@@ -234,9 +233,9 @@ public class DetailPresenter extends BasePresenter<DetailView> {
                                         mBaseView.onChapterLoadSuccess(list);
                                     }
                                 },
-                                new Action1<Throwable>() {
+                                new Consumer<Throwable>() {
                                     @Override
-                                    public void call(Throwable throwable) {
+                                    public void accept(Throwable throwable) {
                                         List<Chapter> cachedChapters =
                                                 mChapterManager.getChapterList(IdCreator.createSourceComic(mComic));
                                         mBaseView.onComicLoadSuccess(mComic);
@@ -282,9 +281,9 @@ public class DetailPresenter extends BasePresenter<DetailView> {
 
     public void backup(CimocDocumentFile file) {
         mComicManager.listFavoriteOrHistoryInRx()
-                .doOnNext(new Action1<List<Comic>>() {
+                .doOnNext(new Consumer<List<Comic>>() {
                     @Override
-                    public void call(List<Comic> list) {
+                    public void accept(List<Comic> list) {
                         Backup.saveComicAuto(
                                 mBaseView.getAppInstance().getContentResolver(), file, list);
                     }
@@ -327,9 +326,7 @@ public class DetailPresenter extends BasePresenter<DetailView> {
      */
     public void addTask(final List<Chapter> cList, final List<Chapter> dList) {
         mCompositeSubscription.add(Observable
-                .create(new Observable.OnSubscribe<ArrayList<Task>>() {
-                    @Override
-                    public void call(Subscriber<? super ArrayList<Task>> subscriber) {
+                .create((io.reactivex.rxjava3.core.ObservableOnSubscribe<ArrayList<Task>>) emitter -> {
                         List<Chapter> dchapterList = new LinkedList<>();
                         List<Chapter> cchapterList = new LinkedList<>();
                         if (mComic.getId() == 0) {
@@ -371,24 +368,23 @@ public class DetailPresenter extends BasePresenter<DetailView> {
                         });
                         Download.updateComicIndex(mBaseView.getAppInstance().getContentResolver(),
                                 mBaseView.getAppInstance().getDocumentFile(), cList, mComic);
-                        subscriber.onNext(result);
-                        subscriber.onCompleted();
-                    }
+                        emitter.onNext(result);
+                        emitter.onComplete();
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                        new Action1<ArrayList<Task>>() {
+                        new Consumer<ArrayList<Task>>() {
                             @Override
-                            public void call(ArrayList<Task> list) {
+                            public void accept(ArrayList<Task> list) {
                                 RxBus.getInstance().post(new RxEvent(
                                         RxEvent.EVENT_TASK_INSERT, new MiniComic(mComic), list));
                                 mBaseView.onTaskAddSuccess(list);
                             }
                         },
-                        new Action1<Throwable>() {
+                        new Consumer<Throwable>() {
                             @Override
-                            public void call(Throwable throwable) {
+                            public void accept(Throwable throwable) {
                                 mBaseView.onTaskAddFail();
                             }
                         }));

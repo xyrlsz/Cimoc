@@ -14,11 +14,11 @@ import com.xyrlsz.xcimocob.ui.view.FavoriteView;
 
 import java.util.List;
 
-import rx.Observer;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.functions.Function;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
  * Created by Hiroshi on 2016/7/6.
@@ -40,34 +40,34 @@ public class FavoritePresenter extends BasePresenter<FavoriteView> {
     @Override
     protected void initSubscription() {
         super.initSubscription();
-        addSubscription(RxEvent.EVENT_COMIC_FAVORITE, new Action1<RxEvent>() {
+        addSubscription(RxEvent.EVENT_COMIC_FAVORITE, new Consumer<RxEvent>() {
             @Override
-            public void call(RxEvent rxEvent) {
+            public void accept(RxEvent rxEvent) {
                 MiniComic comic = (MiniComic) rxEvent.getData();
                 mBaseView.OnComicFavorite(comic);
             }
         });
-        addSubscription(RxEvent.EVENT_COMIC_UNFAVORITE, new Action1<RxEvent>() {
+        addSubscription(RxEvent.EVENT_COMIC_UNFAVORITE, new Consumer<RxEvent>() {
             @Override
-            public void call(RxEvent rxEvent) {
+            public void accept(RxEvent rxEvent) {
                 mBaseView.OnComicUnFavorite((long) rxEvent.getData());
             }
         });
-        addSubscription(RxEvent.EVENT_COMIC_FAVORITE_RESTORE, new Action1<RxEvent>() {
+        addSubscription(RxEvent.EVENT_COMIC_FAVORITE_RESTORE, new Consumer<RxEvent>() {
             @Override
-            public void call(RxEvent rxEvent) {
+            public void accept(RxEvent rxEvent) {
                 mBaseView.OnComicRestore((List<Object>) rxEvent.getData());
             }
         });
-        addSubscription(RxEvent.EVENT_COMIC_READ, new Action1<RxEvent>() {
+        addSubscription(RxEvent.EVENT_COMIC_READ, new Consumer<RxEvent>() {
             @Override
-            public void call(RxEvent rxEvent) {
+            public void accept(RxEvent rxEvent) {
                 mBaseView.onComicRead((MiniComic) rxEvent.getData());
             }
         });
-        addSubscription(RxEvent.EVENT_COMIC_CANCEL_HIGHLIGHT, new Action1<RxEvent>() {
+        addSubscription(RxEvent.EVENT_COMIC_CANCEL_HIGHLIGHT, new Consumer<RxEvent>() {
             @Override
-            public void call(RxEvent rxEvent) {
+            public void accept(RxEvent rxEvent) {
                 mBaseView.onHighlightCancel((MiniComic) rxEvent.getData());
             }
         });
@@ -78,19 +78,19 @@ public class FavoritePresenter extends BasePresenter<FavoriteView> {
     }
 
     public void load() {
-        mCompositeSubscription.add(mComicManager.listFavoriteInRx().compose(new ToAnotherList<>(new Func1<Comic, Object>() {
+        mCompositeSubscription.add(mComicManager.listFavoriteInRx().compose(new ToAnotherList<>(new Function<Comic, Object>() {
             @Override
-            public MiniComic call(Comic comic) {
+            public MiniComic apply(Comic comic) {
                 return new MiniComic(comic);
             }
-        })).observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<List<Object>>() {
+        })).observeOn(AndroidSchedulers.mainThread()).subscribe(new Consumer<List<Object>>() {
             @Override
-            public void call(List<Object> list) {
+            public void accept(List<Object> list) {
                 mBaseView.onComicLoadSuccess(list);
             }
-        }, new Action1<Throwable>() {
+        }, new Consumer<Throwable>() {
             @Override
-            public void call(Throwable throwable) {
+            public void accept(Throwable throwable) {
                 mBaseView.onComicLoadFail();
             }
         }));
@@ -110,48 +110,36 @@ public class FavoritePresenter extends BasePresenter<FavoriteView> {
 
     public void checkUpdate() {
         final List<Comic> list = mComicManager.listFavorite();
-        mCompositeSubscription.add(Manga.checkUpdate(mSourceManager, list).doOnNext(new Action1<Comic>() {
+        mCompositeSubscription.add(Manga.checkUpdate(mSourceManager, list).doOnNext(new Consumer<Comic>() {
             @Override
-            public void call(Comic comic) {
+            public void accept(Comic comic) {
                 if (comic != null) {
                     mComicManager.update(comic);
                 }
             }
-        }).onBackpressureBuffer().subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Observer<>() {
-            private int count = 0;
-
-            @Override
-            public void onCompleted() {
-                mBaseView.onComicCheckComplete();
-//                        if(App.getPreferenceManager().getBoolean(PreferenceManager.PREF_OTHER_FIREBASE_EVENT, true)) {
-//                            Context context = App.getAppContext();
-//                            Bundle bundle = new Bundle();
-//                            bundle.putString(FirebaseAnalytics.Param.CONTENT, context.getString(R.string.favorite_check_update_done));
-//                            bundle.putBoolean(FirebaseAnalytics.Param.SUCCESS, true);
-//                            FirebaseAnalytics mFirebaseAnalytics = FirebaseAnalytics.getInstance(context);
-//                            mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.BEGIN_CHECKOUT, bundle);
-//                        }
+        }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(
+            new io.reactivex.rxjava3.functions.Consumer<Comic>() {
+                private int count = 0;
+                @Override
+                public void accept(Comic comic) {
+                    ++count;
+                    MiniComic miniComic = new MiniComic(comic);
+                    mBaseView.onComicCheckSuccess(miniComic, count, list.size());
+                }
+            },
+            new io.reactivex.rxjava3.functions.Consumer<Throwable>() {
+                @Override
+                public void accept(Throwable e) {
+                    mBaseView.onComicCheckFail();
+                }
+            },
+            new io.reactivex.rxjava3.functions.Action() {
+                @Override
+                public void run() {
+                    mBaseView.onComicCheckComplete();
+                }
             }
-
-            @Override
-            public void onError(Throwable e) {
-                mBaseView.onComicCheckFail();
-//                        if(App.getPreferenceManager().getBoolean(PreferenceManager.PREF_OTHER_FIREBASE_EVENT, true)) {
-//                            Bundle bundle = new Bundle();
-//                            bundle.putString(FirebaseAnalytics.Param.CONTENT, e.toString());
-//                            bundle.putBoolean(FirebaseAnalytics.Param.SUCCESS, false);
-//                            FirebaseAnalytics mFirebaseAnalytics = FirebaseAnalytics.getInstance(App.getAppContext());
-//                            mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.BEGIN_CHECKOUT, bundle);
-//                        }
-            }
-
-            @Override
-            public void onNext(Comic comic) {
-                ++count;
-                MiniComic miniComic = comic == null ? null : new MiniComic(comic);
-                mBaseView.onComicCheckSuccess(miniComic, count, list.size());
-            }
-        }));
+        ));
     }
 
 }

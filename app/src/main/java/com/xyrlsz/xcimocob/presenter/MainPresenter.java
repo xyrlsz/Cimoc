@@ -15,11 +15,10 @@ import org.json.JSONObject;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import rx.Observable;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
  * Created by Hiroshi on 2016/9/21.
@@ -43,9 +42,9 @@ public class MainPresenter extends BasePresenter<MainView> {
 
     @Override
     protected void initSubscription() {
-        addSubscription(RxEvent.EVENT_COMIC_READ, new Action1<RxEvent>() {
+        addSubscription(RxEvent.EVENT_COMIC_READ, new Consumer<RxEvent>() {
             @Override
-            public void call(RxEvent rxEvent) {
+            public void accept(RxEvent rxEvent) {
                 MiniComic comic = (MiniComic) rxEvent.getData();
                 mBaseView.onLastChange(comic.getId(), comic.getSource(), comic.getCid(),
                         comic.getTitle(), comic.getCover());
@@ -61,16 +60,16 @@ public class MainPresenter extends BasePresenter<MainView> {
     public void loadLast() {
         mCompositeSubscription.add(mComicManager.loadLast()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Comic>() {
+                .subscribe(new Consumer<Comic>() {
                     @Override
-                    public void call(Comic comic) {
+                    public void accept(Comic comic) {
                         if (comic != null) {
                             mBaseView.onLastLoadSuccess(comic.getId(), comic.getSource(), comic.getCid(), comic.getTitle(), comic.getCover());
                         }
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         mBaseView.onLastLoadFail();
                     }
                 }));
@@ -79,19 +78,16 @@ public class MainPresenter extends BasePresenter<MainView> {
     public void checkUpdate(final String version) {
         mCompositeSubscription.add(Update.check()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<String>() {
+                .subscribe(new Consumer<String>() {
                     @Override
-                    public void call(String s) {
-//                        if (!version.contains(s) && !version.contains("t")) {
-//                            mBaseView.onUpdateReady();
-//                        }
+                    public void accept(String s) {
                         if(s.compareTo(version)>0){
                             mBaseView.onUpdateReady();
                         }
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                     }
                 }));
     }
@@ -126,18 +122,18 @@ public class MainPresenter extends BasePresenter<MainView> {
 
     public void getSourceBaseUrl() {
         mCompositeSubscription.add(
-                Observable.create(new Observable.OnSubscribe<String>() {
-                    @Override
-                    public void call(Subscriber<? super String> subscriber) {
+                Observable.create((io.reactivex.rxjava3.core.ObservableOnSubscribe<String>) emitter -> {
                         OkHttpClient client = App.getHttpClient();
                         Request request = new Request.Builder().url(SOURCE_URL).build();
                         Response response = null;
+                        boolean checkSuccess = false;
                         try {
                             response = client.newCall(request).execute();
                             if (response.isSuccessful()) {
                                 String json = response.body().string();
-                                subscriber.onNext(json);
-                                subscriber.onCompleted();
+                                emitter.onNext(json);
+                                emitter.onComplete();
+                                checkSuccess = true;
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -146,13 +142,14 @@ public class MainPresenter extends BasePresenter<MainView> {
                                 response.close();
                             }
                         }
-                        subscriber.onError(new Exception());
-                    }
+                        if (!checkSuccess && !emitter.isDisposed()) {
+                            emitter.tryOnError(new Exception());
+                        }
                 }).subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Action1<String>() {
+                        .subscribe(new Consumer<String>() {
                             @Override
-                            public void call(String json) {
+                            public void accept(String json) {
                                 try {
                                     String HHAAZZ = new JSONObject(json).getString("HHAAZZ");
                                     String sw = new JSONObject(json).getString("sw");
@@ -166,9 +163,9 @@ public class MainPresenter extends BasePresenter<MainView> {
                                     e.printStackTrace();
                                 }
                             }
-                        }, new Action1<Throwable>() {
+                        }, new Consumer<Throwable>() {
                             @Override
-                            public void call(Throwable throwable) {
+                            public void accept(Throwable throwable) {
                             }
                         }));
     }

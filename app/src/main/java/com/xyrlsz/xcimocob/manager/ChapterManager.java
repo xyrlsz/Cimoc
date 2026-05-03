@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
-import rx.Observable;
+import io.reactivex.rxjava3.core.Observable;
 
 /**
  * Created by Hiroshi on 2016/7/9.

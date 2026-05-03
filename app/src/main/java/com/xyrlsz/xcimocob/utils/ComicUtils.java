@@ -38,9 +38,9 @@ import okhttp3.Headers;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
  * Created by Hiroshi on 2017/3/24.
@@ -171,7 +171,7 @@ public class ComicUtils {
                 return;
             }
 
-            Observable<Boolean> task = Download.images(App.getApp().getDocumentFile(), comic, chapter,
+            io.reactivex.rxjava3.core.Single<Boolean> taskSingle = Download.images(App.getApp().getDocumentFile(), comic, chapter,
                             sourceManager.getParser(comic.getSource()).getTitle())
                     .all(imageUrls -> {
                         if (imageUrls == null || imageUrls.isEmpty()) return false;
@@ -204,6 +204,7 @@ public class ComicUtils {
                         }
                         return true;
                     });
+            Observable<Boolean> task = taskSingle.toObservable();
 
             tasks.add(task);
             index++;
@@ -274,7 +275,7 @@ public class ComicUtils {
                 String chapterDir = String.format("%0" + sizeDigits + "d-%s/", chapterIndex, sanitizeFileName(chapter.getTitle()));
                 List<ImageUrl> imageUrls = Download.images(App.getApp().getDocumentFile(), comic, chapter,
                                 sourceManager.getParser(comic.getSource()).getTitle())
-                        .toBlocking().first();
+                        .blockingFirst();
 
                 if (imageUrls == null || imageUrls.isEmpty()) {
                     callback.onFailure("章节 [" + chapter.getTitle() + "] 下载失败");
@@ -405,7 +406,7 @@ public class ComicUtils {
             int chapterIndex = 1;
             for (Chapter chapter : chapterList) {
                 List<ImageUrl> imageUrls = Download.images(App.getApp().getDocumentFile(), comic, chapter,
-                        sourceManager.getParser(comic.getSource()).getTitle()).toBlocking().first();
+                        sourceManager.getParser(comic.getSource()).getTitle()).blockingFirst();
 
                 if (imageUrls == null || imageUrls.isEmpty()) {
                     callback.onFailure("章节 [" + chapter.getTitle() + "] 下载失败");
@@ -548,7 +549,7 @@ public class ComicUtils {
             // 依次导出所有章节图片
             for (Chapter chapter : chapterList) {
                 List<ImageUrl> imageUrls = Download.images(App.getApp().getDocumentFile(), comic, chapter,
-                        sourceManager.getParser(comic.getSource()).getTitle()).toBlocking().first();
+                        sourceManager.getParser(comic.getSource()).getTitle()).blockingFirst();
 
                 if (imageUrls == null || imageUrls.isEmpty()) {
                     callback.onFailure("章节 [" + chapter.getTitle() + "] 下载失败");

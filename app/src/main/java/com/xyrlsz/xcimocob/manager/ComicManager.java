@@ -15,7 +15,7 @@ import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.exception.UniqueViolationException;
 import io.objectbox.query.QueryBuilder;
-import rx.Observable;
+import io.reactivex.rxjava3.core.Observable;
 
 /**
  * Created by Hiroshi on 2016/7/9.

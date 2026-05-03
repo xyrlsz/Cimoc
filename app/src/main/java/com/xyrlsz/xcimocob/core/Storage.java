@@ -21,9 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import rx.Observable;
-import rx.Subscriber;
-import rx.schedulers.Schedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
  * Created by Hiroshi on 2016/10/16.
@@ -59,10 +58,10 @@ public class Storage {
     }
 
     private static boolean copyFile(ContentResolver resolver, CimocDocumentFile src,
-                                    CimocDocumentFile parent, Subscriber<? super String> subscriber) {
+                                    CimocDocumentFile parent, io.reactivex.rxjava3.core.ObservableEmitter<? super String> emitter) {
         CimocDocumentFile file = DocumentUtils.getOrCreateFile(parent, src.getName());
         if (file != null) {
-            subscriber.onNext(
+            emitter.onNext(
                     StringUtils.format("正在移动 %s...", src.getUri().getLastPathSegment()));
             try {
                 DocumentUtils.writeBinaryToFile(resolver, src, file);
@@ -75,15 +74,15 @@ public class Storage {
     }
 
     private static boolean copyDir(ContentResolver resolver, CimocDocumentFile src,
-                                   CimocDocumentFile parent, Subscriber<? super String> subscriber) {
+                                   CimocDocumentFile parent, io.reactivex.rxjava3.core.ObservableEmitter<? super String> emitter) {
         if (src.isDirectory()) {
             CimocDocumentFile dir = DocumentUtils.getOrCreateSubDirectory(parent, src.getName());
             for (CimocDocumentFile file : src.listFiles()) {
                 if (file.isDirectory()) {
-                    if (!copyDir(resolver, file, dir, subscriber)) {
+                    if (!copyDir(resolver, file, dir, emitter)) {
                         return false;
                     }
-                } else if (!copyFile(resolver, file, dir, subscriber)) {
+                } else if (!copyFile(resolver, file, dir, emitter)) {
                     return false;
                 }
             }
@@ -92,19 +91,19 @@ public class Storage {
     }
 
     private static boolean copyDir(ContentResolver resolver, CimocDocumentFile src,
-                                   CimocDocumentFile dst, String name, Subscriber<? super String> subscriber) {
+                                   CimocDocumentFile dst, String name, io.reactivex.rxjava3.core.ObservableEmitter<? super String> emitter) {
         CimocDocumentFile file = src.findFile(name);
         if (file != null && file.isDirectory()) {
-            return copyDir(resolver, file, dst, subscriber);
+            return copyDir(resolver, file, dst, emitter);
         }
         return true;
     }
 
     private static void deleteDir(
-            CimocDocumentFile parent, String name, Subscriber<? super String> subscriber) {
+            CimocDocumentFile parent, String name, io.reactivex.rxjava3.core.ObservableEmitter<? super String> emitter) {
         CimocDocumentFile file = parent.findFile(name);
         if (file != null && file.isDirectory()) {
-            subscriber.onNext(
+            emitter.onNext(
                     StringUtils.format("正在删除 %s", file.getUri().getLastPathSegment()));
             file.delete();
         }
@@ -119,19 +118,19 @@ public class Storage {
     public static Observable<String> moveRootDir(
             final ContentResolver resolver, final CimocDocumentFile root, final CimocDocumentFile dst) {
         return Observable
-                .create((Observable.OnSubscribe<String>) subscriber -> {
+                .create((io.reactivex.rxjava3.core.ObservableOnSubscribe<String>) emitter -> {
                     if (dst.canRead() && !isDirSame(root, dst)) {
                         root.refresh();
-                        if (copyDir(resolver, root, dst, BACKUP, subscriber)
-                                && copyDir(resolver, root, dst, DOWNLOAD, subscriber)
-                                && copyDir(resolver, root, dst, PICTURE, subscriber)) {
-                            deleteDir(root, BACKUP, subscriber);
-                            deleteDir(root, DOWNLOAD, subscriber);
-                            deleteDir(root, PICTURE, subscriber);
-                            subscriber.onCompleted();
+                        if (copyDir(resolver, root, dst, BACKUP, emitter)
+                                && copyDir(resolver, root, dst, DOWNLOAD, emitter)
+                                && copyDir(resolver, root, dst, PICTURE, emitter)) {
+                            deleteDir(root, BACKUP, emitter);
+                            deleteDir(root, DOWNLOAD, emitter);
+                            deleteDir(root, PICTURE, emitter);
+                            emitter.onComplete();
                         }
                     }
-                    subscriber.onError(new Exception());
+                    emitter.onError(new Exception());
                 })
                 .subscribeOn(Schedulers.io());
     }
@@ -139,21 +138,21 @@ public class Storage {
     public static Observable<Uri> savePicture(final ContentResolver resolver,
                                               final CimocDocumentFile root, final InputStream stream, final String filename) {
         return Observable
-                .create((Observable.OnSubscribe<Uri>) subscriber -> {
+                .create((io.reactivex.rxjava3.core.ObservableOnSubscribe<Uri>) emitter -> {
                     try {
                         CimocDocumentFile dir = DocumentUtils.getOrCreateSubDirectory(root, PICTURE);
                         if (dir != null) {
                             CimocDocumentFile file = DocumentUtils.getOrCreateFile(dir, filename);
                             DocumentUtils.writeBinaryToFile(
                                     resolver, Objects.requireNonNull(file), stream);
-                            subscriber.onNext(file.getUri());
-                            subscriber.onCompleted();
+                            emitter.onNext(file.getUri());
+                            emitter.onComplete();
                         }
                         stream.close();
                     } catch (IOException ignored) {
 
                     }
-                    subscriber.onError(new Exception());
+                    emitter.onError(new Exception());
                 })
                 .subscribeOn(Schedulers.io());
     }

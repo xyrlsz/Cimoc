@@ -26,12 +26,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import rx.Observable;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.functions.Function;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
  * Created by Hiroshi on 2016/10/19.
@@ -55,14 +54,14 @@ public class BackupPresenter extends BasePresenter<BackupView> {
     public void loadComicFile(CimocDocumentFile root) {
         mCompositeSubscription.add(Backup.loadFavorite(root)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<String[]>() {
+                .subscribe(new Consumer<String[]>() {
                     @Override
-                    public void call(String[] file) {
+                    public void accept(String[] file) {
                         mBaseView.onComicFileLoadSuccess(file);
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         mBaseView.onFileLoadFail();
                     }
                 }));
@@ -71,14 +70,14 @@ public class BackupPresenter extends BasePresenter<BackupView> {
     public void loadTagFile(CimocDocumentFile root) {
         mCompositeSubscription.add(Backup.loadTag(root)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<String[]>() {
+                .subscribe(new Consumer<String[]>() {
                     @Override
-                    public void call(String[] file) {
+                    public void accept(String[] file) {
                         mBaseView.onTagFileLoadSuccess(file);
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         mBaseView.onFileLoadFail();
                     }
                 }));
@@ -87,14 +86,14 @@ public class BackupPresenter extends BasePresenter<BackupView> {
     public void loadSettingsFile(CimocDocumentFile root) {
         mCompositeSubscription.add(Backup.loadSettings(root)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<String[]>() {
+                .subscribe(new Consumer<String[]>() {
                     @Override
-                    public void call(String[] file) {
+                    public void accept(String[] file) {
                         mBaseView.onSettingsFileLoadSuccess(file);
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         mBaseView.onFileLoadFail();
                     }
                 }));
@@ -103,14 +102,14 @@ public class BackupPresenter extends BasePresenter<BackupView> {
     public void loadClearBackupFile(CimocDocumentFile root) {
         mCompositeSubscription.add(Backup.loadClearBackup(root)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<String[]>() {
+                .subscribe(new Consumer<String[]>() {
                     @Override
-                    public void call(String[] file) {
+                    public void accept(String[] file) {
                         mBaseView.onClearFileLoadSuccess(file);
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         mBaseView.onFileLoadFail();
                     }
                 }));
@@ -118,80 +117,73 @@ public class BackupPresenter extends BasePresenter<BackupView> {
 
     public void saveComic(CimocDocumentFile root) {
         mCompositeSubscription.add(mComicManager.listFavoriteOrHistoryInRx()
-                .map(new Func1<List<Comic>, Integer>() {
+                .map(new Function<List<Comic>, Integer>() {
                     @Override
-                    public Integer call(List<Comic> list) {
+                    public Integer apply(List<Comic> list) {
                         return Backup.saveComic(mContentResolver, root, list);
                     }
                 }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Integer>() {
+                .subscribe(new Consumer<Integer>() {
                     @Override
-                    public void call(Integer size) {
+                    public void accept(Integer size) {
                         if (size == -1) {
                             mBaseView.onBackupSaveFail();
                         } else {
                             mBaseView.onBackupSaveSuccess(size);
                         }
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         mBaseView.onBackupSaveFail();
                     }
                 }));
     }
 
     public void saveTag(CimocDocumentFile root) {
-        mCompositeSubscription.add(Observable.create(new Observable.OnSubscribe<Integer>() {
-                    @Override
-                    public void call(Subscriber<? super Integer> subscriber) {
-                        int size = groupAndSaveComicByTag(root);
-                        subscriber.onNext(size);
-                        subscriber.onCompleted();
-                    }
+        mCompositeSubscription.add(Observable.create((io.reactivex.rxjava3.core.ObservableOnSubscribe<Integer>) emitter -> {
+                    int size = groupAndSaveComicByTag(root);
+                    emitter.onNext(size);
+                    emitter.onComplete();
                 }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Integer>() {
+                .subscribe(new Consumer<Integer>() {
                     @Override
-                    public void call(Integer size) {
+                    public void accept(Integer size) {
                         if (size == -1) {
                             mBaseView.onBackupSaveFail();
                         } else {
                             mBaseView.onBackupSaveSuccess(size);
                         }
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         mBaseView.onBackupSaveFail();
                     }
                 }));
     }
 
     public void saveSettings(CimocDocumentFile root) {
-        mCompositeSubscription.add(Observable.create(new Observable.OnSubscribe<Integer>() {
-                    @Override
-                    public void call(Subscriber<? super Integer> subscriber) {
-//                boolean isBackuped = SharePrefUtils.copyFiles(context.getFilesDir().getPath() + context.getPackageName() + "/shared_prefs", );
+        mCompositeSubscription.add(Observable.create((io.reactivex.rxjava3.core.ObservableOnSubscribe<Integer>) emitter -> {
                         int size = Backup.saveSetting(mContentResolver, root, App.getPreferenceManager().getAll());
-                        subscriber.onNext(size);
-                        subscriber.onCompleted();
-                    }
+                        emitter.onNext(size);
+                        emitter.onComplete();
                 }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Integer>() {
+                .subscribe(new Consumer<Integer>() {
                     @Override
-                    public void call(Integer size) {
+                    public void accept(Integer size) {
                         if (size == -1) {
                             mBaseView.onBackupSaveFail();
                         } else {
                             mBaseView.onBackupSaveSuccess(size);
                         }
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         mBaseView.onBackupSaveFail();
                     }
                 }));
@@ -199,21 +191,21 @@ public class BackupPresenter extends BasePresenter<BackupView> {
 
     public void restoreComic(String filename, CimocDocumentFile root) {
         mCompositeSubscription.add(Backup.restoreComic(mContentResolver, root, filename)
-                .doOnNext(new Action1<List<Comic>>() {
+                .doOnNext(new Consumer<List<Comic>>() {
                     @Override
-                    public void call(List<Comic> list) {
+                    public void accept(List<Comic> list) {
                         filterAndPostComic(list);
                     }
                 })
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<Comic>>() {
+                .subscribe(new Consumer<List<Comic>>() {
                     @Override
-                    public void call(List<Comic> list) {
+                    public void accept(List<Comic> list) {
                         mBaseView.onBackupRestoreSuccess();
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         throwable.printStackTrace();
                         mBaseView.onBackupRestoreFail();
                     }
@@ -222,21 +214,21 @@ public class BackupPresenter extends BasePresenter<BackupView> {
 
     public void restoreTag(String filename, CimocDocumentFile root) {
         mCompositeSubscription.add(Backup.restoreTag(mContentResolver, root, filename)
-                .doOnNext(new Action1<List<Pair<Tag, List<Comic>>>>() {
+                .doOnNext(new Consumer<List<Pair<Tag, List<Comic>>>>() {
                     @Override
-                    public void call(List<Pair<Tag, List<Comic>>> list) {
+                    public void accept(List<Pair<Tag, List<Comic>>> list) {
                         updateAndPostTag(list);
                     }
                 })
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<Pair<Tag, List<Comic>>>>() {
+                .subscribe(new Consumer<List<Pair<Tag, List<Comic>>>>() {
                     @Override
-                    public void call(List<Pair<Tag, List<Comic>>> pair) {
+                    public void accept(List<Pair<Tag, List<Comic>>> pair) {
                         mBaseView.onBackupRestoreSuccess();
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         mBaseView.onBackupRestoreFail();
                     }
                 }));
@@ -245,14 +237,14 @@ public class BackupPresenter extends BasePresenter<BackupView> {
     public void restoreSetting(String filename, CimocDocumentFile root) {
         mCompositeSubscription.add(Backup.restoreSetting(mContentResolver, root, filename)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Map<String, ?>>() {
+                .subscribe(new Consumer<Map<String, ?>>() {
                     @Override
-                    public void call(Map<String, ?> pair) {
+                    public void accept(Map<String, ?> pair) {
                         mBaseView.onBackupRestoreSuccess();
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         mBaseView.onBackupRestoreFail();
                     }
                 }));
@@ -261,14 +253,14 @@ public class BackupPresenter extends BasePresenter<BackupView> {
     public void clearBackup(CimocDocumentFile root) {
         mCompositeSubscription.add(Backup.clearBackup(root)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Integer>() {
+                .subscribe(new Consumer<Integer>() {
                     @Override
-                    public void call(Integer pair) {
+                    public void accept(Integer pair) {
                         mBaseView.onClearBackupSuccess();
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         mBaseView.onClearBackupFail();
                     }
                 }));
@@ -277,14 +269,14 @@ public class BackupPresenter extends BasePresenter<BackupView> {
     public void deleteBackup(String filename, CimocDocumentFile root) {
         mCompositeSubscription.add(Backup.deleteBackup(root, filename)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Integer>() {
+                .subscribe(new Consumer<Integer>() {
                     @Override
-                    public void call(Integer pair) {
+                    public void accept(Integer pair) {
                         mBaseView.onClearBackupSuccess();
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         mBaseView.onClearBackupFail();
                     }
                 }));
@@ -293,14 +285,14 @@ public class BackupPresenter extends BasePresenter<BackupView> {
     public void uploadBackup2Cloud(CimocDocumentFile src, WebDavCimocDocumentFile dst) {
         mCompositeSubscription.add(upload2WebDav(src, dst, true)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Integer>() {
+                .subscribe(new Consumer<Integer>() {
                     @Override
-                    public void call(Integer pair) {
+                    public void accept(Integer pair) {
                         mBaseView.onUploadSuccess();
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         mBaseView.onUploadFail();
                     }
                 }));

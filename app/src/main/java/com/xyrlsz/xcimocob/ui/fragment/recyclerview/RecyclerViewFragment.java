@@ -20,7 +20,6 @@ public abstract class RecyclerViewFragment extends BaseFragment implements BaseA
     @Override
     protected void initView() {
         mRecyclerView = mRootView.findViewById(R.id.recycler_view_content);
-        mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setItemAnimator(null);
         mRecyclerView.setLayoutManager(initLayoutManager());
         BaseAdapter adapter = initAdapter();

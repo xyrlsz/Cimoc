@@ -19,11 +19,11 @@ import com.xyrlsz.xcimocob.utils.IdCreator;
 import java.util.ArrayList;
 import java.util.List;
 
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.functions.Function;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
  * Created by Hiroshi on 2016/9/1.
@@ -46,35 +46,35 @@ public class DownloadPresenter extends BasePresenter<DownloadView> {
     @SuppressWarnings("unchecked")
     @Override
     protected void initSubscription() {
-        addSubscription(RxEvent.EVENT_TASK_INSERT, new Action1<RxEvent>() {
+        addSubscription(RxEvent.EVENT_TASK_INSERT, new Consumer<RxEvent>() {
             @Override
-            public void call(RxEvent rxEvent) {
+            public void accept(RxEvent rxEvent) {
                 mBaseView.onDownloadAdd((MiniComic) rxEvent.getData());
             }
         });
-        addSubscription(RxEvent.EVENT_DOWNLOAD_REMOVE, new Action1<RxEvent>() {
+        addSubscription(RxEvent.EVENT_DOWNLOAD_REMOVE, new Consumer<RxEvent>() {
             @Override
-            public void call(RxEvent rxEvent) {
+            public void accept(RxEvent rxEvent) {
                 mBaseView.onDownloadDelete((long) rxEvent.getData());
             }
         });
-        addSubscription(RxEvent.EVENT_DOWNLOAD_CLEAR, new Action1<RxEvent>() {
+        addSubscription(RxEvent.EVENT_DOWNLOAD_CLEAR, new Consumer<RxEvent>() {
             @Override
-            public void call(RxEvent rxEvent) {
+            public void accept(RxEvent rxEvent) {
                 for (long id : (List<Long>) rxEvent.getData()) {
                     mBaseView.onDownloadDelete(id);
                 }
             }
         });
-        addSubscription(RxEvent.EVENT_DOWNLOAD_START, new Action1<RxEvent>() {
+        addSubscription(RxEvent.EVENT_DOWNLOAD_START, new Consumer<RxEvent>() {
             @Override
-            public void call(RxEvent rxEvent) {
+            public void accept(RxEvent rxEvent) {
                 mBaseView.onDownloadStart();
             }
         });
-        addSubscription(RxEvent.EVENT_DOWNLOAD_STOP, new Action1<RxEvent>() {
+        addSubscription(RxEvent.EVENT_DOWNLOAD_STOP, new Consumer<RxEvent>() {
             @Override
-            public void call(RxEvent rxEvent) {
+            public void accept(RxEvent rxEvent) {
                 mBaseView.onDownloadStop();
             }
         });
@@ -82,9 +82,9 @@ public class DownloadPresenter extends BasePresenter<DownloadView> {
 
     public void deleteComic(long id) {
         mCompositeSubscription.add(Observable.just(id)
-                .doOnNext(new Action1<Long>() {
+                .doOnNext(new Consumer<Long>() {
                     @Override
-                    public void call(final Long id) {
+                    public void accept(final Long id) {
                         Comic comic;
                         try {
                             comic = mComicManager.callInTx(() -> {
@@ -113,29 +113,29 @@ public class DownloadPresenter extends BasePresenter<DownloadView> {
 
     public void load() {
         mCompositeSubscription.add(mComicManager.listDownloadInRx()
-                .compose(new ToAnotherList<>((Func1<Comic, Object>) MiniComic::new))
+                .compose(new ToAnotherList<>((io.reactivex.rxjava3.functions.Function<Comic, Object>) MiniComic::new))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(list -> mBaseView.onComicLoadSuccess(list), throwable -> mBaseView.onComicLoadFail()));
     }
 
     public void loadTask() {
         mCompositeSubscription.add(mTaskManager.listInRx()
-                .flatMap(new Func1<List<Task>, Observable<Task>>() {
+                .flatMap(new Function<List<Task>, Observable<Task>>() {
                     @Override
-                    public Observable<Task> call(List<Task> list) {
-                        return Observable.from(list);
+                    public Observable<Task> apply(List<Task> list) {
+                        return Observable.fromIterable(list);
                     }
                 })
-                .filter(new Func1<Task, Boolean>() {
+                .filter(new io.reactivex.rxjava3.functions.Predicate<Task>() {
                     @Override
-                    public Boolean call(Task task) {
+                    public boolean test(Task task) {
                         return !task.isFinish();
                     }
                 })
                 .toList()
-                .doOnNext(new Action1<List<Task>>() {
+                .doOnSuccess(new Consumer<List<Task>>() {
                     @Override
-                    public void call(List<Task> list) {
+                    public void accept(List<Task> list) {
                         LongSparseArray<Comic> array = ComicUtils.buildComicMap(mComicManager.listDownload());
                         for (Task task : list) {
                             Comic comic = array.get(task.getKey());
@@ -148,14 +148,14 @@ public class DownloadPresenter extends BasePresenter<DownloadView> {
                     }
                 })
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<Task>>() {
+                .subscribe(new Consumer<List<Task>>() {
                     @Override
-                    public void call(List<Task> list) {
+                    public void accept(List<Task> list) {
                         mBaseView.onTaskLoadSuccess(new ArrayList<>(list));
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         mBaseView.onExecuteFail();
                     }
                 }));

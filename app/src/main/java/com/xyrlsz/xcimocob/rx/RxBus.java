@@ -1,11 +1,10 @@
 package com.xyrlsz.xcimocob.rx;
 
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
-import rx.subjects.PublishSubject;
-import rx.subjects.SerializedSubject;
-import rx.subjects.Subject;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.functions.Predicate;
+import io.reactivex.rxjava3.subjects.PublishSubject;
+import io.reactivex.rxjava3.subjects.Subject;
 
 /**
  * Created by Hiroshi on 2016/8/21.
@@ -14,10 +13,10 @@ public class RxBus {
 
     private static RxBus instance;
 
-    private Subject<Object, Object> bus;
+    private Subject<Object> bus;
 
     private RxBus() {
-        bus = new SerializedSubject<>(PublishSubject.create());
+        bus = PublishSubject.<Object>create().toSerialized();
     }
 
     public static RxBus getInstance() {
@@ -37,12 +36,12 @@ public class RxBus {
 
     public Observable<RxEvent> toObservable(@RxEvent.EventType final int type) {
         return bus.ofType(RxEvent.class)
-                .filter(new Func1<RxEvent, Boolean>() {
+                .filter(new io.reactivex.rxjava3.functions.Predicate<RxEvent>() {
                     @Override
-                    public Boolean call(RxEvent rxEvent) {
+                    public boolean test(RxEvent rxEvent) {
                         return rxEvent.getType() == type;
                     }
-                }).onBackpressureBuffer().observeOn(AndroidSchedulers.mainThread());
+                }).observeOn(AndroidSchedulers.mainThread());
     }
 
 }

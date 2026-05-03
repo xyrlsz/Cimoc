@@ -4,8 +4,9 @@ import com.xyrlsz.xcimocob.rx.RxBus;
 import com.xyrlsz.xcimocob.rx.RxEvent;
 import com.xyrlsz.xcimocob.ui.view.BaseView;
 
-import rx.functions.Action1;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.disposables.Disposable;
 
 /**
  * Created by Hiroshi on 2016/7/4.
@@ -13,15 +14,15 @@ import rx.subscriptions.CompositeSubscription;
 public abstract class BasePresenter<T extends BaseView> {
 
     protected T mBaseView;
-    protected CompositeSubscription mCompositeSubscription;
+    protected CompositeDisposable mCompositeSubscription;
 
     public void attachView(T view) {
         this.mBaseView = view;
         onViewAttach();
-        mCompositeSubscription = new CompositeSubscription();
-        addSubscription(RxEvent.EVENT_SWITCH_NIGHT, new Action1<RxEvent>() {
+        mCompositeSubscription = new CompositeDisposable();
+        addSubscription(RxEvent.EVENT_SWITCH_NIGHT, new Consumer<RxEvent>() {
             @Override
-            public void call(RxEvent rxEvent) {
+            public void accept(RxEvent rxEvent) {
                 mBaseView.onNightSwitch();
             }
         });
@@ -34,18 +35,19 @@ public abstract class BasePresenter<T extends BaseView> {
     protected void initSubscription() {
     }
 
-    protected void addSubscription(@RxEvent.EventType int type, Action1<RxEvent> action) {
-        mCompositeSubscription.add(RxBus.getInstance().toObservable(type).subscribe(action, new Action1<Throwable>() {
+    protected void addSubscription(@RxEvent.EventType int type, Consumer<RxEvent> action) {
+        Disposable disposable = RxBus.getInstance().toObservable(type).subscribe(action, new Consumer<Throwable>() {
             @Override
-            public void call(Throwable throwable) {
+            public void accept(Throwable throwable) {
                 throwable.printStackTrace();
             }
-        }));
+        });
+        mCompositeSubscription.add(disposable);
     }
 
     public void detachView() {
         if (mCompositeSubscription != null) {
-            mCompositeSubscription.unsubscribe();
+            mCompositeSubscription.dispose();
         }
         mBaseView = null;
     }

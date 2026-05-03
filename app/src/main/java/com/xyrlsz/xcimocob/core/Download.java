@@ -22,9 +22,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
-import rx.Observable;
-import rx.Subscriber;
-import rx.schedulers.Schedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
  * Created by Hiroshi on 2016/9/9.
@@ -254,13 +253,13 @@ public class Download {
 //        }).subscribeOn(Schedulers.io());
 //    }
     public static Observable<List<ImageUrl>> images(final CimocDocumentFile root, final Comic comic, final Chapter chapter, final String title) {
-        return Observable.create((Observable.OnSubscribe<List<ImageUrl>>) subscriber -> {
+        return Observable.create((io.reactivex.rxjava3.core.ObservableOnSubscribe<List<ImageUrl>>) emitter -> {
             try {
                 CimocDocumentFile dir = getChapterDir(root, comic, chapter, title);
 
                 // Check if directory is null or doesn't exist
                 if (dir == null || !dir.exists()) {
-                    subscriber.onError(new Exception("Chapter directory not found"));
+                    emitter.onError(new Exception("Chapter directory not found"));
                     return;
                 }
 
@@ -273,19 +272,19 @@ public class Download {
 
                 // Check if files list is null (in case listFiles() returns null)
                 if (files == null) {
-                    subscriber.onError(new Exception("Failed to list files in directory"));
+                    emitter.onError(new Exception("Failed to list files in directory"));
                     return;
                 }
 
                 List<ImageUrl> list = Storage.buildImageUrlFromDocumentFile(files, chapter.getPath(), chapter.getCount(), chapter);
                 if (!list.isEmpty()) {
-                    subscriber.onNext(list);
-                    subscriber.onCompleted();
+                    emitter.onNext(list);
+                    emitter.onComplete();
                 } else {
-                    subscriber.onError(new Exception("No valid images found"));
+                    emitter.onError(new Exception("No valid images found"));
                 }
             } catch (Exception e) {
-                subscriber.onError(e);
+                emitter.onError(e);
             }
         }).subscribeOn(Schedulers.io());
     }
@@ -364,9 +363,7 @@ public class Download {
     }
 
     public static Observable<Pair<Comic, List<Task>>> scan(final ContentResolver resolver, final CimocDocumentFile root) {
-        return Observable.create(new Observable.OnSubscribe<Pair<Comic, List<Task>>>() {
-            @Override
-            public void call(Subscriber<? super Pair<Comic, List<Task>>> subscriber) {
+        return Observable.create((io.reactivex.rxjava3.core.ObservableOnSubscribe<Pair<Comic, List<Task>>>) emitter -> {
                 root.refresh();
                 CimocDocumentFile downloadDir = DocumentUtils.getOrCreateSubDirectory(root, DOWNLOAD);
                 if (downloadDir != null) {
@@ -383,15 +380,14 @@ public class Download {
                                         }
                                     }
                                     if (!list.isEmpty()) {
-                                        subscriber.onNext(Pair.create(comic, list));
+                                        emitter.onNext(Pair.create(comic, list));
                                     }
                                 }
                             }
                         }
                     }
                 }
-                subscriber.onCompleted();
-            }
+                emitter.onComplete();
         }).subscribeOn(Schedulers.io());
     }
 

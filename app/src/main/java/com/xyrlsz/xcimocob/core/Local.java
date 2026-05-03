@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import rx.Observable;
-import rx.schedulers.Schedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
  * Created by Hiroshi on 2017/5/20.
@@ -29,7 +29,7 @@ public class Local {
     private static Pattern chapterPattern = null;
 
     public static Observable<List<Pair<Comic, ArrayList<Task>>>> scan(final CimocDocumentFile root) {
-        return Observable.create((Observable.OnSubscribe<List<Pair<Comic, ArrayList<Task>>>>) subscriber -> {
+        return Observable.create((io.reactivex.rxjava3.core.ObservableOnSubscribe<List<Pair<Comic, ArrayList<Task>>>>) emitter -> {
             List<Pair<Comic, ArrayList<Task>>> result = new ArrayList<>();
 
             ScanInfo info = new ScanInfo(root);
@@ -60,20 +60,20 @@ public class Local {
                     list.remove(0);
                 }
             }
-            subscriber.onNext(result);
-            subscriber.onCompleted();
+            emitter.onNext(result);
+            emitter.onComplete();
         }).subscribeOn(Schedulers.io());
     }
 
     public static Observable<List<ImageUrl>> images(final CimocDocumentFile dir, final Chapter chapter) {
-        return Observable.create((Observable.OnSubscribe<List<ImageUrl>>) subscriber -> {
+        return Observable.create((io.reactivex.rxjava3.core.ObservableOnSubscribe<List<ImageUrl>>) emitter -> {
             List<CimocDocumentFile> files = dir.listFiles(file -> file.isFile() && StringUtils.endWith(file.getName(), "jpg", "png", "jpeg", "webp"), Comparator.comparing(CimocDocumentFile::getName));
             List<ImageUrl> list = Storage.buildImageUrlFromDocumentFile(files, chapter.getTitle(), chapter.getCount(), chapter);
             if (!list.isEmpty()) {
-                subscriber.onNext(list);
-                subscriber.onCompleted();
+                emitter.onNext(list);
+                emitter.onComplete();
             } else {
-                subscriber.onError(new Exception());
+                emitter.onError(new Exception());
             }
         }).subscribeOn(Schedulers.io());
     }

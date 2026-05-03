@@ -15,10 +15,10 @@ import com.xyrlsz.xcimocob.ui.view.PartFavoriteView;
 import java.util.ArrayList;
 import java.util.List;
 
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.functions.Func1;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.functions.Function;
 
 /**
  * Created by Hiroshi on 2016/10/11.
@@ -41,15 +41,15 @@ public class PartFavoritePresenter extends BasePresenter<PartFavoriteView> {
     @SuppressWarnings("unchecked")
     @Override
     protected void initSubscription() {
-        addSubscription(RxEvent.EVENT_COMIC_UNFAVORITE, new Action1<RxEvent>() {
+        addSubscription(RxEvent.EVENT_COMIC_UNFAVORITE, new Consumer<RxEvent>() {
             @Override
-            public void call(RxEvent rxEvent) {
+            public void accept(RxEvent rxEvent) {
                 mBaseView.onComicRemove((long) rxEvent.getData());
             }
         });
-        addSubscription(RxEvent.EVENT_TAG_UPDATE, new Action1<RxEvent>() {
+        addSubscription(RxEvent.EVENT_TAG_UPDATE, new Consumer<RxEvent>() {
             @Override
-            public void call(RxEvent rxEvent) {
+            public void accept(RxEvent rxEvent) {
                 long id = (long) rxEvent.getData();
                 List<Long> list = (List<Long>) rxEvent.getData(1);
                 if (list.contains(mTagId)) {
@@ -60,15 +60,15 @@ public class PartFavoritePresenter extends BasePresenter<PartFavoriteView> {
                 }
             }
         });
-        addSubscription(RxEvent.EVENT_COMIC_CANCEL_HIGHLIGHT, new Action1<RxEvent>() {
+        addSubscription(RxEvent.EVENT_COMIC_CANCEL_HIGHLIGHT, new Consumer<RxEvent>() {
             @Override
-            public void call(RxEvent rxEvent) {
+            public void accept(RxEvent rxEvent) {
                 mBaseView.onHighlightCancel((MiniComic) rxEvent.getData());
             }
         });
-        addSubscription(RxEvent.EVENT_COMIC_READ, new Action1<RxEvent>() {
+        addSubscription(RxEvent.EVENT_COMIC_READ, new Consumer<RxEvent>() {
             @Override
-            public void call(RxEvent rxEvent) {
+            public void accept(RxEvent rxEvent) {
                 mBaseView.onComicRead((MiniComic) rxEvent.getData());
             }
         });
@@ -87,21 +87,21 @@ public class PartFavoritePresenter extends BasePresenter<PartFavoriteView> {
     public void load(long id) {
         mTagId = id;
         mCompositeSubscription.add(getObservable(id)
-                .compose(new ToAnotherList<>(new Func1<Comic, Object>() {
+                .compose(new ToAnotherList<>(new Function<Comic, Object>() {
                     @Override
-                    public MiniComic call(Comic comic) {
+                    public MiniComic apply(Comic comic) {
                         return new MiniComic(comic);
                     }
                 }))
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<Object>>() {
+                .subscribe(new Consumer<List<Object>>() {
                     @Override
-                    public void call(List<Object> list) {
+                    public void accept(List<Object> list) {
                         mBaseView.onComicLoadSuccess(list);
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         mBaseView.onComicLoadFail();
                     }
                 }));
@@ -119,22 +119,22 @@ public class PartFavoritePresenter extends BasePresenter<PartFavoriteView> {
     public void loadComicTitle(List<Object> list) {
         // TODO 不使用 in
         mCompositeSubscription.add(mComicManager.listFavoriteNotIn(buildIdList(list))
-                .compose(new ToAnotherList<>(new Func1<Comic, String>() {
+                .compose(new ToAnotherList<>(new Function<Comic, String>() {
                     @Override
-                    public String call(Comic comic) {
+                    public String apply(Comic comic) throws Exception {
                         mSavedComic.put(comic.getId(), comic);
                         return comic.getTitle();
                     }
                 }))
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<String>>() {
+                .subscribe(new Consumer<List<String>>() {
                     @Override
-                    public void call(List<String> list) {
+                    public void accept(List<String> list) {
                         mBaseView.onComicTitleLoadSuccess(list);
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         mBaseView.onComicTitleLoadFail();
                     }
                 }));

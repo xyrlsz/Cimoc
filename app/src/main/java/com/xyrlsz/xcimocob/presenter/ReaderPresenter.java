@@ -26,9 +26,9 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Objects;
 
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.functions.Consumer;
 
 /**
  * Created by Hiroshi on 2016/7/8.
@@ -62,9 +62,9 @@ public class ReaderPresenter extends BasePresenter<ReaderView> {
 
     @Override
     protected void initSubscription() {
-        addSubscription(RxEvent.EVENT_PICTURE_PAGING, new Action1<RxEvent>() {
+        addSubscription(RxEvent.EVENT_PICTURE_PAGING, new Consumer<RxEvent>() {
             @Override
-            public void call(RxEvent rxEvent) {
+            public void accept(RxEvent rxEvent) {
                 mBaseView.onPicturePaging((ImageUrl) rxEvent.getData());
             }
         });
@@ -73,18 +73,18 @@ public class ReaderPresenter extends BasePresenter<ReaderView> {
     public void lazyLoad(final ImageUrl imageUrl) {
         mCompositeSubscription.add(Manga.loadLazyUrl(mSourceManager.getParser(mComic.getSource()), imageUrl.getUrl())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<String>() {
+                .subscribe(new Consumer<String>() {
                     @Override
-                    public void call(String url) {
+                    public void accept(String url) {
                         if (url == null) {
                             mBaseView.onImageLoadFail(imageUrl.getId());
                         } else {
                             mBaseView.onImageLoadSuccess(imageUrl.getId(), url);
                         }
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         mBaseView.onImageLoadFail(imageUrl.getId());
                     }
                 }));
@@ -169,14 +169,14 @@ public class ReaderPresenter extends BasePresenter<ReaderView> {
         mCompositeSubscription.add(Storage.savePicture(mBaseView.getAppInstance().getContentResolver(),
                 mBaseView.getAppInstance().getDocumentFile(), inputStream, buildPictureName(title, page, url))
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Uri>() {
+                .subscribe(new Consumer<Uri>() {
                     @Override
-                    public void call(Uri uri) {
+                    public void accept(Uri uri) {
                         mBaseView.onPictureSaveSuccess(uri);
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         throwable.printStackTrace();
                         mBaseView.onPictureSaveFail();
                     }
@@ -208,9 +208,9 @@ public class ReaderPresenter extends BasePresenter<ReaderView> {
     private void images(Observable<List<ImageUrl>> observable) {
         mCompositeSubscription.add(observable
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<ImageUrl>>() {
+                .subscribe(new Consumer<List<ImageUrl>>() {
                     @Override
-                    public void call(List<ImageUrl> list) {
+                    public void accept(List<ImageUrl> list) {
                         mImageUrlManager.updateOrInsert(list);
                         Chapter chapter;
                         switch (status) {
@@ -237,9 +237,9 @@ public class ReaderPresenter extends BasePresenter<ReaderView> {
                         }
                         status = LOAD_NULL;
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         try{
                             Chapter chapter;
                             List<ImageUrl> list;

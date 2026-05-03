@@ -6,8 +6,8 @@ import com.xyrlsz.xcimocob.ui.view.ComicView;
 
 import java.util.List;
 
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.functions.Consumer;
 
 /**
  * Created by Hiroshi on 2016/10/11.
@@ -25,14 +25,14 @@ public class ComicPresenter extends BasePresenter<ComicView> {
     public void loadTag() {
         mCompositeSubscription.add(mTagManager.listInRx()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<Tag>>() {
+                .subscribe(new Consumer<List<Tag>>() {
                     @Override
-                    public void call(List<Tag> list) {
+                    public void accept(List<Tag> list) {
                         mBaseView.onTagLoadSuccess(list);
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         mBaseView.onTagLoadFail();
                     }
                 }));

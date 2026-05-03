@@ -12,9 +12,9 @@ import com.xyrlsz.xcimocob.ui.view.ResultView;
 
 import java.util.List;
 
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action0;
-import rx.functions.Action1;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.functions.Action;
 
 /**
  * Created by Hiroshi on 2016/7/4.
@@ -106,9 +106,9 @@ public class ResultPresenter extends BasePresenter<ResultView> {
 //            }
             mCompositeSubscription.add(Manga.getCategoryComic(parser, keyword, ++mStateArray[0].page)
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Action1<List<Comic>>() {
+                    .subscribe(new Consumer<List<Comic>>() {
                         @Override
-                        public void call(List<Comic> list) {
+                        public void accept(List<Comic> list) {
 
                             //修复扑飞漫画分类查看时的重复加载列表问题
                             if (!comicTitleTemp.isEmpty() && comicTitleTemp.equals(list.get(0).getTitle())) {
@@ -119,9 +119,9 @@ public class ResultPresenter extends BasePresenter<ResultView> {
                             mBaseView.onLoadSuccess(list);
                             mStateArray[0].state = STATE_NULL;
                         }
-                    }, new Action1<Throwable>() {
+                    }, new Consumer<Throwable>() {
                         @Override
-                        public void call(Throwable throwable) {
+                        public void accept(Throwable throwable) {
                             throwable.printStackTrace();
                             if (mStateArray[0].page == 1) {
                                 mBaseView.onLoadFail();
@@ -142,14 +142,14 @@ public class ResultPresenter extends BasePresenter<ResultView> {
                 obj.state = STATE_DOING;
                 mCompositeSubscription.add(Manga.getSearchResult(parser, keyword, ++obj.page, strictSearch, stSameSearch, searchType)
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Action1<Comic>() {
+                        .subscribe(new Consumer<Comic>() {
                             @Override
-                            public void call(Comic comic) {
+                            public void accept(Comic comic) {
                                 mBaseView.onSearchSuccess(comic);
                             }
-                        }, new Action1<Throwable>() {
+                        }, new Consumer<Throwable>() {
                             @Override
-                            public void call(Throwable throwable) {
+                            public void accept(Throwable throwable) {
                                 throwable.printStackTrace();
                                 if (obj.page == 1) {
                                     obj.state = STATE_DONE;
@@ -158,9 +158,9 @@ public class ResultPresenter extends BasePresenter<ResultView> {
                                     }
                                 }
                             }
-                        }, new Action0() {
+                        }, new Action() {
                             @Override
-                            public void call() {
+                            public void run() {
                                 obj.state = STATE_NULL;
                             }
                         }));

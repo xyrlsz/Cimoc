@@ -21,10 +21,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.functions.Function;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 
 /**
@@ -48,7 +48,7 @@ public class LocalPresenter extends BasePresenter<LocalView> {
 
     public void load() {
         mCompositeSubscription.add(mComicManager.listLocalInRx()
-                .compose(new ToAnotherList<>((Func1<Comic, Object>) comic -> new MiniComic(comic)))
+                .compose(new ToAnotherList<>((io.reactivex.rxjava3.functions.Function<Comic, Object>) comic -> new MiniComic(comic)))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         list -> mBaseView.onComicLoadSuccess(list),
@@ -107,7 +107,7 @@ public class LocalPresenter extends BasePresenter<LocalView> {
     public void scan(CimocDocumentFile doc) {
         mCompositeSubscription.add(Local.scan(doc)
                 .map(this::processScanResult)
-                .compose(new ToAnotherList<>((Func1<Comic, Object>) MiniComic::new))
+                .compose(new ToAnotherList<>((io.reactivex.rxjava3.functions.Function<Comic, Object>) MiniComic::new))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(list
                                 -> mBaseView.onLocalScanSuccess(list),

@@ -39,8 +39,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import rx.android.schedulers.AndroidSchedulers;
-import rx.subscriptions.CompositeSubscription;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.disposables.Disposable;
 
 
 public class CategoryFragment extends BaseFragment implements CategoryView, AdapterView.OnItemSelectedListener {
@@ -63,7 +64,7 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
     private Category mCategory;
     private SourceManager mSourceManager;
     private LinkedList<Pair<String, String>> mSourceList;
-    private CompositeSubscription mCompositeSubscription;
+    private CompositeDisposable mCompositeSubscription;
     private State mCurrentState;
     private String mCurrentFormat;
     private boolean isHeadCollapsed = false;
@@ -77,8 +78,8 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mCompositeSubscription != null && !mCompositeSubscription.isUnsubscribed()) {
-            mCompositeSubscription.unsubscribe();
+        if (mCompositeSubscription != null && !mCompositeSubscription.isDisposed()) {
+            mCompositeSubscription.dispose();
             mCompositeSubscription.clear();
         }
     }
@@ -140,7 +141,7 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
                 initSpinner(mSourceList.get(0).second);
             }
         });
-        mCompositeSubscription = new CompositeSubscription();
+        mCompositeSubscription = new CompositeDisposable();
 
         mCurrentState = new State();
         mCurrentState.source = mSource;

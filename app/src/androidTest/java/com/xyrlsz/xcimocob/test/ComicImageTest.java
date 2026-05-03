@@ -13,7 +13,7 @@ import com.xyrlsz.xcimocob.parser.MangaParser;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-import rx.Observable;
+import io.reactivex.rxjava3.core.Observable;
 
 public class ComicImageTest {
 

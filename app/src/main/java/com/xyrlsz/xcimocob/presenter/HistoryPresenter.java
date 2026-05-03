@@ -11,9 +11,9 @@ import com.xyrlsz.xcimocob.utils.IdCreator;
 
 import java.util.List;
 
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.functions.Func1;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.functions.Function;
 
 /**
  * Created by Hiroshi on 2016/7/18.
@@ -33,15 +33,15 @@ public class HistoryPresenter extends BasePresenter<HistoryView> {
     @Override
     protected void initSubscription() {
         super.initSubscription();
-        addSubscription(RxEvent.EVENT_COMIC_READ, new Action1<RxEvent>() {
+        addSubscription(RxEvent.EVENT_COMIC_READ, new Consumer<RxEvent>() {
             @Override
-            public void call(RxEvent rxEvent) {
+            public void accept(RxEvent rxEvent) {
                 mBaseView.onItemUpdate((MiniComic) rxEvent.getData());
             }
         });
-        addSubscription(RxEvent.EVENT_COMIC_HISTORY_RESTORE, new Action1<RxEvent>() {
+        addSubscription(RxEvent.EVENT_COMIC_HISTORY_RESTORE, new Consumer<RxEvent>() {
             @Override
-            public void call(RxEvent rxEvent) {
+            public void accept(RxEvent rxEvent) {
                 mBaseView.OnComicRestore((List<Object>) rxEvent.getData());
             }
         });
@@ -53,21 +53,21 @@ public class HistoryPresenter extends BasePresenter<HistoryView> {
 
     public void load() {
         mCompositeSubscription.add(mComicManager.listHistoryInRx()
-                .compose(new ToAnotherList<>(new Func1<Comic, Object>() {
+                .compose(new ToAnotherList<>(new Function<Comic, Object>() {
                     @Override
-                    public MiniComic call(Comic comic) {
+                    public MiniComic apply(Comic comic) {
                         return new MiniComic(comic);
                     }
                 }))
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<Object>>() {
+                .subscribe(new Consumer<List<Object>>() {
                     @Override
-                    public void call(List<Object> list) {
+                    public void accept(List<Object> list) {
                         mBaseView.onComicLoadSuccess(list);
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         mBaseView.onComicLoadFail();
                     }
                 }));
@@ -87,9 +87,9 @@ public class HistoryPresenter extends BasePresenter<HistoryView> {
 
     public void clear() {
         mCompositeSubscription.add(mComicManager.listHistoryInRx()
-                .doOnNext(new Action1<List<Comic>>() {
+                .doOnNext(new Consumer<List<Comic>>() {
                     @Override
-                    public void call(final List<Comic> list) {
+                    public void accept(final List<Comic> list) {
                         mComicManager.runInTx(new Runnable() {
                             @Override
                             public void run() {
@@ -105,14 +105,14 @@ public class HistoryPresenter extends BasePresenter<HistoryView> {
                     }
                 })
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<Comic>>() {
+                .subscribe(new Consumer<List<Comic>>() {
                     @Override
-                    public void call(List<Comic> list) {
+                    public void accept(List<Comic> list) {
                         mBaseView.onHistoryClearSuccess();
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         mBaseView.onExecuteFail();
                     }
                 }));

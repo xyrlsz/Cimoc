@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import rx.functions.Func1;
+import io.reactivex.rxjava3.functions.Function;
 
 /**
  * Created by Hiroshi on 2016/12/2.
@@ -18,10 +18,14 @@ public class CollectionUtils {
         return collection;
     }
 
-    public static <T, R> List<R> map(Collection<T> origin, Func1<T, R> func) {
+    public static <T, R> List<R> map(Collection<T> origin, Function<T, R> func) {
         List<R> result = new ArrayList<>(origin.size());
         for (T element : origin) {
-            result.add(func.call(element));
+            try {
+                result.add(func.apply(element));
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
         }
         return result;
     }

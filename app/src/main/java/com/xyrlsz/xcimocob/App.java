@@ -164,6 +164,21 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
         registerActivityLifecycleCallbacks(mActivityLifecycle);
         mPreferenceManager = new PreferenceManager(this);
 
+        // RxJava3 全局错误处理 - 防止 UndeliverableException 崩溃
+        io.reactivex.rxjava3.plugins.RxJavaPlugins.setErrorHandler(e -> {
+            if (e instanceof io.reactivex.rxjava3.exceptions.UndeliverableException) {
+                e = (Throwable) e.getCause();
+            }
+            if (!(e instanceof java.net.UnknownHostException
+                    || e instanceof java.net.ConnectException
+                    || e instanceof java.net.SocketTimeoutException
+                    || e instanceof javax.net.ssl.SSLException
+                    || e instanceof java.io.InterruptedIOException)) {
+                Thread.currentThread().getUncaughtExceptionHandler()
+                        .uncaughtException(Thread.currentThread(), e);
+            }
+        });
+
         // 初始化ObjectBox
         mBoxStore = MyObjectBox.builder().androidContext(this).build();
 

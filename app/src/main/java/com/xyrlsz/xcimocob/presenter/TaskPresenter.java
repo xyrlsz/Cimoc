@@ -17,11 +17,12 @@ import com.xyrlsz.xcimocob.utils.IdCreator;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.functions.Consumer;
+import io.reactivex.rxjava3.functions.Function;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+import io.reactivex.rxjava3.disposables.Disposable;
 
 
 /**
@@ -45,9 +46,9 @@ public class TaskPresenter extends BasePresenter<TaskView> {
     @SuppressWarnings("unchecked")
     @Override
     protected void initSubscription() {
-        addSubscription(RxEvent.EVENT_TASK_STATE_CHANGE, new Action1<RxEvent>() {
+        addSubscription(RxEvent.EVENT_TASK_STATE_CHANGE, new Consumer<RxEvent>() {
             @Override
-            public void call(RxEvent rxEvent) {
+            public void accept(RxEvent rxEvent) {
                 long id = (long) rxEvent.getData(1);
                 switch ((int) rxEvent.getData()) {
                     case Task.STATE_PARSE:
@@ -62,16 +63,16 @@ public class TaskPresenter extends BasePresenter<TaskView> {
                 }
             }
         });
-        addSubscription(RxEvent.EVENT_TASK_PROCESS, new Action1<RxEvent>() {
+        addSubscription(RxEvent.EVENT_TASK_PROCESS, new Consumer<RxEvent>() {
             @Override
-            public void call(RxEvent rxEvent) {
+            public void accept(RxEvent rxEvent) {
                 long id = (long) rxEvent.getData();
                 mBaseView.onTaskProcess(id, (int) rxEvent.getData(1), (int) rxEvent.getData(2));
             }
         });
-        addSubscription(RxEvent.EVENT_TASK_INSERT, new Action1<RxEvent>() {
+        addSubscription(RxEvent.EVENT_TASK_INSERT, new Consumer<RxEvent>() {
             @Override
-            public void call(RxEvent rxEvent) {
+            public void accept(RxEvent rxEvent) {
                 List<Task> list = (List<Task>) rxEvent.getData(1);
                 Task task       = list.get(0);
                 if (task.getKey() == mComic.getId()) {
@@ -79,9 +80,9 @@ public class TaskPresenter extends BasePresenter<TaskView> {
                 }
             }
         });
-        addSubscription(RxEvent.EVENT_COMIC_UPDATE, new Action1<RxEvent>() {
+        addSubscription(RxEvent.EVENT_COMIC_UPDATE, new Consumer<RxEvent>() {
             @Override
-            public void call(RxEvent rxEvent) {
+            public void accept(RxEvent rxEvent) {
                 if (mComic.getId() > 0 && mComic.getId() == (long) rxEvent.getData()) {
                     Comic comic = mComicManager.load(mComic.getId());
                     mComic.setPage(comic.getPage());
@@ -107,10 +108,10 @@ public class TaskPresenter extends BasePresenter<TaskView> {
 
     public void load(long id, final boolean asc) {
         mComic = mComicManager.load(id);
-        mCompositeSubscription.add(mTaskManager.listInRx(id)
-                .doOnNext(new Action1<List<Task>>() {
+        Disposable disposable = mTaskManager.listInRx(id)
+                .doOnNext(new Consumer<List<Task>>() {
                     @Override
-                    public void call(List<Task> list) {
+                    public void accept(List<Task> list) {
                         updateTaskList(list);
                         if (!mComic.getLocal()) {
                             final List<String> sList = Download.getComicIndex(
@@ -141,27 +142,28 @@ public class TaskPresenter extends BasePresenter<TaskView> {
                 })
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                    new Action1<List<Task>>() {
+                    new Consumer<List<Task>>() {
                         @Override
-                        public void call(List<Task> list) {
+                        public void accept(List<Task> list) {
                             mBaseView.onTaskLoadSuccess(list, mComic.getLocal());
                         }
                     },
-                    new Action1<Throwable>() {
+                    new Consumer<Throwable>() {
                         @Override
-                        public void call(Throwable throwable) {
+                        public void accept(Throwable throwable) {
                             mBaseView.onTaskLoadFail();
                         }
-                    }));
+                    });
+        mCompositeSubscription.add(disposable);
     }
 
     public void deleteTask(List<Chapter> list, final boolean isEmpty) {
         final long id = mComic.getId();
-        mCompositeSubscription.add(Observable.just(list)
+        Disposable disposable = Observable.just(list)
                 .subscribeOn(Schedulers.io())
-                .doOnNext(new Action1<List<Chapter>>() {
+                .doOnNext(new Consumer<List<Chapter>>() {
                     @Override
-                    public void call(List<Chapter> list) {
+                    public void accept(List<Chapter> list) {
                         deleteFromDatabase(list, isEmpty);
                         if (!mComic.getLocal()) {
                             if (isEmpty) {
@@ -176,17 +178,17 @@ public class TaskPresenter extends BasePresenter<TaskView> {
                         }
                     }
                 })
-                .compose(new ToAnotherList<>(new Func1<Chapter, Long>() {
+                .compose(new ToAnotherList<>(new Function<Chapter, Long>() {
                     @Override
-                    public Long call(Chapter chapter) {
+                    public Long apply(Chapter chapter) {
                         return chapter.getTid();
                     }
                 }))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
-                    new Action1<List<Long>>() {
+                    new Consumer<List<Long>>() {
                         @Override
-                        public void call(List<Long> list) {
+                        public void accept(List<Long> list) {
                             if (isEmpty) {
                                 RxBus.getInstance().post(
                                     new RxEvent(RxEvent.EVENT_DOWNLOAD_REMOVE, id));
@@ -194,12 +196,13 @@ public class TaskPresenter extends BasePresenter<TaskView> {
                             mBaseView.onTaskDeleteSuccess(list);
                         }
                     },
-                    new Action1<Throwable>() {
+                    new Consumer<Throwable>() {
                         @Override
-                        public void call(Throwable throwable) {
+                        public void accept(Throwable throwable) {
                             mBaseView.onTaskDeleteFail();
                         }
-                    }));
+                    });
+        mCompositeSubscription.add(disposable);
     }
 
     private void deleteFromDatabase(final List<Chapter> list, final boolean isEmpty) {

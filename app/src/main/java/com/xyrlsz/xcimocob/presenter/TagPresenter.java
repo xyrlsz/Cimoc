@@ -8,8 +8,8 @@ import com.xyrlsz.xcimocob.ui.view.TagView;
 
 import java.util.List;
 
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.functions.Consumer;
 
 /**
  * Created by Hiroshi on 2016/10/10.
@@ -29,9 +29,9 @@ public class TagPresenter extends BasePresenter<TagView> {
     @SuppressWarnings("unchecked")
     @Override
     protected void initSubscription() {
-        addSubscription(RxEvent.EVENT_TAG_RESTORE, new Action1<RxEvent>() {
+        addSubscription(RxEvent.EVENT_TAG_RESTORE, new Consumer<RxEvent>() {
             @Override
-            public void call(RxEvent rxEvent) {
+            public void accept(RxEvent rxEvent) {
                 mBaseView.onTagRestore((List<Tag>) rxEvent.getData());
             }
         });
@@ -40,14 +40,14 @@ public class TagPresenter extends BasePresenter<TagView> {
     public void load() {
         mCompositeSubscription.add(mTagManager.listInRx()
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<List<Tag>>() {
+                .subscribe(new Consumer<List<Tag>>() {
                     @Override
-                    public void call(List<Tag> list) {
+                    public void accept(List<Tag> list) {
                         mBaseView.onTagLoadSuccess(list);
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         mBaseView.onTagLoadFail();
                     }
                 }));
@@ -65,14 +65,14 @@ public class TagPresenter extends BasePresenter<TagView> {
                         mTagManager.delete(tag);
                     }
                 }).observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Object>() {
+                .subscribe(new Consumer<Object>() {
                     @Override
-                    public void call(Object aVoid) {
+                    public void accept(Object aVoid) {
                         mBaseView.onTagDeleteSuccess(tag);
                     }
-                }, new Action1<Throwable>() {
+                }, new Consumer<Throwable>() {
                     @Override
-                    public void call(Throwable throwable) {
+                    public void accept(Throwable throwable) {
                         mBaseView.onTagDeleteFail();
                     }
                 }));

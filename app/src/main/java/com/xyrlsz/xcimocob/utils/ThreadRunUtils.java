@@ -1,12 +1,13 @@
 package com.xyrlsz.xcimocob.utils;
 
+import android.annotation.SuppressLint;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class ThreadRunUtils {
     private static final Handler MAIN = new Handler(Looper.getMainLooper());
@@ -15,14 +16,16 @@ public class ThreadRunUtils {
         MAIN.post(r);
     }
 
+    @SuppressLint("CheckResult")
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void runOnIOThread(Runnable runnable, TaskCallback callback) {
-        Observable.create(subscriber -> {
+        Observable.create(emitter -> {
                     try {
                         runnable.run();
-                        subscriber.onNext(null); // Notify completion
-                        subscriber.onCompleted();
+                        emitter.onNext(0); // Notify completion (RxJava3 disallows null)
+                        emitter.onComplete();
                     } catch (Throwable e) {
-                        subscriber.onError(e); // Pass error directly to RxJava error handler
+                        emitter.onError(e); // Pass error directly to RxJava error handler
                     }
                 })
                 .subscribeOn(Schedulers.io())
