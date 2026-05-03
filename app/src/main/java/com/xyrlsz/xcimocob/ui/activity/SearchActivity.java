@@ -9,6 +9,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.appcompat.widget.AppCompatAutoCompleteTextView;
@@ -49,7 +50,7 @@ public class SearchActivity extends BackActivity implements SearchView, TextView
     FloatingActionButton mActionButton;
     AppCompatCheckBox mStrictCheckBox;
     AppCompatCheckBox mSTSameCheckBox;
-    AppCompatSpinner mTypeSpinner;
+    Spinner mTypeSpinner;
     private ArrayAdapter<String> mArrayAdapter;
 
     @Override
