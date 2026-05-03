@@ -62,8 +62,7 @@ import com.xyrlsz.xcimocob.utils.STConvertUtils;
 import java.io.IOException;
 import java.util.Objects;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
 import okhttp3.Request;
 import okhttp3.Response;
 
@@ -83,11 +82,8 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
     private static final int FRAGMENT_NUM = 3;
     private final Update update = new Update();
     private final long mExitTime = 0;
-    @BindView(R.id.main_layout)
     DrawerLayout mDrawerLayout;
-    @BindView(R.id.main_navigation_view)
     NavigationView mNavigationView;
-    @BindView(R.id.main_fragment_container)
     FrameLayout mFrameLayout;
     private TextView mLastText;
     private SimpleDraweeView mDraweeView;
@@ -145,6 +141,14 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
     }
 
     @Override
+    protected void initViewById() {
+        super.initViewById();
+        mDrawerLayout = findViewById(R.id.main_layout);
+        mNavigationView = findViewById(R.id.main_navigation_view);
+        mFrameLayout = findViewById(R.id.main_fragment_container);
+    }
+
+    @Override
     protected void initView() {
         initDrawerToggle();
         initNavigation();
@@ -173,13 +177,6 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
     private void initDrawerToggle() {
         android.util.Log.d("MainActivity", "mDrawerLayout = " + mDrawerLayout);
         android.util.Log.d("MainActivity", "mToolbar = " + mToolbar);
-        if (mDrawerLayout == null) {
-            // 如果 DrawerLayout 还是 null，尝试重新绑定
-            ButterKnife.bind(this);
-            if (mDrawerLayout == null) {
-                return; // 或者抛出更明确的错误
-            }
-        }
 
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, 0, 0) {
             @Override

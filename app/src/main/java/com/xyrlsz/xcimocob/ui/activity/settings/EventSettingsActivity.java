@@ -21,9 +21,10 @@ import com.xyrlsz.xcimocob.global.Extra;
 import com.xyrlsz.xcimocob.ui.activity.BaseActivity;
 import com.xyrlsz.xcimocob.ui.fragment.dialog.ChoiceDialogFragment;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindViews;
+
 
 /**
  * Created by Hiroshi on 2016/10/9.
@@ -32,9 +33,19 @@ import butterknife.BindViews;
 public class EventSettingsActivity extends BaseActivity implements DialogCaller {
 
     private final float thredhold = 0.3f;
-    @BindViews({R.id.event_left, R.id.event_top, R.id.event_middle, R.id.event_bottom, R.id.event_right})
     List<Button> mButtonList;
     private int[] mChoiceArray;
+
+    @Override
+    protected void initViewById() {
+        super.initViewById();
+        mButtonList = new ArrayList<>();
+        mButtonList.add(findViewById(R.id.event_left));
+        mButtonList.add(findViewById(R.id.event_top));
+        mButtonList.add(findViewById(R.id.event_middle));
+        mButtonList.add(findViewById(R.id.event_bottom));
+        mButtonList.add(findViewById(R.id.event_right));
+    }
     private String[] mKeyArray;
     private boolean isLong;
     private boolean JoyLock[] = {false, false};

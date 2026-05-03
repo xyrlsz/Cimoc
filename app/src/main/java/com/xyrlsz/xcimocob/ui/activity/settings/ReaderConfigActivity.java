@@ -14,7 +14,7 @@ import com.xyrlsz.xcimocob.ui.fragment.BaseFragment;
 import com.xyrlsz.xcimocob.ui.fragment.config.PageConfigFragment;
 import com.xyrlsz.xcimocob.ui.fragment.config.StreamConfigFragment;
 
-import butterknife.BindView;
+
 
 /**
  * Created by Hiroshi on 2016/10/14.
@@ -22,12 +22,17 @@ import butterknife.BindView;
 
 public class ReaderConfigActivity extends BackActivity implements DialogCaller {
 
-    @BindView(R.id.reader_config_tab_layout)
     TabLayout mTabLayout;
-    @BindView(R.id.reader_config_view_pager)
     ViewPager mViewPager;
 
     private String[] mKeyArray;
+
+    @Override
+    protected void initViewById() {
+        super.initViewById();
+        mTabLayout = findViewById(R.id.reader_config_tab_layout);
+        mViewPager = findViewById(R.id.reader_config_view_pager);
+    }
     private int[] mChoiceArray;
 
     @Override

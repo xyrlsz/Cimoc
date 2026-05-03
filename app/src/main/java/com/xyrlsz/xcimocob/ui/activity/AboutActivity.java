@@ -24,8 +24,7 @@ import com.xyrlsz.xcimocob.utils.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.OnClick;
+
 
 /**
  * Created by Hiroshi on 2016/9/21.
@@ -33,11 +32,8 @@ import butterknife.OnClick;
 
 public class AboutActivity extends BackActivity implements AboutView, AdapterView.OnItemSelectedListener {
 
-    @BindView(R.id.about_update_summary)
     TextView mUpdateText;
-    @BindView(R.id.about_version_name)
     TextView mVersionName;
-    @BindView(R.id.about_layout)
     View mLayoutView;
     private AboutPresenter mPresenter;
     private boolean update = false;
@@ -59,6 +55,14 @@ public class AboutActivity extends BackActivity implements AboutView, AdapterVie
 
     // TODO 更新源独立出一个模块？
     @Override
+    protected void initViewById() {
+        super.initViewById();
+        mUpdateText = findViewById(R.id.about_update_summary);
+        mVersionName = findViewById(R.id.about_version_name);
+        mLayoutView = findViewById(R.id.about_layout);
+    }
+
+    @Override
     protected void initView() {
         try {
             PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), 0);
@@ -71,12 +75,17 @@ public class AboutActivity extends BackActivity implements AboutView, AdapterVie
             tvResourceUrl.setText(Constants.GITHUB_RELEASE_URL);
             tvSupportUrl.setText(Constants.GITHUB_ISSUE_URL);
 
+            findViewById(R.id.about_app_name).setOnClickListener(v -> onVersionClick());
+            findViewById(R.id.home_page_btn).setOnClickListener(v -> onHomeClick());
+            findViewById(R.id.about_support_btn).setOnClickListener(v -> onSupportClick());
+            findViewById(R.id.about_resource_btn).setOnClickListener(v -> onResourceClick());
+            findViewById(R.id.about_update_btn).setOnClickListener(v -> onUpdateClick());
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    @OnClick(R.id.about_app_name)
     void onVersionClick() {
         SharedPreferences sharedPreferences = getSharedPreferences(Constants.APP_SHARED,MODE_PRIVATE);
         boolean isTestMode = sharedPreferences.getBoolean(Constants.APP_SHARED_TEST_MODE,false);
@@ -89,7 +98,6 @@ public class AboutActivity extends BackActivity implements AboutView, AdapterVie
             }
         }
     }
-    @OnClick(R.id.home_page_btn)
     void onHomeClick() {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.GITHUB_HOME_PAGE_URL));
         try {
@@ -109,7 +117,6 @@ public class AboutActivity extends BackActivity implements AboutView, AdapterVie
 //        }
 //    }
 
-    @OnClick(R.id.about_support_btn)
     void onSupportClick() {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.GITHUB_ISSUE_URL));
         try {
@@ -119,7 +126,6 @@ public class AboutActivity extends BackActivity implements AboutView, AdapterVie
         }
     }
 
-    @OnClick(R.id.about_resource_btn)
     void onResourceClick() {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.GITHUB_HOME_PAGE_URL));
         try {
@@ -149,9 +155,7 @@ public class AboutActivity extends BackActivity implements AboutView, AdapterVie
 //        }
 //    }
 
-    @OnClick(R.id.about_update_btn)
     void onUpdateClick() {
-//        if (update) {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.GITHUB_RELEASE_URL));
         try {
             startActivity(intent);

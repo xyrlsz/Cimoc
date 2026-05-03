@@ -26,8 +26,6 @@ import com.xyrlsz.xcimocob.ui.view.ResultView;
 import java.util.LinkedList;
 import java.util.List;
 
-import butterknife.BindView;
-
 /**
  * Created by Hiroshi on 2016/7/3.
  */
@@ -49,11 +47,16 @@ public class ResultActivity extends BackActivity implements ResultView, BaseAdap
     // 在新的一次请求（上拉加载）前检查新Url与上一次请求的是否一致。
     // 一致则返回空请求，达到阻断请求的目的；不一致则更新Map中存的Url，Map中不存在则新建
     public static SparseArray<String> searchUrls = new SparseArray<>();
-    @BindView(R.id.result_recycler_view)
     RecyclerView mRecyclerView;
-    @BindView(R.id.result_layout)
     FrameLayout mLayoutView;
     private ResultAdapter mResultAdapter;
+
+    @Override
+    protected void initViewById() {
+        super.initViewById();
+        mRecyclerView = findViewById(R.id.result_recycler_view);
+        mLayoutView = findViewById(R.id.result_layout);
+    }
     private LinearLayoutManager mLayoutManager;
     private ResultPresenter mPresenter;
     private ControllerBuilderProvider mProvider;

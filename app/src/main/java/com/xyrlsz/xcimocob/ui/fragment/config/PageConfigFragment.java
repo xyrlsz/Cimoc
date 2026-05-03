@@ -17,8 +17,7 @@ import com.xyrlsz.xcimocob.ui.widget.preference.CheckBoxPreference;
 import com.xyrlsz.xcimocob.ui.widget.preference.ChoicePreference;
 import com.xyrlsz.xcimocob.ui.widget.preference.SliderPreference;
 
-import butterknife.BindView;
-import butterknife.OnClick;
+
 
 /**
  * Created by Hiroshi on 2016/10/13.
@@ -34,25 +33,27 @@ public class PageConfigFragment extends BaseFragment implements DialogCaller {
     private static final int OPERATION_VOLUME_UP = 0;
     private static final int OPERATION_VOLUME_DOWN = 1;
 
-    @BindView(R.id.settings_reader_load_prev)
     CheckBoxPreference mReaderLoadPrev;
-    @BindView(R.id.settings_reader_load_next)
     CheckBoxPreference mReaderLoadNext;
-    @BindView(R.id.settings_reader_ban_turn)
     CheckBoxPreference mReaderBanTurn;
-    @BindView(R.id.settings_reader_quick_turn)
     CheckBoxPreference mReaderQuickTurn;
-    @BindView(R.id.settings_reader_orientation)
     ChoicePreference mReaderOrientation;
-    @BindView(R.id.settings_reader_turn)
     ChoicePreference mReaderTurn;
-    @BindView(R.id.settings_reader_trigger)
     SliderPreference mReaderTrigger;
 
 //    @BindView(R.id.settings_reader_volume_click_event) View mReaderVolumeEvent;
 
     @Override
     protected void initView() {
+        mReaderLoadPrev = mRootView.findViewById(R.id.settings_reader_load_prev);
+        mReaderLoadNext = mRootView.findViewById(R.id.settings_reader_load_next);
+        mReaderBanTurn = mRootView.findViewById(R.id.settings_reader_ban_turn);
+        mReaderQuickTurn = mRootView.findViewById(R.id.settings_reader_quick_turn);
+        mReaderOrientation = mRootView.findViewById(R.id.settings_reader_orientation);
+        mReaderTurn = mRootView.findViewById(R.id.settings_reader_turn);
+        mReaderTrigger = mRootView.findViewById(R.id.settings_reader_trigger);
+        mRootView.findViewById(R.id.settings_reader_click_event).setOnClickListener(v -> onReaderEventClick(v));
+        mRootView.findViewById(R.id.settings_reader_long_click_event).setOnClickListener(v -> onReaderEventClick(v));
 //        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
 //            mReaderVolumeEvent.setVisibility(View.VISIBLE);
 //        } else {
@@ -70,7 +71,6 @@ public class PageConfigFragment extends BaseFragment implements DialogCaller {
                 R.string.settings_reader_trigger, DIALOG_REQUEST_TRIGGER);
     }
 
-    @OnClick({R.id.settings_reader_click_event, R.id.settings_reader_long_click_event})
     void onReaderEventClick(View view) {
         boolean isLong = view.getId() == R.id.settings_reader_long_click_event;
         Intent intent = EventSettingsActivity.createIntent(getActivity(), isLong,

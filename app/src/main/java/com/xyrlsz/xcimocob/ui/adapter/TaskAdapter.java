@@ -23,8 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import butterknife.BindView;
-
 /**
  * Created by Hiroshi on 2016/9/7.
  */
@@ -135,19 +133,19 @@ public class TaskAdapter extends BaseAdapter<Task> {
     }
 
     static class TaskHolder extends BaseViewHolder {
-        @BindView(R.id.task_page)
         TextView taskPage;
-        @BindView(R.id.task_title)
         TextView taskTitle;
-        @BindView(R.id.task_state)
         TextView taskState;
-        @BindView(R.id.task_progress)
         ProgressBar taskProgress;
-        @BindView(R.id.task_last)
         View taskLast;
 
         TaskHolder(View view, int color) {
             super(view);
+            taskPage = view.findViewById(R.id.task_page);
+            taskTitle = view.findViewById(R.id.task_title);
+            taskState = view.findViewById(R.id.task_state);
+            taskProgress = view.findViewById(R.id.task_progress);
+            taskLast = view.findViewById(R.id.task_last);
             taskProgress.getProgressDrawable().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
         }
     }

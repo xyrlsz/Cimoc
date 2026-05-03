@@ -10,8 +10,7 @@ import com.xyrlsz.xcimocob.presenter.SourceDetailPresenter;
 import com.xyrlsz.xcimocob.ui.view.SourceDetailView;
 import com.xyrlsz.xcimocob.ui.widget.Option;
 
-import butterknife.BindView;
-import butterknife.OnClick;
+
 
 /**
  * Created by Hiroshi on 2017/1/18.
@@ -19,13 +18,18 @@ import butterknife.OnClick;
 
 public class SourceDetailActivity extends BackActivity implements SourceDetailView {
 
-    @BindView(R.id.source_detail_type)
     Option mSourceType;
-    @BindView(R.id.source_detail_title)
     Option mSourceTitle;
-    @BindView(R.id.source_detail_favorite)
     Option mSourceFavorite;
     private SourceDetailPresenter mPresenter;
+
+    @Override
+    protected void initViewById() {
+        super.initViewById();
+        mSourceType = findViewById(R.id.source_detail_type);
+        mSourceTitle = findViewById(R.id.source_detail_title);
+        mSourceFavorite = findViewById(R.id.source_detail_favorite);
+    }
 
     public static Intent createIntent(Context context, int type) {
         Intent intent = new Intent(context, SourceDetailActivity.class);
@@ -42,10 +46,10 @@ public class SourceDetailActivity extends BackActivity implements SourceDetailVi
 
     @Override
     protected void initData() {
+        findViewById(R.id.source_detail_favorite).setOnClickListener(v -> onSourceFavoriteClick());
         mPresenter.load(getIntent().getIntExtra(Extra.EXTRA_SOURCE, -1));
     }
 
-    @OnClick(R.id.source_detail_favorite)
     void onSourceFavoriteClick() {
         // TODO 显示这个图源的漫画
     }

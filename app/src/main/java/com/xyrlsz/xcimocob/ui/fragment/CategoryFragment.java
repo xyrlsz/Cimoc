@@ -39,9 +39,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.BindViews;
-import butterknife.OnClick;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.subscriptions.CompositeSubscription;
 
@@ -52,25 +49,16 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
     private static final int STATE_DONE = 3;
     //    private static final int STATE_NO_MORE = 4; // 没有更多数据
     private final List<CategoryMiniComic> mComicList = new ArrayList<>();
-    @BindViews({R.id.category_spinner_subject, R.id.category_spinner_area, R.id.category_spinner_reader,
-            R.id.category_spinner_year, R.id.category_spinner_progress, R.id.category_spinner_order})
     List<AppCompatSpinner> mSpinnerList;
-    @BindViews({R.id.category_subject, R.id.category_area, R.id.category_reader,
-            R.id.category_year, R.id.category_progress, R.id.category_order})
     List<View> mCategoryView;
 
-    @BindView(R.id.category_spinner_source)
     AppCompatSpinner mCategorySourceSpinner;
-    @BindView(R.id.recycler_view_content)
     RecyclerView mRecyclerView;
 
     CategoryGridAdapter categoryGridAdapter;
     int mSource;
-    @BindView(R.id.head_view)
     View headView;
-    @BindView(R.id.category_action_button)
     FloatingActionButton actionButton;
-    @BindView(R.id.category_action_toggle_head)
     ImageButton toggleHeadButton;
     private Category mCategory;
     private SourceManager mSourceManager;
@@ -114,6 +102,29 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
 
     @Override
     protected void initData() {
+        // 查找视图（mRootView 在 onCreateView 中已设置）
+        mSpinnerList = new ArrayList<>();
+        mSpinnerList.add(mRootView.findViewById(R.id.category_spinner_subject));
+        mSpinnerList.add(mRootView.findViewById(R.id.category_spinner_area));
+        mSpinnerList.add(mRootView.findViewById(R.id.category_spinner_reader));
+        mSpinnerList.add(mRootView.findViewById(R.id.category_spinner_year));
+        mSpinnerList.add(mRootView.findViewById(R.id.category_spinner_progress));
+        mSpinnerList.add(mRootView.findViewById(R.id.category_spinner_order));
+
+        mCategoryView = new ArrayList<>();
+        mCategoryView.add(mRootView.findViewById(R.id.category_subject));
+        mCategoryView.add(mRootView.findViewById(R.id.category_area));
+        mCategoryView.add(mRootView.findViewById(R.id.category_reader));
+        mCategoryView.add(mRootView.findViewById(R.id.category_year));
+        mCategoryView.add(mRootView.findViewById(R.id.category_progress));
+        mCategoryView.add(mRootView.findViewById(R.id.category_order));
+
+        mCategorySourceSpinner = mRootView.findViewById(R.id.category_spinner_source);
+        mRecyclerView = mRootView.findViewById(R.id.recycler_view_content);
+        headView = mRootView.findViewById(R.id.head_view);
+        actionButton = mRootView.findViewById(R.id.category_action_button);
+        toggleHeadButton = mRootView.findViewById(R.id.category_action_toggle_head);
+
         updateSourceList();
 
         mCategorySourceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -140,6 +151,9 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
     @Override
     protected void initView() {
         setHasOptionsMenu(true);
+
+        mRootView.findViewById(R.id.category_action_button_to_top).setOnClickListener(v -> onToTopButtonClick());
+        mRootView.findViewById(R.id.category_action_button).setOnClickListener(v -> onActionButtonClick());
 
         categoryGridAdapter = new CategoryGridAdapter(getContext(), mComicList);
         categoryGridAdapter.setProvider(getAppInstance().getBuilderProvider());
@@ -340,12 +354,10 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
 
     }
 
-    @OnClick(R.id.category_action_button_to_top)
     void onToTopButtonClick() {
         mRecyclerView.scrollToPosition(0);
     }
 
-    @OnClick(R.id.category_action_button)
     void onActionButtonClick() {
         String[] args = new String[mSpinnerList.size()];
         for (int i = 0; i != args.length; ++i) {

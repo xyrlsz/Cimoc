@@ -14,7 +14,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.xyrlsz.xcimocob.R;
 import com.xyrlsz.xcimocob.ui.adapter.BaseAdapter;
 
-import butterknife.BindView;
+
 
 /**
  * Created by Hiroshi on 2016/12/1.
@@ -23,17 +23,22 @@ import butterknife.BindView;
 public abstract class CoordinatorActivity extends BackActivity implements
         BaseAdapter.OnItemClickListener, BaseAdapter.OnItemLongClickListener {
 
-    @BindView(R.id.coordinator_action_button)
     FloatingActionButton mActionButton;
-    @BindView(R.id.coordinator_action_button2)
     FloatingActionButton mActionButton2;
-    @BindView(R.id.coordinator_recycler_view)
     RecyclerView mRecyclerView;
-    @BindView(R.id.coordinator_layout)
     CoordinatorLayout mCoordinatorLayout;
 
-    @BindView(R.id.coordinator_frame_layout)
     FrameLayout mLayoutView;
+
+    @Override
+    protected void initViewById() {
+        super.initViewById();
+        mActionButton = findViewById(R.id.coordinator_action_button);
+        mActionButton2 = findViewById(R.id.coordinator_action_button2);
+        mRecyclerView = findViewById(R.id.coordinator_recycler_view);
+        mCoordinatorLayout = findViewById(R.id.coordinator_layout);
+        mLayoutView = findViewById(R.id.coordinator_frame_layout);
+    }
 
     @Override
     protected void initView() {

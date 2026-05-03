@@ -46,7 +46,6 @@ import com.xyrlsz.xcimocob.utils.ThemeUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
 
 /**
  * Created by Hiroshi on 2016/10/11.
@@ -56,9 +55,7 @@ public class ComicFragment extends BaseFragment implements ComicView {
 
     private static final int DIALOG_REQUEST_FILTER = 0;
 
-    @BindView(R.id.bottom_navigation)
     BottomNavigationView mBottomNavigationView;
-    @BindView(R.id.comic_view_pager)
     ViewPager mViewPager;
     TextView mToolbarTitle;
     private ComicPresenter mPresenter;
@@ -85,6 +82,8 @@ public class ComicFragment extends BaseFragment implements ComicView {
     @Override
     protected void initView() {
         setHasOptionsMenu(true);
+        mBottomNavigationView = mRootView.findViewById(R.id.bottom_navigation);
+        mViewPager = mRootView.findViewById(R.id.comic_view_pager);
         mToolbarTitle = requireActivity().findViewById(R.id.toolbar_title);
         mTabAdapter = new TabPagerAdapter(requireActivity().getSupportFragmentManager(),
                 new GridFragment[]{new HistoryFragment(), new FavoriteFragment(), new DownloadFragment(), new LocalFragment()},

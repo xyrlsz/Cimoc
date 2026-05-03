@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import butterknife.ButterKnife;
+
 
 /**
  * Created by Hiroshi on 2016/7/1.
@@ -164,7 +164,6 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
     static class BaseViewHolder extends RecyclerView.ViewHolder {
         BaseViewHolder(View view) {
             super(view);
-            ButterKnife.bind(this, view);
         }
     }
 

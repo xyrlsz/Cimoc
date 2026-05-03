@@ -20,9 +20,7 @@ import com.xyrlsz.xcimocob.utils.ThemeUtils;
 
 import java.util.Objects;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
+
 import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
 
@@ -32,12 +30,8 @@ import rx.subscriptions.CompositeSubscription;
 
 public class ProgressDialogFragment extends DialogFragment {
 
-    @BindView(R.id.dialog_progress_bar)
     ProgressBar mProgressBar;
-    @BindView(R.id.dialog_progress_text)
     TextView mTextView;
-
-    private Unbinder unbinder;
     private CompositeSubscription mCompositeSubscription;
 
     public static ProgressDialogFragment newInstance() {
@@ -48,7 +42,8 @@ public class ProgressDialogFragment extends DialogFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.dialog_progress, container, false);
-        unbinder = ButterKnife.bind(this, view);
+        mProgressBar = view.findViewById(R.id.dialog_progress_bar);
+        mTextView = view.findViewById(R.id.dialog_progress_text);
         Objects.requireNonNull(getDialog()).requestWindowFeature(Window.FEATURE_NO_TITLE);
         setCancelable(false);
         int resId = ThemeUtils.getResourceId(requireActivity(), R.attr.colorAccent);
@@ -69,7 +64,6 @@ public class ProgressDialogFragment extends DialogFragment {
             mCompositeSubscription.unsubscribe();
         }
         super.onDestroyView();
-        unbinder.unbind();
     }
 
 }

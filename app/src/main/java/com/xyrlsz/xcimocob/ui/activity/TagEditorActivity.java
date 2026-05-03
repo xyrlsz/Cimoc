@@ -17,7 +17,7 @@ import com.xyrlsz.xcimocob.ui.view.TagEditorView;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.OnClick;
+
 
 /**
  * Created by Hiroshi on 2016/12/2.
@@ -51,6 +51,7 @@ public class TagEditorActivity extends CoordinatorActivity implements TagEditorV
     protected void initActionButton() {
         mActionButton.setImageResource(R.drawable.ic_done_white_24dp);
         mActionButton.show();
+        mActionButton.setOnClickListener(v -> onActionButtonClick());
         hideProgressBar();
     }
 
@@ -91,7 +92,6 @@ public class TagEditorActivity extends CoordinatorActivity implements TagEditorV
         mTagAdapter.notifyItemChanged(position);
     }
 
-    @OnClick(R.id.coordinator_action_button)
     void onActionButtonClick() {
         showProgressDialog();
         List<Long> list = new ArrayList<>();

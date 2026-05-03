@@ -32,12 +32,11 @@ import com.xyrlsz.xcimocob.utils.StringUtils;
 import com.xyrlsz.xcimocob.utils.ThemeUtils;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import butterknife.BindView;
-import butterknife.BindViews;
-import butterknife.OnClick;
+
 
 /**
  * Created by Hiroshi on 2016/9/21.
@@ -60,72 +59,82 @@ public class SettingsActivity extends BackActivity implements SettingsView {
     private final int[] mResultArray = new int[6];
     private final Intent mResultIntent = new Intent();
 
-    @BindViews({R.id.settings_reader_title, R.id.settings_download_title, R.id.settings_other_title, R.id.settings_search_title, R.id.settings_comic_login_title})
     List<TextView> mTitleList;
-    @BindView(R.id.settings_layout)
     View mSettingsLayout;
-    @BindView(R.id.settings_reader_keep_bright)
     CheckBoxPreference mReaderKeepBright;
-    @BindView(R.id.settings_reader_hide_info)
     CheckBoxPreference mReaderHideInfo;
-    @BindView(R.id.settings_reader_hide_nav)
     CheckBoxPreference mReaderHideNav;
-    @BindView(R.id.settings_reader_ban_double_click)
     CheckBoxPreference mReaderBanDoubleClick;
-    @BindView(R.id.settings_reader_paging)
     CheckBoxPreference mReaderPaging;
-    @BindView(R.id.settings_reader_closeautoresizeimage)
     CheckBoxPreference mReaderCloseAutoResizeImage;
-    @BindView(R.id.settings_reader_paging_reverse)
     CheckBoxPreference mReaderPagingReverse;
-    @BindView(R.id.settings_reader_white_edge)
     CheckBoxPreference mReaderWhiteEdge;
-    @BindView(R.id.settings_reader_white_background)
     CheckBoxPreference mReaderWhiteBackground;
-    @BindView(R.id.settings_reader_volume_key)
     CheckBoxPreference mReaderVolumeKeyControls;
-    @BindView(R.id.settings_search_auto_complete)
     CheckBoxPreference mSearchAutoComplete;
-    @BindView(R.id.settings_other_check_update)
     CheckBoxPreference mCheckCimocUpdate;
-    @BindView(R.id.settings_check_update)
     CheckBoxPreference mCheckSoftwareUpdate;
-    @BindView(R.id.settings_reader_mode)
     ChoicePreference mReaderMode;
-    @BindView(R.id.settings_other_launch)
     ChoicePreference mOtherLaunch;
-    @BindView(R.id.settings_other_theme)
     ChoicePreference mOtherTheme;
-    @BindView(R.id.settings_reader_scale_factor)
     SliderPreference mReaderScaleFactor;
-    @BindView(R.id.settings_reader_controller_trig_threshold)
     SliderPreference mReaderControllerTrigThreshold;
-    @BindView(R.id.settings_reader_show_topbar)
     CheckBoxPreference mOtherShowTopbar;
-    @BindView(R.id.settings_other_night_alpha)
     SliderPreference mOtherNightAlpha;
-    @BindView(R.id.settings_download_thread)
     SliderPreference mDownloadThread;
-    @BindView(R.id.settings_other_connect_only_wifi)
     CheckBoxPreference mConnectOnlyWifi;
-    @BindView(R.id.settings_other_loadcover_only_wifi)
     CheckBoxPreference mLoadCoverOnlyWifi;
     //    @BindView(R.id.settings_firebase_event)
 //    CheckBoxPreference mFireBaseEvent;
 //    @BindView(R.id.settings_other_reduce_ad)
 //    CheckBoxPreference mReduceAd;
-    @BindView(R.id.settings_detail_text_st)
     ChoicePreference mDetailTextSt;
 
-    @BindView(R.id.settings_other_dark_mod)
     ChoicePreference mOtherDarkMod;
-    @BindView(R.id.settings_st_engine)
     ChoicePreference mStEngine;
 
-    @BindView(R.id.settings_reader_paging_stream_off)
     CheckBoxPreference mReaderPagingStreamOff;
 
     private SettingsPresenter mPresenter;
+
+    @Override
+    protected void initViewById() {
+        super.initViewById();
+        mTitleList = new ArrayList<>();
+        mTitleList.add(findViewById(R.id.settings_reader_title));
+        mTitleList.add(findViewById(R.id.settings_download_title));
+        mTitleList.add(findViewById(R.id.settings_other_title));
+        mTitleList.add(findViewById(R.id.settings_search_title));
+        mTitleList.add(findViewById(R.id.settings_comic_login_title));
+        mSettingsLayout = findViewById(R.id.settings_layout);
+        mReaderKeepBright = findViewById(R.id.settings_reader_keep_bright);
+        mReaderHideInfo = findViewById(R.id.settings_reader_hide_info);
+        mReaderHideNav = findViewById(R.id.settings_reader_hide_nav);
+        mReaderBanDoubleClick = findViewById(R.id.settings_reader_ban_double_click);
+        mReaderPaging = findViewById(R.id.settings_reader_paging);
+        mReaderCloseAutoResizeImage = findViewById(R.id.settings_reader_closeautoresizeimage);
+        mReaderPagingReverse = findViewById(R.id.settings_reader_paging_reverse);
+        mReaderWhiteEdge = findViewById(R.id.settings_reader_white_edge);
+        mReaderWhiteBackground = findViewById(R.id.settings_reader_white_background);
+        mReaderVolumeKeyControls = findViewById(R.id.settings_reader_volume_key);
+        mSearchAutoComplete = findViewById(R.id.settings_search_auto_complete);
+        mCheckCimocUpdate = findViewById(R.id.settings_other_check_update);
+        mCheckSoftwareUpdate = findViewById(R.id.settings_check_update);
+        mReaderMode = findViewById(R.id.settings_reader_mode);
+        mOtherLaunch = findViewById(R.id.settings_other_launch);
+        mOtherTheme = findViewById(R.id.settings_other_theme);
+        mReaderScaleFactor = findViewById(R.id.settings_reader_scale_factor);
+        mReaderControllerTrigThreshold = findViewById(R.id.settings_reader_controller_trig_threshold);
+        mOtherShowTopbar = findViewById(R.id.settings_reader_show_topbar);
+        mOtherNightAlpha = findViewById(R.id.settings_other_night_alpha);
+        mDownloadThread = findViewById(R.id.settings_download_thread);
+        mConnectOnlyWifi = findViewById(R.id.settings_other_connect_only_wifi);
+        mLoadCoverOnlyWifi = findViewById(R.id.settings_other_loadcover_only_wifi);
+        mDetailTextSt = findViewById(R.id.settings_detail_text_st);
+        mOtherDarkMod = findViewById(R.id.settings_other_dark_mod);
+        mStEngine = findViewById(R.id.settings_st_engine);
+        mReaderPagingStreamOff = findViewById(R.id.settings_reader_paging_stream_off);
+    }
     private String mStoragePath;
     private String mTempStorage;
 
@@ -189,9 +198,13 @@ public class SettingsActivity extends BackActivity implements SettingsView {
                 PreferenceManager.ST_JCC, R.array.st_engine_items, DIALOG_REQUEST_ST_ENGINE);
 
         mReaderPagingStreamOff.bindPreference(PreferenceManager.PREF_READER_PAGING_STREAM_OFF, false);
+        findViewById(R.id.settings_reader_config).setOnClickListener(v -> onReaderConfigBtnClick());
+        findViewById(R.id.settings_other_storage).setOnClickListener(v -> onOtherStorageClick());
+        findViewById(R.id.settings_download_scan).setOnClickListener(v -> onDownloadScanClick());
+        findViewById(R.id.settings_other_clear_cache).setOnClickListener(v -> onOtherCacheClick());
+        findViewById(R.id.settings_comic_source_login).setOnClickListener(v -> onComicSourceLoginClick());
     }
 
-    @OnClick(R.id.settings_reader_config)
     void onReaderConfigBtnClick() {
         Intent intent = new Intent(this, ReaderConfigActivity.class);
         startActivity(intent);
@@ -334,7 +347,6 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         mReaderPagingStreamOff.setColorStateList(stateList);
     }
 
-    @OnClick(R.id.settings_other_storage)
     void onOtherStorageClick() {
         if (ServiceUtils.isServiceRunning(this, DownloadService.class)) {
             showSnackbar(R.string.download_ask_stop);
@@ -345,7 +357,6 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         }
     }
 
-    @OnClick(R.id.settings_download_scan)
     void onDownloadScanClick() {
         if (ServiceUtils.isServiceRunning(this, DownloadService.class)) {
             showSnackbar(R.string.download_ask_stop);
@@ -356,7 +367,6 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         }
     }
 
-    @OnClick(R.id.settings_other_clear_cache)
     void onOtherCacheClick() {
         showProgressDialog();
         mPresenter.clearCache();
@@ -364,7 +374,6 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         hideProgressDialog();
     }
 
-    @OnClick(R.id.settings_comic_source_login)
     void onComicSourceLoginClick() {
         Intent intent = new Intent(this, ComicSourceLoginActivity.class);
         startActivity(intent);

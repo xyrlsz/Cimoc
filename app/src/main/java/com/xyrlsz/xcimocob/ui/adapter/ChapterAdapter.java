@@ -18,8 +18,6 @@ import com.xyrlsz.xcimocob.utils.STConvertUtils;
 
 import java.util.List;
 
-import butterknife.BindView;
-
 /**
  * Created by Hiroshi on 2016/11/15.
  */
@@ -94,22 +92,22 @@ public class ChapterAdapter extends BaseAdapter<Switcher<Chapter>> {
     }
 
     static class ItemHolder extends BaseAdapter.BaseViewHolder {
-        @BindView(R.id.item_select_title)
         TextView chapterTitle;
-        @BindView(R.id.item_select_checkbox)
         CheckBox chapterChoice;
 
         ItemHolder(View view) {
             super(view);
+            chapterTitle = view.findViewById(R.id.item_select_title);
+            chapterChoice = view.findViewById(R.id.item_select_checkbox);
         }
     }
 
     static class ButtonHolder extends BaseAdapter.BaseViewHolder {
-        @BindView(R.id.item_chapter_button)
         ChapterButton chapterButton;
 
         ButtonHolder(View view) {
             super(view);
+            chapterButton = view.findViewById(R.id.item_chapter_button);
         }
     }
 

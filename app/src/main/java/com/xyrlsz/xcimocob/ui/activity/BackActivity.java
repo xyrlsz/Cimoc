@@ -11,7 +11,7 @@ import com.xyrlsz.xcimocob.R;
 import com.xyrlsz.xcimocob.utils.ThemeUtils;
 import com.xyrlsz.xcimocob.utils.ThreadRunUtils;
 
-import butterknife.BindView;
+
 
 /**
  * Created by Hiroshi on 2016/9/11.
@@ -19,7 +19,6 @@ import butterknife.BindView;
 public abstract class BackActivity extends BaseActivity {
 
     @Nullable
-    @BindView(R.id.custom_progress_bar)
     ProgressBar mProgressBar;
 
     @Override
@@ -28,6 +27,12 @@ public abstract class BackActivity extends BaseActivity {
         if (mToolbar != null) {
             mToolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
         }
+    }
+
+    @Override
+    protected void initViewById() {
+        super.initViewById();
+        mProgressBar = findViewById(R.id.custom_progress_bar);
     }
 
     @Override

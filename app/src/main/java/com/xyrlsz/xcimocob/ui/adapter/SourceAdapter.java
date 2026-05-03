@@ -19,8 +19,6 @@ import com.xyrlsz.xcimocob.utils.STConvertUtils;
 
 import java.util.List;
 
-import butterknife.BindView;
-
 /**
  * Created by Hiroshi on 2016/10/10.
  */
@@ -88,13 +86,13 @@ public class SourceAdapter extends BaseAdapter<Source> {
     }
 
     static class SourceHolder extends BaseViewHolder {
-        @BindView(R.id.item_source_title)
         TextView sourceTitle;
-        @BindView(R.id.item_source_switch)
         SwitchCompat sourceSwitch;
 
         SourceHolder(final View view) {
             super(view);
+            sourceTitle = view.findViewById(R.id.item_source_title);
+            sourceSwitch = view.findViewById(R.id.item_source_switch);
         }
     }
 

@@ -33,8 +33,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import butterknife.BindView;
-import butterknife.OnClick;
+
 
 /**
  * Created by Hiroshi on 2016/11/14.
@@ -42,9 +41,7 @@ import butterknife.OnClick;
 
 public class ChapterActivity extends BackActivity implements BaseAdapter.OnItemClickListener {
 
-    @BindView(R.id.chapter_recycler_view)
     RecyclerView mRecyclerView;
-    @BindView(R.id.chapter_coordinator_layout)
     CoordinatorLayout mCoordinatorLayout;
 
     private ChapterAdapter mChapterAdapter;
@@ -61,6 +58,13 @@ public class ChapterActivity extends BackActivity implements BaseAdapter.OnItemC
     }
 
     @Override
+    protected void initViewById() {
+        super.initViewById();
+        mRecyclerView = findViewById(R.id.chapter_recycler_view);
+        mCoordinatorLayout = findViewById(R.id.chapter_coordinator_layout);
+    }
+
+    @Override
     protected void initView() {
         isButtonMode = mPreference.getBoolean(PreferenceManager.PREF_CHAPTER_BUTTON_MODE, false);
         mChapterAdapter = new ChapterAdapter(this, getAdapterList());
@@ -69,6 +73,7 @@ public class ChapterActivity extends BackActivity implements BaseAdapter.OnItemC
         mRecyclerView.setItemAnimator(null);
         mRecyclerView.setAdapter(mChapterAdapter);
         switchMode();
+        findViewById(R.id.chapter_action_button).setOnClickListener(v -> onActionButtonClick());
         ViewCompat.setOnApplyWindowInsetsListener(mCoordinatorLayout, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(
@@ -167,7 +172,6 @@ public class ChapterActivity extends BackActivity implements BaseAdapter.OnItemC
         }
     }
 
-    @OnClick(R.id.chapter_action_button)
     void onActionButtonClick() {
         ArrayList<Chapter> list = new ArrayList<>();
         for (Switcher<Chapter> switcher : mChapterAdapter.getDateSet()) {

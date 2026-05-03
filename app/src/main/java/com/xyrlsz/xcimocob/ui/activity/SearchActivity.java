@@ -33,8 +33,7 @@ import com.xyrlsz.xcimocob.utils.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.OnClick;
+
 
 /**
  * Created by Hiroshi on 2016/10/11.
@@ -45,19 +44,24 @@ public class SearchActivity extends BackActivity implements SearchView, TextView
     public static final int SEARCH_TITLE = 0;
     public static final int SEARCH_AUTHOR = 1;
     private final static int DIALOG_REQUEST_SOURCE = 0;
-    @BindView(R.id.search_text_layout)
     TextInputLayout mInputLayout;
-    @BindView(R.id.search_keyword_input)
     AppCompatAutoCompleteTextView mEditText;
-    @BindView(R.id.search_action_button)
     FloatingActionButton mActionButton;
-    @BindView(R.id.search_strict_checkbox)
     AppCompatCheckBox mStrictCheckBox;
-    @BindView(R.id.search_STSame_checkbox)
     AppCompatCheckBox mSTSameCheckBox;
-    @BindView(R.id.search_type_spinner)
     AppCompatSpinner mTypeSpinner;
     private ArrayAdapter<String> mArrayAdapter;
+
+    @Override
+    protected void initViewById() {
+        super.initViewById();
+        mInputLayout = findViewById(R.id.search_text_layout);
+        mEditText = findViewById(R.id.search_keyword_input);
+        mActionButton = findViewById(R.id.search_action_button);
+        mStrictCheckBox = findViewById(R.id.search_strict_checkbox);
+        mSTSameCheckBox = findViewById(R.id.search_STSame_checkbox);
+        mTypeSpinner = findViewById(R.id.search_type_spinner);
+    }
 
     private SearchPresenter mPresenter;
     private List<Switcher<Source>> mSourceList;
@@ -109,6 +113,7 @@ public class SearchActivity extends BackActivity implements SearchView, TextView
         String[] searchTypes = getResources().getStringArray(R.array.search_type_items);
         mTypeSpinner.setAdapter(new ArrayAdapter<>(this, R.layout.custom_spinner_item, searchTypes));
         mTypeSpinner.setSelection(SEARCH_TITLE);
+        findViewById(R.id.search_action_button).setOnClickListener(v -> onSearchButtonClick());
     }
 
     @Override
@@ -168,7 +173,6 @@ public class SearchActivity extends BackActivity implements SearchView, TextView
         return false;
     }
 
-    @OnClick(R.id.search_action_button)
     void onSearchButtonClick() {
         String keyword = mEditText.getText().toString();
         boolean strictSearch = mStrictCheckBox.isChecked();

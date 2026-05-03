@@ -9,19 +9,13 @@ import android.widget.EditText;
 import com.xyrlsz.xcimocob.R;
 import com.xyrlsz.xcimocob.utils.StringUtils;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
 
 public class ComicFilterDialog extends Dialog {
-    @BindView(R.id.et_keyword)
     EditText keywordEditText;
-    @BindView(R.id.cb_is_completed)
     CheckBox isCompletedCheckBox;
-    @BindView(R.id.cb_is_not_completed)
     CheckBox isNotCompletedCheckBox;
-    @BindView(R.id.btn_commit)
     Button commitButton;
-    @BindView(R.id.btn_cancel)
     Button cancelButton;
 
     public ComicFilterDialog(Context context, int themeResId, SubmitCallBack callBack) {
@@ -32,7 +26,11 @@ public class ComicFilterDialog extends Dialog {
     private void init(Context context, SubmitCallBack callBack) {
         this.setContentView(R.layout.dialog_comic_filter);
         // Find views by ID
-        ButterKnife.bind(this);
+        keywordEditText = findViewById(R.id.et_keyword);
+        isCompletedCheckBox = findViewById(R.id.cb_is_completed);
+        isNotCompletedCheckBox = findViewById(R.id.cb_is_not_completed);
+        commitButton = findViewById(R.id.btn_commit);
+        cancelButton = findViewById(R.id.btn_cancel);
         isCompletedCheckBox.setChecked(true);
         isNotCompletedCheckBox.setChecked(true);
         // Set up click listeners

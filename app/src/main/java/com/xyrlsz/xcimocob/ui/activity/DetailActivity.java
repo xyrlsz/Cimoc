@@ -49,7 +49,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import butterknife.OnClick;
+
 import okhttp3.Headers;
 
 /**
@@ -80,6 +80,13 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
         mPresenter = new DetailPresenter();
         mPresenter.attachView(this);
         return mPresenter;
+    }
+
+    @Override
+    protected void initView() {
+        super.initView();
+        findViewById(R.id.coordinator_action_button).setOnClickListener(v -> onActionButtonClick());
+        findViewById(R.id.coordinator_action_button2).setOnClickListener(v -> onActionButton2Click());
     }
 
     @Override
@@ -232,7 +239,6 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
         }
     }
 
-    @OnClick(R.id.coordinator_action_button)
     void onActionButtonClick() {
         if (mPresenter.getComic().getFavorite() != null) {
             mPresenter.unfavoriteComic();
@@ -254,7 +260,6 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
         mPresenter.checkDatabaseStatus();
     }
 
-    @OnClick(R.id.coordinator_action_button2)
     void onActionButton2Click() {
         if (!mDetailAdapter.getDateSet().isEmpty()) {
             String path = mPresenter.getComic().getLast();

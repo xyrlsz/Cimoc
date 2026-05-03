@@ -12,10 +12,10 @@ import com.xyrlsz.xcimocob.manager.SourceManager;
 import com.xyrlsz.xcimocob.parser.Category;
 import com.xyrlsz.xcimocob.ui.adapter.CategoryAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindViews;
-import butterknife.OnClick;
+
 
 /**
  * Created by Hiroshi on 2016/12/11.
@@ -23,11 +23,7 @@ import butterknife.OnClick;
 
 public class CategoryActivity extends BackActivity implements AdapterView.OnItemSelectedListener {
 
-    @BindViews({R.id.category_spinner_subject, R.id.category_spinner_area, R.id.category_spinner_reader,
-            R.id.category_spinner_year, R.id.category_spinner_progress, R.id.category_spinner_order})
     List<AppCompatSpinner> mSpinnerList;
-    @BindViews({R.id.category_subject, R.id.category_area, R.id.category_reader,
-            R.id.category_year, R.id.category_progress, R.id.category_order})
     List<View> mCategoryView;
 
     private Category mCategory;
@@ -40,6 +36,25 @@ public class CategoryActivity extends BackActivity implements AdapterView.OnItem
     }
 
     @Override
+    protected void initViewById() {
+        super.initViewById();
+        mSpinnerList = new ArrayList<>();
+        mSpinnerList.add(findViewById(R.id.category_spinner_subject));
+        mSpinnerList.add(findViewById(R.id.category_spinner_area));
+        mSpinnerList.add(findViewById(R.id.category_spinner_reader));
+        mSpinnerList.add(findViewById(R.id.category_spinner_year));
+        mSpinnerList.add(findViewById(R.id.category_spinner_progress));
+        mSpinnerList.add(findViewById(R.id.category_spinner_order));
+        mCategoryView = new ArrayList<>();
+        mCategoryView.add(findViewById(R.id.category_subject));
+        mCategoryView.add(findViewById(R.id.category_area));
+        mCategoryView.add(findViewById(R.id.category_reader));
+        mCategoryView.add(findViewById(R.id.category_year));
+        mCategoryView.add(findViewById(R.id.category_progress));
+        mCategoryView.add(findViewById(R.id.category_order));
+    }
+
+    @Override
     protected void initView() {
         int source = getIntent().getIntExtra(Extra.EXTRA_SOURCE, -1);
         if (mToolbar != null) {
@@ -47,6 +62,7 @@ public class CategoryActivity extends BackActivity implements AdapterView.OnItem
         }
         mCategory = SourceManager.getInstance(this).getParser(source).getCategory();
         initSpinner();
+        findViewById(R.id.category_action_button).setOnClickListener(v -> onActionButtonClick());
     }
 
     private void initSpinner() {
@@ -78,7 +94,6 @@ public class CategoryActivity extends BackActivity implements AdapterView.OnItem
     public void onNothingSelected(AdapterView<?> parent) {
     }
 
-    @OnClick(R.id.category_action_button)
     void onActionButtonClick() {
         String[] args = new String[mSpinnerList.size()];
         for (int i = 0; i != args.length; ++i) {

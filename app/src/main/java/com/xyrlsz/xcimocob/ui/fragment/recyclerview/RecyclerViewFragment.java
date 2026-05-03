@@ -7,7 +7,6 @@ import com.xyrlsz.xcimocob.R;
 import com.xyrlsz.xcimocob.ui.adapter.BaseAdapter;
 import com.xyrlsz.xcimocob.ui.fragment.BaseFragment;
 
-import butterknife.BindView;
 
 /**
  * Created by Hiroshi on 2016/10/11.
@@ -16,11 +15,11 @@ import butterknife.BindView;
 public abstract class RecyclerViewFragment extends BaseFragment implements BaseAdapter.OnItemClickListener,
         BaseAdapter.OnItemLongClickListener {
 
-    @BindView(R.id.recycler_view_content)
     protected RecyclerView mRecyclerView;
 
     @Override
     protected void initView() {
+        mRecyclerView = mRootView.findViewById(R.id.recycler_view_content);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setItemAnimator(null);
         mRecyclerView.setLayoutManager(initLayoutManager());

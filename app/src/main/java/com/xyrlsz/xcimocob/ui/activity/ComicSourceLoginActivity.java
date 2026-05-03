@@ -53,9 +53,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import butterknife.BindView;
-import butterknife.OnClick;
-import butterknife.OnLongClick;
+
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
@@ -69,33 +67,19 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
     private final int DIALOG_COPY_IMG_QUALITY = 1001;
     private final int DIALOG_HOT_IMG_QUALITY = 2001;
     private final int DIALOG_BAOZI_IMG_QUALITY = 3001;
-    @BindView(R.id.comic_login_layout)
     View mComicSourceLoginLayout;
-    @BindView(R.id.comic_login_dmzj_login)
     Option mDmzjLogin;
-    @BindView(R.id.comic_login_dmzj_logout)
     ImageButton mDmzjLogout;
-    @BindView(R.id.comic_login_komiic_login)
     Option mkomiicLogin;
-    @BindView(R.id.comic_login_komiic_logout)
     ImageButton mKomiicLogout;
-    @BindView(R.id.comic_login_vomicmh_login)
     Option mVoMiCMHLogin;
-    @BindView(R.id.comic_login_vomicmh_logout)
     ImageButton mVoMiCMHLogout;
-    @BindView(R.id.comic_login_zai_login)
     Option mZaiLogin;
-    @BindView(R.id.comic_login_zai_logout)
     ImageButton mZaiLogout;
-    @BindView(R.id.comic_login_zai_auto_sign)
     CheckBoxPreference mZaiAutoSign;
-    //    @BindView(R.id.comic_login_copy_region)
-//    ChoicePreference mCopyRegion;
-    @BindView(R.id.comic_login_copy_image_quality)
+    //    ChoicePreference mCopyRegion;
     ChoicePreference mCopyImgQuality;
-    @BindView(R.id.comic_login_hot_image_quality)
     ChoicePreference mHotImageQuality;
-    @BindView(R.id.comic_login_baozi_image_quality)
     ChoicePreference mBaoZiImageQuality;
 
     @Override
@@ -124,6 +108,24 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
                 int res_baozi_img_quality = bundle.getInt(EXTRA_DIALOG_RESULT_INDEX);
                 mBaoZiImageQuality.setValue(res_baozi_img_quality);
         }
+    }
+
+    @Override
+    protected void initViewById() {
+        super.initViewById();
+        mComicSourceLoginLayout = findViewById(R.id.comic_login_layout);
+        mDmzjLogin = findViewById(R.id.comic_login_dmzj_login);
+        mDmzjLogout = findViewById(R.id.comic_login_dmzj_logout);
+        mkomiicLogin = findViewById(R.id.comic_login_komiic_login);
+        mKomiicLogout = findViewById(R.id.comic_login_komiic_logout);
+        mVoMiCMHLogin = findViewById(R.id.comic_login_vomicmh_login);
+        mVoMiCMHLogout = findViewById(R.id.comic_login_vomicmh_logout);
+        mZaiLogin = findViewById(R.id.comic_login_zai_login);
+        mZaiLogout = findViewById(R.id.comic_login_zai_logout);
+        mZaiAutoSign = findViewById(R.id.comic_login_zai_auto_sign);
+        mCopyImgQuality = findViewById(R.id.comic_login_copy_image_quality);
+        mHotImageQuality = findViewById(R.id.comic_login_hot_image_quality);
+        mBaoZiImageQuality = findViewById(R.id.comic_login_baozi_image_quality);
     }
 
     @Override
@@ -193,6 +195,17 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
 
         }
 
+        findViewById(R.id.comic_login_dmzj_login).setOnClickListener(v -> onDmzjLoginClick());
+        findViewById(R.id.comic_login_dmzj_logout).setOnClickListener(v -> onDmzjLogoutClick());
+        findViewById(R.id.comic_login_komiic_login).setOnClickListener(v -> onKomiicLoginClick());
+        findViewById(R.id.comic_login_komiic_logout).setOnClickListener(v -> onKomiicLogoutClick());
+        findViewById(R.id.comic_login_vomicmh_login).setOnClickListener(v -> onVoMiCMHLoginClick());
+        findViewById(R.id.comic_login_vomicmh_logout).setOnClickListener(v -> onVoMiCMHLogoutClick());
+        findViewById(R.id.comic_login_zai_login).setOnClickListener(v -> onZaiLoginClick());
+        findViewById(R.id.comic_login_zai_logout).setOnClickListener(v -> onZaiLogoutClick());
+        findViewById(R.id.comic_login_zai_auto_sign).setOnClickListener(v -> onZaiAutoSignClick());
+        findViewById(R.id.comic_login_zai_auto_sign).setOnLongClickListener(v -> { onZaiAutoSignLongClick(); return true; });
+
     }
 
     @Override
@@ -238,7 +251,6 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
     }
 
     // 动漫之家
-    @OnClick(R.id.comic_login_dmzj_login)
     void onDmzjLoginClick() {
 
         int theme = ThemeUtils.getThemeId();
@@ -314,7 +326,6 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
     }
 
 
-    @OnClick(R.id.comic_login_dmzj_logout)
     void onDmzjLogoutClick() {
         SharedPreferences sharedPreferences = getSharedPreferences(DMZJ_SHARED, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -329,7 +340,6 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
     }
 
     // komiic
-    @OnClick(R.id.comic_login_komiic_login)
     void onKomiicLoginClick() {
 
         int theme = ThemeUtils.getThemeId();
@@ -439,7 +449,6 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
         loginDialog.show();
     }
 
-    @OnClick(R.id.comic_login_komiic_logout)
     void onKomiicLogoutClick() {
         SharedPreferences sharedPreferences = getSharedPreferences(KOMIIC_SHARED, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -453,7 +462,6 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
     }
 
     // vomicmh漫
-    @OnClick(R.id.comic_login_vomicmh_login)
     void onVoMiCMHLoginClick() {
         int theme = ThemeUtils.getThemeId();
         LoginDialog loginDialog = new LoginDialog(this, ThemeUtils.getDialogThemeById(theme));
@@ -517,7 +525,6 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
         loginDialog.show();
     }
 
-    @OnClick(R.id.comic_login_vomicmh_logout)
     void onVoMiCMHLogoutClick() {
         SharedPreferences sharedPreferences = getSharedPreferences(VOMIC_SHARED, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -531,7 +538,6 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
     }
 
     // 再漫画
-    @OnClick(R.id.comic_login_zai_login)
     void onZaiLoginClick() {
         int theme = ThemeUtils.getThemeId();
         LoginDialog loginDialog = new LoginDialog(this, ThemeUtils.getDialogThemeById(theme));
@@ -573,7 +579,6 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
         loginDialog.show();
     }
 
-    @OnClick(R.id.comic_login_zai_logout)
     void onZaiLogoutClick() {
         SharedPreferences sharedPreferences = getSharedPreferences(Constants.ZAI_SHARED, MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -589,7 +594,6 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
         mZaiAutoSign.setVisibility(View.GONE);
     }
 
-    @OnClick(R.id.comic_login_zai_auto_sign)
     void onZaiAutoSignClick() {
         boolean isChecked = mZaiAutoSign.isChecked();
         mZaiAutoSign.setChecked(!isChecked);
@@ -599,7 +603,6 @@ public class ComicSourceLoginActivity extends BackActivity implements ComicSourc
         editor.apply();
     }
 
-    @OnLongClick(R.id.comic_login_zai_auto_sign)
     void onZaiAutoSignLongClick() {
         ZaiManhuaSignUtils.CheckSigned(getApplicationContext(), isSigned -> {
             if (isSigned) {

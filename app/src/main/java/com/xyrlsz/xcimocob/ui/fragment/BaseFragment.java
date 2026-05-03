@@ -21,9 +21,7 @@ import com.xyrlsz.xcimocob.ui.view.BaseView;
 import com.xyrlsz.xcimocob.utils.ThemeUtils;
 import com.xyrlsz.xcimocob.utils.ThreadRunUtils;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.Unbinder;
+
 
 /**
  * Created by Hiroshi on 2016/7/1.
@@ -32,21 +30,20 @@ public abstract class BaseFragment extends Fragment implements BaseView {
 
     protected PreferenceManager mPreference;
     @Nullable
-    @BindView(R.id.custom_progress_bar)
     ProgressBar mProgressBar;
-    private Unbinder unbinder;
+    protected View mRootView;
     private BasePresenter mBasePresenter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(getLayoutRes(), container, false);
-        unbinder = ButterKnife.bind(this, view);
+        mRootView = inflater.inflate(getLayoutRes(), container, false);
+        mProgressBar = mRootView.findViewById(R.id.custom_progress_bar);
         mPreference = App.getPreferenceManager();
         mBasePresenter = initPresenter();
         initProgressBar();
         initData();
         initView();
-        return view;
+        return mRootView;
     }
 
     @Override
@@ -55,7 +52,6 @@ public abstract class BaseFragment extends Fragment implements BaseView {
             mBasePresenter.detachView();
         }
         super.onDestroyView();
-        unbinder.unbind();
     }
 
     @Override

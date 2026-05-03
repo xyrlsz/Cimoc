@@ -37,14 +37,12 @@ import com.xyrlsz.xcimocob.utils.HintUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
 
 /**
  * Created by Hiroshi on 2016/8/11.
  */
 public class SourceFragment extends RecyclerViewFragment implements SourceView, SourceAdapter.OnItemCheckedListener {
 
-    @BindView(R.id.fragment_container)
     FrameLayout frameLayout;
     private SourcePresenter mPresenter;
     private SourceAdapter mSourceAdapter;
@@ -59,6 +57,7 @@ public class SourceFragment extends RecyclerViewFragment implements SourceView, 
     @Override
     protected void initView() {
         setHasOptionsMenu(true);
+        frameLayout = mRootView.findViewById(R.id.fragment_container);
         ViewCompat.setOnApplyWindowInsetsListener(frameLayout, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(
