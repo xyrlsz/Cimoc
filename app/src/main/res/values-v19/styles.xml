@@ -7,6 +7,7 @@
         <item name="colorBackgroundTrans">@color/colorBackgroundTrans</item>
         <item name="colorAutoWG">@color/colorAutoWG</item>
         <item name="colorAutoG_GW">@color/colorAutoG_GW</item>
+        <item name="colorAutoBG">@color/colorAutoBG</item>
         <item name="colorAutoBW">@color/colorAutoBW</item>
         <item name="colorAutoWB">@color/colorAutoWB</item>
         <item name="android:windowTranslucentStatus">true</item>

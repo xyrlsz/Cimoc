@@ -2,6 +2,7 @@
 <resources>
     <color name="colorBackgroundTrans">#AA9A9A9A</color>
     <color name="colorAutoWG">#343434</color>
+    <color name="colorAutoBG">#A9A9A9</color>
     <color name="colorAutoG_GW">#A9A9A9</color>
     <color name="colorAutoWB">@color/black</color>
     <color name="colorAutoBW">@color/white</color>
