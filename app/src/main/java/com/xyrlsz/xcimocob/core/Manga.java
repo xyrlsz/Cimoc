@@ -368,19 +368,26 @@ public class Manga {
     public static Observable<String> loadLazyUrl(final MangaParser parser, final String url) {
         return Observable.create((io.reactivex.rxjava3.core.ObservableOnSubscribe<String>) emitter -> {
             Request request = parser.getLazyRequest(url);
-            String newUrl = null;
             try {
+                String newUrl;
                 if (parser.isParseImagesLazyUseWebParser()) {
                     WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
                     newUrl = parser.parseLazy(webParser.getHtmlStrSync(), url);
                 } else {
                     newUrl = parser.parseLazy(getResponseBody(App.getHttpClient(), request), url);
                 }
+                if (newUrl != null) {
+                    emitter.onNext(newUrl);
+                    emitter.onComplete();
+                    return;
+                } else {
+                    emitter.onError(new Exception("loadLazyUrl returned null"));
+                    return;
+                }
             } catch (Exception e) {
-                e.printStackTrace();
+                emitter.onError(e);
+                return;
             }
-            emitter.onNext(newUrl);
-            emitter.onComplete();
         }).subscribeOn(Schedulers.io());
     }
 
@@ -405,12 +412,25 @@ public class Manga {
         }).subscribeOn(Schedulers.io());
     }
 
-    public static Observable<Comic> checkUpdate(
+    /**
+     * 漫画检查更新结果包装类
+     */
+    public static class CheckUpdateEvent {
+        public final Comic comic;
+        public final boolean hasUpdate;
+
+        public CheckUpdateEvent(Comic comic, boolean hasUpdate) {
+            this.comic = comic;
+            this.hasUpdate = hasUpdate;
+        }
+    }
+
+    public static Observable<CheckUpdateEvent> checkUpdate(
             final SourceManager manager, final List<Comic> list) {
         return Observable.fromIterable(list)
                 .flatMap(comic -> Observable.just(comic)
                         .subscribeOn(Schedulers.io())  // 每个 Comic 分配到不同的 IO 线程
-                        .map(c -> {
+                        .flatMap(c -> {
                             try {
                                 OkHttpClient client = new OkHttpClient.Builder()
                                         .connectTimeout(1500, TimeUnit.MILLISECONDS)
@@ -421,6 +441,9 @@ public class Manga {
                                 Request request = parser.getCheckRequest(c.getCid());
                                 if (request == null) {
                                     request = parser.getInfoRequest(c.getCid());
+                                }
+                                if (request == null) {
+                                    return Observable.just(new CheckUpdateEvent(c, false));
                                 }
 
                                 String update = parser.parseCheck(getResponseBody(client, request));
@@ -436,12 +459,12 @@ public class Manga {
                                         c.setChapterCount(checkRes.second);
                                     }
                                     c.setHighlight(true);
-                                    return c;  // 返回更新后的 Comic
+                                    return Observable.just(new CheckUpdateEvent(c, true));  // 有更新
                                 }
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
-                            return null;  // 无更新或出错时返回 null
+                            return Observable.just(new CheckUpdateEvent(c, false));  // 无更新，确保进度计数正确
                         }), 10
                 );
     }
@@ -503,6 +526,8 @@ public class Manga {
             e.printStackTrace();
             if (retry)
                 return getResponseBody(client, request, false);
+        } catch (Error e) {
+            e.printStackTrace();
         } finally {
             if (response != null) {
                 response.close();

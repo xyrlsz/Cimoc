@@ -183,6 +183,9 @@ public class Komiic extends MangaParser {
         List<Chapter> list = new LinkedList<>();
 
         JSONObject data = new JSONObject(html).getJSONObject("data");
+        if (!data.has("chaptersByComicId")) {
+            return list;
+        }
         JSONArray chapters = data.getJSONArray("chaptersByComicId");
 
         List<JSONObject> jsonList = new ArrayList<>();

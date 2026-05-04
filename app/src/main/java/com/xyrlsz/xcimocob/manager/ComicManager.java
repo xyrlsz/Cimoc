@@ -194,10 +194,10 @@ public class ComicManager {
     }
 
     public Observable<Comic> loadLast() {
-        return Observable.fromCallable(() -> {
+        return Observable.defer(() -> {
             List<Comic> list =
                     mComicBox.query(Comic_.history.notNull()).orderDesc(Comic_.history).build().find();
-            return list.isEmpty() ? null : list.get(0);
+            return list.isEmpty() ? Observable.empty() : Observable.just(list.get(0));
         });
     }
 

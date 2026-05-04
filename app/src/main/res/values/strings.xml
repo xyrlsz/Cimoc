@@ -207,6 +207,9 @@
     <string name="settings_other_storage_edit_neutral">选择路径</string>
     <string name="settings_other_clear_cache">清理缓存</string>
     <string name="settings_other_clear_cache_summary">清理在线漫画的缓存数据</string>
+    <string name="settings_other_permission">权限管理</string>
+    <string name="settings_other_permission_summary">重新申请存储、通知等必要权限</string>
+    <string name="main_permission_guide_settings">权限已被系统拦截，请在系统设置中手动开启</string>
     <string name="settings_other_firebase_event">Firebase数据收集</string>
     <string name="settings_other_firebase_event_summary">允许程序通过Firebase收集您的使用情况，以便于分析程序和漫画源的工作状态。</string>
     <string name="settings_other_reduce_ad">减少页面广告</string>

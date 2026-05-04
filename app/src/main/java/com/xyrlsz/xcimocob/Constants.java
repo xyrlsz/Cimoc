@@ -56,4 +56,8 @@ public final class Constants {
     public static final String GITEE_RELEASE_URL = GITEE_HOME_PAGE_URL + "/releases";
     public static final String GITEE_ISSUE_URL = GITEE_HOME_PAGE_URL + "/issues";
 
+    // 权限请求码
+    public static final int REQUEST_CODE_STORAGE = 0x1001;
+    public static final int REQUEST_CODE_MANAGE_STORAGE = 0x1002;
+
 }

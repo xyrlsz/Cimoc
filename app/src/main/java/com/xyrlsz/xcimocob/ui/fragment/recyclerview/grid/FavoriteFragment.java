@@ -56,7 +56,11 @@ public class FavoriteFragment extends GridFragment implements FavoriteView {
     public void onDestroyView() {
         super.onDestroyView();
         if (mNotification != null) {
-            mNotification.cancel();
+            try {
+                mNotification.cancel();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -160,16 +164,30 @@ public class FavoriteFragment extends GridFragment implements FavoriteView {
 
     @Override
     public void onComicCheckFail() {
-        mNotification.post(getString(R.string.favorite_check_update_fail), false);
-        mNotification = null;
+        try {
+            if (mNotification != null) {
+                mNotification.post(getString(R.string.favorite_check_update_fail), false);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            mNotification = null;
+        }
         HintUtils.showToast(getActivity(), R.string.favorite_check_update_fail);
     }
 
     @Override
     public void onComicCheckComplete() {
-        mNotification.post(getString(R.string.favorite_check_update_done), false);
-        mNotification.cancel();
-        mNotification = null;
+        try {
+            if (mNotification != null) {
+                mNotification.post(getString(R.string.favorite_check_update_done), false);
+                mNotification.cancel();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            mNotification = null;
+        }
         HintUtils.showToast(getActivity(), R.string.favorite_check_update_done);
     }
 

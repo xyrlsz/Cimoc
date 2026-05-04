@@ -110,21 +110,26 @@ public class FavoritePresenter extends BasePresenter<FavoriteView> {
 
     public void checkUpdate() {
         final List<Comic> list = mComicManager.listFavorite();
-        mCompositeSubscription.add(Manga.checkUpdate(mSourceManager, list).doOnNext(new Consumer<Comic>() {
+        final int total = list.size();
+        mCompositeSubscription.add(Manga.checkUpdate(mSourceManager, list).doOnNext(new Consumer<Manga.CheckUpdateEvent>() {
             @Override
-            public void accept(Comic comic) {
-                if (comic != null) {
-                    mComicManager.update(comic);
+            public void accept(Manga.CheckUpdateEvent event) {
+                if (event.hasUpdate) {
+                    mComicManager.update(event.comic);
                 }
             }
         }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(
-            new io.reactivex.rxjava3.functions.Consumer<Comic>() {
+            new io.reactivex.rxjava3.functions.Consumer<Manga.CheckUpdateEvent>() {
                 private int count = 0;
                 @Override
-                public void accept(Comic comic) {
+                public void accept(Manga.CheckUpdateEvent event) {
                     ++count;
-                    MiniComic miniComic = new MiniComic(comic);
-                    mBaseView.onComicCheckSuccess(miniComic, count, list.size());
+                    if (event.hasUpdate) {
+                        MiniComic miniComic = new MiniComic(event.comic);
+                        mBaseView.onComicCheckSuccess(miniComic, count, total);
+                    } else {
+                        mBaseView.onComicCheckSuccess(null, count, total);
+                    }
                 }
             },
             new io.reactivex.rxjava3.functions.Consumer<Throwable>() {

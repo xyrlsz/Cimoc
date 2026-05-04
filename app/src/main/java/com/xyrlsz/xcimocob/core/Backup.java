@@ -99,6 +99,7 @@ public class Backup {
                     Arrays.sort(files);
                     emitter.onNext(files);
                     emitter.onComplete();
+                    return;
                 }
             }
             emitter.onError(new Exception());

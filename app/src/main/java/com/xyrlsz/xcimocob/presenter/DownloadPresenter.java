@@ -84,22 +84,17 @@ public class DownloadPresenter extends BasePresenter<DownloadView> {
         mCompositeSubscription.add(Observable.just(id)
                 .doOnNext(new Consumer<Long>() {
                     @Override
-                    public void accept(final Long id) {
-                        Comic comic;
-                        try {
-                            comic = mComicManager.callInTx(() -> {
-                                Comic comic1 = mComicManager.load(id);
-                                mTaskManager.deleteByComicId(id);
-                                comic1.setDownload(null);
-                                int res = mComicManager.updateOrDelete(comic1);
-                                if (res == ComicManager.RESULT_DELETE) {
-                                    mChapterManager.deleteBySourceComic(IdCreator.createSourceComic(comic1));
-                                }
-                                return comic1;
-                            });
-                        } catch (Exception e) {
-                             return;
-                        }
+                    public void accept(final Long id) throws Exception {
+                        Comic comic = mComicManager.callInTx(() -> {
+                            Comic comic1 = mComicManager.load(id);
+                            mTaskManager.deleteByComicId(id);
+                            comic1.setDownload(null);
+                            int res = mComicManager.updateOrDelete(comic1);
+                            if (res == ComicManager.RESULT_DELETE) {
+                                mChapterManager.deleteBySourceComic(IdCreator.createSourceComic(comic1));
+                            }
+                            return comic1;
+                        });
                         Download.delete(mBaseView.getAppInstance().getDocumentFile(), comic, mSourceManager.getParser(comic.getSource()).getTitle());
                     }
                 }).subscribeOn(Schedulers.io())

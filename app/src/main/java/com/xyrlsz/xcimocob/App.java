@@ -169,11 +169,14 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
             if (e instanceof io.reactivex.rxjava3.exceptions.UndeliverableException) {
                 e = (Throwable) e.getCause();
             }
+            // SecurityException: Android 14+ SystemUI NotificationProviderPublic bug (MIUI/HyperOS)
+            // 此异常由系统 Bug 引发，应用层无法根治，忽略即可
             if (!(e instanceof java.net.UnknownHostException
                     || e instanceof java.net.ConnectException
                     || e instanceof java.net.SocketTimeoutException
                     || e instanceof javax.net.ssl.SSLException
-                    || e instanceof java.io.InterruptedIOException)) {
+                    || e instanceof java.io.InterruptedIOException
+                    || e instanceof java.lang.SecurityException)) {
                 Thread.currentThread().getUncaughtExceptionHandler()
                         .uncaughtException(Thread.currentThread(), e);
             }
@@ -306,6 +309,15 @@ public class App extends MultiDexApplication implements AppGetter, Thread.Uncaug
 
     @Override
     public void uncaughtException(@NonNull Thread t, Throwable e) {
+        // Android 14+ 系统 Bug: SecurityException "not owned by uid"
+        // 由 SystemUI NotificationProviderPublic 误判引发，应用层无法根治
+        // 直接忽略，不要触发崩溃退出流程
+        if (e instanceof SecurityException
+                && e.getMessage() != null
+                && e.getMessage().contains("not owned by uid")) {
+            Log.w("UncaughtException", "Ignoring known SystemUI SecurityException (not owned by uid)", e);
+            return;
+        }
         StringBuilder sb = new StringBuilder();
         sb.append("MODEL: ").append(Build.MODEL).append('\n');
         sb.append("SDK: ").append(Build.VERSION.SDK_INT).append('\n');

@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.xyrlsz.xcimocob.App;
+import com.xyrlsz.xcimocob.BuildConfig;
 import com.xyrlsz.xcimocob.R;
 import com.king.app.dialog.AppDialog;
 import com.king.app.updater.AppUpdater;
@@ -54,6 +55,7 @@ public class Update {
                     emitter.onNext(version);
                     emitter.onComplete();
                     checkSuccess = true;
+                    return;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -72,6 +74,7 @@ public class Update {
                         emitter.onNext(version);
                         emitter.onComplete();
                         checkSuccess = true;
+                        return;
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -198,9 +201,15 @@ public class Update {
                         .setVersionCode(versionCode)//支持versionCode校验，设置versionCode之后，新版本versionCode相同的apk只下载一次,优先取本地缓存,推荐使用MD5校验的方式
                         .setVibrate(true)  //振动
                         .setFilename("Cimoc_" + versionName + ".apk")
+                        .setAuthority(BuildConfig.APPLICATION_ID)
+//                        .setSmallIcon(R.drawable.ic_file_download_white_24dp)
                         .build(getContext());
 
-                mAppUpdater.setHttpManager(OkHttpManager.getInstance()).start();
+                try {
+                    mAppUpdater.setHttpManager(OkHttpManager.getInstance()).start();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 AppDialog.INSTANCE.dismissDialog();
             }
         });

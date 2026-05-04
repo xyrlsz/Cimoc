@@ -334,6 +334,13 @@
                     app:title="@string/settings_other_storage" />
 
                 <com.xyrlsz.xcimocob.ui.widget.Option
+                    android:id="@+id/settings_other_permission"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:summary="@string/settings_other_permission_summary"
+                    app:title="@string/settings_other_permission" />
+
+                <com.xyrlsz.xcimocob.ui.widget.Option
                     android:id="@+id/settings_other_clear_cache"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

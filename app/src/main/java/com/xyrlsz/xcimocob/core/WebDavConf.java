@@ -33,8 +33,10 @@ public class WebDavConf {
                                 sardine.createDirectory(mWebDavUrl);
                             }
                             emitter.onComplete();
+                            return;
                         } catch (IOException e) {
                             emitter.onError(e);
+                            return;
                         }
                     })
                     .subscribeOn(Schedulers.io())

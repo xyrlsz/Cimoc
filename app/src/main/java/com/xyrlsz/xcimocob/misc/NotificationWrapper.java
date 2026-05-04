@@ -5,6 +5,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.os.Build;
+import android.util.Log;
 import androidx.annotation.DrawableRes;
 import androidx.core.app.NotificationCompat;
 
@@ -23,20 +24,42 @@ public class NotificationWrapper {
     public NotificationWrapper(Context context, String id, @DrawableRes int icon, boolean ongoing) {
         String title = context.getString(R.string.app_name);
         mManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (mManager == null) {
+            Log.e("NotificationWrapper", "NotificationManager is null");
+            return;
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            mManager.createNotificationChannel(new NotificationChannel(id, id, NotificationManager.IMPORTANCE_MIN));
+            try {
+                NotificationChannel channel = new NotificationChannel(id, id, NotificationManager.IMPORTANCE_MIN);
+                channel.setShowBadge(false);
+                mManager.createNotificationChannel(channel);
+            } catch (Exception e) {
+                Log.e("NotificationWrapper", "create channel failed", e);
+            }
         }
         mBuilder = new NotificationCompat.Builder(context, id);
         mBuilder.setContentTitle(title)
-                .setSmallIcon(R.mipmap.ic_launcher_round)
+                .setSmallIcon(icon)
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), icon))
                 .setOngoing(ongoing);
         mId = id.hashCode();
     }
 
+    public android.app.Notification getNotification() {
+        return mBuilder.build();
+    }
+
     public void post(int progress, int max) {
-        mBuilder.setProgress(max, progress, false);
-        mManager.notify(mId, mBuilder.build());
+        if (mManager == null) {
+            Log.e("NotificationWrapper", "post skipped: mManager is null");
+            return;
+        }
+        try {
+            mBuilder.setProgress(max, progress, false);
+            mManager.notify(mId, mBuilder.build());
+        } catch (Exception e) {
+            Log.e("NotificationWrapper", "post error", e);
+        }
     }
 
     public void post(String content, int progress, int max) {
@@ -50,7 +73,15 @@ public class NotificationWrapper {
     }
 
     public void cancel() {
-        mManager.cancel(mId);
+        if (mManager == null) {
+            Log.e("NotificationWrapper", "cancel skipped: mManager is null");
+            return;
+        }
+        try {
+            mManager.cancel(mId);
+        } catch (Exception e) {
+            Log.e("NotificationWrapper", "cancel failed", e);
+        }
     }
 
 }

@@ -151,13 +151,16 @@ public class MainPresenter extends BasePresenter<MainView> {
                             @Override
                             public void accept(String json) {
                                 try {
-                                    String HHAAZZ = new JSONObject(json).getString("HHAAZZ");
-                                    String sw = new JSONObject(json).getString("sw");
+                                    JSONObject obj = new JSONObject(json);
+                                    String HHAAZZ = obj.getString("HHAAZZ");
                                     if (!HHAAZZ.equals(App.getPreferenceManager().getString(PreferenceManager.PREF_HHAAZZ_BASEURL, ""))){
                                         App.getPreferenceManager().putString(PreferenceManager.PREF_HHAAZZ_BASEURL, HHAAZZ);
                                     }
-                                    if (!sw.equals(App.getPreferenceManager().getString(PreferenceManager.PREF_HHAAZZ_SW, ""))){
-                                        App.getPreferenceManager().putString(PreferenceManager.PREF_HHAAZZ_SW, sw);
+                                    if (obj.has("sw")) {
+                                        String sw = obj.getString("sw");
+                                        if (!sw.equals(App.getPreferenceManager().getString(PreferenceManager.PREF_HHAAZZ_SW, ""))){
+                                            App.getPreferenceManager().putString(PreferenceManager.PREF_HHAAZZ_SW, sw);
+                                        }
                                     }
                                 } catch (JSONException e) {
                                     e.printStackTrace();

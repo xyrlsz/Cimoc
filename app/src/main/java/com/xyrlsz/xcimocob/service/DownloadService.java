@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
+import android.util.Log;
 import android.util.Pair;
 
 import androidx.annotation.Nullable;
@@ -118,6 +119,12 @@ public class DownloadService extends Service implements AppGetter {
                 mNotification = new NotificationWrapper(this, NOTIFICATION_DOWNLOAD,
                         R.drawable.ic_file_download_white_24dp, true);
                 mNotification.post(getString(R.string.download_service_doing), true);
+                try {
+                    startForeground(NOTIFICATION_DOWNLOAD.hashCode(), mNotification.getNotification());
+                } catch (Exception e) {
+                    Log.e("DownloadService", "startForeground failed", e);
+                    // 如果前台服务启动失败，仍然继续执行下载任务
+                }
             }
             List<Task> list = intent.getParcelableArrayListExtra(Extra.EXTRA_TASK);
             for (Task task : Objects.requireNonNull(list)) {
@@ -168,6 +175,11 @@ public class DownloadService extends Service implements AppGetter {
     private void notifyCompleted() {
         if (mNotification != null) {
             mNotification.post(getString(R.string.download_service_done), false);
+            try {
+                stopForeground(true);
+            } catch (Exception e) {
+                Log.e("DownloadService", "stopForeground failed", e);
+            }
             mNotification.cancel();
             mNotification = null;
         }

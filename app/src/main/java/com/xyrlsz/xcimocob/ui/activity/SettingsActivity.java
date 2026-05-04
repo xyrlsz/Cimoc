@@ -27,6 +27,7 @@ import com.xyrlsz.xcimocob.ui.widget.preference.CheckBoxPreference;
 import com.xyrlsz.xcimocob.ui.widget.preference.ChoicePreference;
 import com.xyrlsz.xcimocob.ui.widget.preference.SliderPreference;
 import com.xyrlsz.xcimocob.utils.HintUtils;
+import com.xyrlsz.xcimocob.utils.PermissionUtils;
 import com.xyrlsz.xcimocob.utils.ServiceUtils;
 import com.xyrlsz.xcimocob.utils.StringUtils;
 import com.xyrlsz.xcimocob.utils.ThemeUtils;
@@ -201,6 +202,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         findViewById(R.id.settings_reader_config).setOnClickListener(v -> onReaderConfigBtnClick());
         findViewById(R.id.settings_other_storage).setOnClickListener(v -> onOtherStorageClick());
         findViewById(R.id.settings_download_scan).setOnClickListener(v -> onDownloadScanClick());
+        findViewById(R.id.settings_other_permission).setOnClickListener(v -> onPermissionClick());
         findViewById(R.id.settings_other_clear_cache).setOnClickListener(v -> onOtherCacheClick());
         findViewById(R.id.settings_comic_source_login).setOnClickListener(v -> onComicSourceLoginClick());
     }
@@ -364,6 +366,14 @@ public class SettingsActivity extends BackActivity implements SettingsView {
             MessageDialogFragment fragment = MessageDialogFragment.newInstance(R.string.dialog_confirm,
                     R.string.settings_download_scan_confirm, true, DIALOG_REQUEST_DOWNLOAD_SCAN);
             fragment.show(getSupportFragmentManager(), null);
+        }
+    }
+
+    void onPermissionClick() {
+        if (!PermissionUtils.hasAllPermissions(this)) {
+            MainActivity.requestAppPermissions(this);
+        } else {
+            HintUtils.showToast(this, R.string.main_permission_success);
         }
     }
 

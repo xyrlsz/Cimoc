@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.ViewGroup;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
@@ -49,8 +50,13 @@ public class WebParser {
         this.latch = new CountDownLatch(1);
 
         new Handler(Looper.getMainLooper()).post(() -> {
-            webView = new WebView(context);
-            initWebView();
+            try {
+                webView = new WebView(context);
+                initWebView();
+            } catch (Exception e) {
+                Log.e("WebParser", "WebView init error", e);
+                latch.countDown();
+            }
         });
     }
 

@@ -2,8 +2,11 @@ package com.xyrlsz.xcimocob.ui.activity;
 
 import static com.xyrlsz.xcimocob.Constants.GITEE_RELEASE_URL;
 import static com.xyrlsz.xcimocob.Constants.GITHUB_RELEASE_URL;
+import static com.xyrlsz.xcimocob.Constants.REQUEST_CODE_MANAGE_STORAGE;
+import static com.xyrlsz.xcimocob.Constants.REQUEST_CODE_STORAGE;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
@@ -32,13 +35,15 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.facebook.imagepipeline.common.ResizeOptions;
 import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.google.android.material.navigation.NavigationView;
-import com.king.app.updater.constant.Constants;
 import com.xyrlsz.xcimocob.App;
 import com.xyrlsz.xcimocob.R;
 import com.xyrlsz.xcimocob.component.ThemeResponsive;
@@ -138,6 +143,21 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
 
         // 注册回调
         getOnBackPressedDispatcher().addCallback(this, callback);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // 从 MANAGE_EXTERNAL_STORAGE 设置页面返回后重新检查权限
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && Environment.isExternalStorageManager()) {
+            if (!PermissionUtils.hasAllPermissions(this)) {
+                // MANAGE_EXTERNAL_STORAGE 已授权，但可能还需要其他运行时权限
+                requestAppPermissions(this);
+            } else if (((App) getApplication()).getDocumentFile() == null) {
+                // 权限已就绪但文档根目录未初始化
+                ((App) getApplication()).initRootDocumentFile();
+            }
+        }
     }
 
     @Override
@@ -384,6 +404,32 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
                     break;
             }
         }
+        // 处理 API 30+ MANAGE_EXTERNAL_STORAGE 设置返回
+        if (requestCode == REQUEST_CODE_MANAGE_STORAGE) {
+            onStoragePermissionSettingsReturn();
+        }
+    }
+
+    /**
+     * 从 MANAGE_EXTERNAL_STORAGE 或应用详情设置返回后，重新检查权限
+     */
+    private void onStoragePermissionSettingsReturn() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && Environment.isExternalStorageManager()) {
+            // MANAGE_EXTERNAL_STORAGE 已授权
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                // API 33+ 还需要检查是否有 READ_MEDIA_IMAGES
+                if (PermissionUtils.hasAllPermissions(this)) {
+                    ((App) getApplication()).initRootDocumentFile();
+                    HintUtils.showToast(this, R.string.main_permission_success);
+                } else {
+                    requestAppPermissions(this);
+                }
+            } else {
+                // API 30-32: MANAGE_EXTERNAL_STORAGE 已足够
+                ((App) getApplication()).initRootDocumentFile();
+                HintUtils.showToast(this, R.string.main_permission_success);
+            }
+        }
     }
 
     @Override
@@ -393,48 +439,20 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
                 mPreference.putBoolean(PreferenceManager.PREF_MAIN_NOTICE, true);
                 //showPermission();
                 break;
-//            case DIALOG_REQUEST_PERMISSION:
-            //ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
-//                com.king.app.updater.util.PermissionUtils.verifyReadAndWritePermissions(this, Constants.RE_CODE_STORAGE_PERMISSION);
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
-//                    Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-//                    startActivity(intent);
-//                }
             case DIALOG_REQUEST_PERMISSION:
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    // Android 13 (API 33) and above
-                    if (!Environment.isExternalStorageManager()) {
-                        Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-                        startActivity(intent);
-
-                    }
-                    ActivityCompat.requestPermissions(this, new String[]{
-                            Manifest.permission.READ_MEDIA_IMAGES,
-                            Manifest.permission.READ_MEDIA_VIDEO,
-                            Manifest.permission.READ_MEDIA_AUDIO,
-                            Manifest.permission.READ_PHONE_STATE,
-                            Manifest.permission.POST_NOTIFICATIONS
-                    }, Constants.RE_CODE_STORAGE_PERMISSION);
-
-
-                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    // Android 11 (API 30) and Android 12 (API 31-32)
-                    if (!Environment.isExternalStorageManager()) {
-                        Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-                        startActivity(intent);
-
-                    }
-                    ActivityCompat.requestPermissions(this, new String[]{
-                            Manifest.permission.READ_PHONE_STATE
-                    }, Constants.RE_CODE_STORAGE_PERMISSION);
-
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()) {
+                    // API 30+ 需要 MANAGE_EXTERNAL_STORAGE → 跳转系统设置页面
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                    startActivityForResult(intent, REQUEST_CODE_MANAGE_STORAGE);
+                } else if (PermissionUtils.shouldShowPermissionRationale(this)) {
+                    // 可以显示 rationale → 正常请求权限
+                    requestAppPermissions(this);
+                } else if (!PermissionUtils.hasAllPermissions(this)) {
+                    // 权限被永久拒绝（或 MIUI 等 ROM 拦截）→ 引导去应用详情设置
+                    HintUtils.showToast(this, R.string.main_permission_guide_settings);
+                    openAppSettings(this);
                 } else {
-                    // Below Android 11
-                    ActivityCompat.requestPermissions(this, new String[]{
-                            Manifest.permission.READ_EXTERNAL_STORAGE,
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                            Manifest.permission.READ_PHONE_STATE
-                    }, Constants.RE_CODE_STORAGE_PERMISSION);
+                    requestAppPermissions(this);
                 }
                 break;
 
@@ -449,15 +467,20 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case 0:
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    ((App) getApplication()).initRootDocumentFile();
-                    HintUtils.showToast(this, R.string.main_permission_success);
-                } else {
-                    HintUtils.showToast(this, R.string.main_permission_fail);
+        if (requestCode == REQUEST_CODE_STORAGE) {
+            boolean allGranted = true;
+            for (int result : grantResults) {
+                if (result != PackageManager.PERMISSION_GRANTED) {
+                    allGranted = false;
+                    break;
                 }
-                break;
+            }
+            if (allGranted) {
+                ((App) getApplication()).initRootDocumentFile();
+                HintUtils.showToast(this, R.string.main_permission_success);
+            } else {
+                HintUtils.showToast(this, R.string.main_permission_fail);
+            }
         }
     }
 
@@ -542,18 +565,46 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
     }
 
     private void showPermission() {
-        SharedPreferences sharedPreferences = getSharedPreferences("showPermission", MODE_PRIVATE);
-        boolean isFirstRun = sharedPreferences.getBoolean("isFirstRun", true);
-        if (isFirstRun) {
-            if (!PermissionUtils.hasAllPermissions(this)) {
-                MessageDialogFragment fragment = MessageDialogFragment.newInstance(R.string.main_permission,
-                        R.string.main_permission_content, false, DIALOG_REQUEST_PERMISSION);
-                fragment.show(getSupportFragmentManager(), null);
-            }
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putBoolean("isFirstRun", false);
-            editor.apply();
+        if (!PermissionUtils.hasAllPermissions(this)) {
+            MessageDialogFragment fragment = MessageDialogFragment.newInstance(R.string.main_permission,
+                    R.string.main_permission_content, false, DIALOG_REQUEST_PERMISSION);
+            fragment.show(getSupportFragmentManager(), null);
         }
+    }
+
+    public static void requestAppPermissions(Activity activity) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Android 13+ (API 33+): 使用细粒度媒体权限
+            // 不需要 MANAGE_EXTERNAL_STORAGE，只需要 READ_MEDIA_IMAGES 读取漫画图片
+            ActivityCompat.requestPermissions(activity, new String[]{
+                    Manifest.permission.READ_MEDIA_IMAGES,
+                    Manifest.permission.READ_PHONE_STATE,
+                    Manifest.permission.POST_NOTIFICATIONS
+            }, REQUEST_CODE_STORAGE);
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // Android 11-12 (API 30-32): 需要 MANAGE_EXTERNAL_STORAGE
+            // 注意：MANAGE_EXTERNAL_STORAGE 通过 Settings Intent 申请，不在 requestPermissions 中
+            if (!Environment.isExternalStorageManager()) {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                activity.startActivity(intent);
+            }
+            ActivityCompat.requestPermissions(activity, new String[]{
+                    Manifest.permission.READ_PHONE_STATE
+            }, REQUEST_CODE_STORAGE);
+        } else {
+            // Android 10 及以下 (API < 30): 传统存储权限
+            ActivityCompat.requestPermissions(activity, new String[]{
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_PHONE_STATE
+            }, REQUEST_CODE_STORAGE);
+        }
+    }
+
+    public static void openAppSettings(Activity activity) {
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        intent.setData(Uri.parse("package:" + activity.getPackageName()));
+        activity.startActivity(intent);
     }
 
     private void checkUpdate() {

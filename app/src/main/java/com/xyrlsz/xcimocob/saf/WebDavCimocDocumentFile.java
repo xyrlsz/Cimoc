@@ -46,8 +46,10 @@ public class WebDavCimocDocumentFile extends CimocDocumentFile {
                             emitter.onNext(resources.get(0));
                         }
                         emitter.onComplete();
+                        return;
                     } catch (IOException e) {
                         emitter.onError(e);
+                        return;
                     }
                 })
                 .subscribeOn(Schedulers.io())
@@ -86,8 +88,10 @@ public class WebDavCimocDocumentFile extends CimocDocumentFile {
                             emitter.onNext(resources.get(0));
                         }
                         emitter.onComplete();
+                        return;
                     } catch (IOException e) {
                         emitter.onError(e);
+                        return;
                     }
                 })
                 .subscribeOn(Schedulers.io())

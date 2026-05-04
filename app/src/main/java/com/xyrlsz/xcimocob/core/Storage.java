@@ -128,6 +128,7 @@ public class Storage {
                             deleteDir(root, DOWNLOAD, emitter);
                             deleteDir(root, PICTURE, emitter);
                             emitter.onComplete();
+                            return;
                         }
                     }
                     emitter.onError(new Exception());
@@ -147,6 +148,7 @@ public class Storage {
                                     resolver, Objects.requireNonNull(file), stream);
                             emitter.onNext(file.getUri());
                             emitter.onComplete();
+                            return;
                         }
                         stream.close();
                     } catch (IOException ignored) {
