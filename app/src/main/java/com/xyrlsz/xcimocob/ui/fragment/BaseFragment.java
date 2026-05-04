@@ -47,11 +47,24 @@ public abstract class BaseFragment extends Fragment implements BaseView {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        onFragmentResume();
+    }
+
+    @Override
     public void onDestroyView() {
         if (mBasePresenter != null) {
             mBasePresenter.detachView();
         }
         super.onDestroyView();
+    }
+
+    /**
+     * Fragment 重新可见时的回调，子类可重写此方法刷新/恢复数据。
+     * 对应 Activity 的 onResume 时机，适用于从其他界面返回后更新数据。
+     */
+    protected void onFragmentResume() {
     }
 
     @Override

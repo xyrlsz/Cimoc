@@ -8,6 +8,7 @@ import android.content.pm.ActivityInfo;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.view.InputDevice;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -68,6 +69,9 @@ import okhttp3.Headers;
  */
 public abstract class ReaderActivity extends BaseActivity implements OnTapGestureListener,
         OnProgressChangeListener, OnLazyLoadListener, ReaderView {
+
+    private static final String SAVED_STATE_PROGRESS = "saved_state_progress";
+    private static final String SAVED_STATE_MAX = "saved_state_max";
 
     private final boolean[] JoyLock = {false, false};
     private final int[] JoyEvent = {7, 8};
@@ -289,6 +293,22 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
     protected void onResume() {
         super.onResume();
         registerReceiver(batteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+    }
+
+    @Override
+    protected void saveState(Bundle outState) {
+        super.saveState(outState);
+        outState.putInt(SAVED_STATE_PROGRESS, progress);
+        outState.putInt(SAVED_STATE_MAX, max);
+    }
+
+    @Override
+    protected void restoreData(Bundle savedInstanceState) {
+        super.restoreData(savedInstanceState);
+        if (savedInstanceState.containsKey(SAVED_STATE_PROGRESS)) {
+            progress = savedInstanceState.getInt(SAVED_STATE_PROGRESS);
+            max = savedInstanceState.getInt(SAVED_STATE_MAX);
+        }
     }
 
     @Override

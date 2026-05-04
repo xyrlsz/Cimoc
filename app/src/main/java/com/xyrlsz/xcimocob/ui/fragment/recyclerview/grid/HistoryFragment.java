@@ -39,6 +39,15 @@ public class HistoryFragment extends GridFragment implements HistoryView {
     }
 
     @Override
+    protected void onFragmentResume() {
+        super.onFragmentResume();
+        // 从阅读器返回后刷新历史记录
+        if (mPresenter != null && isAdded()) {
+            mPresenter.load();
+        }
+    }
+
+    @Override
     protected void performActionButtonClick() {
         if (mGridAdapter.getDateSet().isEmpty()) {
             return;

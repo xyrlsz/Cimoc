@@ -46,7 +46,8 @@ public class ResultActivity extends BackActivity implements ResultView, BaseAdap
     // 解决重复加载列表问题思路：
     // 在新的一次请求（上拉加载）前检查新Url与上一次请求的是否一致。
     // 一致则返回空请求，达到阻断请求的目的；不一致则更新Map中存的Url，Map中不存在则新建
-    public static SparseArray<String> searchUrls = new SparseArray<>();
+    // 注意：使用实例级缓存而非 static，避免跨实例泄漏
+    public SparseArray<String> searchUrls = new SparseArray<>();
     RecyclerView mRecyclerView;
     FrameLayout mLayoutView;
     private ResultAdapter mResultAdapter;
@@ -147,10 +148,12 @@ public class ResultActivity extends BackActivity implements ResultView, BaseAdap
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         if (mProvider != null) {
             mProvider.clear();
         }
+        // 清理实例级缓存
+        searchUrls.clear();
+        super.onDestroy();
     }
 
     private void load() {

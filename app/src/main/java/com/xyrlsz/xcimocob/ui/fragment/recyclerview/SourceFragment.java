@@ -89,6 +89,14 @@ public class SourceFragment extends RecyclerViewFragment implements SourceView, 
     }
 
     @Override
+    protected void onFragmentResume() {
+        super.onFragmentResume();
+        if (mPresenter != null && isAdded()) {
+            mPresenter.load();
+        }
+    }
+
+    @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_source, menu);

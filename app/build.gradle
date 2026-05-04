@@ -111,7 +111,6 @@ android {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            shrinkResources true
             signingConfig signingConfigs.release
             buildConfigField "boolean", "USE_FINAL_RESOURCE_IDS", "true"
 
@@ -119,7 +118,6 @@ android {
         debug {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            shrinkResources false
             signingConfig signingConfigs.debug
             buildConfigField "boolean", "USE_FINAL_RESOURCE_IDS", "true"
 
@@ -169,7 +167,7 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.22.2'
     implementation 'com.google.re2j:re2j:1.8'
     implementation 'org.adw.library:discrete-seekbar:1.0.1'
-    implementation 'io.reactivex.rxjava3:rxjava:3.1.8'
+    implementation 'io.reactivex.rxjava3:rxjava:3.1.12'
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.2'
 
     api 'com.google.guava:guava:33.6.0-android'

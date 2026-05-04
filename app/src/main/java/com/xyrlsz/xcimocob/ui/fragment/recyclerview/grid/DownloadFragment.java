@@ -60,6 +60,15 @@ public class DownloadFragment extends GridFragment implements DownloadView {
         mPresenter.load();
     }
 
+    @Override
+    protected void onFragmentResume() {
+        super.onFragmentResume();
+        // 从下载任务列表返回后刷新下载状态
+        if (mPresenter != null && isAdded()) {
+            mPresenter.load();
+        }
+    }
+
     private void outputComic(int type) {
         // showProgressDialog();
         ComicUtils.OutputDownloadedComic(this, getContext(), type, mPresenter.load(mSavedId), new ComicUtils.OutputComicCallback() {

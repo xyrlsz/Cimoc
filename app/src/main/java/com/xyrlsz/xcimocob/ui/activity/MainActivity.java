@@ -85,6 +85,13 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
     private static final int REQUEST_ACTIVITY_SETTINGS = 0;
 
     private static final int FRAGMENT_NUM = 3;
+    private static final String SAVED_STATE_CHECK_ITEM = "saved_state_check_item";
+
+    // Fragment 标签，用于配置变化后恢复 Fragment
+    private static final String TAG_FRAGMENT_COMIC = "fragment_comic";
+    private static final String TAG_FRAGMENT_SOURCE = "fragment_source";
+    private static final String TAG_FRAGMENT_CATEGORY = "fragment_category";
+
     private final Update update = new Update();
     private final long mExitTime = 0;
     DrawerLayout mDrawerLayout;
@@ -242,30 +249,76 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
     }
 
     private void initFragment() {
-        int home = mPreference.getNumber(PreferenceManager.PREF_OTHER_LAUNCH, PreferenceManager.HOME_FAVORITE).intValue();
-        switch (home) {
-            default:
-            case PreferenceManager.HOME_FAVORITE:
-            case PreferenceManager.HOME_HISTORY:
-            case PreferenceManager.HOME_DOWNLOAD:
-                mCheckItem = R.id.drawer_comic;
-                break;
-            case PreferenceManager.HOME_SOURCE:
-                mCheckItem = R.id.drawer_source;
-                break;
-//            case PreferenceManager.HOME_TAG:
-//                mCheckItem = R.id.drawer_tag;
-//                break;
-        }
-        mNavigationView.setCheckedItem(mCheckItem);
+        // 如果是重新创建（如旋转屏幕），先尝试从 FragmentManager 恢复已有 Fragment
         mFragmentArray = new SparseArray<>(FRAGMENT_NUM);
+        tryRestoreFragment(R.id.drawer_comic, TAG_FRAGMENT_COMIC);
+        tryRestoreFragment(R.id.drawer_source, TAG_FRAGMENT_SOURCE);
+        tryRestoreFragment(R.id.drawer_category, TAG_FRAGMENT_CATEGORY);
+
+        // 如果 mCheckItem 没有被 restoreData 恢复，则根据首页设置确定
+        if (mCheckItem == 0) {
+            int home = mPreference.getNumber(PreferenceManager.PREF_OTHER_LAUNCH, PreferenceManager.HOME_FAVORITE).intValue();
+            switch (home) {
+                default:
+                case PreferenceManager.HOME_FAVORITE:
+                case PreferenceManager.HOME_HISTORY:
+                case PreferenceManager.HOME_DOWNLOAD:
+                    mCheckItem = R.id.drawer_comic;
+                    break;
+                case PreferenceManager.HOME_SOURCE:
+                    mCheckItem = R.id.drawer_source;
+                    break;
+            }
+        }
+
+        mNavigationView.setCheckedItem(mCheckItem);
         refreshCurrentFragment();
-        getSupportFragmentManager().beginTransaction().add(R.id.main_fragment_container, mCurrentFragment).commit();
+        // 只在 Fragment 尚未添加时执行添加操作
+        if (!isFragmentRestored(mCheckItem)) {
+            String tag = getFragmentTag(mCheckItem);
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.main_fragment_container, mCurrentFragment, tag)
+                    .commit();
+        }
+    }
+
+    /**
+     * 尝试从 FragmentManager 中按 tag 恢复已存在的 Fragment
+     */
+    private void tryRestoreFragment(int checkItem, String tag) {
+        BaseFragment fragment = (BaseFragment) getSupportFragmentManager().findFragmentByTag(tag);
+        if (fragment != null) {
+            mFragmentArray.put(checkItem, fragment);
+            if (checkItem == R.id.drawer_comic) {
+                mComicFragment = (ComicFragment) fragment;
+            }
+        }
+    }
+
+    /**
+     * 判断指定 checkItem 对应的 Fragment 是否已从 FragmentManager 中恢复
+     */
+    private boolean isFragmentRestored(int checkItem) {
+        return getSupportFragmentManager().findFragmentByTag(getFragmentTag(checkItem)) != null;
+    }
+
+    private String getFragmentTag(int checkItem) {
+        switch (checkItem) {
+            case R.id.drawer_comic:
+                return TAG_FRAGMENT_COMIC;
+            case R.id.drawer_source:
+                return TAG_FRAGMENT_SOURCE;
+            case R.id.drawer_category:
+                return TAG_FRAGMENT_CATEGORY;
+            default:
+                return TAG_FRAGMENT_COMIC;
+        }
     }
 
     private boolean refreshCurrentFragment() {
         mCurrentFragment = mFragmentArray.get(mCheckItem);
         if (mCurrentFragment == null) {
+            String tag = getFragmentTag(mCheckItem);
             switch (mCheckItem) {
                 case R.id.drawer_comic:
                     mComicFragment = new ComicFragment();
@@ -274,9 +327,6 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
                 case R.id.drawer_source:
                     mCurrentFragment = new SourceFragment();
                     break;
-//                case R.id.drawer_tag:
-//                    mCurrentFragment = new TagFragment();
-//                    break;
                 case R.id.drawer_category:
                     mCurrentFragment = new CategoryFragment();
                     break;
@@ -302,8 +352,17 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
     }
 
     @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
+    protected void saveState(Bundle outState) {
+        super.saveState(outState);
+        outState.putInt(SAVED_STATE_CHECK_ITEM, mCheckItem);
+    }
+
+    @Override
+    protected void restoreData(Bundle savedInstanceState) {
+        super.restoreData(savedInstanceState);
+        if (savedInstanceState.containsKey(SAVED_STATE_CHECK_ITEM)) {
+            mCheckItem = savedInstanceState.getInt(SAVED_STATE_CHECK_ITEM);
+        }
     }
 
 

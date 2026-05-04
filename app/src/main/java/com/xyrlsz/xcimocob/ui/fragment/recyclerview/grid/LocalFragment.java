@@ -52,6 +52,15 @@ public class LocalFragment extends GridFragment implements LocalView {
     }
 
     @Override
+    protected void onFragmentResume() {
+        super.onFragmentResume();
+        // 返回后刷新本地漫画列表
+        if (mPresenter != null && isAdded()) {
+            mPresenter.load();
+        }
+    }
+
+    @Override
     protected void performActionButtonClick() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             try {

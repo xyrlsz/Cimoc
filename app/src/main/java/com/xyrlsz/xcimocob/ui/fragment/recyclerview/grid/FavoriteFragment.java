@@ -65,6 +65,15 @@ public class FavoriteFragment extends GridFragment implements FavoriteView {
     }
 
     @Override
+    protected void onFragmentResume() {
+        super.onFragmentResume();
+        // 从其他界面（如详情页）返回后刷新收藏列表数据
+        if (mPresenter != null && isAdded()) {
+            mPresenter.load();
+        }
+    }
+
+    @Override
     public void onDialogResult(int requestCode, Bundle bundle) {
         switch (requestCode) {
             case DIALOG_REQUEST_OPERATION:

@@ -29,6 +29,8 @@ import com.xyrlsz.xcimocob.utils.ThreadRunUtils;
  */
 public abstract class BaseActivity extends AppCompatActivity implements BaseView {
 
+    protected static final String SAVED_STATE_NIGHT_MODE = "saved_state_night_mode";
+
     protected PreferenceManager mPreference;
     @Nullable
     View mNightMask;
@@ -52,8 +54,33 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
         mBasePresenter = initPresenter();
         mProgressDialog = ProgressDialogFragment.newInstance();
         initView();
+        // 配置变化时（旋转屏幕等），先恢复已保存的状态再加载数据
+        if (savedInstanceState != null) {
+            restoreData(savedInstanceState);
+        }
         initData();
         initUser();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(SAVED_STATE_NIGHT_MODE,
+                mPreference.getBoolean(PreferenceManager.PREF_NIGHT, false));
+        saveState(outState);
+    }
+
+    /**
+     * 子类重写此方法保存额外状态
+     */
+    protected void saveState(Bundle outState) {
+    }
+
+    /**
+     * 子类重写此方法恢复额外状态
+     * 注意：仅在 {@code savedInstanceState != null} 时调用
+     */
+    protected void restoreData(Bundle savedInstanceState) {
     }
 
     @Override

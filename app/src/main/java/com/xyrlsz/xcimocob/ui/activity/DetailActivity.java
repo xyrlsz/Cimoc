@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -58,6 +59,8 @@ import okhttp3.Headers;
 public class DetailActivity extends CoordinatorActivity implements DetailView {
 
     public static final int REQUEST_CODE_DOWNLOAD = 0;
+
+    private static final String SAVED_STATE_BACKUP_COUNT = "saved_state_backup_count";
 
     private DetailAdapter mDetailAdapter;
     private DetailPresenter mPresenter;
@@ -113,6 +116,20 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
         mPresenter.load(id, source, cid);
 
 
+    }
+
+    @Override
+    protected void saveState(Bundle outState) {
+        super.saveState(outState);
+        outState.putInt(SAVED_STATE_BACKUP_COUNT, mBackupCount);
+    }
+
+    @Override
+    protected void restoreData(Bundle savedInstanceState) {
+        super.restoreData(savedInstanceState);
+        if (savedInstanceState.containsKey(SAVED_STATE_BACKUP_COUNT)) {
+            mBackupCount = savedInstanceState.getInt(SAVED_STATE_BACKUP_COUNT);
+        }
     }
 
     @Override

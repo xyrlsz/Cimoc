@@ -2,6 +2,7 @@ package com.xyrlsz.xcimocob.ui.fragment;
 
 import android.animation.ValueAnimator;
 import android.content.Intent;
+import android.os.Bundle;
 import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -11,6 +12,7 @@ import android.widget.AdapterView;
 import android.widget.ImageButton;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatSpinner;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -45,6 +47,13 @@ import io.reactivex.rxjava3.disposables.Disposable;
 
 
 public class CategoryFragment extends BaseFragment implements CategoryView, AdapterView.OnItemSelectedListener {
+
+    private static final String SAVED_STATE_SOURCE = "saved_state_source";
+    private static final String SAVED_STATE_PAGE = "saved_state_page";
+    private static final String SAVED_STATE_STATE = "saved_state_state";
+    private static final String SAVED_STATE_FORMAT = "saved_state_format";
+    private static final String SAVED_STATE_HEAD_COLLAPSED = "saved_state_head_collapsed";
+
     private static final int STATE_NULL = 0;
     private static final int STATE_DOING = 1;
     private static final int STATE_DONE = 3;
@@ -81,6 +90,35 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
         if (mCompositeSubscription != null && !mCompositeSubscription.isDisposed()) {
             mCompositeSubscription.dispose();
             mCompositeSubscription.clear();
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mCurrentState != null) {
+            outState.putInt(SAVED_STATE_SOURCE, mCurrentState.source);
+            outState.putInt(SAVED_STATE_PAGE, mCurrentState.page);
+            outState.putInt(SAVED_STATE_STATE, mCurrentState.state);
+        }
+        if (mCurrentFormat != null) {
+            outState.putString(SAVED_STATE_FORMAT, mCurrentFormat);
+        }
+        outState.putBoolean(SAVED_STATE_HEAD_COLLAPSED, isHeadCollapsed);
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if (savedInstanceState != null) {
+            // 在 initData 设置完 mCurrentState 后恢复状态
+            if (mCurrentState != null) {
+                mCurrentState.source = savedInstanceState.getInt(SAVED_STATE_SOURCE, mCurrentState.source);
+                mCurrentState.page = savedInstanceState.getInt(SAVED_STATE_PAGE, mCurrentState.page);
+                mCurrentState.state = savedInstanceState.getInt(SAVED_STATE_STATE, mCurrentState.state);
+            }
+            mCurrentFormat = savedInstanceState.getString(SAVED_STATE_FORMAT, mCurrentFormat);
+            isHeadCollapsed = savedInstanceState.getBoolean(SAVED_STATE_HEAD_COLLAPSED, false);
         }
     }
 
