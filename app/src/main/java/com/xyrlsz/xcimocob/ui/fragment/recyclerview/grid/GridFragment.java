@@ -106,7 +106,8 @@ public abstract class GridFragment extends RecyclerViewFragment implements GridV
 
     @Override
     public void onComicLoadSuccess(List<Object> list) {
-        mGridAdapter.addAll(list);
+        // 使用 setData 替换数据而非追加，避免 onResume 重新加载时数据重复
+        mGridAdapter.setData(list);
     }
 
 
