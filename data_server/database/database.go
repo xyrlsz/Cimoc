@@ -86,6 +86,8 @@ func Init(cfg *config.Config) {
 	err = DB.AutoMigrate(
 		&models.User{},
 		&models.Comic{},
+		&models.ComicDelete{},
+		&models.SyncEvent{},
 		&models.Setting{},
 		&models.Tag{},
 		&models.TagRef{},

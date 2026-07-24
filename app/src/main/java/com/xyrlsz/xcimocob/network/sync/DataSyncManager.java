@@ -12,6 +12,7 @@ import com.xyrlsz.xcimocob.model.Comic;
 import com.xyrlsz.xcimocob.model.MiniComic;
 import com.xyrlsz.xcimocob.rx.RxBus;
 import com.xyrlsz.xcimocob.rx.RxEvent;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,6 +21,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -136,32 +139,73 @@ public class DataSyncManager {
     // ==================== 事件监听（按数据类型拆分） ====================
 
     private void listenDataChanges() {
-        // 漫画事件（收藏/取消收藏/阅读/信息更新）→ 仅同步漫画
+        // 收藏事件 → 从 MiniComic 加载完整 Comic 并构建事件后同步
         mDisposable.add(RxBus.getInstance().toObservable(RxEvent.EVENT_COMIC_FAVORITE)
                 .debounce(DEBOUNCE_MS, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(e -> triggerDebounced(SyncType.COMIC),
-                        t -> Log.w(TAG, "EVENT_COMIC_FAVORITE error", t)));
+                .subscribe(e -> {
+                    Object data = e.getData();
+                    if (data instanceof MiniComic) {
+                        MiniComic mc = (MiniComic) data;
+                        Comic comic = mComicManager.load(mc.getSource(), mc.getCid());
+                        if (comic != null) {
+                            enqueueComicEvent(comic, true, false, false, false);
+                        }
+                    }
+                    triggerDebounced(SyncType.COMIC);
+                }, t -> Log.w(TAG, "EVENT_COMIC_FAVORITE error", t)));
 
+        // 取消收藏 → Presenter 已直接调用 enqueueClearFavoriteEvent，这里只需触发同步
         mDisposable.add(RxBus.getInstance().toObservable(RxEvent.EVENT_COMIC_UNFAVORITE)
                 .debounce(DEBOUNCE_MS, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(e -> triggerDebounced(SyncType.COMIC),
                         t -> Log.w(TAG, "EVENT_COMIC_UNFAVORITE error", t)));
 
+        // 阅读进度事件
         mDisposable.add(RxBus.getInstance().toObservable(RxEvent.EVENT_COMIC_READ)
                 .debounce(DEBOUNCE_MS, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(e -> triggerDebounced(SyncType.COMIC),
-                        t -> Log.w(TAG, "EVENT_COMIC_READ error", t)));
+                .subscribe(e -> {
+                    Object data = e.getData();
+                    if (data instanceof MiniComic) {
+                        MiniComic mc = (MiniComic) data;
+                        Comic comic = mComicManager.load(mc.getSource(), mc.getCid());
+                        if (comic != null) {
+                            enqueueComicEvent(comic, false, false, true, false);
+                        }
+                    }
+                    triggerDebounced(SyncType.COMIC);
+                }, t -> Log.w(TAG, "EVENT_COMIC_READ error", t)));
 
+        // 漫画信息更新事件（data 可能是 MiniComic 或 Long id）
         mDisposable.add(RxBus.getInstance().toObservable(RxEvent.EVENT_COMIC_UPDATE)
                 .debounce(DEBOUNCE_MS, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(e -> triggerDebounced(SyncType.COMIC),
-                        t -> Log.w(TAG, "EVENT_COMIC_UPDATE error", t)));
+                .subscribe(e -> {
+                    Comic comic = extractComicFromEvent(e);
+                    if (comic != null) {
+                        enqueueComicEvent(comic, false, false, false, true);
+                    }
+                    triggerDebounced(SyncType.COMIC);
+                }, t -> Log.w(TAG, "EVENT_COMIC_UPDATE error", t)));
 
+    }
 
+    /**
+     * 从 RxEvent 中提取 Comic 对象。
+     * 兼容 MiniComic 和 Long id 两种数据类型。
+     */
+    @Nullable
+    private Comic extractComicFromEvent(RxEvent e) {
+        Object data = e.getData();
+        if (data instanceof MiniComic) {
+            MiniComic mc = (MiniComic) data;
+            return mComicManager.load(mc.getSource(), mc.getCid());
+        } else if (data instanceof Long) {
+            return mComicManager.load((Long) data);
+        }
+        return null;
     }
 
     // ==================== 防抖触发 ====================
@@ -207,72 +251,199 @@ public class DataSyncManager {
         return !TextUtils.isEmpty(token) && !TextUtils.isEmpty(url);
     }
 
-    // ==================== 漫画双向同步（上传+下载，仅漫画） ====================
+    // ==================== 事件驱动同步 ====================
+
+    /** 事件同步的持久化 key */
+    private static final String PREF_LAST_EVENT_ID = "data_sync_last_event_id";
+    private static final String PREF_CLIENT_ID = "data_sync_client_id";
+
+    /** Gson 实例（用于序列化事件 payload） */
+    private static final Gson GSON = new Gson();
+
+    /**
+     * 本设备发送的待推送事件缓冲（线程安全）。
+     * 积累到一定数量或时间后批量推送。
+     */
+    private final List<DataSyncModels.SyncEvent> mPendingEvents = new CopyOnWriteArrayList<>();
+
+    /** 获取或生成设备唯一标识 */
+    private static String getClientId() {
+        String clientId = App.getPreferenceManager().getString(PREF_CLIENT_ID, "");
+        if (TextUtils.isEmpty(clientId)) {
+            clientId = UUID.randomUUID().toString();
+            App.getPreferenceManager().putString(PREF_CLIENT_ID, clientId);
+        }
+        return clientId;
+    }
+
+    /** 获取上次拉取到的事件 ID，0 表示从头开始 */
+    private static long getLastEventId() {
+        Number n = App.getPreferenceManager().getNumber(PREF_LAST_EVENT_ID, 0L);
+        return n != null ? n.longValue() : 0L;
+    }
+
+    private static void setLastEventId(long eventId) {
+        App.getPreferenceManager().putNumber(PREF_LAST_EVENT_ID, eventId);
+    }
+
+    // ==================== 事件构建 ====================
+
+    /** 将本地漫画数据变更转为事件 */
+    public void enqueueComicEvent(Comic comic, boolean isFavorite, boolean isUnfavorite,
+                                   boolean isRead, boolean isUpdate) {
+        DataSyncModels.SyncEvent event = null;
+
+        if (isUnfavorite) {
+            event = buildUnfavoriteEvent(comic);
+        } else if (isFavorite && comic.getFavorite() != null) {
+            event = buildFavoriteEvent(comic);
+        } else if (isRead && comic.getHistory() != null) {
+            event = buildReadEvent(comic);
+        } else if (isUpdate) {
+            event = buildUpdateInfoEvent(comic);
+        }
+
+        if (event != null) {
+            event.client_id = getClientId();
+            mPendingEvents.add(event);
+            Log.d(TAG, "[Event] Enqueued: " + event.type + " for " + comic.getSource() + ":" + comic.getCid());
+        }
+    }
+
+    private DataSyncModels.SyncEvent buildFavoriteEvent(Comic c) {
+        FavoritePayload p = new FavoritePayload();
+        p.source = c.getSource();
+        p.cid = c.getCid();
+        p.title = c.getTitle();
+        p.cover = c.getCover();
+        p.update = c.getUpdate();
+        p.finish = c.getFinish() != null && c.getFinish();
+        p.chapter_count = c.getChapterCount();
+        p.timestamp = c.getFavorite() != null ? c.getFavorite() : System.currentTimeMillis();
+        return new DataSyncModels.SyncEvent(DataSyncModels.EVENT_FAVORITE, GSON.toJson(p));
+    }
+
+    private DataSyncModels.SyncEvent buildUnfavoriteEvent(Comic c) {
+        UnfavoritePayload p = new UnfavoritePayload();
+        p.source = c.getSource();
+        p.cid = c.getCid();
+        return new DataSyncModels.SyncEvent(DataSyncModels.EVENT_UNFAVORITE, GSON.toJson(p));
+    }
+
+    private DataSyncModels.SyncEvent buildReadEvent(Comic c) {
+        ReadPayload p = new ReadPayload();
+        p.source = c.getSource();
+        p.cid = c.getCid();
+        p.chapter = c.getChapter() != null ? c.getChapter() : "";
+        p.page = c.getPage() != null ? c.getPage() : 0;
+        p.last = c.getLast() != null ? c.getLast() : "";
+        p.timestamp = c.getHistory() != null ? c.getHistory() : System.currentTimeMillis();
+        return new DataSyncModels.SyncEvent(DataSyncModels.EVENT_READ, GSON.toJson(p));
+    }
+
+    private DataSyncModels.SyncEvent buildUpdateInfoEvent(Comic c) {
+        UpdateInfoPayload p = new UpdateInfoPayload();
+        p.source = c.getSource();
+        p.cid = c.getCid();
+        p.title = c.getTitle() != null ? c.getTitle() : "";
+        p.cover = c.getCover() != null ? c.getCover() : "";
+        p.update = c.getUpdate() != null ? c.getUpdate() : "";
+        p.finish = c.getFinish() != null && c.getFinish();
+        p.chapter_count = c.getChapterCount();
+        return new DataSyncModels.SyncEvent(DataSyncModels.EVENT_UPDATE_INFO, GSON.toJson(p));
+    }
+
+    /**
+     * 添加清除历史事件到待推送队列。
+     * 由外部（如 HistoryPresenter）在清除历史时调用。
+     */
+    public void enqueueClearHistoryEvent(int source, String cid) {
+        ClearHistoryPayload p = new ClearHistoryPayload();
+        p.source = source;
+        p.cid = cid;
+        DataSyncModels.SyncEvent event = new DataSyncModels.SyncEvent(
+                DataSyncModels.EVENT_CLEAR_HISTORY, GSON.toJson(p));
+        event.client_id = getClientId();
+        mPendingEvents.add(event);
+        Log.d(TAG, "[Event] Enqueued clear_history for " + source + ":" + cid);
+    }
+
+    /**
+     * 添加取消收藏事件到待推送队列。
+     * 由外部（如 DetailPresenter、FavoritePresenter）在取消收藏时调用。
+     */
+    public void enqueueClearFavoriteEvent(int source, String cid) {
+        UnfavoritePayload p = new UnfavoritePayload();
+        p.source = source;
+        p.cid = cid;
+        DataSyncModels.SyncEvent event = new DataSyncModels.SyncEvent(
+                DataSyncModels.EVENT_UNFAVORITE, GSON.toJson(p));
+        event.client_id = getClientId();
+        mPendingEvents.add(event);
+        Log.d(TAG, "[Event] Enqueued unfavorite for " + source + ":" + cid);
+    }
+
+    // ==================== 漫画双向同步（事件驱动） ====================
 
     private void doSyncComicsBidirectional() {
         Observable.fromCallable(() -> {
-            Log.d(TAG, "[Sync] Starting bidirectional comic sync...");
+            Log.d(TAG, "[EventSync] Starting bidirectional event sync...");
             String token = DataSyncClient.ensureValidToken();
             if (token == null) {
-                Log.w(TAG, "[Sync] Token is null, aborting sync");
+                Log.w(TAG, "[EventSync] Token is null, aborting sync");
                 return false;
             }
             if (!createClient()) {
-                Log.w(TAG, "[Sync] Failed to create client, aborting sync");
+                Log.w(TAG, "[EventSync] Failed to create client, aborting sync");
                 return false;
             }
 
-            uploadComics(mClient, token);
-            downloadAndMergeComics(mClient, token);
+            // 1. 拉取远程事件并本地重放（其他设备的变化）
+            pullAndReplayEvents(mClient, token);
 
-            Log.d(TAG, "[Sync] Bidirectional comic sync completed successfully");
+            // 2. 推送本地积压的事件
+            flushPendingEvents(mClient, token);
+
+            Log.d(TAG, "[EventSync] Bidirectional event sync completed");
             return true;
         }).subscribeOn(Schedulers.io()).subscribe(
-                r -> {
-                    if (r == Boolean.TRUE) {
-                        Log.d(TAG, "[Sync] Sync finished successfully");
-                    }
-                }, t -> {
-                    Log.e(TAG, "[Sync] Bidirectional comic sync failed", t);
-                    // 发生错误时尝试显示通知（静默失败的隐患）
-                    android.util.Log.e(TAG, "[Sync] Error details: " + t.getMessage());
-                });
+                r -> Log.d(TAG, "[EventSync] Sync finished"),
+                t -> Log.e(TAG, "[EventSync] Bidirectional event sync failed", t));
     }
 
-    // ==================== 全量双向同步（漫画+设置，前台触发） ====================
+    // ==================== 全量双向同步（事件驱动 + 设置，前台触发） ====================
 
     private void doSyncAllBidirectional() {
         Observable.fromCallable(() -> {
-            Log.d(TAG, "[Sync] Starting full bidirectional sync...");
+            Log.d(TAG, "[EventSync] Starting full bidirectional event sync...");
             String token = DataSyncClient.ensureValidToken();
             if (token == null) {
-                Log.w(TAG, "[Sync] Token is null, aborting full sync");
+                Log.w(TAG, "[EventSync] Token is null, aborting full sync");
                 return false;
             }
             if (!createClient()) {
-                Log.w(TAG, "[Sync] Failed to create client, aborting full sync");
+                Log.w(TAG, "[EventSync] Failed to create client, aborting full sync");
                 return false;
             }
 
-            uploadComics(mClient, token);
+            // 1. 拉取远程事件并本地重放
+            pullAndReplayEvents(mClient, token);
+
+            // 2. 推送本地积压的事件
+            flushPendingEvents(mClient, token);
+
+            // 3. 设置同步（保持原有机制）
             uploadSettings(mClient, token);
-            downloadAndMergeComics(mClient, token);
             downloadSettings(mClient, token);
 
-            Log.d(TAG, "[Sync] Full bidirectional sync completed successfully");
+            Log.d(TAG, "[EventSync] Full bidirectional event sync completed");
             return true;
         }).subscribeOn(Schedulers.io()).subscribe(
-                r -> {
-                    if (r == Boolean.TRUE) {
-                        Log.d(TAG, "[Sync] Full sync finished successfully");
-                    }
-                }, t -> {
-                    Log.e(TAG, "[Sync] Full bidirectional sync failed", t);
-                    android.util.Log.e(TAG, "[Sync] Full sync error details: " + t.getMessage());
-                });
+                r -> Log.d(TAG, "[EventSync] Full sync finished"),
+                t -> Log.e(TAG, "[EventSync] Full bidirectional event sync failed", t));
     }
 
-    // ==================== 共享的数据同步方法 ====================
+    // ==================== 事件推送/拉取/重放 ====================
 
     @Nullable
     private DataSyncClient mClient;
@@ -287,168 +458,282 @@ public class DataSyncManager {
         return true;
     }
 
-    /** 上传本地漫画到服务端（包括历史/收藏删除标记） */
-    private void uploadComics(DataSyncClient client, String token) throws Exception {
-        List<Comic> comics = mComicManager.listFavoriteOrHistory();
-        Log.d(TAG, "[Sync] Upload: " + comics.size() + " comics from local");
-        List<DataSyncModels.ComicSyncItem> items = new ArrayList<>(comics.size() + 8);
-        // 记录已出现在常规上传中的漫画 key，避免与清除标记冲突
-        Set<String> uploadedKeys = new HashSet<>();
-        for (Comic c : comics) {
-            items.add(buildComicSyncItem(c));
-            uploadedKeys.add(c.getSource() + ":" + c.getCid());
-        }
+    /**
+     * 从服务端拉取新事件并在本地重放。
+     * 自动翻页处理 has_more 直到全部拉完。
+     * 重放完成后发送 RxBus 事件通知 UI 刷新。
+     */
+    private void pullAndReplayEvents(DataSyncClient client, String token) throws Exception {
+        long sinceID = getLastEventId();
+        int totalReplayed = 0;
+        int pageCount = 0;
 
-        // 附加标记了"历史已删除"的漫画，通知服务端清除历史
-        Set<String> deletedKeys = getHistoryDeletedKeys();
-        if (!deletedKeys.isEmpty()) {
-            Log.d(TAG, "[Sync] Upload: " + deletedKeys.size() + " history-deleted markers");
-            for (String key : deletedKeys) {
-                String[] parts = key.split(":", 2);
-                if (parts.length != 2) continue;
+        // 收集受影响的需要通知 UI 的漫画
+        final List<MiniComic> favoriteChanged = new LinkedList<>();
+        final List<MiniComic> historyChanged = new LinkedList<>();
 
-                int source;
-                try {
-                    source = Integer.parseInt(parts[0]);
-                } catch (NumberFormatException e) {
-                    Log.w(TAG, "Invalid history deleted key (source not int): " + key);
-                    continue;
+        while (true) {
+            DataSyncModels.PullEventsResponse resp = client.pullEvents(token, sinceID);
+            if (resp == null || resp.events == null || resp.events.isEmpty()) {
+                break;
+            }
+
+            pageCount++;
+            for (DataSyncModels.SyncEvent event : resp.events) {
+                ReplayResult result = replayEvent(event);
+                if (result.replayed) {
+                    totalReplayed++;
                 }
-                String cid = parts[1];
-
-                if (uploadedKeys.contains(key)) {
-                    // 该漫画在本地仍有数据（如收藏），但用户已清除历史记录
-                    // 需要标记 clear_history，让服务端也清除历史，避免下次下载时恢复
-                    for (DataSyncModels.ComicSyncItem item : items) {
-                        if (item.source == source && item.cid != null && item.cid.equals(cid)) {
-                            item.clear_history = true;
-                            Log.d(TAG, "[Sync]   clear_history on existing comic " + key);
-                            break;
-                        }
+                if (result.comic != null) {
+                    if (result.favChanged) {
+                        favoriteChanged.add(result.comic);
                     }
-                } else {
-                    DataSyncModels.ComicSyncItem item = new DataSyncModels.ComicSyncItem();
-                    item.source = source;
-                    item.cid = cid;
-                    item.clear_history = true;
-                    items.add(item);
-                    Log.d(TAG, "[Sync]   standalone clear_history item for " + key);
+                    if (result.histChanged) {
+                        historyChanged.add(result.comic);
+                    }
                 }
+                sinceID = event.id; // 逐条推进，确保中断后能续传
+            }
+
+            if (!resp.has_more) {
+                break;
             }
         }
 
-        // 附加标记了"收藏已取消"的漫画，通知服务端清除收藏
-        Set<String> favoriteDeletedKeys = getFavoriteDeletedKeys();
-        if (!favoriteDeletedKeys.isEmpty()) {
-            Log.d(TAG, "[Sync] Upload: " + favoriteDeletedKeys.size() + " favorite-deleted markers");
-            for (String key : favoriteDeletedKeys) {
-                String[] parts = key.split(":", 2);
-                if (parts.length != 2) continue;
-
-                int source;
-                try {
-                    source = Integer.parseInt(parts[0]);
-                } catch (NumberFormatException e) {
-                    Log.w(TAG, "Invalid favorite deleted key (source not int): " + key);
-                    continue;
-                }
-                String cid = parts[1];
-
-                if (uploadedKeys.contains(key)) {
-                    // 该漫画在本地仍有数据（如历史记录），但用户已取消收藏
-                    // 需要标记 clear_favorite，让服务端也清除收藏，避免下次下载时恢复
-                    for (DataSyncModels.ComicSyncItem item : items) {
-                        if (item.source == source && item.cid != null && item.cid.equals(cid)) {
-                            item.clear_favorite = true;
-                            Log.d(TAG, "[Sync]   clear_favorite on existing comic " + key);
-                            break;
-                        }
-                    }
-                } else {
-                    DataSyncModels.ComicSyncItem item = new DataSyncModels.ComicSyncItem();
-                    item.source = source;
-                    item.cid = cid;
-                    item.clear_favorite = true;
-                    items.add(item);
-                    Log.d(TAG, "[Sync]   standalone clear_favorite item for " + key);
-                }
-            }
+        if (sinceID > getLastEventId()) {
+            setLastEventId(sinceID);
         }
 
-        Log.d(TAG, "[Sync] Upload: sending " + items.size() + " items to server");
-        for (DataSyncModels.ComicSyncItem item : items) {
-            Log.d(TAG, "[Sync]   -> src=" + item.source + " cid=" + item.cid
-                    + " fav=" + item.favorite + " hist=" + item.history
-                    + " clrFav=" + item.clear_favorite + " clrHist=" + item.clear_history);
-        }
-        client.syncComics(token, items);
+        Log.d(TAG, "[EventSync] Pulled " + totalReplayed + " events in " + pageCount
+                + " pages, favChanged=" + favoriteChanged.size()
+                + " histChanged=" + historyChanged.size()
+                + ", latest_id=" + sinceID);
 
-        // 上传成功后清除所有删除标记
-        if (!deletedKeys.isEmpty()) {
-            clearHistoryDeletedKeys();
-            Log.d(TAG, "[Sync] Cleared " + deletedKeys.size() + " history-deleted markers");
+        // 通知 UI 刷新
+        if (!favoriteChanged.isEmpty()) {
+            RxBus.getInstance().post(new RxEvent(RxEvent.EVENT_COMIC_FAVORITE_RESTORE, favoriteChanged));
         }
-        if (!favoriteDeletedKeys.isEmpty()) {
-            clearFavoriteDeletedKeys();
-            Log.d(TAG, "[Sync] Cleared " + favoriteDeletedKeys.size() + " favorite-deleted markers");
+        if (!historyChanged.isEmpty()) {
+            RxBus.getInstance().post(new RxEvent(RxEvent.EVENT_COMIC_HISTORY_RESTORE, historyChanged));
         }
     }
 
-    /** 从服务端下载漫画并合并到本地，完成后发送 RxBus 事件通知 UI 刷新 */
-    private void downloadAndMergeComics(DataSyncClient client, String token) throws Exception {
-        List<DataSyncModels.ComicServerItem> serverComics = client.listComics(token);
-        if (serverComics == null) {
-            Log.d(TAG, "[Sync] Download: server returned null");
+    /**
+     * 将本地积累的事件批量推送到服务端。
+     */
+    private void flushPendingEvents(DataSyncClient client, String token) throws Exception {
+        if (mPendingEvents.isEmpty()) {
             return;
         }
-        Log.d(TAG, "[Sync] Download: " + serverComics.size() + " comics from server");
 
-        // 仅追踪本次真正需要通知 UI 的漫画（新增或数据有变更的）
-        final List<MiniComic> favoriteList = new LinkedList<>();
-        final List<MiniComic> historyList = new LinkedList<>();
-        int insertedCount = 0, updatedCount = 0, clearedFavCount = 0, clearedHistCount = 0;
+        // 取出所有待推送事件（原子操作）
+        List<DataSyncModels.SyncEvent> batch = new ArrayList<>(mPendingEvents);
+        mPendingEvents.clear();
 
-        for (DataSyncModels.ComicServerItem s : serverComics) {
-            Comic local = mComicManager.load(s.source, s.cid);
-            if (local == null) {
-                local = createComicFromServer(s);
-                mComicManager.insert(local);
-                insertedCount++;
-                // 新插入的漫画需要通知 UI
-                if (s.favorite != null) {
-                    favoriteList.add(new MiniComic(local));
-                }
-                if (s.history != null) {
-                    historyList.add(new MiniComic(local));
-                }
-            } else {
-                boolean changed = mergeServerComic(local, s);
-                // 仅当合并后数据有实际变更时才通知 UI，避免重复
-                if (changed) {
-                    updatedCount++;
-                    if (s.favorite == null && local.getFavorite() == null) clearedFavCount++;
-                    if (s.history == null && local.getHistory() == null) clearedHistCount++;
-                    // 合并后根据本地实际状态通知 UI（可能被清除了收藏/历史）
-                    if (local.getFavorite() != null) {
-                        favoriteList.add(new MiniComic(local));
-                    }
-                    if (local.getHistory() != null) {
-                        historyList.add(new MiniComic(local));
-                    }
-                }
+        Log.d(TAG, "[EventSync] Pushing " + batch.size() + " pending events");
+        client.pushEvents(token, batch, getClientId());
+        Log.d(TAG, "[EventSync] Pushed " + batch.size() + " events successfully");
+    }
+
+    /**
+     * 在本地重放一个远程事件（将事件应用到本地数据库）。
+     * 所有操作都是幂等的 —— 重复重放同一事件不会产生副作用。
+     *
+     * @return ReplayResult 包含重放状态和受影响的漫画信息
+     */
+    private ReplayResult replayEvent(DataSyncModels.SyncEvent event) {
+        // 跳过自己产生的事件
+        if (getClientId().equals(event.client_id)) {
+            return ReplayResult.SKIPPED;
+        }
+
+        try {
+            switch (event.type) {
+                case DataSyncModels.EVENT_FAVORITE:
+                    return replayFavorite(GSON.fromJson(event.payload, FavoritePayload.class));
+                case DataSyncModels.EVENT_UNFAVORITE:
+                    return replayUnfavorite(GSON.fromJson(event.payload, UnfavoritePayload.class));
+                case DataSyncModels.EVENT_READ:
+                    return replayRead(GSON.fromJson(event.payload, ReadPayload.class));
+                case DataSyncModels.EVENT_CLEAR_HISTORY:
+                    return replayClearHistory(GSON.fromJson(event.payload, ClearHistoryPayload.class));
+                case DataSyncModels.EVENT_UPDATE_INFO:
+                    return replayUpdateInfo(GSON.fromJson(event.payload, UpdateInfoPayload.class));
+                default:
+                    Log.d(TAG, "[EventSync] Unknown event type: " + event.type);
+                    return ReplayResult.SKIPPED;
             }
+        } catch (Exception e) {
+            Log.w(TAG, "[EventSync] Failed to replay event " + event.type, e);
+            return ReplayResult.SKIPPED;
         }
+    }
 
-        Log.d(TAG, "[Sync] Download: inserted=" + insertedCount + " updated=" + updatedCount
-                + " clearedFav=" + clearedFavCount + " clearedHist=" + clearedHistCount);
+    /** 事件重放结果 */
+    private static class ReplayResult {
+        static final ReplayResult SKIPPED = new ReplayResult(false, null, false, false);
 
-        // 发送 RxBus 事件通知 UI 刷新
-        if (!favoriteList.isEmpty()) {
-            RxBus.getInstance().post(new RxEvent(RxEvent.EVENT_COMIC_FAVORITE_RESTORE, favoriteList));
+        final boolean replayed;
+        @Nullable final MiniComic comic;
+        final boolean favChanged;
+        final boolean histChanged;
+
+        ReplayResult(boolean replayed, @Nullable MiniComic comic, boolean favChanged, boolean histChanged) {
+            this.replayed = replayed;
+            this.comic = comic;
+            this.favChanged = favChanged;
+            this.histChanged = histChanged;
         }
-        if (!historyList.isEmpty()) {
-            RxBus.getInstance().post(new RxEvent(RxEvent.EVENT_COMIC_HISTORY_RESTORE, historyList));
+    }
+
+    // ==================== 事件重放实现（幂等） ====================
+
+    private ReplayResult replayFavorite(FavoritePayload p) {
+        if (p == null || p.cid == null) return ReplayResult.SKIPPED;
+        Comic local = mComicManager.load(p.source, p.cid);
+        if (local == null) {
+            local = new Comic();
+            local.setId(0);
+            local.setSource(p.source);
+            local.setCid(p.cid);
         }
+        // 只接受更新的时间戳
+        if (local.getFavorite() != null && local.getFavorite() >= p.timestamp) {
+            return ReplayResult.SKIPPED; // 本地已有更新的数据
+        }
+        local.setFavorite(p.timestamp);
+        if (p.title != null && !p.title.isEmpty()) {
+            local.setTitle(p.title);
+            local.setCover(p.cover);
+            local.setUpdate(p.update);
+            local.setFinish(p.finish);
+            if (p.chapter_count != null) local.setChapterCount(p.chapter_count);
+        }
+        if (local.getId() == 0) {
+            mComicManager.insert(local);
+        } else {
+            mComicManager.update(local);
+        }
+        Log.d(TAG, "[EventSync] Replay: favorite " + p.source + ":" + p.cid);
+        return new ReplayResult(true, new MiniComic(local), true, false);
+    }
+
+    private ReplayResult replayUnfavorite(UnfavoritePayload p) {
+        if (p == null || p.cid == null) return ReplayResult.SKIPPED;
+        Comic local = mComicManager.load(p.source, p.cid);
+        if (local == null || local.getFavorite() == null) return ReplayResult.SKIPPED;
+        local.setFavorite(null);
+        mComicManager.update(local);
+        Log.d(TAG, "[EventSync] Replay: unfavorite " + p.source + ":" + p.cid);
+        return new ReplayResult(true, new MiniComic(local), true, false);
+    }
+
+    private ReplayResult replayRead(ReadPayload p) {
+        if (p == null || p.cid == null) return ReplayResult.SKIPPED;
+        Comic local = mComicManager.load(p.source, p.cid);
+        if (local == null) {
+            local = new Comic();
+            local.setId(0);
+            local.setSource(p.source);
+            local.setCid(p.cid);
+        }
+        // 只接受更新的阅读时间
+        if (local.getHistory() != null && local.getHistory() >= p.timestamp) {
+            return ReplayResult.SKIPPED;
+        }
+        local.setHistory(p.timestamp);
+        local.setChapter(p.chapter);
+        local.setPage(p.page);
+        local.setLast(p.last);
+        if (local.getId() == 0) {
+            mComicManager.insert(local);
+        } else {
+            mComicManager.update(local);
+        }
+        Log.d(TAG, "[EventSync] Replay: read " + p.source + ":" + p.cid);
+        return new ReplayResult(true, new MiniComic(local), false, true);
+    }
+
+    private ReplayResult replayClearHistory(ClearHistoryPayload p) {
+        if (p == null || p.cid == null) return ReplayResult.SKIPPED;
+        Comic local = mComicManager.load(p.source, p.cid);
+        if (local == null || local.getHistory() == null) return ReplayResult.SKIPPED;
+        local.setHistory(null);
+        local.setLast(null);
+        local.setPage(null);
+        local.setChapter(null);
+        mComicManager.update(local);
+        Log.d(TAG, "[EventSync] Replay: clear_history " + p.source + ":" + p.cid);
+        return new ReplayResult(true, new MiniComic(local), false, true);
+    }
+
+    private ReplayResult replayUpdateInfo(UpdateInfoPayload p) {
+        if (p == null || p.cid == null) return ReplayResult.SKIPPED;
+        Comic local = mComicManager.load(p.source, p.cid);
+        if (local == null) return ReplayResult.SKIPPED;
+        boolean changed = false;
+        if (p.title != null && !p.title.equals(local.getTitle())) {
+            local.setTitle(p.title); changed = true;
+        }
+        if (p.cover != null && !p.cover.equals(local.getCover())) {
+            local.setCover(p.cover); changed = true;
+        }
+        if (p.update != null && !p.update.equals(local.getUpdate())) {
+            local.setUpdate(p.update); changed = true;
+        }
+        if (local.getFinish() == null || local.getFinish() != p.finish) {
+            local.setFinish(p.finish); changed = true;
+        }
+        if (p.chapter_count != null) {
+            local.setChapterCount(p.chapter_count); changed = true;
+        }
+        if (changed) {
+            mComicManager.update(local);
+            Log.d(TAG, "[EventSync] Replay: update_info " + p.source + ":" + p.cid);
+        }
+        return new ReplayResult(changed, new MiniComic(local), false, false);
+    }
+
+    // ==================== 事件 Payload 内部类 ====================
+
+    private static class FavoritePayload {
+        int source;
+        String cid;
+        String title;
+        String cover;
+        String update;
+        boolean finish;
+        Integer chapter_count;
+        long timestamp;
+    }
+
+    private static class UnfavoritePayload {
+        int source;
+        String cid;
+    }
+
+    private static class ReadPayload {
+        int source;
+        String cid;
+        String chapter;
+        int page;
+        String last;
+        long timestamp;
+    }
+
+    private static class ClearHistoryPayload {
+        int source;
+        String cid;
+    }
+
+    private static class UpdateInfoPayload {
+        int source;
+        String cid;
+        String title;
+        String cover;
+        String update;
+        boolean finish;
+        Integer chapter_count;
     }
 
     /** 敏感 key 列表：不上传到服务器，也不从服务器覆盖本地 */
@@ -460,7 +745,9 @@ public class DataSyncManager {
             PreferenceManager.PREFERENCES_USER_ID,
             PreferenceManager.PREF_DATA_SERVER_URL,
             PreferenceManager.PREF_DATA_SERVER_AUTO_SYNC,
-            PreferenceManager.PREF_OTHER_STORAGE
+            PreferenceManager.PREF_OTHER_STORAGE,
+            PREF_LAST_EVENT_ID,   // 事件同步位置由客户端本地维护
+            PREF_CLIENT_ID         // 设备标识不上传
     ));
 
     /** 上传本地设置到服务端（过滤掉敏感 key） */
@@ -485,6 +772,60 @@ public class DataSyncManager {
             if (s.key != null && s.value != null && !SENSITIVE_KEYS.contains(s.key)) {
                 pm.putObject(s.key, s.value);
             }
+        }
+    }
+
+    // ==================== 标签同步 ====================
+
+    /** 上传本地标签到服务端 */
+    private void uploadTags(DataSyncClient client, String token) throws Exception {
+        // TODO: 需要 TagManager 提供 listAllTags 方法获取所有本地标签
+        // 当前先记录日志，后续接入 TagManager
+        Log.d(TAG, "[Sync] Tag upload: TagManager integration pending");
+        // 示例调用:
+        // TagManager tm = TagManager.getInstance(App.getApp());
+        // List<Tag> tags = tm.listAll();
+        // ... 构建 TagSyncItem 列表 ...
+        // client.syncTags(token, items, false);
+    }
+
+    /** 从服务端下载标签并合并到本地 */
+    private void downloadAndMergeTags(DataSyncClient client, String token) throws Exception {
+        List<DataSyncModels.TagServerItem> serverTags = client.listTags(token);
+        if (serverTags == null || serverTags.isEmpty()) {
+            Log.d(TAG, "[Sync] Tag download: server returned empty");
+            return;
+        }
+        Log.d(TAG, "[Sync] Tag download: " + serverTags.size() + " tags from server");
+
+        // TODO: 需要 TagManager 和 TagRefManager 的写入方法
+        // 当前先记录日志
+        Log.d(TAG, "[Sync] Tag merge: TagManager integration pending");
+        // 示例逻辑:
+        // TagManager tm = TagManager.getInstance(App.getApp());
+        // for (TagServerItem s : serverTags) {
+        //     Tag local = tm.findByTitle(s.title);
+        //     if (local == null) { tm.insert(...); }
+        //     // 合并 refs...
+        // }
+    }
+
+    // ==================== 删除标记解析 ====================
+
+    /**
+     * 服务端已记录删除，从本地删除标记集合中移除
+     */
+    private static void markFavoriteDeletedResolved(int source, String cid) {
+        Set<String> keys = getFavoriteDeletedKeys();
+        if (keys.remove(source + ":" + cid)) {
+            saveFavoriteDeletedKeys(keys);
+        }
+    }
+
+    private static void markHistoryDeletedResolved(int source, String cid) {
+        Set<String> keys = getHistoryDeletedKeys();
+        if (keys.remove(source + ":" + cid)) {
+            saveHistoryDeletedKeys(keys);
         }
     }
 

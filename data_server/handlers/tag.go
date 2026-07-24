@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"xcimoc-data-server/database"
@@ -54,8 +55,10 @@ func (h *TagHandler) List(c *gin.Context) {
 }
 
 // Sync uploads/merges tags and their comic references.
-// Strategy: replace all tags for the user — delete existing, then insert new ones.
-// This is simpler than per-item merge for tagging data.
+// 改进：合并策略 (merge) 替代原来的全量替换策略
+// - 客户端上传的标签：如果标题匹配则更新关联，否则新建
+// - 客户端未提及的标签：保留（多端支持，不会丢失其他设备的标签）
+// - 标签关联：通过 added_comics 和 removed_comics 增量更新
 func (h *TagHandler) Sync(c *gin.Context) {
 	userID := c.GetUint("user_id")
 
@@ -65,45 +68,92 @@ func (h *TagHandler) Sync(c *gin.Context) {
 		return
 	}
 
-	// Start a transaction
 	tx := database.DB.Begin()
-	defer tx.Rollback() // 异常时自动回滚，Commit 后调用无副作用
+	defer tx.Rollback()
 
-	// Delete existing tags and tag refs for this user
-	tx.Where("user_id = ?", userID).Delete(&models.TagRef{})
-	tx.Where("user_id = ?", userID).Delete(&models.Tag{})
+	// Step 1: 获取服务端现有标签（按 title 索引，用于合并不是替换）
+	var existingTags []models.Tag
+	tx.Where("user_id = ?", userID).Find(&existingTags)
+	existingByTitle := make(map[string]uint, len(existingTags)) // title -> tag_id
+	for _, t := range existingTags {
+		existingByTitle[t.Title] = t.ID
+	}
 
-	// Insert new tags with batch refs
 	syncedTags := 0
 	syncedRefs := 0
+	clientTagTitles := make(map[string]bool) // 跟踪客户端上传的标签标题
+
 	for _, item := range req.Tags {
 		if item.Title == "" {
 			continue
 		}
+		clientTagTitles[item.Title] = true
 
-		tag := models.Tag{
-			UserID: userID,
-			Title:  item.Title,
+		var tagID uint
+		if existingID, exists := existingByTitle[item.Title]; exists {
+			// 标签已存在 → 复用
+			tagID = existingID
+		} else {
+			// 新标签 → 创建
+			tag := models.Tag{
+				UserID: userID,
+				Title:  item.Title,
+			}
+			if result := tx.Create(&tag); result.Error != nil {
+				tx.Rollback()
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "保存标签失败: " + result.Error.Error()})
+				return
+			}
+			tagID = tag.ID
+			existingByTitle[item.Title] = tagID // 更新本地索引
+			syncedTags++
 		}
-		if result := tx.Create(&tag); result.Error != nil {
-			tx.Rollback()
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "保存标签失败: " + result.Error.Error()})
-			return
-		}
-		syncedTags++
 
-		// 批量插入 TagRef（减少数据库 round-trip）
+		// 查找客户端请求中已有的 cid 集合（用于增量更新）
+		clientRefKeys := make(map[string]bool, len(item.Comics))
+		for _, comic := range item.Comics {
+			if comic.Cid == "" {
+				continue
+			}
+			key := comicKey(comic.Source, comic.Cid)
+			clientRefKeys[key] = true
+		}
+
+		// 获取该标签现有的 TagRef
+		var existingRefs []models.TagRef
+		tx.Where("user_id = ? AND tag_id = ?", userID, tagID).Find(&existingRefs)
+		existingRefKeys := make(map[string]uint, len(existingRefs)) // key -> TagRef.ID
+		for _, ref := range existingRefs {
+			existingRefKeys[comicKey(ref.Source, ref.Cid)] = ref.ID
+		}
+
+		// 删除客户端不再包含的关联（客户端没传 = 用户在客户端删除了）
+		// 但如果客户端使用的是增量模式（partial_update），则保留未提及的关联
+		if !req.PartialUpdate {
+			for key, refID := range existingRefKeys {
+				if !clientRefKeys[key] {
+					tx.Delete(&models.TagRef{}, refID)
+				}
+			}
+		}
+
+		// 插入或保留客户端指定的关联
 		refs := make([]models.TagRef, 0, len(item.Comics))
 		for _, comic := range item.Comics {
 			if comic.Cid == "" {
 				continue
 			}
-			refs = append(refs, models.TagRef{
-				UserID: userID,
-				TagID:  tag.ID,
-				Source: comic.Source,
-				Cid:    comic.Cid,
-			})
+			key := comicKey(comic.Source, comic.Cid)
+			if _, exists := existingRefKeys[key]; !exists {
+				// 新关联
+				refs = append(refs, models.TagRef{
+					UserID: userID,
+					TagID:  tagID,
+					Source: comic.Source,
+					Cid:    comic.Cid,
+				})
+			}
+			// 如果已存在，保持不动
 		}
 		if len(refs) > 0 {
 			if result := tx.Create(&refs); result.Error != nil {
@@ -115,6 +165,19 @@ func (h *TagHandler) Sync(c *gin.Context) {
 		}
 	}
 
+	// 如果客户端使用全量同步模式，删除服务端有但客户端没有的标签
+	// 以此支持跨端标签删除
+	if !req.PartialUpdate {
+		// 收集客户端没有提及的标签，并删除它们
+		for _, t := range existingTags {
+			if !clientTagTitles[t.Title] {
+				// 先删除关联
+				tx.Where("tag_id = ?", t.ID).Delete(&models.TagRef{})
+				tx.Delete(&t)
+			}
+		}
+	}
+
 	tx.Commit()
 
 	c.JSON(http.StatusOK, gin.H{
@@ -122,4 +185,8 @@ func (h *TagHandler) Sync(c *gin.Context) {
 		"synced_refs": syncedRefs,
 		"message":     "标签同步完成",
 	})
+}
+
+func comicKey(source int, cid string) string {
+	return fmt.Sprintf("%d:%s", source, cid)
 }

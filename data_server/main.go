@@ -78,6 +78,7 @@ func main() {
 	comicHandler := handlers.NewComicHandler()
 	settingHandler := handlers.NewSettingHandler()
 	tagHandler := handlers.NewTagHandler()
+	eventHandler := handlers.NewEventHandler()
 
 	// Gin 设为 release 模式（也可通过环境变量 GIN_MODE=release）
 	gin.SetMode(gin.ReleaseMode)
@@ -125,6 +126,14 @@ func main() {
 		api.GET("/comics", comicHandler.List)
 		api.POST("/comics/sync", comicHandler.Sync)
 		api.DELETE("/comics/:id", comicHandler.Delete)
+
+		// Sync status (lightweight endpoint for checking sync state)
+		api.GET("/sync/status", comicHandler.SyncStatus)
+
+		// Event-based sync (核心同步机制)
+		api.GET("/events/pull", eventHandler.PullEvents)
+		api.POST("/events/push", eventHandler.PushEvents)
+		api.GET("/events/status", eventHandler.EventStatus)
 
 		// Settings
 		api.GET("/settings", settingHandler.List)

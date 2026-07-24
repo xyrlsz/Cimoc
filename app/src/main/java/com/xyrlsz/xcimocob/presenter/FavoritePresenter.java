@@ -146,8 +146,8 @@ public class FavoritePresenter extends BasePresenter<FavoriteView> {
     public void unfavoriteComic(long id) {
         if (mBaseView == null) return;
         Comic comic = mComicManager.load(id);
-        // 标记收藏已取消，防止同步时被服务端恢复
-        DataSyncManager.markFavoriteDeleted(comic.getSource(), comic.getCid());
+        // 通过事件同步通知其他设备取消收藏
+        DataSyncManager.getInstance().enqueueClearFavoriteEvent(comic.getSource(), comic.getCid());
         comic.setFavorite(null);
         mTagRefManager.deleteByComic(id);
         mComicManager.updateOrDelete(comic);

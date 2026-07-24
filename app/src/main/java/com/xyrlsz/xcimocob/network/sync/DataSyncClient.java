@@ -224,24 +224,60 @@ public class DataSyncClient {
     // ==================== Comics ====================
 
     /**
-     * 获取服务端该用户的所有漫画
+     * 获取服务端该用户的所有漫画（支持增量拉取）
+     * @param since 增量拉取起点(毫秒)，null 则全量拉取
      */
-    public List<DataSyncModels.ComicServerItem> listComics(String token)
+    public List<DataSyncModels.ComicServerItem> listComics(String token, Long since)
             throws IOException, DataSyncException {
-        String body = get("/api/comics", token);
+        String path = "/api/comics";
+        if (since != null && since > 0) {
+            path += "?since=" + since;
+        }
+        String body = get(path, token);
         DataSyncModels.ComicListResponse resp = GSON.fromJson(body, DataSyncModels.ComicListResponse.class);
         return resp != null ? resp.comics : null;
     }
 
     /**
-     * 同步漫画到服务端
+     * 获取服务端漫画列表 + 删除记录（增量同步用）
      */
-    public DataSyncModels.ComicSyncResponse syncComics(String token, List<DataSyncModels.ComicSyncItem> comics)
+    public DataSyncModels.ComicListResponse listComicsFull(String token, Long since)
             throws IOException, DataSyncException {
-        DataSyncModels.ComicSyncRequest req = new DataSyncModels.ComicSyncRequest(comics);
+        String path = "/api/comics";
+        if (since != null && since > 0) {
+            path += "?since=" + since;
+        }
+        String body = get(path, token);
+        return GSON.fromJson(body, DataSyncModels.ComicListResponse.class);
+    }
+
+    /**
+     * 获取服务端该用户的所有漫画（全量，兼容旧调用）
+     */
+    public List<DataSyncModels.ComicServerItem> listComics(String token)
+            throws IOException, DataSyncException {
+        return listComics(token, null);
+    }
+
+    /**
+     * 同步漫画到服务端（增量模式：仅推送变更）
+     * @param since 上次同步时间(毫秒)，用于服务端过滤
+     */
+    public DataSyncModels.ComicSyncResponse syncComics(String token,
+            List<DataSyncModels.ComicSyncItem> comics, Long since, boolean pushOnly)
+            throws IOException, DataSyncException {
+        DataSyncModels.ComicSyncRequest req = new DataSyncModels.ComicSyncRequest(comics, since, pushOnly);
         String json = GSON.toJson(req);
         String body = post("/api/comics/sync", json, token);
         return GSON.fromJson(body, DataSyncModels.ComicSyncResponse.class);
+    }
+
+    /**
+     * 同步漫画到服务端（全量模式，兼容旧调用）
+     */
+    public DataSyncModels.ComicSyncResponse syncComics(String token, List<DataSyncModels.ComicSyncItem> comics)
+            throws IOException, DataSyncException {
+        return syncComics(token, comics, null, false);
     }
 
     /**
@@ -250,6 +286,74 @@ public class DataSyncClient {
     public void deleteComic(String token, long comicId)
             throws IOException, DataSyncException {
         delete("/api/comics/" + comicId, token);
+    }
+
+    // ==================== Event-based Sync ====================
+
+    /**
+     * 拉取事件：获取 since_id 之后的所有事件
+     * @param sinceID 上次拉取到的事件ID，0 表示从头开始
+     */
+    public DataSyncModels.PullEventsResponse pullEvents(String token, long sinceID)
+            throws IOException, DataSyncException {
+        String path = "/api/events/pull?since=" + sinceID;
+        String body = get(path, token);
+        return GSON.fromJson(body, DataSyncModels.PullEventsResponse.class);
+    }
+
+    /**
+     * 推送事件：将本地产生的事件发送到服务端
+     */
+    public void pushEvents(String token, List<DataSyncModels.SyncEvent> events, String clientId)
+            throws IOException, DataSyncException {
+        DataSyncModels.PushEventsRequest req = new DataSyncModels.PushEventsRequest(events, clientId);
+        String json = GSON.toJson(req);
+        post("/api/events/push", json, token);
+    }
+
+    /**
+     * 获取事件流状态（最新事件ID等）
+     */
+    public DataSyncModels.EventStatusResponse getEventStatus(String token)
+            throws IOException, DataSyncException {
+        String body = get("/api/events/status", token);
+        return GSON.fromJson(body, DataSyncModels.EventStatusResponse.class);
+    }
+
+    // ==================== Sync Status ====================
+
+    /**
+     * 获取同步状态（服务端时间、漫画数量等）
+     */
+    public DataSyncModels.SyncStatusResponse getSyncStatus(String token)
+            throws IOException, DataSyncException {
+        String body = get("/api/sync/status", token);
+        return GSON.fromJson(body, DataSyncModels.SyncStatusResponse.class);
+    }
+
+    // ==================== Tags ====================
+
+    /**
+     * 获取服务端所有标签及关联
+     */
+    public List<DataSyncModels.TagServerItem> listTags(String token)
+            throws IOException, DataSyncException {
+        String body = get("/api/tags", token);
+        DataSyncModels.TagListResponse resp = GSON.fromJson(body, DataSyncModels.TagListResponse.class);
+        return resp != null ? resp.tags : null;
+    }
+
+    /**
+     * 同步标签到服务端
+     * @param partialUpdate true: 仅更新传了的标签，不删除未提及的；false: 全量替换
+     */
+    public DataSyncModels.TagSyncResponse syncTags(String token,
+            List<DataSyncModels.TagSyncItem> tags, boolean partialUpdate)
+            throws IOException, DataSyncException {
+        DataSyncModels.TagSyncRequest req = new DataSyncModels.TagSyncRequest(tags, partialUpdate);
+        String json = GSON.toJson(req);
+        String body = post("/api/tags/sync", json, token);
+        return GSON.fromJson(body, DataSyncModels.TagSyncResponse.class);
     }
 
     // ==================== Settings ====================

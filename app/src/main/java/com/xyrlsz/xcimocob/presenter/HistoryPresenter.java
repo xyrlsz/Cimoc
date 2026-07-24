@@ -94,9 +94,9 @@ public class HistoryPresenter extends BasePresenter<HistoryView> {
                 .subscribe(new Consumer<Long>() {
                     @Override
                     public void accept(Long id2) {
-                        // 标记此漫画历史已删除，防止下载同步时被恢复
+                        // 通过事件同步通知其他设备清除历史
                         if (cid != null) {
-                            DataSyncManager.markHistoryDeleted(source, cid);
+                            DataSyncManager.getInstance().enqueueClearHistoryEvent(source, cid);
                         }
                         mBaseView.onHistoryDelete(id2);
                     }
@@ -128,8 +128,11 @@ public class HistoryPresenter extends BasePresenter<HistoryView> {
                 .subscribe(new Consumer<List<Comic>>() {
                     @Override
                     public void accept(List<Comic> list) {
-                        // 标记所有被清除历史的漫画，防止下载同步时被恢复
-                        DataSyncManager.markHistoryDeleted(list);
+                        // 通过事件同步通知其他设备清除全部历史
+                        for (Comic comic : list) {
+                            DataSyncManager.getInstance().enqueueClearHistoryEvent(
+                                    comic.getSource(), comic.getCid());
+                        }
                         mBaseView.onHistoryClearSuccess();
                     }
                 }, new Consumer<Throwable>() {

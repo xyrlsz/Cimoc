@@ -356,8 +356,8 @@ public class DetailPresenter extends BasePresenter<DetailView> {
 
     public void unfavoriteComic() {
         long id = mComic.getId();
-        // 标记收藏已取消，防止同步时被服务端恢复
-        DataSyncManager.markFavoriteDeleted(mComic.getSource(), mComic.getCid());
+        // 通过事件同步通知其他设备取消收藏
+        DataSyncManager.getInstance().enqueueClearFavoriteEvent(mComic.getSource(), mComic.getCid());
         mComic.setFavorite(null);
         mTagRefManager.deleteByComic(id);
         mComicManager.updateOrDelete(mComic);
