@@ -43,7 +43,6 @@ forked from https://github.com/Haleydu/Cimoc
 - [OkHttp](https://github.com/square/okhttp)
 - [Fresco](https://github.com/facebook/fresco)
 - [Jsoup](https://github.com/jhy/jsoup)
-- [DiscreteSeekBar](https://github.com/AnderWeb/discreteSeekBar)
 - [RxJava](https://github.com/ReactiveX/RxJava)
 - [RxAndroid](https://github.com/ReactiveX/RxAndroid)
 - [Rhino](https://github.com/mozilla/rhino)

@@ -133,6 +133,13 @@ android {
         main {
         }
     }
+
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+
     lint {
         abortOnError true
         fatal "NewApi"
