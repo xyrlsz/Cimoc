@@ -32,6 +32,7 @@
     <string name="search_source_none">未選擇圖源</string>
     <string name="search_source_load_fail">讀取圖源失敗</string>
 
+    <string name="search_history_empty">暫無搜尋歷史</string>
     <string name="result">搜尋結果</string>
     <string name="result_empty">搜尋結果為空</string>
 
@@ -443,4 +444,6 @@
     <string name="copy_region_summary">拷貝漫畫的CDN線路源</string>
     <string name="settings_other_permission">許可權管理</string>
     <string name="settings_other_permission_summary">重新申請儲存、通知等必要許可權</string>
+    <string name="search_history_title">搜尋歷史</string>
+    <string name="search_history_clear">清空</string>
 </resources>
