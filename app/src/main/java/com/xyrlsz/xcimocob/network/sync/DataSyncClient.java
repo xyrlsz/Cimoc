@@ -20,7 +20,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
- * 与 Cimoc Data Sync Server (Go) 通信的 API 客户端
+ * 与 XCimoc Data Sync Server (Go) 通信的 API 客户端
  * <p>
  * 使用 OkHttp + Gson，无需 Retrofit 依赖。
  * 所有方法均同步执行，调用方应在后台线程执行。
