@@ -105,17 +105,18 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled true
-            shrinkResources true
+            optimization {
+                enable = true
+            }
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
+            signingConfig = signingConfigs.release
             buildConfigField "boolean", "USE_FINAL_RESOURCE_IDS", "true"
 
         }
         debug {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.debug
+            signingConfig = signingConfigs.debug
             buildConfigField "boolean", "USE_FINAL_RESOURCE_IDS", "true"
 
         }

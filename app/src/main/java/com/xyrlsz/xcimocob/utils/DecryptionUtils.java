@@ -8,6 +8,7 @@ import org.mozilla.javascript.Scriptable;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.ArrayList;
 
@@ -37,13 +38,13 @@ public class DecryptionUtils {
         Cipher cipher = Cipher.getInstance("DES");
         cipher.init(Cipher.DECRYPT_MODE, key);
         byte[] result = cipher.doFinal(cipherBytes);
-        return new String(result, "UTF-8");
+        return new String(result, StandardCharsets.UTF_8);
     }
 
     // ref: https://jueyue.iteye.com/blog/1830792
     public static String aesDecrypt(String value, String key, String ivs) throws Exception {
-        SecretKeySpec secretKey = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
-        IvParameterSpec iv = new IvParameterSpec(ivs.getBytes("UTF-8"));
+        SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "AES");
+        IvParameterSpec iv = new IvParameterSpec(ivs.getBytes(StandardCharsets.UTF_8));
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding");
         cipher.init(Cipher.DECRYPT_MODE, secretKey, iv);
         byte[] code = Base64.decode(value, Base64.DEFAULT);
@@ -52,7 +53,7 @@ public class DecryptionUtils {
 
     public static String base64Decrypt(String cipherString) throws UnsupportedEncodingException {
         byte[] cipherBytes = Base64.decode(cipherString, Base64.DEFAULT);
-        return new String(cipherBytes, "UTF-8");
+        return new String(cipherBytes, StandardCharsets.UTF_8);
     }
 
     /**
@@ -161,7 +162,7 @@ public class DecryptionUtils {
                 position = resetValue;
                 val = (modify == null) ? (char) (getNextValue[index++] + offset) : modify[getNextValue[index++]];
             }
-            bits |= (resb > 0 ? 1 : 0) << power++;
+            bits |= (char) ((resb > 0 ? 1 : 0) << power++);
         }
 
         switch (bits) {
@@ -175,7 +176,7 @@ public class DecryptionUtils {
                         position = resetValue;
                         val = (modify == null) ? (char) (getNextValue[index++] + offset) : modify[getNextValue[index++]];
                     }
-                    bits |= (resb > 0 ? 1 : 0) << power++;
+                    bits |= (char) ((resb > 0 ? 1 : 0) << power++);
                 }
                 c = String.valueOf(bits);
                 break;
@@ -190,7 +191,7 @@ public class DecryptionUtils {
                         position = resetValue;
                         val = (modify == null) ? (char) (getNextValue[index++] + offset) : modify[getNextValue[index++]];
                     }
-                    bits |= (resb > 0 ? 1 : 0) << power++;
+                    bits |= (char) ((resb > 0 ? 1 : 0) << power++);
                 }
                 c = String.valueOf(bits);
                 break;
@@ -215,7 +216,7 @@ public class DecryptionUtils {
                     position = resetValue;
                     val = (modify == null) ? (char) (getNextValue[index++] + offset) : modify[getNextValue[index++]];
                 }
-                bits |= (resb > 0 ? 1 : 0) << power++;
+                bits |= (char) ((resb > 0 ? 1 : 0) << power++);
             }
             int cc;
             switch (cc = bits) {
@@ -229,7 +230,7 @@ public class DecryptionUtils {
                             position = resetValue;
                             val = (modify == null) ? (char) (getNextValue[index++] + offset) : modify[getNextValue[index++]];
                         }
-                        bits |= (resb > 0 ? 1 : 0) << power++;
+                        bits |= (char) ((resb > 0 ? 1 : 0) << power++);
                     }
 
                     dictionary.add(String.valueOf(bits));
@@ -247,7 +248,7 @@ public class DecryptionUtils {
                             position = resetValue;
                             val = (modify == null) ? (char) (getNextValue[index++] + offset) : modify[getNextValue[index++]];
                         }
-                        bits |= (resb > 0 ? 1 : 0) << power++;
+                        bits |= (char) ((resb > 0 ? 1 : 0) << power++);
                     }
                     dictionary.add(String.valueOf(bits));
                     cc = dictSize++;
