@@ -191,7 +191,7 @@ public class DownloadFragment extends GridFragment implements DownloadView {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setMessage(getString(R.string.common_execute_success) + ": " + message)
                     .setTitle(R.string.common_execute_success)
-                    .setPositiveButton(R.string.app_dialog_ok, null)
+                    .setPositiveButton(R.string.dialog_positive, null)
                     .show();
         } else {
             HintUtils.showToast(getActivity(), message);

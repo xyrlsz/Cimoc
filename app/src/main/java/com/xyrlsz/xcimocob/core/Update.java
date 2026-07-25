@@ -6,17 +6,8 @@ import static com.xyrlsz.xcimocob.Constants.UPDATE_GITEE_URL;
 import static com.xyrlsz.xcimocob.Constants.UPDATE_GITHUB_URL;
 
 import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
 
 import com.xyrlsz.xcimocob.App;
-import com.xyrlsz.xcimocob.BuildConfig;
-import com.xyrlsz.xcimocob.R;
-import com.king.app.dialog.AppDialog;
-import com.king.app.updater.AppUpdater;
-import com.king.app.updater.http.OkHttpManager;
 
 import org.json.JSONObject;
 
@@ -25,9 +16,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-
-//import com.azhon.appupdate.config.UpdateConfiguration;
-//import com.azhon.appupdate.manager.DownloadManager;
 
 /**
  * Created by Hiroshi on 2016/8/24.
@@ -38,7 +26,6 @@ public class Update {
 //    private static final String UPDATE_URL_GITHUB = "https://raw.githubusercontent.com/xyrlsz/update/master/Update.json";
 //    private static final String UPDATE_URL_GITEE = "https://gitee.com/Haleydu/update/raw/master/Update.json";
     private static final String SERVER_FILENAME = "tag_name";
-    private AppUpdater mAppUpdater;
 //    private static final String LIST = "list";
 
     public static Observable<String> check() {
@@ -173,49 +160,7 @@ public class Update {
 //        }).subscribeOn(Schedulers.io());
 //    }
 
-    public void startUpdate(String versionName, String content, String mUrl, int versionCode, String md5) {
-        View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_update, null);
 
-        TextView tvTitle = view.findViewById(R.id.tvTitle);
-        tvTitle.setText(R.string.main_start_update);
-        tvTitle.append(versionName);
-        TextView tvContent = view.findViewById(R.id.tvContent);
-        tvContent.setText(content);
-
-        Button btnCancel = view.findViewById(R.id.btnCancel);
-        btnCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AppDialog.INSTANCE.dismissDialog();
-            }
-        });
-        Button btnOK = view.findViewById(R.id.btnOK);
-        btnOK.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mAppUpdater = new AppUpdater.Builder()
-//                        .setPath(Environment.getExternalStorageDirectory() + "/.AppUpdater")//如果适配Android Q，则Environment.getExternalStorageDirectory()将废弃
-//                        .setPath(getExternalFilesDir(Constants.DEFAULT_DIR).getAbsolutePath())//自定义路径，推荐使用默认
-                        .setApkMD5(md5)//支持MD5校验，如果缓存APK的MD5与此MD5相同，则直接取本地缓存安装，推荐使用MD5校验的方式
-                        .serUrl(mUrl)
-                        .setVersionCode(versionCode)//支持versionCode校验，设置versionCode之后，新版本versionCode相同的apk只下载一次,优先取本地缓存,推荐使用MD5校验的方式
-                        .setVibrate(true)  //振动
-                        .setFilename("Cimoc_" + versionName + ".apk")
-                        .setAuthority(BuildConfig.APPLICATION_ID)
-//                        .setSmallIcon(R.drawable.ic_file_download_white_24dp)
-                        .build(getContext());
-
-                try {
-                    mAppUpdater.setHttpManager(OkHttpManager.getInstance()).start();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                AppDialog.INSTANCE.dismissDialog();
-            }
-        });
-
-        AppDialog.INSTANCE.showDialog(getContext(), view);
-    }
 
     public Context getContext() {
         return App.getAppContext();

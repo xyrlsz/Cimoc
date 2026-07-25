@@ -401,22 +401,23 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
             } else if (__id == R.id.drawer_comicUpdate) {
 //                    update.startUpdate(versionName, content, mUrl, versionCode, md5);
                     new Thread(() -> {
-                        boolean checkGithubOk = false;
-                        try {
-                            Request request = new Request.Builder().url(GITHUB_RELEASE_URL).build();
-                            Response response = App.getHttpClient().newCall(request).execute();
-                            if (response.isSuccessful()) {
-                                checkGithubOk = true;
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+//                        boolean checkGithubOk = false;
+//                        try {
+//                            Request request = new Request.Builder().url(GITHUB_RELEASE_URL).build();
+//                            Response response = App.getHttpClient().newCall(request).execute();
+//                            if (response.isSuccessful()) {
+//                                checkGithubOk = true;
+//                            }
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
+//                        }
                         String releaseUrl;
-                        if (checkGithubOk) {
-                            releaseUrl = GITHUB_RELEASE_URL;
-                        } else {
-                            releaseUrl = GITEE_RELEASE_URL;
-                        }
+//                        if (checkGithubOk) {
+//                            releaseUrl = GITHUB_RELEASE_URL;
+//                        } else {
+//                            releaseUrl = GITEE_RELEASE_URL;
+//                        }
+                        releaseUrl = GITHUB_RELEASE_URL;
                         Intent intent = new Intent(Intent.ACTION_VIEW);
                         intent.setData(Uri.parse(releaseUrl));
                         startActivity(intent);
@@ -443,20 +444,18 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
         super.onActivityResult(requestCode, resultCode, data);
         mCurrentFragment.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
-            switch (requestCode) {
-                case REQUEST_ACTIVITY_SETTINGS:
-                    int[] result = data.getIntArrayExtra(Extra.EXTRA_RESULT);
-                    if (Objects.requireNonNull(result)[0] == 1) {
-                        changeTheme(result[1], result[2], result[3]);
-                    }
-                    if (result[4] == 1 && mNightMask != null) {
-                        mNightMask.setBackgroundColor(result[5] << 24);
-                    }
-                    // 深色模式变更 → 重建 Activity 使新主题生效
-                    if (result.length > 6 && result[6] == 1) {
-                        recreate();
-                    }
-                    break;
+            if (requestCode == REQUEST_ACTIVITY_SETTINGS) {
+                int[] result = data.getIntArrayExtra(Extra.EXTRA_RESULT);
+                if (Objects.requireNonNull(result)[0] == 1) {
+                    changeTheme(result[1], result[2], result[3]);
+                }
+                if (result[4] == 1 && mNightMask != null) {
+                    mNightMask.setBackgroundColor(result[5] << 24);
+                }
+                // 深色模式变更 → 重建 Activity 使新主题生效
+                if (result.length > 6 && result[6] == 1) {
+                    recreate();
+                }
             }
         }
         // 处理 API 30+ MANAGE_EXTERNAL_STORAGE 设置返回
@@ -566,7 +565,7 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
         this.versionCode = versionCode;
         if (mPreference.getBoolean(PreferenceManager.PREF_OTHER_CHECK_SOFTWARE_UPDATE, true)) {
             mNavigationView.getMenu().findItem(R.id.drawer_comicUpdate).setVisible(true);
-            update.startUpdate(versionName, content, mUrl, versionCode, md5);
+//            update.startUpdate(versionName, content, mUrl, versionCode, md5);
         } else {
             HintUtils.showToast(this, R.string.main_ready_update);
         }
