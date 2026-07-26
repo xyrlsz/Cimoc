@@ -1,0 +1,17 @@
+apply plugin: 'java-library'
+
+dependencies {
+    compileOnly 'com.android.tools.lint:lint-api:31.3.1'
+    compileOnly 'com.android.tools.lint:lint-checks:31.3.1'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+jar {
+    manifest {
+        attributes('Lint-Registry-v2': 'com.xyrlsz.xcimocob.lint.XCimocIssueRegistry')
+    }
+}

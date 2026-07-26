@@ -1,0 +1,255 @@
+import java.util.regex.Pattern
+
+/**
+ * R8 Keep 规则完整性校验脚本
+ * ==============================
+ *
+ * 在 Android Release 构建中自动检查 R8 是否保留了关键类。
+ * 如果遗漏，构建立即失败并提示缺失的 Keep 规则。
+ *
+ * 工作原理：
+ * 1. R8 完成后会生成 seeds.txt（保留项清单）
+ * 2. 本脚本读取 seeds.txt，检查 mustKeepClasses 中的类是否都在里面
+ * 3. 同时检查 usage.txt，确保关键类没有被完全移除
+ * 4. 如果发现遗漏，抛出 GradleException 中断构建
+ *
+ * 适用场景：
+ * - ObjectBox @Entity 实体类
+ * - Gson 序列化模型类
+ * - JNI native 方法所在类
+ * - Parcelable 实现类
+ * - 通过反射访问的类
+ * - 第三方库要求的 keep 类
+ *
+ * 使用方法：在 app/build.gradle 中添加：
+ *   apply from: rootProject.file('check_r8_keep.gradle')
+ */
+
+// ============================================================
+// 自动检测 —— 从源码扫描需要保留的类
+// ============================================================
+def autoDetectKeepClasses() {
+    def result = [] as LinkedHashSet<String>
+    def srcDir = project.file("src/main/java")
+
+    if (!srcDir.exists()) {
+        println "⚠ 源码目录不存在: $srcDir"
+        return result
+    }
+
+    fileTree(srcDir).include("**/*.java").each { file ->
+        def text = file.text
+        def pkg = (text =~ /package\s+([\w.]+)\s*;/)
+        def cls = (text =~ /(?:public\s+)?(?:abstract\s+)?(?:final\s+)?(?:class|interface|enum)\s+(\w+)/)
+        if (!pkg || !cls) return
+
+        def fullName = "${pkg[0][1]}.${cls[0][1]}"
+        def body = text.replaceFirst(/package\s+[\w.]+\s*;/, "")
+
+        // 1. ObjectBox @Entity
+        if (text.contains("@Entity") && text.contains("import io.objectbox.annotation.Entity")) {
+            result.add(fullName)
+            return
+        }
+
+        // 2. Parcelable
+        if (text.contains("implements Parcelable") && text.contains("import android.os.Parcelable")) {
+            result.add(fullName)
+            return
+        }
+
+        // 3. Serializable
+        if (text.contains("implements Serializable") && text.contains("import java.io.Serializable")) {
+            result.add(fullName)
+            return
+        }
+
+        // 4. native 方法
+        if (body =~ /\bnative\s+\w+\s+\w+\s*\(/) {
+            result.add(fullName)
+            return
+        }
+
+        // 5. Gson @SerializedName
+        if (text.contains("@SerializedName") && text.contains("import com.google.gson.annotations.SerializedName")) {
+            result.add(fullName)
+            return
+        }
+
+        // 6. Gson TypeToken 匿名子类
+        if (text.contains("new TypeToken<") && text.contains("import com.google.gson.reflect.TypeToken")) {
+            result.add(fullName)
+            return
+        }
+
+        // 7. WebView @JavascriptInterface
+        if (text.contains("@JavascriptInterface")) {
+            result.add(fullName)
+            return
+        }
+    }
+
+    return result as List<String>
+}
+
+// 构建期自动扫描
+def mustKeepClasses = autoDetectKeepClasses()
+
+// 额外补充 —— 第三方库中无法通过源码扫描的类
+// 按需添加，不再需要手动维护源码中的类
+def extraKeepClasses = [
+    // JNI 库（android-opencc）
+    "com.xyrlsz.opencc.android.lib.ChineseConverter",
+    // JCC 简繁转换
+    "taobe.tec.jcc.JChineseConvertor",
+    // Rhino JavaScript 引擎
+    "org.mozilla.javascript.Scriptable",
+    "org.mozilla.javascript.Context",
+]
+mustKeepClasses.addAll(extraKeepClasses)
+
+def forbiddenFullRemovals = mustKeepClasses.findAll { className ->
+    // 只对源码中的实体类/核心模型做"完全移除"检查，
+    // 第三方补充类（不在项目包名下）不做此检查
+    className.startsWith("com.xyrlsz.xcimocob.model")
+}
+
+// ============================================================
+// 工具函数：在 seeds.txt 内容中查找类名
+// ============================================================
+def classExistsInSeeds(String seedsContent, String className) {
+    def escaped = Pattern.quote(className)
+    def regex = "^" + escaped + "(?:\\s|:|\\{|\\\$)"
+    def pattern = Pattern.compile(regex, Pattern.MULTILINE)
+    return pattern.matcher(seedsContent).find()
+}
+
+// ============================================================
+// 任务：检查 seeds.txt —— 验证关键类被保留
+// ============================================================
+tasks.register("checkR8Seeds") {
+    group = "R8 Verification"
+    description = "检查 R8 的 seeds.txt，确保所有关键类已被保留"
+
+    doLast {
+        def mappingDir = layout.buildDirectory.dir("outputs/mapping/release").get().asFile
+        def seedsFile = new File(mappingDir, "seeds.txt")
+
+        if (!seedsFile.exists()) {
+            throw new GradleException(
+                "未找到 R8 seeds 文件: ${seedsFile.absolutePath}\n" +
+                "请先执行 release 构建（如 ./gradlew assembleRelease）"
+            )
+        }
+
+        def seedsContent = seedsFile.getText("UTF-8")
+        def missingClasses = [] as List<String>
+
+        mustKeepClasses.each { className ->
+            if (!classExistsInSeeds(seedsContent, className)) {
+                missingClasses.add(className)
+            }
+        }
+
+        if (!missingClasses.isEmpty()) {
+            def sb = new StringBuilder()
+            sb.append("══════════════════════════════════════════════════\n")
+            sb.append("  R8 Keep 规则遗漏！以下类未被保留：\n")
+            sb.append("══════════════════════════════════════════════════\n")
+            missingClasses.each { cls ->
+                sb.append("  ❌ $cls\n")
+            }
+            sb.append("──────────────────────────────────────────────────\n")
+            sb.append("请为以上类在 proguard-rules.pro 中添加 Keep 规则。\n")
+            sb.append("例如：\n")
+            sb.append("  -keep class ${missingClasses[0]} { *; }\n")
+            sb.append("══════════════════════════════════════════════════\n")
+            throw new GradleException(sb.toString())
+        }
+
+        def total = mustKeepClasses.size()
+        def autoCount = autoDetectKeepClasses().size()
+        println "✓ R8 Keep 规则验证通过！${total} 个类全部被保留（自动扫描 ${autoCount} + 补充 ${total - autoCount}）。"
+    }
+}
+
+// ============================================================
+// 任务：检查 usage.txt —— 验证关键类未被完全移除
+// ============================================================
+tasks.register("checkR8Usage") {
+    group = "R8 Verification"
+    description = "检查 R8 的 usage.txt，确保关键类没有被错误完全移除"
+
+    doLast {
+        def mappingDir = layout.buildDirectory.dir("outputs/mapping/release").get().asFile
+        def usageFile = new File(mappingDir, "usage.txt")
+
+        if (!usageFile.exists()) {
+            println "⚠ usage.txt 不存在，跳过移除检查。"
+            return
+        }
+
+        def usageLines = usageFile.readLines()
+        def removedClasses = [] as List<String>
+        def seedsFile = new File(mappingDir, "seeds.txt")
+        def seedsContent = seedsFile.exists() ? seedsFile.getText("UTF-8") : ""
+
+        forbiddenFullRemovals.each { className ->
+            def inUsage = usageLines.any { line ->
+                line.trim() == "${className}:" || line.trim() == className
+            }
+            if (inUsage && seedsContent && !classExistsInSeeds(seedsContent, className)) {
+                removedClasses.add(className)
+            }
+        }
+
+        if (!removedClasses.isEmpty()) {
+            def sb = new StringBuilder()
+            sb.append("══════════════════════════════════════════════════\n")
+            sb.append("  R8 完全移除了以下不应移除的类：\n")
+            sb.append("══════════════════════════════════════════════════\n")
+            removedClasses.each { cls ->
+                sb.append("  ❌ $cls\n")
+            }
+            sb.append("──────────────────────────────────────────────────\n")
+            sb.append("请检查 proguard-rules.pro 中相关 Keep 规则。\n")
+            sb.append("══════════════════════════════════════════════════\n")
+            throw new GradleException(sb.toString())
+        }
+
+        println "✓ usage.txt 检查通过，无关键类被错误完全移除。"
+    }
+}
+
+// ============================================================
+// 依赖配置：挂接到 Release 构建流程
+// ============================================================
+def r8TaskNames = [
+    "minifyReleaseWithR8",
+    "minifyRelease",
+    "transformClassesAndResourcesWithProguardTransformForRelease"
+]
+
+def r8Task = tasks.matching { task ->
+    r8TaskNames.contains(task.name)
+}
+
+tasks.named("checkR8Seeds").configure {
+    dependsOn r8Task
+}
+
+tasks.named("checkR8Usage").configure {
+    dependsOn r8Task
+}
+
+// 注册一个组合任务
+tasks.register("checkR8KeepRules") {
+    group = "R8 Verification"
+    description = "运行所有 R8 Keep 规则验证"
+    dependsOn "checkR8Seeds", "checkR8Usage"
+}
+
+// 挂接到 assembleRelease
+tasks.matching { it.name == "assembleRelease" }.configureEach {
+    dependsOn "checkR8KeepRules"
+}
