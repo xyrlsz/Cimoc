@@ -66,6 +66,9 @@ public class ImageUrlManager {
 
     // 5. 修改：load 方法
     public ImageUrl load(long id) {
+        if (id == 0 || id == 1) {
+            return null;
+        }
         return mImageUrlBox.get(id);
     }
 

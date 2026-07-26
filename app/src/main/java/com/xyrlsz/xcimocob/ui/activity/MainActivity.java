@@ -220,6 +220,9 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
     }
 
     private void goToLastComic() {
+        if (mLastId == -1) {
+            return;
+        }
         if (mPresenter.checkLocal(mLastId)) {
             Intent intent = TaskActivity.createIntent(MainActivity.this, mLastId);
             startActivity(intent);
@@ -305,13 +308,13 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
     private String getFragmentTag(int checkItem) {
         int __id = checkItem;
         if (__id == R.id.drawer_comic) {
-                return TAG_FRAGMENT_COMIC;
+            return TAG_FRAGMENT_COMIC;
         } else if (__id == R.id.drawer_source) {
-                return TAG_FRAGMENT_SOURCE;
+            return TAG_FRAGMENT_SOURCE;
         } else if (__id == R.id.drawer_category) {
-                return TAG_FRAGMENT_CATEGORY;
+            return TAG_FRAGMENT_CATEGORY;
         } else {
-                return TAG_FRAGMENT_COMIC;
+            return TAG_FRAGMENT_COMIC;
         }
     }
 
@@ -321,12 +324,12 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
             String tag = getFragmentTag(mCheckItem);
             int __id = mCheckItem;
             if (__id == R.id.drawer_comic) {
-                    mComicFragment = new ComicFragment();
-                    mCurrentFragment = mComicFragment;
+                mComicFragment = new ComicFragment();
+                mCurrentFragment = mComicFragment;
             } else if (__id == R.id.drawer_source) {
-                    mCurrentFragment = new SourceFragment();
+                mCurrentFragment = new SourceFragment();
             } else if (__id == R.id.drawer_category) {
-                    mCurrentFragment = new CategoryFragment();
+                mCurrentFragment = new CategoryFragment();
             }
             mFragmentArray.put(mCheckItem, mCurrentFragment);
             return false;
@@ -369,38 +372,38 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
         if (itemId != mCheckItem) {
             int __id = itemId;
             if (__id == R.id.drawer_comic) {
-                    String title = "";
-                    if (mComicFragment == null) {
-                        mComicFragment = new ComicFragment(getBaseContext());
-                        title = mComicFragment.getCurrTitle();
-                    }
-                    Objects.requireNonNull(mToolbarTitle).setText(title.isEmpty() ? mComicFragment.getCurrTitle() : title);
-                    mCheckItem = itemId;
-                    getSupportFragmentManager().beginTransaction().hide(mCurrentFragment).commit();
-                    mDrawerLayout.closeDrawer(GravityCompat.START);
+                String title = "";
+                if (mComicFragment == null) {
+                    mComicFragment = new ComicFragment(getBaseContext());
+                    title = mComicFragment.getCurrTitle();
+                }
+                Objects.requireNonNull(mToolbarTitle).setText(title.isEmpty() ? mComicFragment.getCurrTitle() : title);
+                mCheckItem = itemId;
+                getSupportFragmentManager().beginTransaction().hide(mCurrentFragment).commit();
+                mDrawerLayout.closeDrawer(GravityCompat.START);
             } else if (__id == R.id.drawer_source) {
 //                case R.id.drawer_tag:
-                    mCheckItem = itemId;
-                    getSupportFragmentManager().beginTransaction().hide(mCurrentFragment).commit();
-                    if (itemId == R.id.drawer_source) {
-                        Objects.requireNonNull(mToolbarTitle).setText(Objects.requireNonNull(item.getTitle()).toString());
-                    }
-                    mDrawerLayout.closeDrawer(GravityCompat.START);
-            } else if (__id == R.id.drawer_category) {
-                    mCheckItem = itemId;
-                    getSupportFragmentManager().beginTransaction().hide(mCurrentFragment).commit();
+                mCheckItem = itemId;
+                getSupportFragmentManager().beginTransaction().hide(mCurrentFragment).commit();
+                if (itemId == R.id.drawer_source) {
                     Objects.requireNonNull(mToolbarTitle).setText(Objects.requireNonNull(item.getTitle()).toString());
-                    mDrawerLayout.closeDrawer(GravityCompat.START);
+                }
+                mDrawerLayout.closeDrawer(GravityCompat.START);
+            } else if (__id == R.id.drawer_category) {
+                mCheckItem = itemId;
+                getSupportFragmentManager().beginTransaction().hide(mCurrentFragment).commit();
+                Objects.requireNonNull(mToolbarTitle).setText(Objects.requireNonNull(item.getTitle()).toString());
+                mDrawerLayout.closeDrawer(GravityCompat.START);
             } else if (__id == R.id.drawer_comiclist) {
-                    Intent intentBaidu = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.home_page_comiclist_url)));
-                    try {
-                        startActivity(intentBaidu);
-                    } catch (Exception e) {
-                        showSnackbar(R.string.about_resource_fail);
-                    }
+                Intent intentBaidu = new Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.home_page_comiclist_url)));
+                try {
+                    startActivity(intentBaidu);
+                } catch (Exception e) {
+                    showSnackbar(R.string.about_resource_fail);
+                }
             } else if (__id == R.id.drawer_comicUpdate) {
 //                    update.startUpdate(versionName, content, mUrl, versionCode, md5);
-                    new Thread(() -> {
+                new Thread(() -> {
 //                        boolean checkGithubOk = false;
 //                        try {
 //                            Request request = new Request.Builder().url(GITHUB_RELEASE_URL).build();
@@ -411,26 +414,26 @@ public class MainActivity extends BaseActivity implements MainView, NavigationVi
 //                        } catch (IOException e) {
 //                            e.printStackTrace();
 //                        }
-                        String releaseUrl;
+                    String releaseUrl;
 //                        if (checkGithubOk) {
 //                            releaseUrl = GITHUB_RELEASE_URL;
 //                        } else {
 //                            releaseUrl = GITEE_RELEASE_URL;
 //                        }
-                        releaseUrl = GITHUB_RELEASE_URL;
-                        Intent intent = new Intent(Intent.ACTION_VIEW);
-                        intent.setData(Uri.parse(releaseUrl));
-                        startActivity(intent);
-                    }).start();
+                    releaseUrl = GITHUB_RELEASE_URL;
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(Uri.parse(releaseUrl));
+                    startActivity(intent);
+                }).start();
             } else if (__id == R.id.drawer_night) {
-                    onNightSwitch();
-                    mPreference.putBoolean(PreferenceManager.PREF_NIGHT, night);
+                onNightSwitch();
+                mPreference.putBoolean(PreferenceManager.PREF_NIGHT, night);
             } else if (__id == R.id.drawer_settings) {
-                    startActivityForResult(new Intent(MainActivity.this, SettingsActivity.class), REQUEST_ACTIVITY_SETTINGS);
+                startActivityForResult(new Intent(MainActivity.this, SettingsActivity.class), REQUEST_ACTIVITY_SETTINGS);
             } else if (__id == R.id.drawer_about) {
-                    startActivity(new Intent(MainActivity.this, AboutActivity.class));
+                startActivity(new Intent(MainActivity.this, AboutActivity.class));
             } else if (__id == R.id.drawer_backup) {
-                    startActivity(new Intent(MainActivity.this, BackupActivity.class));
+                startActivity(new Intent(MainActivity.this, BackupActivity.class));
 //                case R.id.user_info:
 //                    loginout();
 //                    break;

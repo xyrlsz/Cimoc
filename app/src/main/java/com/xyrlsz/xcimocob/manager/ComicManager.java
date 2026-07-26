@@ -178,6 +178,9 @@ public class ComicManager {
     }
 
     public Comic load(long id) {
+        if (id == 0 || id == -1) {
+            return null;
+        }
         return mComicBox.get(id);
     }
 
