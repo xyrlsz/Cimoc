@@ -19,6 +19,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.xyrlsz.xcimocob.R;
 import com.xyrlsz.xcimocob.fresco.ControllerBuilderProvider;
 import com.xyrlsz.xcimocob.global.Extra;
+import com.xyrlsz.xcimocob.manager.SearchHistoryManager;
 import com.xyrlsz.xcimocob.manager.SourceManager;
 import com.xyrlsz.xcimocob.model.Comic;
 import com.xyrlsz.xcimocob.presenter.BasePresenter;
@@ -26,6 +27,7 @@ import com.xyrlsz.xcimocob.presenter.ResultPresenter;
 import com.xyrlsz.xcimocob.ui.adapter.BaseAdapter;
 import com.xyrlsz.xcimocob.ui.adapter.ResultAdapter;
 import com.xyrlsz.xcimocob.ui.view.ResultView;
+import com.xyrlsz.xcimocob.utils.ThreadRunUtils;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -64,6 +66,7 @@ public class ResultActivity extends BackActivity implements ResultView, BaseAdap
         mLayoutView = findViewById(R.id.result_layout);
         mSwipeRefresh = findViewById(R.id.result_swipe_refresh);
     }
+
     private LinearLayoutManager mLayoutManager;
     private ResultPresenter mPresenter;
     private ControllerBuilderProvider mProvider;
@@ -102,6 +105,7 @@ public class ResultActivity extends BackActivity implements ResultView, BaseAdap
     @Override
     protected BasePresenter initPresenter() {
         String keyword = getIntent().getStringExtra(Extra.EXTRA_KEYWORD);
+        ThreadRunUtils.runOnIOThread(() -> SearchHistoryManager.getInstance(ResultActivity.this).insertOrUpdate(keyword));
         int[] source = getIntent().getIntArrayExtra(Extra.EXTRA_SOURCE);
         boolean strictSearch = getIntent().getBooleanExtra(Extra.EXTRA_STRICT, true);
         boolean stSameSearch = getIntent().getBooleanExtra(Extra.EXTAR_STSAME, true);
