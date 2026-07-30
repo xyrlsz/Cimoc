@@ -28,17 +28,20 @@ public class WebParser {
     private static final int MAX_SCROLL = 512; // 最多滚动次数
     private static final int SAME_LIMIT = 3; // 高度连续不变次数
     private static final int SCROLL_DELAY = 50;
-    /** 总超时时间：120 秒后强制完成，防止永久阻塞 */
+    /**
+     * 总超时时间：120 秒后强制完成，防止永久阻塞
+     */
     private static final long TOTAL_TIMEOUT_MS = 120_000;
-    /** 复用的静态 WebView 实例 */
-    private static WebView staticWebView = null;
-    /** 当前活跃的 WebParser 实例，新请求会取代旧请求 */
-    private static volatile WebParser currentInstance = null;
 
     private final String url;
     private final Headers headers;
     private final PublishSubject<String> htmlSubject = PublishSubject.create();
+    private final Context mContext;
     private String UA = "";
+    /**
+     * 每个实例独立的 WebView，不再共享静态实例
+     */
+    private WebView mWebView;
     // 滚动控制
     private int lastHeight = 0;
     private int sameCount = 0;
@@ -46,6 +49,7 @@ public class WebParser {
 
     private int errTimes = 0;
     private volatile boolean emitted = false;
+    private volatile boolean destroyed = false;
 
     public WebParser(Context context, String url, Headers headers) {
         this(context, url, headers, "");
@@ -55,23 +59,13 @@ public class WebParser {
         this.url = url;
         this.headers = headers;
         this.UA = UA;
+        this.mContext = context.getApplicationContext();
 
-        // 取消前一个仍在进行的请求
-        WebParser prev = currentInstance;
-        if (prev != null) {
-            prev.emitError(new Exception("WebParser: superseded by new request"));
-        }
-        currentInstance = this;
-
+        // 在 UI 线程创建 WebView 并开始加载
         new Handler(Looper.getMainLooper()).post(() -> {
             try {
-                if (staticWebView == null) {
-                    staticWebView = new WebView(context);
-                    initWebViewSettings(staticWebView);
-                } else {
-                    // 停止旧页面的加载
-                    staticWebView.stopLoading();
-                }
+                mWebView = new WebView(mContext);
+                initWebViewSettings(mWebView);
                 initWebViewForRequest();
             } catch (Exception e) {
                 Log.e("WebParser", "WebView init error", e);
@@ -86,11 +80,9 @@ public class WebParser {
     private void emitResult(String html) {
         if (!emitted) {
             emitted = true;
-            // 只有当前活跃实例才能成功发射结果
-            if (currentInstance == this) {
-                htmlSubject.onNext(html);
-                htmlSubject.onComplete();
-            }
+            htmlSubject.onNext(html);
+            htmlSubject.onComplete();
+            destroyWebView();
         }
     }
 
@@ -98,10 +90,33 @@ public class WebParser {
         if (!emitted) {
             emitted = true;
             htmlSubject.onError(e);
+            destroyWebView();
         }
     }
 
-    /** 一次性 WebView 通用设置（静态方法，只调用一次） */
+    /**
+     * 销毁 WebView（必须在 UI 线程执行）
+     */
+    private void destroyWebView() {
+        if (destroyed) return;
+        destroyed = true;
+        if (mWebView != null) {
+            new Handler(Looper.getMainLooper()).post(() -> {
+                try {
+                    mWebView.stopLoading();
+                    mWebView.removeAllViews();
+                    mWebView.destroy();
+                } catch (Exception e) {
+                    Log.w("WebParser", "WebView destroy error", e);
+                }
+                mWebView = null;
+            });
+        }
+    }
+
+    /**
+     * WebView 初始化设置
+     */
     @SuppressLint("SetJavaScriptEnabled")
     private static void initWebViewSettings(WebView wv) {
         wv.setLayoutParams(new ViewGroup.LayoutParams(
@@ -112,24 +127,27 @@ public class WebParser {
         wv.getSettings().setCacheMode(android.webkit.WebSettings.LOAD_DEFAULT);
     }
 
-    /** 每次请求前重置 WebView 状态并加载新 URL */
+    /**
+     * 加载 URL 前的配置
+     */
     private void initWebViewForRequest() {
+        if (destroyed) return;
         if (!StringUtils.isEmpty(UA)) {
-            staticWebView.getSettings().setUserAgentString(UA);
+            mWebView.getSettings().setUserAgentString(UA);
         }
 
-        // 使用 TreeMap 并指定忽略大小写的比较器 这样写就可以直接匹配到 "user-agent" 或 "User-Agent"
+        // 使用 TreeMap 并指定忽略大小写的比较器
         Map<String, String> headersMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         if (headers != null) {
             for (String key : headers.names()) {
                 headersMap.put(key, headers.get(key));
             }
             if (StringUtils.isEmpty(UA) && headersMap.containsKey("User-Agent")) {
-                staticWebView.getSettings().setUserAgentString(headersMap.get("User-Agent"));
+                mWebView.getSettings().setUserAgentString(headersMap.get("User-Agent"));
             }
         }
 
-        staticWebView.setWebViewClient(new WebViewClient() {
+        mWebView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 view.loadUrl(request.getUrl().toString());
@@ -143,22 +161,20 @@ public class WebParser {
             }
         });
 
-        staticWebView.loadUrl(url, headersMap);
+        mWebView.loadUrl(url, headersMap);
     }
 
     /**
      * 只等 DOM ready 一次
      */
     private void waitForDomReady() {
-        if (currentInstance != this) return;
+        if (destroyed || mWebView == null) return;
 
-        staticWebView.evaluateJavascript("(function(){return document.readyState})()", value -> {
-            if (currentInstance != this) return;
+        mWebView.evaluateJavascript("(function(){return document.readyState})()", value -> {
+            if (destroyed || mWebView == null) return;
 
             if (value != null && value.contains("complete")) {
-                // 给 JS 一点时间
                 if (url.contains(CopyMHWeb.website) && url.contains("/comic/") && !url.contains("/chapter/")) {
-                    // 修改重点在这里：使用 for 循环遍历所有找到的按钮
                     String jsCode = "javascript:(function() { " +
                             "var btns = document.getElementsByClassName('next-all'); " +
                             "for(var i = 0; i < btns.length; i++) { " +
@@ -166,17 +182,14 @@ public class WebParser {
                             "} " +
                             "})()";
 
-                    staticWebView.evaluateJavascript(jsCode, s -> {
-                        if (currentInstance != this) return;
-                        // 点击操作执行完毕后，延迟执行自动滚动
+                    mWebView.evaluateJavascript(jsCode, s -> {
+                        if (destroyed || mWebView == null) return;
                         new Handler(Looper.getMainLooper()).postDelayed(this::autoScroll, 500);
                     });
                 } else {
-                    // 非目标页面也保持原有的自动滚动逻辑
                     new Handler(Looper.getMainLooper()).postDelayed(this::autoScroll, 300);
                 }
             } else {
-                // DOM 未完成加载，继续轮询
                 new Handler(Looper.getMainLooper()).postDelayed(this::waitForDomReady, 100);
             }
         });
@@ -186,19 +199,18 @@ public class WebParser {
      * 核心：智能滚动
      */
     private void autoScroll() {
-        if (currentInstance != this) return;
+        if (destroyed || mWebView == null) return;
 
         String js = "(function(){"
                 + "var h = document.body.scrollHeight;"
                 + "var ch = document.body.clientHeight;"
                 + "var st = document.body.scrollTop || document.documentElement.scrollTop;"
-                + "window.scrollBy(0, 500);" + // 执行滚动
-                // 返回格式： "总高度,可视高度,当前位置"
-                "return h + ',' + ch + ',' + st;"
+                + "window.scrollBy(0, 500);"
+                + "return h + ',' + ch + ',' + st;"
                 + "})()";
 
-        staticWebView.evaluateJavascript(js, value -> {
-            if (currentInstance != this) return;
+        mWebView.evaluateJavascript(js, value -> {
+            if (destroyed || mWebView == null) return;
 
             try {
                 if (value == null)
@@ -211,13 +223,11 @@ public class WebParser {
 
                 double distanceToBottom = currentScrollHeight - (currentScrollTop + clientHeight);
 
-                // 1. 如果剩余距离已经很小（例如小于 100px），说明到底了，直接结束
                 if (distanceToBottom <= 100) {
                     getPageHtml();
                     return;
                 }
 
-                // 2. 原有的防死循环逻辑（高度不变检测）
                 if (currentScrollHeight == lastHeight) {
                     sameCount++;
                 } else {
@@ -251,14 +261,14 @@ public class WebParser {
      * 获取 HTML
      */
     private void getPageHtml() {
-        if (currentInstance != this) return;
+        if (destroyed || mWebView == null) return;
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            if (currentInstance != this) return;
+            if (destroyed || mWebView == null) return;
 
-            staticWebView.evaluateJavascript(
+            mWebView.evaluateJavascript(
                     "(function(){return document.documentElement.outerHTML})()", value -> {
-                        if (currentInstance != this) return;
+                        if (destroyed || mWebView == null) return;
 
                         if (value != null) {
                             String result = value.replace("\\u003C", "<")
@@ -274,7 +284,7 @@ public class WebParser {
                             emitError(new Exception("WebParser: failed to get HTML"));
                         }
                     });
-        }, 300); // 最后缓冲
+        }, 300);
     }
 
     /**
