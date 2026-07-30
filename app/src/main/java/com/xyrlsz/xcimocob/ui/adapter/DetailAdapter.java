@@ -15,6 +15,8 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.facebook.common.internal.Supplier;
+import com.facebook.drawee.backends.pipeline.PipelineDraweeControllerBuilder;
 import com.facebook.drawee.backends.pipeline.PipelineDraweeControllerBuilderSupplier;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.xyrlsz.xcimocob.R;
@@ -36,7 +38,7 @@ public class DetailAdapter extends BaseAdapter<Chapter> {
     public String source;
     Paint textPaint;
     Paint paint;
-    private PipelineDraweeControllerBuilderSupplier mControllerSupplier;
+    private Supplier<PipelineDraweeControllerBuilder> mControllerSupplier;
     private String cover;
     private String update;
     private Boolean finish;
@@ -234,7 +236,7 @@ public class DetailAdapter extends BaseAdapter<Chapter> {
         });
     }
 
-    public void setControllerSupplier(PipelineDraweeControllerBuilderSupplier supplier) {
+    public void setControllerSupplier(Supplier<PipelineDraweeControllerBuilder> supplier) {
         this.mControllerSupplier = supplier;
     }
 

@@ -23,7 +23,6 @@ import com.facebook.imagepipeline.request.ImageRequest;
 import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.xyrlsz.xcimocob.App;
 import com.xyrlsz.xcimocob.R;
-import com.xyrlsz.xcimocob.fresco.ComicFrescoHeaders;
 import com.xyrlsz.xcimocob.fresco.ControllerBuilderSupplierFactory;
 import com.xyrlsz.xcimocob.fresco.ImagePipelineFactoryBuilder;
 import com.xyrlsz.xcimocob.fresco.processor.MangaPostprocessor;
@@ -213,7 +212,6 @@ public class ReaderAdapter extends BaseAdapter<ImageUrl> {
 
         // 设置 Headers
         Headers currHeaders = imageUrl.getHeaders();
-        ComicFrescoHeaders.setHeaders(currHeaders);
 
         if (currHeaders != null) {
             Context context = App.getAppContext();
@@ -340,6 +338,10 @@ public class ReaderAdapter extends BaseAdapter<ImageUrl> {
         builder.setOldController(draweeView.getController())
                 .setTapToRetryEnabled(true)
                 .setRetainImageOnFailure(true);
+
+        if (currHeaders != null) {
+            builder.setCallerContext(currHeaders);
+        }
 
         draweeView.setController(
                 builder.setFirstAvailableImageRequests(requests).build()

@@ -45,6 +45,7 @@ public class OkHttpNetworkFetcher extends
     private static final String FETCH_TIME = "fetch_time";
     private static final String TOTAL_TIME = "total_time";
     private static final String IMAGE_SIZE = "image_size";
+
     private final OkHttpClient mOkHttpClient;
     private final Headers mHeaders;
     private Executor mCancellationExecutor;
@@ -66,7 +67,6 @@ public class OkHttpNetworkFetcher extends
 
 
     }
-
     @NonNull
     @Override
     public OkHttpNetworkFetchState createFetchState(@NonNull Consumer<EncodedImage> consumer, @NonNull ProducerContext context) {
@@ -76,11 +76,13 @@ public class OkHttpNetworkFetcher extends
     @Override
     public void fetch(@NonNull OkHttpNetworkFetchState fetchState, @NonNull Callback callback) {
         fetchState.submitTime = SystemClock.elapsedRealtime();
-        Headers headers = ComicFrescoHeaders.getHeaders();
+        // 从 ProducerContext 的 callerContext 获取该请求专用的 headers
+        Object callerContext = fetchState.getContext().getCallerContext();
+        Headers headers = callerContext instanceof Headers ? (Headers) callerContext : null;
         final Uri uri = fetchState.getUri();
         Request request = new Request.Builder()
                 .cacheControl(new CacheControl.Builder().noStore().build())
-                .headers(headers)
+                .headers(headers != null ? headers : new Headers.Builder().build())
                 .url(uri.toString())
                 .get()
                 .build();
@@ -150,6 +152,5 @@ public class OkHttpNetworkFetcher extends
             callback.onFailure(e);
         }
     }
-
 
 }

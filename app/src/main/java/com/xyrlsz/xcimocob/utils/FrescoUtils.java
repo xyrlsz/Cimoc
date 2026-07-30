@@ -227,20 +227,12 @@ public class FrescoUtils {
                 .setBaseDirectoryPathSupplier(context::getCacheDir)
                 .build();
         MyImageCacheStatsTracker imageCacheStatsTracker = new MyImageCacheStatsTracker();
-//        ImagePipelineConfig config = ImagePipelineConfig.newBuilder(context)
-//                .setMainDiskCacheConfig(diskCacheConfig)
-//                .setImageCacheStatsTracker(imageCacheStatsTracker)
-//                .setDownsampleEnabled(true)//Downsampling，它处理图片的速度比常规的裁剪更快，
-//                // 并且同时支持PNG，JPG以及WEP格式的图片，非常强大,与ResizeOptions配合使用
-//                .setBitmapsConfig(Bitmap.Config.RGB_565)
-//                .build();
         OkHttpNetworkFetcher fetcher = new OkHttpNetworkFetcher(App.getHttpClient(), null);
         ImagePipelineConfig config = OkHttpImagePipelineConfigFactory
                 .newBuilder(context, Objects.requireNonNull(App.getHttpClient()))
                 .setMainDiskCacheConfig(diskCacheConfig)
                 .setImageCacheStatsTracker(imageCacheStatsTracker)
-                .setDownsampleEnabled(true)//Downsampling，它处理图片的速度比常规的裁剪更快，
-                // 并且同时支持PNG，JPG以及WEP格式的图片，非常强大,与ResizeOptions配合使用
+                .setDownsampleEnabled(true)
                 .setBitmapsConfig(Bitmap.Config.RGB_565)
                 .setNetworkFetcher(fetcher)
                 .build();

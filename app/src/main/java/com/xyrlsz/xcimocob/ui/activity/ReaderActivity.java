@@ -28,7 +28,6 @@ import com.facebook.imagepipeline.core.ImagePipelineFactory;
 import com.google.android.material.slider.Slider;
 import com.xyrlsz.xcimocob.App;
 import com.xyrlsz.xcimocob.R;
-import com.xyrlsz.xcimocob.fresco.ComicFrescoHeaders;
 import com.xyrlsz.xcimocob.fresco.ControllerBuilderSupplierFactory;
 import com.xyrlsz.xcimocob.fresco.ImagePipelineFactoryBuilder;
 import com.xyrlsz.xcimocob.global.ClickEvents;
@@ -420,7 +419,6 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
         _source = source;
         _local = local;
         Headers headers = SourceManager.getInstance(this).getParser(source).getHeader(list);
-        ComicFrescoHeaders.setHeaders(headers);
         mImagePipelineFactory = ImagePipelineFactoryBuilder
                 .build(this, local ? null : headers, false);
         mLargeImagePipelineFactory = ImagePipelineFactoryBuilder
