@@ -38,6 +38,7 @@ import java.util.regex.Pattern;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import okhttp3.CacheControl;
+import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -462,16 +463,13 @@ public class Manga {
 
     public static Observable<CheckUpdateEvent> checkUpdate(
             final SourceManager manager, final List<Comic> list) {
+        // 复用共享连接池的 OkHttpClient，通过 per-request timeout 控制超时
+        OkHttpClient sharedClient = App.getHttpClient();
         return Observable.fromIterable(list)
                 .flatMap(comic -> Observable.just(comic)
                         .subscribeOn(Schedulers.io())  // 每个 Comic 分配到不同的 IO 线程
                         .flatMap(c -> {
                             try {
-                                OkHttpClient client = new OkHttpClient.Builder()
-                                        .connectTimeout(1500, TimeUnit.MILLISECONDS)
-                                        .readTimeout(1500, TimeUnit.MILLISECONDS)
-                                        .build();
-
                                 Parser parser = manager.getParser(c.getSource());
                                 Request request = parser.getCheckRequest(c.getCid());
                                 if (request == null) {
@@ -481,10 +479,15 @@ public class Manga {
                                     return Observable.just(new CheckUpdateEvent(c, false));
                                 }
 
-                                String update = parser.parseCheck(getResponseBody(client, request));
+                                // 使用 per-request 超时控制（复用共享连接池）
+                                okhttp3.Call call = sharedClient.newCall(request);
+                                call.timeout().timeout(3, TimeUnit.SECONDS);
+
+                                String update = parser.parseCheck(getResponseBody(call));
                                 Pair<Boolean, Integer> checkRes = new Pair<>(false, 0);
                                 if (update == null || update.isEmpty()) {
-                                    checkRes = parser.checkUpdateByChapterCount(getResponseBody(client, request), c);
+                                    checkRes = parser.checkUpdateByChapterCount(
+                                            getResponseBody(sharedClient.newCall(request)), c);
                                 }
                                 if ((c.getUpdate() != null && update != null && !update.isEmpty() && !c.getUpdate().equals(update))
                                         || checkRes.first) {
@@ -500,8 +503,29 @@ public class Manga {
                                 e.printStackTrace();
                             }
                             return Observable.just(new CheckUpdateEvent(c, false));  // 无更新，确保进度计数正确
-                        }), 10
+                        }), 32  // 提高并发数到 32
                 );
+    }
+
+    /**
+     * 使用已经构建好的 okhttp3.Call 来获取响应体（支持 per-request timeout）
+     */
+    public static String getResponseBody(okhttp3.Call call) throws NetworkErrorException {
+        try {
+            okhttp3.Response response = call.execute();
+            if (response.isSuccessful() && response.body() != null) {
+                byte[] bodybytes = response.body().bytes();
+                String body = new String(bodybytes);
+                java.util.regex.Matcher m = Pattern.compile("charset=([\\w\\-]+)").matcher(body);
+                if (m.find()) {
+                    body = new String(bodybytes, Objects.requireNonNull(m.group(1)));
+                }
+                return body;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        throw new NetworkErrorException();
     }
 
 

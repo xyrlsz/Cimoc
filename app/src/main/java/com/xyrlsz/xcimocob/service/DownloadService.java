@@ -47,6 +47,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -288,13 +292,66 @@ public class DownloadService extends Service implements AppGetter {
             mParse = mSourceManager.getParser(task.getSource());
         }
 
+        /**
+         * 下载单页图片的内部任务，支持并行提交到线程池
+         */
+        private class PageDownloadTask implements Callable<Boolean> {
+            private final ImageUrl mImage;
+            private final int mPageIndex; // 1-based
+            private final CimocDocumentFile mDir;
+
+            PageDownloadTask(ImageUrl image, int pageIndex, CimocDocumentFile dir) {
+                this.mImage = image;
+                this.mPageIndex = pageIndex;
+                this.mDir = dir;
+            }
+
+            @Override
+            public Boolean call() {
+                int retryCount = 0;
+                while (retryCount++ < 20) {
+                    if (Thread.currentThread().isInterrupted()) {
+                        return false;
+                    }
+                    List<String> urls = mImage.getUrls();
+                    for (int j = 0; j < urls.size(); j++) {
+                        String url;
+                        try {
+                            url = mImage.isLazy()
+                                    ? Manga.getLazyUrl(mParse, urls.get(j))
+                                    : urls.get(j);
+                        } catch (InterruptedIOException e) {
+                            return false;
+                        }
+                        try {
+                            if (GetCacheAndWrite(mDir, mPageIndex, url)) {
+                                return true;
+                            }
+                            Headers imgHeaders = mImage.getHeaders();
+                            Request request = buildRequest(
+                                    imgHeaders == null ? mParse.getHeader(url) : imgHeaders, url);
+                            if (RequestAndWrite(mDir, request, mPageIndex, url)) {
+                                return true;
+                            }
+                        } catch (InterruptedIOException e) {
+                            return false;
+                        } catch (Exception e) {
+                            // 重试
+                        }
+                    }
+                }
+                return false;
+            }
+        }
+
         @Override
         public void run() {
             try {
                 List<ImageUrl> list = onDownloadParse();
                 int size = list.size();
                 if (size != 0) {
-                    CimocDocumentFile dir = Download.updateChapterIndex(mContentResolver, getAppInstance().getDocumentFile(), mTask);
+                    CimocDocumentFile dir = Download.updateChapterIndex(
+                            mContentResolver, getAppInstance().getDocumentFile(), mTask);
                     if (dir != null) {
                         mTask.setMax(size);
                         mTask.setState(Task.STATE_DOING);
@@ -302,49 +359,113 @@ public class DownloadService extends Service implements AppGetter {
                         mCumulativeMax += size;
                         // 更新聚合进度通知
                         updateNotification();
-                        boolean success = false;
-                        for (int i = mTask.getProgress(); i < size; ++i) {
-                            onDownloadProgress(i);
-                            ImageUrl image = list.get(i);
-                            int count = 0;  // 单页下载错误次数
-                            success = false; // 是否下载成功
-                            while (count++ < 20 && !success) {
-                                List<String> urls = image.getUrls();
-                                for (int j = 0; !success && j < urls.size(); ++j) {
-                                    String url = image.isLazy() ? Manga.getLazyUrl(mParse, urls.get(j)) : urls.get(j);
-                                    success = GetCacheAndWrite(dir, i + 1, url);
-                                    if (!success) {
-                                        Headers imgHeaders = image.getHeaders();
-                                        Request request = buildRequest(imgHeaders == null ? mParse.getHeader(url) : imgHeaders, url);
-                                        success = RequestAndWrite(dir, request, i + 1, url);
-                                    }
+
+                        // 根据 CPU 核心数和文件系统性能确定页级并发数
+                        int cpuCount = Runtime.getRuntime().availableProcessors();
+                        int parallelPages = Math.min(Math.max(cpuCount, 3), 8);
+
+                        // 从断点开始下载
+                        int startPage = mTask.getProgress();
+                        int remaining = size - startPage;
+
+                        if (remaining <= 1) {
+                            // 只有一页或已下载完，退化为串行
+                            boolean success = true;
+                            for (int i = startPage; i < size; ++i) {
+                                onDownloadProgress(i);
+                                PageDownloadTask task = new PageDownloadTask(list.get(i), i + 1, dir);
+                                Boolean result = task.call();
+                                if (!result) {
+                                    RxBus.getInstance().post(new RxEvent(
+                                            RxEvent.EVENT_TASK_STATE_CHANGE, Task.STATE_ERROR, mTask.getId()));
+                                    success = false;
+                                    break;
                                 }
                             }
-                            if (!success) {     // 单页下载错误
-                                RxBus.getInstance().post(new RxEvent(RxEvent.EVENT_TASK_STATE_CHANGE, Task.STATE_ERROR, mTask.getId()));
-                                break;
+                            if (success) {
+                                onDownloadProgress(size);
+                            }
+                        } else {
+                            // 并行下载多页
+                            ExecutorService pageExecutor = Executors.newFixedThreadPool(parallelPages,
+                                    r -> {
+                                        Thread t = new Thread(r, "xcimoc-page-dl-"
+                                                + mTask.getId());
+                                        t.setPriority(Thread.NORM_PRIORITY);
+                                        return t;
+                                    });
+                            try {
+                                ExecutorCompletionService<Boolean> ecs =
+                                        new ExecutorCompletionService<>(pageExecutor);
+                                ConcurrentHashMap<Integer, Boolean> results =
+                                        new ConcurrentHashMap<>();
+
+                                // 提交所有剩余页面任务
+                                int submitted = 0;
+                                for (int i = startPage; i < size; ++i) {
+                                    results.put(i, false);
+                                    ecs.submit(new PageDownloadTask(list.get(i), i + 1, dir));
+                                    submitted++;
+                                }
+
+                                // 收集结果，每次完成一个页面就更新进度
+                                boolean allSuccess = true;
+                                int completed = 0;
+                                for (int i = 0; i < submitted; i++) {
+                                    try {
+                                        Future<Boolean> future = ecs.take();
+                                        Boolean pageResult = future.get();
+                                        if (!pageResult) {
+                                            allSuccess = false;
+                                            // 取消剩余未完成的任务
+                                            pageExecutor.shutdownNow();
+                                            break;
+                                        }
+                                        completed++;
+                                        // 更新进度：已完成页数 = startPage + completed
+                                        onDownloadProgress(startPage + completed);
+                                    } catch (InterruptedException | ExecutionException e) {
+                                        allSuccess = false;
+                                        pageExecutor.shutdownNow();
+                                        break;
+                                    }
+                                }
+
+                                if (!allSuccess) {
+                                    RxBus.getInstance().post(new RxEvent(
+                                            RxEvent.EVENT_TASK_STATE_CHANGE, Task.STATE_ERROR, mTask.getId()));
+                                } else {
+                                    onDownloadProgress(size);
+                                }
+                            } finally {
+                                if (!pageExecutor.isShutdown()) {
+                                    pageExecutor.shutdownNow();
+                                }
                             }
                         }
-                        if (success) {
-                            onDownloadProgress(size);
-                        }
                     } else {
-                        RxBus.getInstance().post(new RxEvent(RxEvent.EVENT_TASK_STATE_CHANGE, Task.STATE_ERROR, mTask.getId()));
+                        RxBus.getInstance().post(new RxEvent(
+                                RxEvent.EVENT_TASK_STATE_CHANGE, Task.STATE_ERROR, mTask.getId()));
                     }
                 } else {
-                    RxBus.getInstance().post(new RxEvent(RxEvent.EVENT_TASK_STATE_CHANGE, Task.STATE_ERROR, mTask.getId()));
+                    RxBus.getInstance().post(new RxEvent(
+                            RxEvent.EVENT_TASK_STATE_CHANGE, Task.STATE_ERROR, mTask.getId()));
                 }
             } catch (InterruptedIOException e) {
-                RxBus.getInstance().post(new RxEvent(RxEvent.EVENT_TASK_STATE_CHANGE, Task.STATE_PAUSE, mTask.getId()));
-            } catch (IOException e) {
-                RxBus.getInstance().post(new RxEvent(RxEvent.EVENT_TASK_STATE_CHANGE, Task.STATE_ERROR, mTask.getId()));
+                RxBus.getInstance().post(new RxEvent(
+                        RxEvent.EVENT_TASK_STATE_CHANGE, Task.STATE_PAUSE, mTask.getId()));
+            } catch (Exception e) {
+                RxBus.getInstance().post(new RxEvent(
+                        RxEvent.EVENT_TASK_STATE_CHANGE, Task.STATE_ERROR, mTask.getId()));
             }
 
             completeDownload(mTask.getId());
             Comic comic = mComicManager.load(mTask.getSource(), mTask.getCid());
-            Long sourceComic = IdCreator.createSourceComic(comic);
-            List<Chapter> chapterList = mChapterManager.getChapterList(sourceComic);
-            updateChapterList(chapterList);
+            if (comic != null) {
+                Long sourceComic = IdCreator.createSourceComic(comic);
+                List<Chapter> chapterList = mChapterManager.getChapterList(sourceComic);
+                updateChapterList(chapterList);
+            }
         }
 
         private void updateChapterList(List<Chapter> list) {

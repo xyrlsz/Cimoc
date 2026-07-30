@@ -46,9 +46,12 @@ import com.xyrlsz.xcimocob.utils.ZaiManhuaSignUtils;
 
 import java.io.File;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import io.objectbox.BoxStore;
 import okhttp3.Cache;
+import okhttp3.ConnectionPool;
+import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
 
@@ -121,8 +124,19 @@ public class App extends Application implements AppGetter, Thread.UncaughtExcept
                     // 3.OkHttp访问https的Client实例（带HTTP缓存）
                     File cacheDir = new File(mApp.getCacheDir(), "http");
                     Cache httpCache = new Cache(cacheDir, 20 * 1024 * 1024); // 20MB缓存
+
+                    // 优化连接池：增大最大空闲连接数和每个路由的连接数，提高并发吞吐
+                    ConnectionPool connectionPool = new ConnectionPool(20, 10, TimeUnit.MINUTES);
+
+                    // 优化 Dispatcher：提高最大并发请求数和每主机并发数
+                    Dispatcher dispatcher = new Dispatcher();
+                    dispatcher.setMaxRequests(64);
+                    dispatcher.setMaxRequestsPerHost(8);
+
                     client = new OkHttpClient()
                             .newBuilder()
+                            .connectionPool(connectionPool)
+                            .dispatcher(dispatcher)
                             .cache(httpCache)
                             .addNetworkInterceptor(chain -> {
                                 Response response = chain.proceed(chain.request());
