@@ -11,8 +11,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 
-import com.google.android.material.slider.Slider;
 import com.xyrlsz.xcimocob.R;
+import com.xyrlsz.xcimocob.ui.widget.SeekBar;
 import com.xyrlsz.xcimocob.component.DialogCaller;
 import com.xyrlsz.xcimocob.utils.ThemeUtils;
 
@@ -26,7 +26,7 @@ import java.util.Objects;
 
 public class SliderDialogFragment extends DialogFragment implements DialogInterface.OnClickListener {
 
-    private Slider mSeekBar;
+    private SeekBar mSeekBar;
 
     public static SliderDialogFragment newInstance(int title, int min, int max, int progress, int requestCode) {
         SliderDialogFragment fragment = new SliderDialogFragment();
@@ -44,9 +44,13 @@ public class SliderDialogFragment extends DialogFragment implements DialogInterf
         View view = requireActivity().getLayoutInflater().inflate(R.layout.dialog_slider, null);
         int[] item = requireArguments().getIntArray(DialogCaller.EXTRA_DIALOG_ITEMS);
         mSeekBar = view.findViewById(R.id.dialog_slider_bar);
-        mSeekBar.setValueFrom(Objects.requireNonNull(item)[0]);
-        mSeekBar.setValueTo(item[1]);
-        mSeekBar.setValue(item[2]);
+        int min = Objects.requireNonNull(item)[0];
+        int max = item[1];
+        int value = item[2];
+        // SeekBar 内部会自动处理 valueFrom >= valueTo 的边界情况
+        mSeekBar.setValueFrom(min);
+        mSeekBar.setValueTo(max);
+        mSeekBar.setValue(value);
         int primaryDarkResId = ThemeUtils.getResourceId(requireActivity(), R.attr.colorPrimaryDark);
         int primaryResId = ThemeUtils.getResourceId(requireActivity(), R.attr.colorPrimary);
         if (primaryDarkResId != 0) {

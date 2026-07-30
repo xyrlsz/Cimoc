@@ -9,7 +9,7 @@
     android:visibility="gone">
 
 
-    <com.google.android.material.slider.Slider
+    <com.xyrlsz.xcimocob.ui.widget.SeekBar
         android:id="@+id/reader_seek_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -44,6 +44,7 @@ import com.xyrlsz.xcimocob.ui.view.ReaderView;
 import com.xyrlsz.xcimocob.ui.widget.OnTapGestureListener;
 import com.xyrlsz.xcimocob.ui.widget.PreCacheLayoutManager;
 import com.xyrlsz.xcimocob.ui.widget.RetryDraweeView;
+import com.xyrlsz.xcimocob.ui.widget.SeekBar;
 import com.xyrlsz.xcimocob.utils.FrescoUtils;
 import com.xyrlsz.xcimocob.utils.HintUtils;
 import com.xyrlsz.xcimocob.utils.STConvertUtils;
@@ -105,7 +106,7 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
     View mProgressLayout;
     View mBackLayout;
     View mInfoLayout;
-    Slider mSeekBar;
+    SeekBar mSeekBar;
     TextView mLoadingText;
     RecyclerView mRecyclerView;
     RelativeLayout mReaderBox;
@@ -378,6 +379,7 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
                 Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF, -1.0f,
                 Animation.RELATIVE_TO_SELF, 0.0f);
         downAction.setDuration(300);
+        // SeekBar 内部会自动处理 valueFrom >= valueTo 的边界情况
         mSeekBar.setValueFrom(1);
         if ((int) mSeekBar.getValueTo() != max) {
             mSeekBar.setValueTo(max);
