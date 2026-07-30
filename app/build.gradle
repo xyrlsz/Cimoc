@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'io.objectbox'
+apply from: rootProject.file('check_r8_keep.gradle')
 
 def getGitTagName = { ->
     try {
@@ -108,17 +109,14 @@ android {
             optimization {
                 enable = true
             }
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            proguardFiles 'proguard-rules.pro'
             signingConfig = signingConfigs.release
             buildConfigField "boolean", "USE_FINAL_RESOURCE_IDS", "true"
-
         }
         debug {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig = signingConfigs.debug
             buildConfigField "boolean", "USE_FINAL_RESOURCE_IDS", "true"
-
         }
     }
     splits {
@@ -204,9 +202,6 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.7.0'
     androidTestImplementation 'androidx.test:runner:1.7.0'
 }
-
-// R8 Keep 规则完整性校验（在 release 构建中自动检查）
-apply from: rootProject.file('check_r8_keep.gradle')
 
 repositories {
     mavenCentral()

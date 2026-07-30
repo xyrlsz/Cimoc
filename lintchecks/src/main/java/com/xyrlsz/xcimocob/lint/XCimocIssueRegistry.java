@@ -13,17 +13,21 @@ import java.util.List;
  * 自定义 Lint 检查注册表 - XCimoc R8 Keep 规则检查
  * <p>
  * 本模块在编译期检测代码中需要 R8 Keep 规则的场景。
- * 类级别的检测（ObjectBox @Entity、Parcelable、Serializable、JNI native 方法、
- * 运行时注解等）由 Gradle 任务 {@code checkR8KeepRules} 在 R8 打包后，
- * 通过解析 {@code seeds.txt} 完成验证。
+ * R8 打包后的完整性验证由 Gradle 任务 {@code checkR8KeepRules}
+ * 通过解析 {@code seeds.txt} 完成。
  * <p>
- * 本 Lint 模块聚焦于开发阶段能静态检测的编解码模式：
+ * 本 Lint 模块覆盖以下模式：
  * <ul>
- *   <li>R8Reflection - 检测反射 API 的使用（Class.forName, Method.invoke 等）</li>
- *   <li>R8DynamicProxy - 检测动态代理调用</li>
- *   <li>R8GsonUsage - 检测 Gson toJson/fromJson 调用</li>
+ *   <li>R8Reflection - 检测反射 API（Class.forName、Method.invoke、Field.set 等）</li>
+ *   <li>R8DynamicProxy - 检测动态代理（Proxy.newProxyInstance）</li>
+ *   <li>R8JavascriptInterface - 检测 WebView @JavascriptInterface 注解</li>
+ *   <li>R8JNIMethod - 检测 JNI native 方法和 System.loadLibrary 调用</li>
+ *   <li>R8InnerClassReflection - 检测 Class.forName 访问内部类（需 InnerClasses 属性）</li>
+ *   <li>R8GsonUsage - 检测 Gson 序列化/反序列化</li>
+ *   <li>R8MissingSerializedName - 检测 Gson 数据类缺少 @SerializedName 注解</li>
+ *   <li>R8Serializable - 检测 Serializable 实现类</li>
  * </ul>
- * 详见项目根目录的 {@code check_r8_keep.gradle} 脚本。
+ * 注意：Parcelable、ObjectBox @Entity 无需手动 keep 规则，因此不纳入检测。
  */
 public final class XCimocIssueRegistry extends IssueRegistry {
 
@@ -44,10 +48,12 @@ public final class XCimocIssueRegistry extends IssueRegistry {
         return Arrays.asList(
                 ReflectionDetector.ISSUE_REFLECTION_API,
                 ReflectionDetector.ISSUE_DYNAMIC_PROXY,
+                ReflectionDetector.ISSUE_JAVASCRIPT_INTERFACE,
+                ReflectionDetector.ISSUE_JNI_METHOD,
+                ReflectionDetector.ISSUE_INNER_CLASS_REFLECTION,
                 SerializationDetector.ISSUE_GSON,
-                ClassLevelDetector.ISSUE_PARCELABLE,
-                ClassLevelDetector.ISSUE_SERIALIZABLE,
-                ClassLevelDetector.ISSUE_OBJECTBOX
+                SerializationDetector.ISSUE_MISSING_SERIALIZED_NAME,
+                ClassLevelDetector.ISSUE_SERIALIZABLE
         );
     }
 
