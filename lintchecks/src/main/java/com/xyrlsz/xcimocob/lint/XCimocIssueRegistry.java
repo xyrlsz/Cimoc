@@ -21,9 +21,7 @@ import java.util.List;
  *   <li>R8Reflection - 检测反射 API（Class.forName、Method.invoke、Field.set 等）</li>
  *   <li>R8DynamicProxy - 检测动态代理（Proxy.newProxyInstance）</li>
  *   <li>R8JavascriptInterface - 检测 WebView @JavascriptInterface 注解</li>
- *   <li>R8JNIMethod - 检测 JNI native 方法和 System.loadLibrary 调用</li>
  *   <li>R8InnerClassReflection - 检测 Class.forName 访问内部类（需 InnerClasses 属性）</li>
- *   <li>R8GsonUsage - 检测 Gson 序列化/反序列化</li>
  *   <li>R8MissingSerializedName - 检测 Gson 数据类缺少 @SerializedName 注解</li>
  *   <li>R8Serializable - 检测 Serializable 实现类</li>
  * </ul>
@@ -49,9 +47,7 @@ public final class XCimocIssueRegistry extends IssueRegistry {
                 ReflectionDetector.ISSUE_REFLECTION_API,
                 ReflectionDetector.ISSUE_DYNAMIC_PROXY,
                 ReflectionDetector.ISSUE_JAVASCRIPT_INTERFACE,
-                ReflectionDetector.ISSUE_JNI_METHOD,
                 ReflectionDetector.ISSUE_INNER_CLASS_REFLECTION,
-                SerializationDetector.ISSUE_GSON,
                 SerializationDetector.ISSUE_MISSING_SERIALIZED_NAME,
                 ClassLevelDetector.ISSUE_SERIALIZABLE
         );

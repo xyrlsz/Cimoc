@@ -8,20 +8,16 @@ import com.android.tools.lint.detector.api.JavaContext;
 import com.android.tools.lint.client.api.UElementHandler;
 import com.android.tools.lint.detector.api.Scope;
 import com.android.tools.lint.detector.api.Severity;
-import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMethod;
-import com.intellij.psi.PsiModifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.uast.UAnnotation;
 import org.jetbrains.uast.UCallExpression;
-import org.jetbrains.uast.UClass;
 import org.jetbrains.uast.UElement;
 import org.jetbrains.uast.UExpression;
 import org.jetbrains.uast.ULiteralExpression;
 import org.jetbrains.uast.UReferenceExpression;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -119,31 +115,6 @@ public class ReflectionDetector extends Detector implements Detector.UastScanner
             new Implementation(ReflectionDetector.class, Scope.JAVA_FILE_SCOPE)
     );
 
-    // ======================== JNI Native 方法 ========================
-
-    private static final String JNI_METHOD_DESCRIPTION =
-            "JNI native 方法通过 JNI 层从原生代码直接调用，R8 无法追踪这些调用。" +
-            "如果 native 方法被混淆或移除，将导致运行时 UnsatisfiedLinkError。";
-
-    private static final String JNI_METHOD_DETAIL =
-            "Java 中声明的 `native` 方法由原生代码（C/C++）通过 JNI 直接调用，" +
-            "R8 无法识别这些调用。如果不添加 keep 规则，R8 可能移除或混淆 native 方法，" +
-            "导致运行时崩溃。\n\n" +
-            "建议在 proguard-rules.pro 中添加：\n" +
-            "```\n" +
-            "-keepclassmembers class * { native <methods>; }\n" +
-            "```\n\n" +
-            "另外，`System.loadLibrary()` 加载的 .so 文件不会被 R8 处理，" +
-            "但加载该库的 Java 类中的 native 方法需要上述 keep 规则。";
-
-    public static final Issue ISSUE_JNI_METHOD = Issue.create(
-            "R8JNIMethod",
-            "使用了 JNI native 方法，需要添加 R8 Keep 规则",
-            JNI_METHOD_DETAIL,
-            Category.CORRECTNESS, 7, Severity.WARNING,
-            new Implementation(ReflectionDetector.class, Scope.JAVA_FILE_SCOPE)
-    );
-
     // ======================== 内部类反射 ========================
 
     private static final String INNER_CLASS_REFLECTION_DETAIL =
@@ -199,19 +170,10 @@ public class ReflectionDetector extends Detector implements Detector.UastScanner
             "setDouble"          // Field.setDouble()
     );
 
-    /** 综合的方法名列表（反射 API + JNI 加载方法） */
-    private static final List<String> ALL_APPLICABLE_METHODS;
-    static {
-        List<String> combined = new ArrayList<>(REFLECTION_METHOD_NAMES);
-        combined.add("loadLibrary");
-        combined.add("load");
-        ALL_APPLICABLE_METHODS = Collections.unmodifiableList(combined);
-    }
-
     @Nullable
     @Override
     public List<String> getApplicableMethodNames() {
-        return ALL_APPLICABLE_METHODS;
+        return REFLECTION_METHOD_NAMES;
     }
 
     @Override
@@ -242,15 +204,6 @@ public class ReflectionDetector extends Detector implements Detector.UastScanner
             }
         }
 
-        // ========== JNI loadLibrary/load 检测 ==========
-        if (context.isEnabled(ISSUE_JNI_METHOD)
-                && "java.lang.System".equals(containingClass)
-                && ("loadLibrary".equals(methodName) || "load".equals(methodName))) {
-            String message = "使用了 `System." + methodName + "()` —— "
-                    + "加载的 native 库中的方法需要添加 R8 Keep 规则";
-            context.report(ISSUE_JNI_METHOD, node, context.getLocation(node), message);
-        }
-
         // ========== 内部类反射检测（Class.forName 含 $） ==========
         if (context.isEnabled(ISSUE_INNER_CLASS_REFLECTION)
                 && "java.lang.Class".equals(containingClass)
@@ -273,21 +226,17 @@ public class ReflectionDetector extends Detector implements Detector.UastScanner
     @Nullable
     @Override
     public List<Class<? extends UElement>> getApplicableUastTypes() {
-        return Arrays.asList(UAnnotation.class, UClass.class);
+        return Collections.singletonList(UAnnotation.class);
     }
 
     @Nullable
     @Override
     public UElementHandler createUastHandler(@NotNull JavaContext context) {
-        boolean checkJsInterface = context.isEnabled(ISSUE_JAVASCRIPT_INTERFACE);
-        boolean checkJni = context.isEnabled(ISSUE_JNI_METHOD);
-
-        if (!checkJsInterface && !checkJni) return null;
+        if (!context.isEnabled(ISSUE_JAVASCRIPT_INTERFACE)) return null;
 
         return new UElementHandler() {
             @Override
             public void visitAnnotation(@NotNull UAnnotation node) {
-                if (!checkJsInterface) return;
                 if (!"android.webkit.JavascriptInterface".equals(node.getQualifiedName())) {
                     return;
                 }
@@ -295,33 +244,6 @@ public class ReflectionDetector extends Detector implements Detector.UastScanner
                         + "该方法会被 WebView 通过反射调用，需要添加 R8 Keep 规则";
                 context.report(ISSUE_JAVASCRIPT_INTERFACE, node,
                         context.getLocation(node), message);
-            }
-
-            @Override
-            public void visitClass(@NotNull UClass node) {
-                if (!checkJni) return;
-
-                // 通过 PSI 获取底层 Java 类，检查是否有 native 方法
-                PsiClass psiClass = (PsiClass) node.getJavaPsi();
-                if (psiClass == null || psiClass.getQualifiedName() == null) return;
-
-                boolean hasNative = false;
-                String firstNativeName = null;
-                for (PsiMethod method : psiClass.getMethods()) {
-                    if (method.hasModifierProperty(PsiModifier.NATIVE)) {
-                        hasNative = true;
-                        firstNativeName = method.getName();
-                        break;
-                    }
-                }
-
-                if (hasNative) {
-                    String message = "类 `" + psiClass.getQualifiedName()
-                            + "` 包含 native 方法（`" + firstNativeName + "`）—— "
-                            + "需要添加 R8 Keep 规则";
-                    context.report(ISSUE_JNI_METHOD, node,
-                            context.getLocation((UElement) node), message);
-                }
             }
         };
     }
