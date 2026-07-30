@@ -47,7 +47,6 @@ public class SliderDialogFragment extends DialogFragment implements DialogInterf
         int min = Objects.requireNonNull(item)[0];
         int max = item[1];
         int value = item[2];
-        // SeekBar 内部会自动处理 valueFrom >= valueTo 的边界情况
         mSeekBar.setValueFrom(min);
         mSeekBar.setValueTo(max);
         mSeekBar.setValue(value);

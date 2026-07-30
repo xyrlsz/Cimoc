@@ -52,6 +52,16 @@ public class SeekBar extends Slider {
         }
     }
 
+    @Override
+    public void setValue(float value) {
+        if (value > getValueTo()) {
+            super.setValue(getValueTo());
+        } else if (value < getValueFrom()) {
+            super.setValue(getValueFrom());
+        }
+        super.setValue(value);
+    }
+
     /**
      * 安全设置范围与当前值。当范围无效时自动修正，不会崩溃。
      *
@@ -61,9 +71,8 @@ public class SeekBar extends Slider {
      */
     public void setRangeSafe(float valueFrom, float valueTo, float value) {
         if (valueFrom >= valueTo) {
-            // 范围无效时扩展为 [valueFrom, valueFrom + 1]
-            super.setValueFrom(valueFrom);
-            super.setValueTo(valueFrom + 1f);
+            super.setValueFrom(valueFrom - 1f);
+            super.setValueTo(valueFrom);
         } else {
             super.setValueFrom(valueFrom);
             super.setValueTo(valueTo);

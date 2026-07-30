@@ -1,5 +1,8 @@
 package com.xyrlsz.xcimocob.manager;
 
+import android.annotation.SuppressLint;
+
+import com.google.errorprone.annotations.Keep;
 import com.xyrlsz.xcimocob.component.AppGetter;
 import com.xyrlsz.xcimocob.model.ImageUrl;
 import com.xyrlsz.xcimocob.model.ImageUrl_;
@@ -74,6 +77,12 @@ public class ImageUrlManager {
 
     // 6. 修改：updateOrInsert 逻辑
     public void updateOrInsert(List<ImageUrl> imageUrlList) {
+        if (imageUrlList == null || imageUrlList.isEmpty()) return;
+        int i = 1;
+        for (ImageUrl image : imageUrlList) {
+            image.setNum(i);
+            i++;
+        }
         mImageUrlBox.put(imageUrlList);
     }
 

@@ -42,7 +42,6 @@ public class ReaderPresenter extends BasePresenter<ReaderView> {
 
     private ReaderChapterManger mReaderChapterManger;
     private ImageUrlManager mImageUrlManager;
-    private ChapterManager mChapterManager;
     private ComicManager mComicManager;
     private SourceManager mSourceManager;
     private Comic mComic;
@@ -57,17 +56,12 @@ public class ReaderPresenter extends BasePresenter<ReaderView> {
         mComicManager = ComicManager.getInstance(mBaseView);
         mSourceManager = SourceManager.getInstance(mBaseView);
         mImageUrlManager = ImageUrlManager.getInstance(mBaseView);
-        mChapterManager = ChapterManager.getInstance(mBaseView);
+        ChapterManager.getInstance(mBaseView);
     }
 
     @Override
     protected void initSubscription() {
-        addSubscription(RxEvent.EVENT_PICTURE_PAGING, new Consumer<RxEvent>() {
-            @Override
-            public void accept(RxEvent rxEvent) {
-                mBaseView.onPicturePaging((ImageUrl) rxEvent.getData());
-            }
-        });
+        addSubscription(RxEvent.EVENT_PICTURE_PAGING, rxEvent -> mBaseView.onPicturePaging((ImageUrl) rxEvent.getData()));
     }
 
     public void lazyLoad(final ImageUrl imageUrl) {
@@ -172,30 +166,24 @@ public class ReaderPresenter extends BasePresenter<ReaderView> {
     public void savePicture(InputStream inputStream, String url, String title, int page) {
         if (mBaseView == null) return;
         mCompositeSubscription.add(Storage.savePicture(mBaseView.getAppInstance().getContentResolver(),
-                mBaseView.getAppInstance().getDocumentFile(), inputStream, buildPictureName(title, page, url))
+                        mBaseView.getAppInstance().getDocumentFile(), inputStream, buildPictureName(title, page, url))
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<Uri>() {
-                    @Override
-                    public void accept(Uri uri) {
-                        if (mBaseView != null) {
-                            mBaseView.onPictureSaveSuccess(uri);
-                        }
+                .subscribe(uri -> {
+                    if (mBaseView != null) {
+                        mBaseView.onPictureSaveSuccess(uri);
                     }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) {
-                        throwable.printStackTrace();
-                        if (mBaseView != null) {
-                            mBaseView.onPictureSaveFail();
-                        }
+                }, throwable -> {
+                    throwable.printStackTrace();
+                    if (mBaseView != null) {
+                        mBaseView.onPictureSaveFail();
                     }
                 }));
     }
 
     private String buildPictureName(String title, int page, String url) {
         String suffix = StringUtils.split(url, "\\.", -1);
-        String suffixOriginal= suffix.split("\\?")[0].toLowerCase();
-        if (!pictureUtils.isPictureFormat(suffixOriginal)){
+        String suffixOriginal = suffix.split("\\?")[0].toLowerCase();
+        if (!pictureUtils.isPictureFormat(suffixOriginal)) {
             suffixOriginal = "jpg";
         }
         suffix = suffixOriginal;
@@ -214,91 +202,101 @@ public class ReaderPresenter extends BasePresenter<ReaderView> {
         RxBus.getInstance().post(new RxEvent(RxEvent.EVENT_SWITCH_NIGHT));
     }
 
+    /**
+     * 自动检测图片列表的页码起始值，统一修正为从 1 开始。
+     * 某些源站返回的页码可能从 0 开始，此方法会检测并整体偏移。
+     */
+    private void normalizePageNumbers(List<ImageUrl> list) {
+        if (list == null || list.isEmpty()) return;
+
+        int i = 1;
+        for (ImageUrl image : list) {
+            image.setNum(i);
+            i++;
+        }
+
+    }
+
     private void images(Observable<List<ImageUrl>> observable) {
         mCompositeSubscription.add(observable
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<List<ImageUrl>>() {
-                    @Override
-                    public void accept(List<ImageUrl> list) {
-                        if (mBaseView == null) {
-                            status = LOAD_NULL;
-                            return;
-                        }
-                        mImageUrlManager.updateOrInsert(list);
+                .subscribe(list -> {
+                    if (mBaseView == null) {
+                        status = LOAD_NULL;
+                        return;
+                    }
+
+                    mImageUrlManager.updateOrInsert(list);
+                    Chapter chapter;
+                    switch (status) {
+                        case LOAD_INIT:
+                            chapter = mReaderChapterManger.moveNext();
+                            chapter.setCount(list.size());
+                            if (!chapter.getTitle().equals(mComic.getTitle())) {
+                                mComic.setChapter(chapter.getTitle());
+                                mComicManager.update(mComic);
+                            }
+                            mBaseView.onChapterChange(chapter);
+                            mBaseView.onInitLoadSuccess(list, mComic.getPage(), mComic.getSource(), mComic.getLocal());
+                            break;
+                        case LOAD_PREV:
+                            chapter = mReaderChapterManger.movePrev();
+                            chapter.setCount(list.size());
+                            mBaseView.onPrevLoadSuccess(list);
+                            break;
+                        case LOAD_NEXT:
+                            chapter = mReaderChapterManger.moveNext();
+                            chapter.setCount(list.size());
+                            mBaseView.onNextLoadSuccess(list);
+                            break;
+                    }
+                    status = LOAD_NULL;
+                }, throwable -> {
+                    if (mBaseView == null) {
+                        status = LOAD_NULL;
+                        return;
+                    }
+                    try {
                         Chapter chapter;
+                        List<ImageUrl> list;
                         switch (status) {
                             case LOAD_INIT:
                                 chapter = mReaderChapterManger.moveNext();
-                                chapter.setCount(list.size());
-                                if (!chapter.getTitle().equals(mComic.getTitle())) {
-                                    mComic.setChapter(chapter.getTitle());
-                                    mComicManager.update(mComic);
+                                list = mImageUrlManager.getListImageUrl(chapter.getId());
+                                if (list != null && !list.isEmpty()) {
+                                    chapter.setCount(list.size());
+                                    if (!chapter.getTitle().equals(mComic.getTitle())) {
+                                        mComic.setChapter(chapter.getTitle());
+                                        mComicManager.update(mComic);
+                                    }
+                                    mBaseView.onChapterChange(chapter);
+                                    mBaseView.onInitLoadSuccess(list, mComic.getPage(), mComic.getSource(), mComic.getLocal());
                                 }
-                                mBaseView.onChapterChange(chapter);
-                                mBaseView.onInitLoadSuccess(list, mComic.getPage(), mComic.getSource(), mComic.getLocal());
                                 break;
                             case LOAD_PREV:
                                 chapter = mReaderChapterManger.movePrev();
-                                chapter.setCount(list.size());
-                                mBaseView.onPrevLoadSuccess(list);
+                                list = mImageUrlManager.getListImageUrl(chapter.getId());
+                                if (list != null && !list.isEmpty()) {
+                                    chapter.setCount(list.size());
+                                    mBaseView.onPrevLoadSuccess(list);
+                                }
                                 break;
                             case LOAD_NEXT:
                                 chapter = mReaderChapterManger.moveNext();
-                                chapter.setCount(list.size());
-                                mBaseView.onNextLoadSuccess(list);
+                                list = mImageUrlManager.getListImageUrl(chapter.getId());
+                                if (list != null && !list.isEmpty()) {
+                                    chapter.setCount(list.size());
+                                    mBaseView.onNextLoadSuccess(list);
+                                }
                                 break;
                         }
                         status = LOAD_NULL;
-                    }
-                }, new Consumer<Throwable>() {
-                    @Override
-                    public void accept(Throwable throwable) {
-                        if (mBaseView == null) {
-                            status = LOAD_NULL;
-                            return;
+                    } finally {
+                        if (mBaseView != null) {
+                            mBaseView.onParseError();
                         }
-                        try{
-                            Chapter chapter;
-                            List<ImageUrl> list;
-                            switch (status) {
-                                case LOAD_INIT:
-                                    chapter = mReaderChapterManger.moveNext();
-                                    list = mImageUrlManager.getListImageUrl(chapter.getId());
-                                    if (list!=null && list.size()!=0) {
-                                        chapter.setCount(list.size());
-                                        if (!chapter.getTitle().equals(mComic.getTitle())) {
-                                            mComic.setChapter(chapter.getTitle());
-                                            mComicManager.update(mComic);
-                                        }
-                                        mBaseView.onChapterChange(chapter);
-                                        mBaseView.onInitLoadSuccess(list, mComic.getPage(), mComic.getSource(), mComic.getLocal());
-                                    }
-                                    break;
-                                case LOAD_PREV:
-                                    chapter = mReaderChapterManger.movePrev();
-                                    list = mImageUrlManager.getListImageUrl(chapter.getId());
-                                    if (list!=null && list.size()!=0) {
-                                        chapter.setCount(list.size());
-                                        mBaseView.onPrevLoadSuccess(list);
-                                    }
-                                    break;
-                                case LOAD_NEXT:
-                                    chapter = mReaderChapterManger.moveNext();
-                                    list = mImageUrlManager.getListImageUrl(chapter.getId());
-                                    if (list!=null && list.size()!=0) {
-                                        chapter.setCount(list.size());
-                                        mBaseView.onNextLoadSuccess(list);
-                                    }
-                                    break;
-                            }
+                        if (status != LOAD_INIT && ++count < 2) {
                             status = LOAD_NULL;
-                        } finally {
-                            if (mBaseView != null) {
-                                mBaseView.onParseError();
-                            }
-                            if (status != LOAD_INIT && ++count < 2) {
-                                status = LOAD_NULL;
-                            }
                         }
                     }
                 }));
@@ -306,7 +304,7 @@ public class ReaderPresenter extends BasePresenter<ReaderView> {
 
     private static class ReaderChapterManger {
 
-        private Chapter[] array;
+        private final Chapter[] array;
         private int index;
         private int prev;
         private int next;

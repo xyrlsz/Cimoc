@@ -379,13 +379,13 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
                 Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF, -1.0f,
                 Animation.RELATIVE_TO_SELF, 0.0f);
         downAction.setDuration(300);
-        // SeekBar 内部会自动处理 valueFrom >= valueTo 的边界情况
-        mSeekBar.setValueFrom(1);
-        if ((int) mSeekBar.getValueTo() != max) {
-            mSeekBar.setValueTo(max);
-        }
-        // 确保值不小于 1（页面从 1 开始计数）
-        mSeekBar.setValue(Math.max(progress, 1));
+//        mSeekBar.setValueFrom(1);
+//        if ((int) mSeekBar.getValueTo() != max) {
+//            mSeekBar.setValueTo(max);
+//        }
+//        // 确保值不小于 1（页面从 1 开始计数）
+//        mSeekBar.setValue(Math.max(progress, 1));
+        mSeekBar.setRangeSafe(1, Math.max(max, 1), Math.max(progress, 1));
         mProgressLayout.startAnimation(upAction);
         mProgressLayout.setVisibility(View.VISIBLE);
         mBackLayout.startAnimation(downAction);
