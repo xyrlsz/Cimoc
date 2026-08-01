@@ -2,31 +2,18 @@ package com.xyrlsz.xcimocob.ui.activity;
 
 import android.content.Context;
 import android.content.Intent;
-import androidx.appcompat.widget.AppCompatSpinner;
-import android.view.View;
-import android.widget.AdapterView;
 
 import com.xyrlsz.xcimocob.R;
 import com.xyrlsz.xcimocob.global.Extra;
-import com.xyrlsz.xcimocob.manager.SourceManager;
-import com.xyrlsz.xcimocob.parser.Category;
-import com.xyrlsz.xcimocob.ui.adapter.CategoryAdapter;
-
-import java.util.ArrayList;
-import java.util.List;
-
-
+import com.xyrlsz.xcimocob.ui.fragment.CategoryFragment;
 
 /**
  * Created by Hiroshi on 2016/12/11.
+ * 分类浏览页：承载 CategoryFragment，提供独立的分类浏览入口。
  */
+public class CategoryActivity extends BackActivity {
 
-public class CategoryActivity extends BackActivity implements AdapterView.OnItemSelectedListener {
-
-    List<AppCompatSpinner> mSpinnerList;
-    List<View> mCategoryView;
-
-    private Category mCategory;
+    private static final String TAG_FRAGMENT_CATEGORY = "fragment_category";
 
     public static Intent createIntent(Context context, int source, String title) {
         Intent intent = new Intent(context, CategoryActivity.class);
@@ -36,80 +23,24 @@ public class CategoryActivity extends BackActivity implements AdapterView.OnItem
     }
 
     @Override
-    protected void initViewById() {
-        super.initViewById();
-        mSpinnerList = new ArrayList<>();
-        mSpinnerList.add(findViewById(R.id.category_spinner_subject));
-        mSpinnerList.add(findViewById(R.id.category_spinner_area));
-        mSpinnerList.add(findViewById(R.id.category_spinner_reader));
-        mSpinnerList.add(findViewById(R.id.category_spinner_year));
-        mSpinnerList.add(findViewById(R.id.category_spinner_progress));
-        mSpinnerList.add(findViewById(R.id.category_spinner_order));
-        mCategoryView = new ArrayList<>();
-        mCategoryView.add(findViewById(R.id.category_subject));
-        mCategoryView.add(findViewById(R.id.category_area));
-        mCategoryView.add(findViewById(R.id.category_reader));
-        mCategoryView.add(findViewById(R.id.category_year));
-        mCategoryView.add(findViewById(R.id.category_progress));
-        mCategoryView.add(findViewById(R.id.category_order));
-    }
-
-    @Override
     protected void initView() {
-        int source = getIntent().getIntExtra(Extra.EXTRA_SOURCE, -1);
-        if (mToolbar != null) {
-            mToolbar.setTitle(getIntent().getStringExtra(Extra.EXTRA_KEYWORD));
+        super.initView();
+        String title = getIntent().getStringExtra(Extra.EXTRA_KEYWORD);
+        if (mToolbarTitle != null) {
+            mToolbarTitle.setText(title != null ? title : getString(R.string.category));
         }
-        mCategory = SourceManager.getInstance(this).getParser(source).getCategory();
-        initSpinner();
-        findViewById(R.id.category_action_button).setOnClickListener(v -> onActionButtonClick());
+        addCategoryFragment();
     }
 
-    private void initSpinner() {
-        int[] type = new int[]{Category.CATEGORY_SUBJECT, Category.CATEGORY_AREA, Category.CATEGORY_READER,
-                Category.CATEGORY_YEAR, Category.CATEGORY_PROGRESS, Category.CATEGORY_ORDER};
-        for (int i = 0; i != type.length; ++i) {
-            if (mCategory.hasAttribute(type[i])) {
-                mCategoryView.get(i).setVisibility(View.VISIBLE);
-                if (!mCategory.isComposite()) {
-                    mSpinnerList.get(i).setOnItemSelectedListener(this);
-                }
-                mSpinnerList.get(i).setAdapter(new CategoryAdapter(this, mCategory.getAttrList(type[i])));
-            }
+    private void addCategoryFragment() {
+        CategoryFragment fragment = (CategoryFragment) getSupportFragmentManager()
+                .findFragmentByTag(TAG_FRAGMENT_CATEGORY);
+        if (fragment == null) {
+            fragment = new CategoryFragment();
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.category_fragment_container, fragment, TAG_FRAGMENT_CATEGORY)
+                    .commit();
         }
-    }
-
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        for (AppCompatSpinner spinner : mSpinnerList) {
-            if (position == 0) {
-                spinner.setEnabled(true);
-            } else if (!parent.equals(spinner)) {
-                spinner.setEnabled(false);
-            }
-        }
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-    }
-
-    void onActionButtonClick() {
-        String[] args = new String[mSpinnerList.size()];
-        for (int i = 0; i != args.length; ++i) {
-            args[i] = getSpinnerValue(mSpinnerList.get(i));
-        }
-        int source = getIntent().getIntExtra(Extra.EXTRA_SOURCE, -1);
-        String format = mCategory.getFormat(args);
-        Intent intent = ResultActivity.createIntent(this, format, source, ResultActivity.LAUNCH_MODE_CATEGORY);
-        startActivity(intent);
-    }
-
-    private String getSpinnerValue(AppCompatSpinner spinner) {
-        if (!spinner.isShown()) {
-            return null;
-        }
-        return ((CategoryAdapter) spinner.getAdapter()).getValue(spinner.getSelectedItemPosition());
     }
 
     @Override
