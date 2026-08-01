@@ -45,7 +45,6 @@ import com.xyrlsz.xcimocob.utils.TrustAllSslUtils;
 import com.xyrlsz.xcimocob.utils.ZaiManhuaSignUtils;
 
 import java.io.File;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import io.objectbox.BoxStore;
@@ -392,15 +391,28 @@ public class App extends Application implements AppGetter, Thread.UncaughtExcept
         }
         try {
             CimocDocumentFile doc = getDocumentFile();
-            CimocDocumentFile dir = DocumentUtils.getOrCreateSubDirectory(doc, "log");
-            CimocDocumentFile file = DocumentUtils.getOrCreateFile(
-                    Objects.requireNonNull(dir), StringUtils.getDateStringWithSuffix("log"));
-            DocumentUtils.writeStringToFile(
-                    getContentResolver(), Objects.requireNonNull(file), sb.toString());
+            if (doc == null) {
+                Log.e("UncaughtException", "Storage root is null, skip saving crash log");
+            } else {
+                CimocDocumentFile dir = DocumentUtils.getOrCreateSubDirectory(doc, "log");
+                if (dir == null) {
+                    Log.e("UncaughtException", "Failed to get/create log directory, skip saving crash log");
+                } else {
+                    CimocDocumentFile file = DocumentUtils.getOrCreateFile(
+                            dir, StringUtils.getDateStringWithSuffix("log"));
+                    if (file == null) {
+                        Log.e("UncaughtException", "Failed to get/create crash log file, skip saving crash log");
+                    } else {
+                        DocumentUtils.writeStringToFile(getContentResolver(), file, sb.toString());
+                    }
+                }
+            }
         } catch (Exception ex) {
             Log.e("UncaughtException", "Error while saving crash log", ex);
         }
-        mActivityLifecycle.clear();
+        if (mActivityLifecycle != null) {
+            mActivityLifecycle.clear();
+        }
         System.exit(1);
     }
 

@@ -6,7 +6,7 @@ android {
     ndkVersion "29.0.14206865"
 
     defaultConfig {
-        minSdkVersion 26
+        minSdkVersion 21
         consumerProguardFiles 'proguard-rules.pro'
 
         // QuickJS (bellard/quickjs) 支持的 ABI

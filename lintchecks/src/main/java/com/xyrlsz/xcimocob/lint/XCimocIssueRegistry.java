@@ -18,8 +18,7 @@ import java.util.List;
  * <p>
  * 本 Lint 模块覆盖以下模式：
  * <ul>
- *   <li>R8Reflection - 检测反射 API（Class.forName、Method.invoke、Field.set 等）</li>
- *   <li>R8DynamicProxy - 检测动态代理（Proxy.newProxyInstance）</li>
+ *   <li>R8Reflection - 检测反射 API（Class.forName、Method.invoke、Field.set 等）</li> *   <li>R8LibraryReflection - 检测【依赖库字节码】中的反射 API（需开启 checkDependencies）</li> *   <li>R8DynamicProxy - 检测动态代理（Proxy.newProxyInstance）</li>
  *   <li>R8JavascriptInterface - 检测 WebView @JavascriptInterface 注解</li>
  *   <li>R8InnerClassReflection - 检测 Class.forName 访问内部类（需 InnerClasses 属性）</li>
  *   <li>R8MissingSerializedName - 检测 Gson 数据类缺少 @SerializedName 注解</li>
@@ -45,6 +44,7 @@ public final class XCimocIssueRegistry extends IssueRegistry {
     public List<Issue> getIssues() {
         return Arrays.asList(
                 ReflectionDetector.ISSUE_REFLECTION_API,
+                LibraryReflectionDetector.ISSUE_LIBRARY_REFLECTION,
                 ReflectionDetector.ISSUE_DYNAMIC_PROXY,
                 ReflectionDetector.ISSUE_JAVASCRIPT_INTERFACE,
                 ReflectionDetector.ISSUE_INNER_CLASS_REFLECTION,

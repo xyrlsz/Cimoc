@@ -47,7 +47,7 @@ android {
     }
     defaultConfig {
         applicationId "com.xyrlsz.xcimocob"
-        minSdkVersion 26
+        minSdkVersion 21
         targetSdkVersion 37
         versionCode buildVersion // 动态生成的版本号
         versionName version
@@ -114,7 +114,7 @@ android {
             optimization {
                 enable = true
             }
-            proguardFiles 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig = signingConfigs.release
             buildConfigField "boolean", "USE_FINAL_RESOURCE_IDS", "true"
         }
@@ -147,21 +147,25 @@ android {
     lint {
         abortOnError true
         fatal "NewApi"
+        // 分析依赖库（AAR）字节码，供自定义 Lint 检测器（如 R8LibraryReflection）使用
+        checkDependencies = true
     }
 }
 
 dependencies {
     lintChecks project(':lintchecks')
-    // QuickJS 引擎（JNI 独立库模块）
     implementation project(':quickjs')
+
     implementation 'androidx.constraintlayout:constraintlayout:2.2.2'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation fileTree("libs")
     implementation 'androidx.legacy:legacy-support-v13:1.0.0'
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
-    implementation 'com.google.android.material:material:1.14.0'
-    implementation 'androidx.activity:activity-ktx:1.13.0'
+    //noinspection GradleDependency
+    implementation 'com.google.android.material:material:1.13.0'
+    //noinspection GradleDependency
+    implementation 'androidx.activity:activity-ktx:1.11.0'
     implementation 'io.objectbox:objectbox-android:5.4.2'
     annotationProcessor 'io.objectbox:objectbox-processor:5.4.2'
     implementation 'com.squareup.okhttp3:okhttp:5.4.0'
@@ -180,7 +184,8 @@ dependencies {
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.2'
     api 'com.google.guava:guava:33.6.0-android'
     implementation 'com.google.code.gson:gson:2.14.0'
-    implementation "androidx.core:core-ktx:1.19.0"
+    //noinspection GradleDependency
+    implementation "androidx.core:core-ktx:1.17.0"
     implementation 'com.github.xyrlsz:android-opencc:1.4.2'
     implementation('com.github.thegrizzlylabs:sardine-android:0.9') {
         exclude group: 'xpp3', module: 'xpp3'
