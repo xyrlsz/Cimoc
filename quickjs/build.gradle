@@ -1,0 +1,35 @@
+apply plugin: 'com.android.library'
+
+android {
+    namespace "com.xyrlsz.quickjs"
+    compileSdk 37
+    ndkVersion "29.0.14206865"
+
+    defaultConfig {
+        minSdkVersion 26
+        consumerProguardFiles 'proguard-rules.pro'
+
+        // QuickJS (bellard/quickjs) 支持的 ABI
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+        }
+
+        externalNativeBuild {
+            cmake {
+                // 纯 C 实现，不需要 C++ STL，避免打包 libc++_shared.so
+                arguments "-DANDROID_STL=none"
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+        }
+    }
+}

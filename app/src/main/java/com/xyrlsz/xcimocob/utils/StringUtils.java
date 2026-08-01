@@ -1,5 +1,11 @@
 package com.xyrlsz.xcimocob.utils;
 
+import android.annotation.SuppressLint;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonSyntaxException;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -11,6 +17,7 @@ import java.util.regex.Pattern;
  * Created by Hiroshi on 2016/9/3.
  */
 public class StringUtils {
+    private static final Gson gson = new Gson();
 
     public static boolean endWith(String str, String... args) {
         if (str != null) {
@@ -132,6 +139,64 @@ public class StringUtils {
             return null;
         }
         return str.replaceAll("\\D", "");
+    }
+
+    public static String extractJson(String input) {
+        if (input == null) return null;
+
+        int start = -1;
+        int braceCount = 0;
+        int bracketCount = 0;
+        boolean inString = false;
+        char prev = 0;
+
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+
+            // 1. 定位起始位置（第一个 { 或 [）
+            if (start == -1) {
+                if (c == '{' || c == '[') {
+                    start = i;
+                    if (c == '{') braceCount++;
+                    else bracketCount++;
+                }
+                continue;
+            }
+
+            // 2. 开始计数（必须处理字符串内的干扰符号）
+            // 遇到双引号且前一个字符不是反斜杠，则翻转字符串状态
+            if (c == '"' && prev != '\\') {
+                inString = !inString;
+            }
+
+            if (!inString) {
+                if (c == '{') braceCount++;
+                else if (c == '}') braceCount--;
+                else if (c == '[') bracketCount++;
+                else if (c == ']') bracketCount--;
+            }
+
+            // 3. 判断是否回到根级别（计数归零）
+            if (braceCount == 0 && bracketCount == 0) {
+                // 确保结束的符号与起始符号匹配
+                char startChar = input.charAt(start);
+                if ((startChar == '{' && c == '}') || (startChar == '[' && c == ']')) {
+                    try {
+                        String candidate = input.substring(start, i + 1);
+                        JsonElement res = gson.fromJson(candidate, JsonElement.class);
+                        if (res.isJsonObject()) {
+                            return candidate; // 合法则返回
+                        }
+                    } catch (JsonSyntaxException e) {
+                        // 极少情况：如果起始符误判（如字符串里有个单独的 { 被当成开头），
+                        // 但计数法几乎不会误判，若真出错则返回 null
+                        return null;
+                    }
+                }
+            }
+            prev = c;
+        }
+        return null; // 未找到完整 JSON
     }
 
 }

@@ -155,7 +155,7 @@ public class ManHuaGui extends MangaParser {
                 packed = packed.replace(replaceable, StringUtils.format("'%s'.split('|')", real));
                 String result = DecryptionUtils.evalDecrypt(packed);
 
-                String jsonString = result.substring(12, result.length() - 12);
+                String jsonString = StringUtils.extractJson(result);
                 JSONObject object = new JSONObject(jsonString);
                 String chapterId = object.getString("cid");
                 String path = object.getString("path");

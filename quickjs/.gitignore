@@ -1,0 +1,11 @@
+# ============ 构建产物 ============
+build/
+.cxx/
+.externalNativeBuild/
+
+# ============ IDE ============
+.idea/
+*.iml
+
+# ============ 本地配置 ============
+local.properties

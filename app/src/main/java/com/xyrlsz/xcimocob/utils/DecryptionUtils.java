@@ -2,9 +2,7 @@ package com.xyrlsz.xcimocob.utils;
 
 import android.util.Base64;
 
-import org.mozilla.javascript.ClassShutter;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Scriptable;
+import com.xyrlsz.quickjs.QuickJSEngine;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -57,8 +55,6 @@ public class DecryptionUtils {
     }
 
     /**
-     * 直接执行一段js，这！非！常！危！险！ 虽然尝试屏蔽了大部分Java方法的调用，但是仍存在安全隐患，请各位维护者尽量尝试使用正则或其他方式来获取结果。
-     *
      * @param jsCode js代码
      */
     public static String evalDecrypt(String jsCode) {
@@ -66,53 +62,21 @@ public class DecryptionUtils {
     }
 
     /**
-     * 直接执行一段js，这！非！常！危！险！ 虽然尝试屏蔽了大部分Java方法的调用，但是仍存在安全隐患，请各位维护者尽量尝试使用正则或其他方式来获取结果。
+     * 执行一段 JS 脚本，并返回指定全局变量的字符串值（如 DM5 的 "newImgs"）。
      *
      * @param jsCode  js代码
      * @param varName 返回的变量
      */
-    @Deprecated
     public static String evalDecrypt(String jsCode, String varName) {
-        Context rhino = Context.enter();
-        rhino.setOptimizationLevel(-1);
-        Scriptable scope = rhino.initSafeStandardObjects();
-        Context.ClassShutterSetter setter = rhino.getClassShutterSetter();
-        if (setter != null) {
-            setter.setClassShutter(new ClassShutter() {
-                //指定在JS中可以调用Java的类，在本漫画爬虫场景中不会与Java交互，请保持返回false以保证安全
-                public boolean visibleToScripts(String className) {
-
-
-                    return false;
-                }
-            });
-        }
-
-
+        QuickJSEngine engine = new QuickJSEngine();
         try {
-            Object object = rhino.evaluateString(scope, jsCode, null, 1, null);
-            if (varName == null) {
-                return Context.toString(object);
-            } else {
-                Object jsObject = scope.get(varName, scope);
-                return Context.toString(jsObject);
-
-//            NativeArray array=(NativeArray) jsObject;
-//            return String.join((Array<String>) array.toArray());
-//            return String.join(",",(List<String>)jsObject);
-                //这个竟然需要api26，喵喵喵??
-//            String resault = "";
-//            for (String s : (List<String>) jsObject) {
-//                resault += (s + ',');
-//            }
-//            return resault.substring(0, resault.length() - 1);
-//            // 我也不想这么写😭
-            }
+            return engine.evaluate(jsCode, varName);
         } catch (Exception e) {
             e.printStackTrace();
             return "";
+        } finally {
+            engine.close();
         }
-
     }
 
     public static String urlDecrypt(String str) {

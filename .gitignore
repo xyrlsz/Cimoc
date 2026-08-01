@@ -1,38 +1,53 @@
-# Gradle files
+# ============ Gradle files ============
 .gradle/
 build/
 
-# Built application files
-*.apk
-*.ap_
-
-# Intellij
-*.iml
-.idea/
-
-# Local configuration file (sdk path, etc)
+# ============ Local configuration file (sdk path, etc) ============
 local.properties
 /keystore.properties
+/gradle.properties
 
-# Android Studio captures folder
+# ============ Log/OS Files ============
+*.log
+
+# ============ Android Studio generated files and folders ============
 captures/
+.externalNativeBuild/
+.cxx/
+*.aab
+*.apk
+*.ap_
+output-metadata.json
 
-# Keystore files
-# *.jks
+# ============ IntelliJ ============
+*.iml
+.idea/
+misc.xml
+deploymentTargetDropDown.xml
+render.experimental.xml
 
-# Android Studio Navigation editor temp files
+# ============ Keystore files ============
+*.jks
+*.keystore
+
+# ============ Google Services (e.g. APIs or Firebase) ============
+google-services.json
+
+# ============ Android Profiling ============
+*.hprof
+
+# ============ Android Studio Navigation editor temp files ============
 .navigation/
 
-# Java class files
+# ============ Java class files ============
 *.class
 
-
-/gradle.properties
+# ============ 项目特有 ============
 /app/src/main/BrowserFilter-data.xml
 /app/debug/
 app/libs/xyropencc-sources.jar
 app/libs/xyropencc.aar
 data_server/xcimoc-data-server.exe
-data_server/data/cimoc.db
 data_server/xcimoc-data-server.exe~
+data_server/data/cimoc.db
 release_body.md

@@ -45,7 +45,7 @@ forked from https://github.com/Haleydu/Cimoc
 - [Jsoup](https://github.com/jhy/jsoup)
 - [RxJava](https://github.com/ReactiveX/RxJava)
 - [RxAndroid](https://github.com/ReactiveX/RxAndroid)
-- [Rhino](https://github.com/mozilla/rhino)
+- [QuickJS](https://github.com/bellard/quickjs)
 <!-- - [AppUpdater](https://gitee.com/jenly1314/AppUpdater) -->
 - [android-opencc](https://github.com/xyrlsz/android-opencc)
 - [sardine-android](https://github.com/thegrizzlylabs/sardine-android)

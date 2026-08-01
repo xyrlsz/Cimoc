@@ -57,6 +57,11 @@ android {
 
         buildConfigField "String", "REPOSITORIE_NAME", '"XCimoc"'
         buildConfigField "String", "OWNER_NAME", '"xyrlsz"'
+
+        // 最终 APK 打包的 ABI 范围（原生库来自 :quickjs 模块），与 splits.abi 保持一致
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
+        }
     }
 
     signingConfigs {
@@ -147,6 +152,8 @@ android {
 
 dependencies {
     lintChecks project(':lintchecks')
+    // QuickJS 引擎（JNI 独立库模块）
+    implementation project(':quickjs')
     implementation 'androidx.constraintlayout:constraintlayout:2.2.2'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation fileTree("libs")
@@ -158,7 +165,6 @@ dependencies {
     implementation 'io.objectbox:objectbox-android:5.4.2'
     annotationProcessor 'io.objectbox:objectbox-processor:5.4.2'
     implementation 'com.squareup.okhttp3:okhttp:5.4.0'
-    implementation 'org.mozilla:rhino:1.9.1'
 
     implementation 'com.facebook.fresco:fresco:3.7.0'
     implementation 'com.facebook.fresco:middleware:3.7.0'

@@ -102,9 +102,6 @@ def extraKeepClasses = [
     "com.xyrlsz.opencc.android.lib.ChineseConverter",
     // JCC 简繁转换
     "taobe.tec.jcc.JChineseConvertor",
-    // Rhino JavaScript 引擎
-    "org.mozilla.javascript.Scriptable",
-    "org.mozilla.javascript.Context",
 ]
 mustKeepClasses.addAll(extraKeepClasses)
 

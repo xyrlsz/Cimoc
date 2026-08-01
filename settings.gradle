@@ -1,5 +1,6 @@
 include ':app'
 include ':lintchecks'
+include ':quickjs'
 
 long beginOfSetting = System.currentTimeMillis()
 def beginOfConfig
