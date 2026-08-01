@@ -9,7 +9,6 @@ android {
         minSdkVersion 21
         consumerProguardFiles 'proguard-rules.pro'
 
-        // QuickJS (bellard/quickjs) 支持的 ABI
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
         }

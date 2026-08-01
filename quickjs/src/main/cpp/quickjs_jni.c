@@ -1,7 +1,7 @@
 /*
  * QuickJS JavaScript 引擎的 Android JNI 封装
  *
- * 底层引擎：https://github.com/bellard/quickjs (MIT License, Fabrice Bellard)
+ * 底层引擎：https://github.com/quickjs-ng/quickjs (MIT License, QuickJS-NG)
  *
  * 特性：
  *  - 每个 JSRuntime 相互隔离（独立堆、单线程模型）
