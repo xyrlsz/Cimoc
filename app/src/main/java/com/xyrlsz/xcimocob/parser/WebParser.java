@@ -26,7 +26,8 @@ public class WebParser {
     // 参数（可调）
     private static final int MAX_SCROLL = 512; // 最多滚动次数
     private static final int SAME_LIMIT = 3; // 高度连续不变次数
-    private static final int SCROLL_DELAY = 50;
+    private static final int SCROLL_DELAY = 50; // 出错重试间隔
+    private static final int BOTTOM_WAIT = 200; // 滚动到底后等待内容渲染的时间
     /**
      * 总超时时间：120 秒后强制完成，防止永久阻塞
      */
@@ -210,7 +211,8 @@ public class WebParser {
     }
 
     /**
-     * 核心：智能滚动
+     * 核心：智能滚动——逐步向下滚动触发懒加载（保证每段内容都经过视口），
+     * 滚动到底后等待内容渲染，若高度继续增长则接着滚，直到高度连续不变或达到上限
      */
     private void autoScroll() {
         if (destroyed || mWebView == null) return;
@@ -237,12 +239,8 @@ public class WebParser {
 
                 double distanceToBottom = currentScrollHeight - (currentScrollTop + clientHeight);
 
-                if (distanceToBottom <= 100) {
-                    getPageHtml();
-                    return;
-                }
-
-                if (currentScrollHeight == lastHeight) {
+                // 记录内容高度是否仍在变化
+                if ((int) currentScrollHeight == lastHeight) {
                     sameCount++;
                 } else {
                     sameCount = 0;
@@ -251,13 +249,20 @@ public class WebParser {
 
                 scrollCount++;
 
+                // 高度连续不变或达到上限：加载完成
                 if (sameCount >= SAME_LIMIT || scrollCount >= MAX_SCROLL) {
                     getPageHtml();
                     return;
                 }
 
-                int nextDelay = (distanceToBottom < 1000) ? 200 : 50;
+                if (distanceToBottom <= 100) {
+                    // 已到当前底部：等待内容渲染，若高度继续增长则接着滚，否则多次确认后完成
+                    new Handler(Looper.getMainLooper()).postDelayed(this::autoScroll, BOTTOM_WAIT);
+                    return;
+                }
 
+                // 继续滚动，接近底部时放慢速度给懒加载留出时间
+                int nextDelay = (distanceToBottom < 1000) ? 200 : 50;
                 new Handler(Looper.getMainLooper()).postDelayed(this::autoScroll, nextDelay);
 
             } catch (Exception ignored) {
