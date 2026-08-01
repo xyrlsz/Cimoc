@@ -134,7 +134,9 @@ public class FavoriteFragment extends GridFragment implements FavoriteView {
 
     @Override
     public void OnComicRestore(List<Object> list) {
-        mGridAdapter.addAll(mGridAdapter.findFirstNotHighlight(), list);
+        // 去重合并：自动同步每次全量对账都会推送全部收藏，
+        // 直接 addAll 会把已显示的同名漫画再次追加导致重复显示
+        mGridAdapter.addAllIfNotExist(mGridAdapter.findFirstNotHighlight(), list);
     }
 
     @Override

@@ -56,6 +56,33 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<RecyclerView.V
         }
     }
 
+    /**
+     * 去重合并添加（用于同步恢复等场景）。
+     * 已存在（按 equals 判等）的项用新数据原位替换，避免重复显示；
+     * 不存在的项从 location 开始依次插入。
+     */
+    public void addAllIfNotExist(int location, Collection<T> collection) {
+        if (collection == null || collection.isEmpty()) {
+            return;
+        }
+        int insertPos = location;
+        for (T item : collection) {
+            int index = mDataSet.indexOf(item);
+            if (index != -1) {
+                // 已存在 → 原位替换（刷新标题/封面等元信息）
+                mDataSet.set(index, item);
+                mOriginalData.set(index, item);
+                notifyItemChanged(index);
+            } else {
+                // 不存在 → 插入
+                mDataSet.add(insertPos, item);
+                mOriginalData.add(insertPos, item);
+                notifyItemInserted(insertPos);
+                insertPos++;
+            }
+        }
+    }
+
     public boolean exist(T data) {
         return mDataSet.indexOf(data) != -1;
     }

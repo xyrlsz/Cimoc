@@ -106,7 +106,9 @@ public class HistoryFragment extends GridFragment implements HistoryView {
 
     @Override
     public void OnComicRestore(List<Object> list) {
-        mGridAdapter.addAll(0, list);
+        // 去重合并：自动同步每次全量对账都会推送全部历史，
+        // 直接 addAll 会把已显示的同名漫画再次追加导致重复显示
+        mGridAdapter.addAllIfNotExist(0, list);
     }
 
     @Override
