@@ -100,6 +100,12 @@ func (h *ComicHandler) Sync(c *gin.Context) {
 		delResult := database.DB.Where("user_id = ? AND source = ? AND cid = ?",
 			userID, item.Source, item.Cid).Limit(1).Find(&delRecord)
 
+		// favResolved/hisResolved 标记本次请求是否已"解决"对应墓碑（客户端确认清除）。
+		// 已解决的墓碑不应再被底部的 recordDelete 重新创建，否则墓碑永不清理，
+		// 且该漫画将永远无法重新收藏/恢复（服务器会一直强制清除）。
+		favResolved := false
+		hisResolved := false
+
 		if delResult.RowsAffected > 0 {
 			// 有其他设备删除了此漫画的数据，检查是否需要跳过
 			if delRecord.DeleteFav && item.Favorite != nil && !item.ClearFavorite {
@@ -114,23 +120,21 @@ func (h *ComicHandler) Sync(c *gin.Context) {
 				item.ClearHistory = true
 				log.Printf("多端冲突: 漫画 %d:%s 的历史被其他设备删除，拒绝恢复", item.Source, item.Cid)
 			}
-			// 如果两边都已清除，从删除记录表中移除（冲突已解决）
-			if (delRecord.DeleteFav && item.ClearFavorite) && (delRecord.DeleteHis && item.ClearHistory) {
-				database.DB.Delete(&delRecord)
-			} else if delRecord.DeleteFav && item.ClearFavorite {
+
+			// 冲突解决：客户端确认清除（clear_xxx=true）即视为认可该删除，
+			// 从墓碑中移除对应标志；两个标志都移除后删除整条墓碑记录。
+			if delRecord.DeleteFav && item.ClearFavorite {
 				delRecord.DeleteFav = false
-				if !delRecord.DeleteHis {
-					database.DB.Delete(&delRecord)
-				} else {
-					database.DB.Save(&delRecord)
-				}
-			} else if delRecord.DeleteHis && item.ClearHistory {
+				favResolved = true
+			}
+			if delRecord.DeleteHis && item.ClearHistory {
 				delRecord.DeleteHis = false
-				if !delRecord.DeleteFav {
-					database.DB.Delete(&delRecord)
-				} else {
-					database.DB.Save(&delRecord)
-				}
+				hisResolved = true
+			}
+			if !delRecord.DeleteFav && !delRecord.DeleteHis {
+				database.DB.Delete(&delRecord)
+			} else {
+				database.DB.Save(&delRecord)
 			}
 		}
 
@@ -166,12 +170,15 @@ func (h *ComicHandler) Sync(c *gin.Context) {
 			}
 
 			// Client explicit clear history — always honor and record deletion
+			// （本次请求已解决墓碑的，不再重复记录，避免墓碑被重新创建）
 			if item.ClearHistory {
 				if existing.History != nil {
 					existing.History = nil
 					needsUpdate = true
 				}
-				h.recordDelete(userID, item.Source, item.Cid, false, true)
+				if !hisResolved {
+					h.recordDelete(userID, item.Source, item.Cid, false, true)
+				}
 			}
 
 			// Client explicit clear favorite — always honor and record deletion
@@ -180,7 +187,9 @@ func (h *ComicHandler) Sync(c *gin.Context) {
 					existing.Favorite = nil
 					needsUpdate = true
 				}
-				h.recordDelete(userID, item.Source, item.Cid, true, false)
+				if !favResolved {
+					h.recordDelete(userID, item.Source, item.Cid, true, false)
+				}
 			}
 
 			if needsUpdate {
@@ -197,10 +206,10 @@ func (h *ComicHandler) Sync(c *gin.Context) {
 			// New comic — create (unless it's just a delete marker with no data)
 			if item.Favorite == nil && item.History == nil {
 				// 纯删除标记（clear_history/clear_favorite），没有实际数据，记录删除即可
-				if item.ClearHistory {
+				if item.ClearHistory && !hisResolved {
 					h.recordDelete(userID, item.Source, item.Cid, false, true)
 				}
-				if item.ClearFavorite {
+				if item.ClearFavorite && !favResolved {
 					h.recordDelete(userID, item.Source, item.Cid, true, false)
 				}
 				skipped++

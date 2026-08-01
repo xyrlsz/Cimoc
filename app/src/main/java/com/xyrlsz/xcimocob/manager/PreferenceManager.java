@@ -3,7 +3,11 @@ package com.xyrlsz.xcimocob.manager;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Hiroshi on 2016/8/4.
@@ -167,6 +171,110 @@ public class PreferenceManager {
 
     // HTTP 缓存清理标记（首次启动或版本升级时清理一次）
     public static final String PREF_HTTP_CACHE_CLEANUP = "pref_http_cache_cleanup";
+
+    /**
+     * 需要跨设备同步的用户设置 key 白名单。
+     * <p>
+     * 只包含真正的用户偏好；设备本地状态一律不在其中（事件游标、client_id、
+     * 删除标记、版本号、缓存清理标记、账号、服务器地址、来源解密参数、
+     * 下载路径等），避免内部状态被上传并在其他设备上互相覆盖。
+     */
+    public static final Set<String> SYNCABLE_SETTINGS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+            // ---- 阅读器 ----
+            PREF_READER_MODE,
+            PREF_READER_KEEP_BRIGHT,
+            PREF_READER_HIDE_INFO,
+            PREF_READER_HIDE_NAV,
+            PREF_READER_BAN_DOUBLE_CLICK,
+            PREF_READER_PAGING,
+            PREF_READER_CLOSEAUTORESIZEIMAGE,
+            PREF_READER_PAGING_REVERSE,
+            PREF_READER_PAGING_STREAM_OFF,
+            PREF_READER_WHITE_EDGE,
+            PREF_READER_WHITE_BACKGROUND,
+            PREF_READER_SCALE_FACTOR,
+            PREF_READER_CONTROLLER_TRIG_THRESHOLD,
+            PREF_READER_VOLUME_KEY_CONTROLS_PAGE_TURNING,
+            // ---- 分页模式配置 ----
+            PREF_READER_PAGE_TURN,
+            PREF_READER_PAGE_ORIENTATION,
+            PREF_READER_PAGE_CLICK_LEFT,
+            PREF_READER_PAGE_CLICK_TOP,
+            PREF_READER_PAGE_CLICK_MIDDLE,
+            PREF_READER_PAGE_CLICK_BOTTOM,
+            PREF_READER_PAGE_CLICK_RIGHT,
+            PREF_READER_PAGE_CLICK_UP,
+            PREF_READER_PAGE_CLICK_DOWN,
+            PREF_READER_PAGE_JOY_LT,
+            PREF_READER_PAGE_JOY_RT,
+            PREF_READER_PAGE_JOY_A,
+            PREF_READER_PAGE_JOY_B,
+            PREF_READER_PAGE_JOY_X,
+            PREF_READER_PAGE_JOY_Y,
+            PREF_READER_PAGE_JOY_LEFT,
+            PREF_READER_PAGE_JOY_RIGHT,
+            PREF_READER_PAGE_JOY_UP,
+            PREF_READER_PAGE_JOY_DOWN,
+            PREF_READER_PAGE_LONG_CLICK_LEFT,
+            PREF_READER_PAGE_LONG_CLICK_TOP,
+            PREF_READER_PAGE_LONG_CLICK_MIDDLE,
+            PREF_READER_PAGE_LONG_CLICK_BOTTOM,
+            PREF_READER_PAGE_LONG_CLICK_RIGHT,
+            PREF_READER_PAGE_LOAD_PREV,
+            PREF_READER_PAGE_LOAD_NEXT,
+            PREF_READER_PAGE_TRIGGER,
+            PREF_READER_PAGE_BAN_TURN,
+            PREF_READER_PAGE_QUICK_TURN,
+            // ---- 卷纸模式配置 ----
+            PREF_READER_STREAM_TURN,
+            PREF_READER_STREAM_ORIENTATION,
+            PREF_READER_STREAM_CLICK_LEFT,
+            PREF_READER_STREAM_CLICK_TOP,
+            PREF_READER_STREAM_CLICK_MIDDLE,
+            PREF_READER_STREAM_CLICK_BOTTOM,
+            PREF_READER_STREAM_CLICK_RIGHT,
+            PREF_READER_STREAM_CLICK_UP,
+            PREF_READER_STREAM_CLICK_DOWN,
+            PREF_READER_STREAM_JOY_LT,
+            PREF_READER_STREAM_JOY_RT,
+            PREF_READER_STREAM_JOY_A,
+            PREF_READER_STREAM_JOY_B,
+            PREF_READER_STREAM_JOY_X,
+            PREF_READER_STREAM_JOY_Y,
+            PREF_READER_STREAM_JOY_LEFT,
+            PREF_READER_STREAM_JOY_RIGHT,
+            PREF_READER_STREAM_JOY_UP,
+            PREF_READER_STREAM_JOY_DOWN,
+            PREF_READER_STREAM_LONG_CLICK_LEFT,
+            PREF_READER_STREAM_LONG_CLICK_TOP,
+            PREF_READER_STREAM_LONG_CLICK_MIDDLE,
+            PREF_READER_STREAM_LONG_CLICK_BOTTOM,
+            PREF_READER_STREAM_LONG_CLICK_RIGHT,
+            PREF_READER_STREAM_LOAD_PREV,
+            PREF_READER_STREAM_LOAD_NEXT,
+            PREF_READER_STREAM_INTERVAL,
+            // ---- 通用设置 ----
+            PREF_NIGHT,
+            PREF_UPDATE_APP_AUTO,
+            PREF_OTHER_CHECK_UPDATE,
+            PREF_OTHER_CHECK_SOFTWARE_UPDATE,
+            PREF_OTHER_CONNECT_ONLY_WIFI,
+            PREF_OTHER_LOADCOVER_ONLY_WIFI,
+            PREF_OTHER_THEME,
+            PREF_OTHER_DARK_MOD,
+            PREF_OTHER_LAUNCH,
+            PREF_OTHER_NIGHT_ALPHA,
+            PREF_OTHER_SHOW_TOPBAR,
+            PREF_DOWNLOAD_THREAD,
+            PREF_SEARCH_AUTO_COMPLETE,
+            PREF_CHAPTER_BUTTON_MODE,
+            PREF_CHAPTER_ASCEND_MODE,
+            PREF_DETAIL_TEXT_ST,
+            PREF_ST_ENGINE,
+            PREF_BACKUP_SAVE_COMIC,
+            PREF_BACKUP_SAVE_COMIC_CLOUD,
+            PREF_BACKUP_SAVE_COMIC_COUNT
+    )));
 
     private static final String PREFERENCES_NAME = "cimoc_preferences";
     private final SharedPreferences mSharedPreferences;

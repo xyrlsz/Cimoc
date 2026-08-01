@@ -255,6 +255,8 @@ func (h *EventHandler) applyFavorite(userID uint, p *models.FavoritePayload) boo
 				}
 			}
 			database.DB.Save(&comic)
+			// 重新收藏成功 → 移除删除墓碑
+			h.resolveTombstone(userID, p.Source, p.Cid, true, false)
 		}
 	} else {
 		// 新漫画 → 创建
@@ -270,6 +272,7 @@ func (h *EventHandler) applyFavorite(userID uint, p *models.FavoritePayload) boo
 			ChapterCount: p.ChapterCount,
 		}
 		database.DB.Create(&comic)
+		h.resolveTombstone(userID, p.Source, p.Cid, true, false)
 	}
 	return true
 }
@@ -281,6 +284,8 @@ func (h *EventHandler) applyUnfavorite(userID uint, p *models.UnfavoritePayload)
 	database.DB.Model(&models.Comic{}).
 		Where("user_id = ? AND source = ? AND cid = ?", userID, p.Source, p.Cid).
 		Update("favorite", nil)
+	// 记录删除墓碑：防止其他设备通过全量上传把已删除的收藏重新上传
+	h.recordTombstone(userID, p.Source, p.Cid, true, false)
 	return true
 }
 
@@ -301,6 +306,8 @@ func (h *EventHandler) applyRead(userID uint, p *models.ReadPayload) bool {
 			comic.Page = &pageVal
 			comic.Last = p.Last
 			database.DB.Save(&comic)
+			// 恢复历史成功 → 移除删除墓碑
+			h.resolveTombstone(userID, p.Source, p.Cid, false, true)
 		}
 	} else {
 		// 新漫画（只有历史没有收藏）→ 创建
@@ -314,6 +321,7 @@ func (h *EventHandler) applyRead(userID uint, p *models.ReadPayload) bool {
 			Last:    p.Last,
 		}
 		database.DB.Create(&comic)
+		h.resolveTombstone(userID, p.Source, p.Cid, false, true)
 	}
 	return true
 }
@@ -330,6 +338,8 @@ func (h *EventHandler) applyClearHistory(userID uint, p *models.ClearHistoryPayl
 			"page":    nil,
 			"chapter": nil,
 		})
+	// 记录删除墓碑：防止其他设备通过全量上传把已清除的历史重新上传
+	h.recordTombstone(userID, p.Source, p.Cid, false, true)
 	return true
 }
 
@@ -462,4 +472,53 @@ func unmarshalPayload(data string, v interface{}) bool {
 		return false
 	}
 	return true
+}
+
+// ==================== 墓碑（删除标记）维护 ====================
+// 与 /api/comics/sync 的 ComicDelete 表保持一致：事件路径的删除也记录墓碑，
+// 防止其他设备通过全量上传把已删除的数据重新上传；重新收藏/恢复历史时移除墓碑。
+
+// recordTombstone 记录删除墓碑（幂等，可重复调用）
+func (h *EventHandler) recordTombstone(userID uint, source int, cid string, deleteFav, deleteHis bool) {
+	var existing models.ComicDelete
+	result := database.DB.Where("user_id = ? AND source = ? AND cid = ?",
+		userID, source, cid).Limit(1).Find(&existing)
+	if result.RowsAffected > 0 {
+		if deleteFav {
+			existing.DeleteFav = true
+		}
+		if deleteHis {
+			existing.DeleteHis = true
+		}
+		database.DB.Save(&existing)
+	} else {
+		database.DB.Create(&models.ComicDelete{
+			UserID:    userID,
+			Source:    source,
+			Cid:       cid,
+			DeleteFav: deleteFav,
+			DeleteHis: deleteHis,
+		})
+	}
+}
+
+// resolveTombstone 移除墓碑的对应标志（重新收藏/恢复历史即视为已认可该删除）
+func (h *EventHandler) resolveTombstone(userID uint, source int, cid string, fav, his bool) {
+	var existing models.ComicDelete
+	result := database.DB.Where("user_id = ? AND source = ? AND cid = ?",
+		userID, source, cid).Limit(1).Find(&existing)
+	if result.RowsAffected == 0 {
+		return
+	}
+	if fav {
+		existing.DeleteFav = false
+	}
+	if his {
+		existing.DeleteHis = false
+	}
+	if !existing.DeleteFav && !existing.DeleteHis {
+		database.DB.Delete(&existing)
+	} else {
+		database.DB.Save(&existing)
+	}
 }

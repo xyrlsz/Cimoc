@@ -73,6 +73,9 @@ func main() {
 	// Initialize database
 	database.Init(cfg)
 
+	// 启动后台维护任务（事件日志定期清理等）
+	go runMaintenance()
+
 	// Initialize handlers
 	authHandler := handlers.NewAuthHandler(cfg)
 	comicHandler := handlers.NewComicHandler()

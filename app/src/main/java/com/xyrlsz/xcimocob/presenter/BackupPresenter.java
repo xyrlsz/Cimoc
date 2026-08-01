@@ -29,7 +29,6 @@ import com.xyrlsz.xcimocob.ui.view.BackupView;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -519,7 +518,7 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                     Map<String, ?> allPrefs = App.getPreferenceManager().getAll();
                     List<DataSyncModels.SettingItem> items = new ArrayList<>();
                     for (Map.Entry<String, ?> entry : allPrefs.entrySet()) {
-                        if (entry.getValue() != null && !SENSITIVE_KEYS.contains(entry.getKey())) {
+                        if (entry.getValue() != null && PreferenceManager.SYNCABLE_SETTINGS.contains(entry.getKey())) {
                             items.add(new DataSyncModels.SettingItem(entry.getKey(), entry.getValue().toString()));
                         }
                     }
@@ -652,11 +651,11 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                             DataSyncManager.clearFavoriteDeletedKeysAfterUpload();
                         }
 
-                        // 2. 同步设置（过滤敏感 key）
+                        // 2. 同步设置（只同步白名单内的用户设置）
                         Map<String, ?> allPrefs = App.getPreferenceManager().getAll();
                         List<DataSyncModels.SettingItem> settingItems = new ArrayList<>();
                         for (Map.Entry<String, ?> entry : allPrefs.entrySet()) {
-                            if (entry.getValue() != null && !SENSITIVE_KEYS.contains(entry.getKey())) {
+                            if (entry.getValue() != null && PreferenceManager.SYNCABLE_SETTINGS.contains(entry.getKey())) {
                                 settingItems.add(new DataSyncModels.SettingItem(entry.getKey(), entry.getValue().toString()));
                             }
                         }
@@ -671,18 +670,6 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(success -> mBaseView.onDataSyncAllSuccess(), e -> mBaseView.onDataSyncError(getErrorMessage(e))));
     }
-
-    /** 敏感 key 列表：不上传到服务器，也不从服务器覆盖本地 */
-    private static final Set<String> SENSITIVE_KEYS = new HashSet<>(Arrays.asList(
-            PreferenceManager.PREFERENCES_USER_TOCKEN,
-            PreferenceManager.PREFERENCES_USER_NAME,
-            PreferenceManager.PREFERENCES_USER_PASSWORD,
-            PreferenceManager.PREFERENCES_USER_EMAIL,
-            PreferenceManager.PREFERENCES_USER_ID,
-            PreferenceManager.PREF_DATA_SERVER_URL,
-            PreferenceManager.PREF_DATA_SERVER_AUTO_SYNC,
-            PreferenceManager.PREF_OTHER_STORAGE
-    ));
 
     // ==================== 从服务器下载/恢复 ====================
 
@@ -851,7 +838,7 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                         PreferenceManager pm = App.getPreferenceManager();
                         int count = 0;
                         for (DataSyncModels.SettingServerItem item : serverSettings) {
-                            if (item.key != null && item.value != null && !SENSITIVE_KEYS.contains(item.key)) {
+                            if (item.key != null && item.value != null && PreferenceManager.SYNCABLE_SETTINGS.contains(item.key)) {
                                 pm.putObject(item.key, item.value);
                                 count++;
                             }
@@ -978,12 +965,12 @@ public class BackupPresenter extends BasePresenter<BackupView> {
                             }
                         }
 
-                        // 2. 恢复设置（跳过敏感 key）
+                        // 2. 恢复设置（只应用白名单内的用户设置）
                         List<DataSyncModels.SettingServerItem> serverSettings = client.listSettings(token);
                         if (serverSettings != null) {
                             PreferenceManager pm = App.getPreferenceManager();
                             for (DataSyncModels.SettingServerItem item : serverSettings) {
-                                if (item.key != null && item.value != null && !SENSITIVE_KEYS.contains(item.key)) {
+                                if (item.key != null && item.value != null && PreferenceManager.SYNCABLE_SETTINGS.contains(item.key)) {
                                     pm.putObject(item.key, item.value);
                                 }
                             }
