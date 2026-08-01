@@ -32,7 +32,7 @@ public class ManWa extends MangaParser {
 
     public ManWa(Source source) {
         init(source);
-        setParseImagesUseWebParser(true);
+        getImagesConfig().setUseWebParser(true);
     }
 
     public static Source getDefaultSource() {

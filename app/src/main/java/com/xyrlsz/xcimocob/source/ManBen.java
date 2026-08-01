@@ -32,7 +32,7 @@ public class ManBen extends MangaParser {
 
     public ManBen(Source source) {
         init(source);
-        setParseImagesUseWebParser(true);
+        getImagesConfig().setUseWebParser(true);
     }
 
     public static Source getDefaultSource() {

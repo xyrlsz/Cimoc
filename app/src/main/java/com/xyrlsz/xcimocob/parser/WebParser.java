@@ -11,7 +11,6 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import com.xyrlsz.xcimocob.source.CopyMHWeb;
 import com.xyrlsz.xcimocob.utils.StringUtils;
 
 import java.util.Map;
@@ -39,6 +38,14 @@ public class WebParser {
     private final Context mContext;
     private String UA = "";
     /**
+     * 是否自动向下滑动页面以触发懒加载，默认开启
+     */
+    private final boolean autoScroll;
+    /**
+     * DOM 就绪后注入执行的自定义 JS，可为 null
+     */
+    private final String injectJs;
+    /**
      * 每个实例独立的 WebView，不再共享静态实例
      */
     private WebView mWebView;
@@ -52,13 +59,19 @@ public class WebParser {
     private volatile boolean destroyed = false;
 
     public WebParser(Context context, String url, Headers headers) {
-        this(context, url, headers, "");
+        this(context, url, headers, "", new WebParserConfig());
     }
 
     public WebParser(Context context, String url, Headers headers, String UA) {
+        this(context, url, headers, UA, new WebParserConfig());
+    }
+
+    public WebParser(Context context, String url, Headers headers, String UA, WebParserConfig config) {
         this.url = url;
         this.headers = headers;
         this.UA = UA;
+        this.autoScroll = config.isAutoScroll();
+        this.injectJs = config.getInjectJs();
         this.mContext = context.getApplicationContext();
 
         // 在 UI 线程创建 WebView 并开始加载
@@ -174,20 +187,21 @@ public class WebParser {
             if (destroyed || mWebView == null) return;
 
             if (value != null && value.contains("complete")) {
-                if (url.contains(CopyMHWeb.website) && url.contains("/comic/") && !url.contains("/chapter/")) {
-                    String jsCode = "javascript:(function() { " +
-                            "var btns = document.getElementsByClassName('next-all'); " +
-                            "for(var i = 0; i < btns.length; i++) { " +
-                            "   btns[i].click(); " +
-                            "} " +
-                            "})()";
-
-                    mWebView.evaluateJavascript(jsCode, s -> {
+                if (injectJs != null && !injectJs.isEmpty()) {
+                    // 源配置了 JS 注入：先执行注入脚本，再根据 autoScroll 决定是否继续滑动
+                    mWebView.evaluateJavascript(injectJs, s -> {
                         if (destroyed || mWebView == null) return;
-                        new Handler(Looper.getMainLooper()).postDelayed(this::autoScroll, 500);
+                        if (autoScroll) {
+                            new Handler(Looper.getMainLooper()).postDelayed(this::autoScroll, 500);
+                        } else {
+                            getPageHtml();
+                        }
                     });
-                } else {
+                } else if (autoScroll) {
                     new Handler(Looper.getMainLooper()).postDelayed(this::autoScroll, 300);
+                } else {
+                    // 关闭自动滑动：DOM 就绪后直接抓取当前 HTML
+                    getPageHtml();
                 }
             } else {
                 new Handler(Looper.getMainLooper()).postDelayed(this::waitForDomReady, 100);

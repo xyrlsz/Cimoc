@@ -16,6 +16,7 @@ import com.xyrlsz.xcimocob.parser.MangaParser;
 import com.xyrlsz.xcimocob.parser.Parser;
 import com.xyrlsz.xcimocob.parser.SearchIterator;
 import com.xyrlsz.xcimocob.parser.WebParser;
+import com.xyrlsz.xcimocob.parser.WebParserConfig;
 import com.xyrlsz.xcimocob.rx.RxBus;
 import com.xyrlsz.xcimocob.rx.RxEvent;
 import com.xyrlsz.xcimocob.utils.IdCreator;
@@ -94,8 +95,9 @@ public class Manga {
                 return Observable.error(new Exception("Search request returned null"));
             }
             String url = request.url().toString();
-            Observable<String> htmlObs = parser.isGetSearchUseWebParser()
-                    ? new WebParser(App.getAppContext(), url, request.headers()).getHtmlObservable()
+            WebParserConfig searchConfig = parser.getSearchConfig();
+            Observable<String> htmlObs = searchConfig.isUseWebParser()
+                    ? new WebParser(App.getAppContext(), url, request.headers(), "", searchConfig).getHtmlObservable()
                     : Observable.fromCallable(() -> getResponseBody(App.getHttpClient(), request));
             return htmlObs
                     .flatMap(html -> {
@@ -133,8 +135,9 @@ public class Manga {
                 return Observable.error(new Exception("Search request returned null"));
             }
             String url = request.url().toString();
-            Observable<String> htmlObs = parser.isGetSearchUseWebParser()
-                    ? new WebParser(App.getAppContext(), url, request.headers()).getHtmlObservable()
+            WebParserConfig searchConfig = parser.getSearchConfig();
+            Observable<String> htmlObs = searchConfig.isUseWebParser()
+                    ? new WebParser(App.getAppContext(), url, request.headers(), "", searchConfig).getHtmlObservable()
                     : Observable.fromCallable(() -> getResponseBody(App.getHttpClient(), request));
             return htmlObs
                     .flatMap(html -> {
@@ -202,8 +205,9 @@ public class Manga {
                 return Observable.error(new Exception("Info request returned null"));
             }
             String infoUrl = infoRequest.url().toString();
-            Observable<String> infoHtmlObs = parser.isParseInfoUseWebParser()
-                    ? new WebParser(App.getAppContext(), infoUrl, infoRequest.headers()).getHtmlObservable()
+            WebParserConfig infoConfig = parser.getInfoConfig();
+            Observable<String> infoHtmlObs = infoConfig.isUseWebParser()
+                    ? new WebParser(App.getAppContext(), infoUrl, infoRequest.headers(), "", infoConfig).getHtmlObservable()
                     : Observable.fromCallable(() -> getResponseBody(App.getHttpClient(), infoRequest));
             return infoHtmlObs
                     .flatMap(html -> {
@@ -218,8 +222,9 @@ public class Manga {
                         Request chapterReq = parser.getChapterRequest(html, comic.getCid());
                         if (chapterReq != null) {
                             String chapterUrl = chapterReq.url().toString();
-                            Observable<String> chapterHtmlObs = parser.isParseChapterUseWebParser()
-                                    ? new WebParser(App.getAppContext(), chapterUrl, chapterReq.headers()).getHtmlObservable()
+                            WebParserConfig chapterConfig = parser.getChapterConfig();
+                            Observable<String> chapterHtmlObs = chapterConfig.isUseWebParser()
+                                    ? new WebParser(App.getAppContext(), chapterUrl, chapterReq.headers(), "", chapterConfig).getHtmlObservable()
                                     : Observable.fromCallable(() -> getResponseBody(App.getHttpClient(), chapterReq));
                             return chapterHtmlObs.flatMap(chapterHtml -> {
                                 if (chapterHtml == null) {
@@ -304,8 +309,9 @@ public class Manga {
                 return Observable.error(new Exception("Images request returned null"));
             }
             String url = request.url().toString();
-            Observable<String> htmlObs = parser.isParseImagesUseWebParser()
-                    ? new WebParser(App.getAppContext(), url, request.headers()).getHtmlObservable()
+            WebParserConfig imagesConfig = parser.getImagesConfig();
+            Observable<String> htmlObs = imagesConfig.isUseWebParser()
+                    ? new WebParser(App.getAppContext(), url, request.headers(), "", imagesConfig).getHtmlObservable()
                     : Observable.fromCallable(() -> getResponseBody(App.getHttpClient(), request));
             return htmlObs
                     .flatMap(html -> {
@@ -345,7 +351,7 @@ public class Manga {
             if (request == null) {
                 return list;
             }
-            if (!parser.isParseImagesUseWebParser()) {
+            if (!parser.getImagesConfig().isUseWebParser()) {
                 response = Objects.requireNonNull(App.getHttpClient()).newCall(request).execute();
                 if (response.isSuccessful()) {
                     Comic comic = ComicManager.getInstance(parser).load(source, cid);
@@ -362,7 +368,7 @@ public class Manga {
                     throw new NetworkErrorException();
                 }
             } else {
-                WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
+                WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers(), "", parser.getImagesConfig());
 
                 String html = webParser.getHtmlObservable().blockingFirst();
                 Comic comic = ComicManager.getInstance(parser).load(source, cid);
@@ -394,8 +400,8 @@ public class Manga {
             Request request = parser.getLazyRequest(url);
             response = Objects.requireNonNull(App.getHttpClient()).newCall(request).execute();
             if (response.isSuccessful()) {
-                if (parser.isParseImagesLazyUseWebParser()) {
-                    WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers());
+                if (parser.getImagesLazyConfig().isUseWebParser()) {
+                    WebParser webParser = new WebParser(App.getAppContext(), request.url().toString(), request.headers(), "", parser.getImagesLazyConfig());
                     return parser.parseLazy(webParser.getHtmlObservable().blockingFirst(), url);
                 }
                 return parser.parseLazy(response.body().string(), url);
@@ -418,8 +424,9 @@ public class Manga {
         return Observable.defer(() -> {
             Request request = parser.getLazyRequest(url);
             String reqUrl = request.url().toString();
-            Observable<String> htmlObs = parser.isParseImagesLazyUseWebParser()
-                    ? new WebParser(App.getAppContext(), reqUrl, request.headers()).getHtmlObservable()
+            WebParserConfig imagesLazyConfig = parser.getImagesLazyConfig();
+            Observable<String> htmlObs = imagesLazyConfig.isUseWebParser()
+                    ? new WebParser(App.getAppContext(), reqUrl, request.headers(), "", imagesLazyConfig).getHtmlObservable()
                     : Observable.fromCallable(() -> getResponseBody(App.getHttpClient(), request));
             return htmlObs
                     .flatMap(html -> {

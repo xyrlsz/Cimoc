@@ -30,7 +30,7 @@ public class GFMH extends MangaParser {
 
     public GFMH(Source source) {
         init(source);
-        setParseImagesUseWebParser(true);
+        getImagesConfig().setUseWebParser(true);
     }
 
     public static Source getDefaultSource() {

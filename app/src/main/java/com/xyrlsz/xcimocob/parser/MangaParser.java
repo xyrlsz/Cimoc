@@ -29,11 +29,14 @@ public abstract class MangaParser implements Parser, AppGetter {
     protected String mTitle;
     protected List<UrlFilter> filter = new ArrayList<>();
     private Category mCategory;
-    private boolean getSearchUseWebParser = false;
-    private boolean parseInfoUseWebParser = false;
-    private boolean parseChapterUseWebParser = false;
-    private boolean parseImagesUseWebParser = false;
-    private boolean parseImagesLazyUseWebParser = false;
+    /**
+     * 各解析环节使用 WebView 渲染抓取的配置（是否使用 WebView + 是否自动滑动）。
+     */
+    private final WebParserConfig searchConfig = new WebParserConfig();
+    private final WebParserConfig infoConfig = new WebParserConfig();
+    private final WebParserConfig chapterConfig = new WebParserConfig();
+    private final WebParserConfig imagesConfig = new WebParserConfig();
+    private final WebParserConfig imagesLazyConfig = new WebParserConfig();
 
     public static Source getDefaultSource() {
         return new Source(null, null, -100, true, null);
@@ -200,44 +203,24 @@ public abstract class MangaParser implements Parser, AppGetter {
         return null;
     }
 
-    public boolean isParseImagesUseWebParser() {
-        return parseImagesUseWebParser;
+    public WebParserConfig getSearchConfig() {
+        return searchConfig;
     }
 
-    protected void setParseImagesUseWebParser(boolean isUseWebView) {
-        this.parseImagesUseWebParser = isUseWebView;
+    public WebParserConfig getInfoConfig() {
+        return infoConfig;
     }
 
-    public boolean isParseChapterUseWebParser() {
-        return parseChapterUseWebParser;
+    public WebParserConfig getChapterConfig() {
+        return chapterConfig;
     }
 
-    protected void setParseChapterUseWebParser(boolean parseChapterUseWebParser) {
-        this.parseChapterUseWebParser = parseChapterUseWebParser;
+    public WebParserConfig getImagesConfig() {
+        return imagesConfig;
     }
 
-    public boolean isParseInfoUseWebParser() {
-        return parseInfoUseWebParser;
-    }
-
-    protected void setParseInfoUseWebParser(boolean parseInfoUseWebParser) {
-        this.parseInfoUseWebParser = parseInfoUseWebParser;
-    }
-
-    public boolean isGetSearchUseWebParser() {
-        return getSearchUseWebParser;
-    }
-
-    protected void setGetSearchUseWebParser(boolean getSearchUseWebParser) {
-        this.getSearchUseWebParser = getSearchUseWebParser;
-    }
-
-    public boolean isParseImagesLazyUseWebParser() {
-        return parseImagesLazyUseWebParser;
-    }
-
-    public void setParseImagesLazyUseWebParser(boolean parseImagesLazyUseWebParser) {
-        this.parseImagesLazyUseWebParser = parseImagesLazyUseWebParser;
+    public WebParserConfig getImagesLazyConfig() {
+        return imagesLazyConfig;
     }
 
     public String getUA() {

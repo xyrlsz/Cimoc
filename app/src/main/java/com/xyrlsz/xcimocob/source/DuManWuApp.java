@@ -57,7 +57,7 @@ public class DuManWuApp extends MangaParser {
 
     public DuManWuApp(Source source) {
         init(source);
-        setParseImagesUseWebParser(true);
+        getImagesConfig().setUseWebParser(true);
     }
 
     public static Source getDefaultSource() {

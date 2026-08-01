@@ -46,7 +46,7 @@ public class Manhuayu extends MangaParser {
 
     public Manhuayu(Source source) {
         init(source);
-//        setParseImagesUseWebParser(true);
+//        getImagesConfig().setUseWebParser(true);
     }
 
     public static Source getDefaultSource() {

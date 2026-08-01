@@ -23,6 +23,13 @@ public class CopyMHWeb extends CopyMHBase {
 
     public CopyMHWeb(Source source) {
         super(source, new Category(), TYPE, true, true);
+        // 详情页需点击 "next-all" 按钮展开全部章节后再滚动加载
+        getInfoConfig().setInjectJs("javascript:(function() { " +
+                "var btns = document.getElementsByClassName('next-all'); " +
+                "for(var i = 0; i < btns.length; i++) { " +
+                "   btns[i].click(); " +
+                "} " +
+                "})()");
     }
 
     public static Source getDefaultSource() {

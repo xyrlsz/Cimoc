@@ -32,7 +32,7 @@
 //
 //    public TTKMH(Source source) {
 //        init(source);
-//        setParseImagesUseWebParser(true);
+//        getImagesConfig().setUseWebParser(true);
 //    }
 //
 //    public static Source getDefaultSource() {

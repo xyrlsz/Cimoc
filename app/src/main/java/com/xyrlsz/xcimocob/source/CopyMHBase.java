@@ -56,10 +56,11 @@ public abstract class CopyMHBase extends MangaParser {
         init(source, category);
         this.type = type;
         if (useWebParserForInfo) {
-            setParseInfoUseWebParser(true);
+            getInfoConfig().setUseWebParser(true);
+            getInfoConfig().setAutoScroll(false);
         }
         if (useWebParserForImages) {
-            setParseImagesUseWebParser(true);
+            getImagesConfig().setUseWebParser(true);
         }
         sharedPreferences = App.getAppContext()
                 .getSharedPreferences(Constants.COPYMG_SHARED, Context.MODE_PRIVATE);

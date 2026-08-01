@@ -48,7 +48,7 @@ public class GoDaManHua extends MangaParser {
 
     public GoDaManHua(Source source) {
         init(source);
-//        setParseImagesUseWebParser(true);
+//        getImagesConfig().setUseWebParser(true);
     }
 
     public static Source getDefaultSource() {

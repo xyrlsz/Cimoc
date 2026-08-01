@@ -32,7 +32,7 @@ public class MH5 extends MangaParser {
 
     public MH5(Source source) {
         init(source);
-        setParseImagesUseWebParser(true);
+        getImagesConfig().setUseWebParser(true);
     }
 
     public static Source getDefaultSource() {
