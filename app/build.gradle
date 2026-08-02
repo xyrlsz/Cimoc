@@ -154,7 +154,7 @@ android {
 
 dependencies {
     lintChecks project(':lintchecks')
-    implementation project(':quickjs')
+//    implementation project(':quickjs')
 
     implementation 'androidx.constraintlayout:constraintlayout:2.2.2'
     implementation fileTree(include: ['*.jar'], dir: 'libs')

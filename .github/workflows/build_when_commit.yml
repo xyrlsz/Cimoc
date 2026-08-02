@@ -47,16 +47,17 @@ jobs:
         run: |
           echo "$KEYSTORE_BASE64" | base64 -d > ${{ github.workspace }}/xcimoc.jks
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      - name: Grant execute permission for build.sh
+        run: chmod +x build.sh
 
-      - name: Build with Gradle
+      # build.sh 内部流程：1) :quickjs:assembleRelease 2) 复制 AAR 到 app/libs 3) :app:assembleRelease
+      - name: Build with build.sh (QuickJS AAR + APK)
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           SIGNING_ENABLED: ${{ secrets.SIGNING_ENABLED }}
-        run: ./gradlew assembleRelease
+        run: ./build.sh
 
       - name: Upload APK (arm64-v8a)
         uses: actions/upload-artifact@v6
