@@ -9,7 +9,7 @@ import static com.xyrlsz.xcimocob.parser.Category.CATEGORY_YEAR;
 import static com.xyrlsz.xcimocob.parser.MangaCategory.getParseFormatMap;
 
 import android.util.Pair;
-
+import org.apache.commons.text.StringEscapeUtils;
 import com.xyrlsz.xcimocob.model.Chapter;
 import com.xyrlsz.xcimocob.model.Comic;
 import com.xyrlsz.xcimocob.model.ImageUrl;
@@ -49,7 +49,11 @@ public class MYCOMIC extends MangaParser {
     private static final String baseUrl = "https://mycomic.com";
 
     public MYCOMIC(Source source) {
-        init(source, new Category());
+        init(source);
+        getSearchConfig().setUseWebParser(true).setAutoScroll(false).setInteractiveChallenge(true);
+        getInfoConfig().setUseWebParser(true).setAutoScroll(false).setInteractiveChallenge(true);
+        getChapterConfig().setUseWebParser(true).setAutoScroll(false).setInteractiveChallenge(true);
+        getImagesConfig().setUseWebParser(true).setAutoScroll(false).setInteractiveChallenge(true);
     }
 
     public static Source getDefaultSource() {
@@ -122,8 +126,8 @@ public class MYCOMIC extends MangaParser {
     public List<Chapter> parseChapter(String html, Comic comic, Long sourceComic) {
         List<Chapter> list = new LinkedList<>();
         Node body = new Node(html);
-        List<Node> chapterNodes = body.list(".grow > [x-cloak] > [x-data]");
-        List<Node> chapterTypes = body.list(".grow > [x-cloak] > [x-data] > [data-flux-subheading] > div");
+        List<Node> chapterNodes = body.list("[x-data*='chapters:']");
+        List<Node> chapterTypes = body.list("[x-data*='chapters:'] > [data-flux-subheading] > div");
         int i = 0;
 
         for (int k = 0; k < chapterTypes.size(); k++) {
@@ -135,7 +139,7 @@ public class MYCOMIC extends MangaParser {
 
                 for (int j = 0; j < chaptersData.length(); j++) {
                     JSONObject chapter = chaptersData.getJSONObject(j);
-                    String title = chapter.getString("title");
+                    String title = StringEscapeUtils.unescapeJava(chapter.getString("title"));
                     String path = chapter.getString("id");
                     Long id = IdCreator.createChapterId(sourceComic, i++);
                     list.add(new Chapter(id, sourceComic, title, path, type));
@@ -180,6 +184,7 @@ public class MYCOMIC extends MangaParser {
         heads.put("referer", baseUrl.concat("/"));
         return Headers.of(heads);
     }
+/*
 
     @Override
     public Request getCategoryRequest(String format, int page) {
@@ -369,6 +374,7 @@ public class MYCOMIC extends MangaParser {
             return list;
         }
     }
+*/
 
 
 }

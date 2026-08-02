@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.xyrlsz.xcimocob.App;
 import com.xyrlsz.xcimocob.utils.StringUtils;
@@ -97,6 +98,10 @@ public class WebParser {
      */
     private final boolean interactiveChallenge;
     /**
+     * 所属漫画源名称，用于 Cloudflare 认证触发时的提示消息
+     */
+    private final String sourceTitle;
+    /**
      * 每个实例独立的 WebView，不再共享静态实例
      */
     private WebView mWebView;
@@ -114,6 +119,7 @@ public class WebParser {
     private boolean cloudflareWaiting = false;
     private long cloudflareStartTime = 0;
     private ViewGroup mChallengeContainer;
+    private boolean cfNotified = false;
 
     public WebParser(Context context, String url, Headers headers) {
         this(context, url, headers, "", new WebParserConfig());
@@ -132,6 +138,7 @@ public class WebParser {
         this.handleCloudflare = config.isHandleCloudflare();
         this.cloudflareTimeoutMs = config.getCloudflareTimeoutMs();
         this.interactiveChallenge = config.isInteractiveChallenge();
+        this.sourceTitle = config.getSourceTitle();
         this.mContext = context.getApplicationContext();
 
         // 在 UI 线程创建 WebView 并开始加载
@@ -295,16 +302,18 @@ public class WebParser {
             } else if (cf == 2) {
                 if (interactiveChallenge) {
                     // 交互式验证：把 WebView 挂到前台由用户手动点击完成
+                    notifyCloudflare("「" + sourceDisplay() + "」需要完成 Cloudflare 真人验证");
                     cloudflareWaiting = true;
                     cloudflareStartTime = System.currentTimeMillis();
                     showChallengeOverlay();
                     waitAndRecheckCloudflare();
                 } else {
                     // 交互式验证（勾选验证码）或 Attention Required 拦截无法在后台 WebView 自动完成
-                    emitError(new Exception("网站启用了 Cloudflare 交互式验证，无法自动解析"));
+                    emitError(new Exception("「" + sourceDisplay() + "」启用了 Cloudflare 交互式验证，无法自动解析"));
                 }
             } else {
                 // 纯 JS 挑战：页面 JS 会自动计算并通过，轮询等待
+                notifyCloudflare("「" + sourceDisplay() + "」正在通过 Cloudflare 验证，请稍候");
                 cloudflareWaiting = true;
                 cloudflareStartTime = System.currentTimeMillis();
                 waitAndRecheckCloudflare();
@@ -323,7 +332,7 @@ public class WebParser {
             if (elapsed >= cloudflareTimeoutMs) {
                 cloudflareWaiting = false;
                 hideChallengeOverlay();
-                emitError(new Exception("Cloudflare 验证超时"));
+                emitError(new Exception("「" + sourceDisplay() + "」Cloudflare 验证超时"));
                 return;
             }
 
@@ -343,13 +352,32 @@ public class WebParser {
                     } else {
                         cloudflareWaiting = false;
                         hideChallengeOverlay();
-                        emitError(new Exception("网站启用了 Cloudflare 交互式验证，无法自动解析"));
+                        emitError(new Exception("「" + sourceDisplay() + "」启用了 Cloudflare 交互式验证，无法自动解析"));
                     }
                 } else {
                     waitAndRecheckCloudflare();
                 }
             });
         }, CLOUDFLARE_POLL_MS);
+    }
+
+    /**
+     * Cloudflare 认证触发时，用 Toast 提示是哪个漫画源（每个实例只提示一次）。
+     */
+    private void notifyCloudflare(String message) {
+        if (cfNotified) return;
+        cfNotified = true;
+        try {
+            Toast.makeText(mContext, message, Toast.LENGTH_LONG).show();
+        } catch (Exception ignored) {
+        }
+    }
+
+    /**
+     * 源名称显示，未配置时使用通用文案。
+     */
+    private String sourceDisplay() {
+        return StringUtils.isEmpty(sourceTitle) ? "该漫画源" : sourceTitle;
     }
 
     /**
@@ -392,7 +420,7 @@ public class WebParser {
         cancel.setText("取消");
         cancel.setOnClickListener(v -> {
             hideChallengeOverlay();
-            emitError(new Exception("用户取消 Cloudflare 交互式验证"));
+            emitError(new Exception("已取消「" + sourceDisplay() + "」的 Cloudflare 验证"));
         });
         topBar.addView(cancel);
 

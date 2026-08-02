@@ -50,15 +50,26 @@ public abstract class MangaParser implements Parser, AppGetter {
     protected void init(Source source, Category category) {
         mTitle = source.getTitle();
         mCategory = category;
-
+        applyConfigSourceTitle(mTitle);
         initUrlFilterList();
     }
 
     protected void init(Source source) {
         mTitle = source.getTitle();
         mCategory = null;
-
+        applyConfigSourceTitle(mTitle);
         initUrlFilterList();
+    }
+
+    /**
+     * 将漫画源名称填充到各解析环节配置中，供 WebParser 在 Cloudflare 认证触发时提示用户。
+     */
+    private void applyConfigSourceTitle(String title) {
+        searchConfig.setSourceTitle(title);
+        infoConfig.setSourceTitle(title);
+        chapterConfig.setSourceTitle(title);
+        imagesConfig.setSourceTitle(title);
+        imagesLazyConfig.setSourceTitle(title);
     }
 
     protected void initUrlFilterList() {

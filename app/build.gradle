@@ -169,7 +169,7 @@ dependencies {
     implementation 'io.objectbox:objectbox-android:5.4.2'
     annotationProcessor 'io.objectbox:objectbox-processor:5.4.2'
     implementation 'com.squareup.okhttp3:okhttp:5.4.0'
-
+    implementation 'org.apache.commons:commons-text:1.15.0'
     implementation 'com.facebook.fresco:fresco:3.7.0'
     implementation 'com.facebook.fresco:middleware:3.7.0'
     implementation 'com.facebook.fresco:imagepipeline:3.7.0'

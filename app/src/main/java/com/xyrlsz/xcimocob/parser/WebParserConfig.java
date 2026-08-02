@@ -57,6 +57,12 @@ public class WebParserConfig {
      */
     private boolean interactiveChallenge = false;
 
+    /**
+     * 所属漫画源名称（如"优酷漫画"），用于 Cloudflare 认证触发时的提示消息，可为空。
+     * 由 {@link MangaParser} 初始化时自动填充，无需手动设置。
+     */
+    private String sourceTitle = "";
+
     public WebParserConfig() {
     }
 
@@ -122,6 +128,15 @@ public class WebParserConfig {
 
     public WebParserConfig setInteractiveChallenge(boolean interactiveChallenge) {
         this.interactiveChallenge = interactiveChallenge;
+        return this;
+    }
+
+    public String getSourceTitle() {
+        return sourceTitle;
+    }
+
+    public WebParserConfig setSourceTitle(String sourceTitle) {
+        this.sourceTitle = sourceTitle == null ? "" : sourceTitle;
         return this;
     }
 }
