@@ -84,6 +84,13 @@ public class App extends Application implements AppGetter, Thread.UncaughtExcept
         return mApp;
     }
 
+    /**
+     * 当前可见（resumed）的 Activity，可能为 null（无前台 Activity 时）。
+     */
+    public static Activity getCurrentActivity() {
+        return mApp == null || mApp.mActivityLifecycle == null ? null : mApp.mActivityLifecycle.getCurrentActivity();
+    }
+
     public static Resources getAppResources() {
         return mApp.getResources();
     }

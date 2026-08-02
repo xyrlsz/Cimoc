@@ -38,6 +38,13 @@ public class YKMH extends MangaParser {
 
     public YKMH(Source source) {
         init(source);
+        // 站点带 Cloudflare 认证：搜索/详情/章节/图片均走 WebView 渲染（自动等待 CF 挑战通过）
+        // 页面为服务端渲染、内容均在初始 HTML 中，无需自动滚动；
+        // 交互式验证时把 WebView 挂到前台由用户手动点击完成
+        getSearchConfig().setUseWebParser(true).setAutoScroll(false).setInteractiveChallenge(true);
+        getInfoConfig().setUseWebParser(true).setAutoScroll(false).setInteractiveChallenge(true);
+        getChapterConfig().setUseWebParser(true).setAutoScroll(false).setInteractiveChallenge(true);
+        getImagesConfig().setUseWebParser(true).setAutoScroll(false).setInteractiveChallenge(true);
     }
 
     public static Source getDefaultSource() {

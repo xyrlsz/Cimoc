@@ -16,6 +16,7 @@ import java.util.List;
 public class ActivityLifecycle implements Application.ActivityLifecycleCallbacks {
 
     private List<Activity> mActivityList;
+    private Activity mCurrentActivity;
 
     public ActivityLifecycle() {
         mActivityList = new LinkedList<>();
@@ -27,6 +28,14 @@ public class ActivityLifecycle implements Application.ActivityLifecycleCallbacks
             activity.finish();
         }
         mActivityList.clear();
+        mCurrentActivity = null;
+    }
+
+    /**
+     * 返回当前可见（resumed）的 Activity，用于交互式 Cloudflare 验证挂载 WebView。
+     */
+    public Activity getCurrentActivity() {
+        return mCurrentActivity;
     }
 
     @Override
@@ -40,10 +49,14 @@ public class ActivityLifecycle implements Application.ActivityLifecycleCallbacks
 
     @Override
     public void onActivityResumed(@NonNull Activity activity) {
+        mCurrentActivity = activity;
     }
 
     @Override
     public void onActivityPaused(@NonNull Activity activity) {
+        if (mCurrentActivity == activity) {
+            mCurrentActivity = null;
+        }
     }
 
     @Override
@@ -57,6 +70,9 @@ public class ActivityLifecycle implements Application.ActivityLifecycleCallbacks
     @Override
     public void onActivityDestroyed(@NonNull Activity activity) {
         mActivityList.remove(activity);
+        if (mCurrentActivity == activity) {
+            mCurrentActivity = null;
+        }
     }
 
 }
