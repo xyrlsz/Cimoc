@@ -68,6 +68,8 @@ public class DownloadService extends Service implements AppGetter {
 
     private static final String NOTIFICATION_DOWNLOAD = "NOTIFICATION_DOWNLOAD";
 
+    private static boolean sRunning;
+
     private LongSparseArray<Pair<Worker, Future>> mWorkerArray;
     private ExecutorService mExecutorService;
     private OkHttpClient mHttpClient;
@@ -103,6 +105,7 @@ public class DownloadService extends Service implements AppGetter {
     @Override
     public void onCreate() {
         super.onCreate();
+        sRunning = true;
 //        getApplication();
         PreferenceManager manager = App.getPreferenceManager();
         int num = manager.getNumber(PreferenceManager.PREF_DOWNLOAD_THREAD, 2).intValue();
@@ -155,10 +158,15 @@ public class DownloadService extends Service implements AppGetter {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        sRunning = false;
         if (mNotification != null) {
             mExecutorService.shutdownNow();
             notifyCompleted();
         }
+    }
+
+    public static boolean isRunning() {
+        return sRunning;
     }
 
     @Override
