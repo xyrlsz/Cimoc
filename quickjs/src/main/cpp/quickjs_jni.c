@@ -18,6 +18,7 @@
 #include <android/log.h>
 
 #include "quickjs.h"
+#include "utf8to16.h"
 
 #define LOG_TAG "QuickJS"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
@@ -33,25 +34,22 @@ typedef struct {
 
 /* ---------------- 工具 ---------------- */
 
-static int64_t now_ms(void)
-{
+static int64_t now_ms(void) {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (int64_t)ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+    return (int64_t) ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
 }
 
 /* 执行超时中断回调：返回非 0 时引擎中止执行 */
-static int qjs_interrupt_handler(JSRuntime *rt, void *opaque)
-{
-    QJSRuntimeData *data = (QJSRuntimeData *)opaque;
+static int qjs_interrupt_handler(JSRuntime *rt, void *opaque) {
+    QJSRuntimeData *data = (QJSRuntimeData *) opaque;
     return now_ms() >= data->deadline_ms;
 }
 
 /* 将 JSValue 转成 Java String（正确处理增补平面字符/代理对）。
  * 注意：NewStringUTF 期望"修改版 UTF-8"，直接传入标准 UTF-8 会在
  * 非 BMP 字符（如 emoji）处出错，故统一走 UTF-8 -> UTF-16 转换。 */
-static jstring qjs_jsvalue_to_jstring(JNIEnv *env, JSContext *ctx, JSValueConst val)
-{
+static jstring qjs_jsvalue_to_jstring(JNIEnv *env, JSContext *ctx, JSValueConst val) {
     size_t len = 0;
     const char *utf8 = JS_ToCStringLen2(ctx, &len, val, 0);
     jstring jstr;
@@ -62,43 +60,10 @@ static jstring qjs_jsvalue_to_jstring(JNIEnv *env, JSContext *ctx, JSValueConst 
     if (len == 0) {
         jstr = (*env)->NewStringUTF(env, "");
     } else {
-        jchar *utf16 = (jchar *)malloc((len + 1) * sizeof(jchar));
+        jchar *utf16 = (jchar *) malloc((len + 1) * sizeof(jchar));
         if (utf16) {
-            size_t i = 0, n = 0;
-            while (i < len) {
-                uint32_t cp;
-                unsigned char c = (unsigned char)utf8[i];
-                if (c < 0x80) {
-                    cp = c;
-                    i += 1;
-                } else if ((c & 0xE0) == 0xC0) {
-                    cp = (uint32_t)(c & 0x1F);
-                    cp = (cp << 6) | (utf8[i + 1] & 0x3F);
-                    i += 2;
-                } else if ((c & 0xF0) == 0xE0) {
-                    cp = (uint32_t)(c & 0x0F);
-                    cp = (cp << 6) | (utf8[i + 1] & 0x3F);
-                    cp = (cp << 6) | (utf8[i + 2] & 0x3F);
-                    i += 3;
-                } else if ((c & 0xF8) == 0xF0) {
-                    cp = (uint32_t)(c & 0x07);
-                    cp = (cp << 6) | (utf8[i + 1] & 0x3F);
-                    cp = (cp << 6) | (utf8[i + 2] & 0x3F);
-                    cp = (cp << 6) | (utf8[i + 3] & 0x3F);
-                    i += 4;
-                } else {
-                    cp = 0xFFFD; /* 非法字节按 U+FFFD 处理 */
-                    i += 1;
-                }
-                if (cp >= 0x10000) {
-                    cp -= 0x10000;
-                    utf16[n++] = (jchar)(0xD800 + (cp >> 10));
-                    utf16[n++] = (jchar)(0xDC00 + (cp & 0x3FF));
-                } else {
-                    utf16[n++] = (jchar)cp;
-                }
-            }
-            jstr = (*env)->NewString(env, utf16, (jsize)n);
+            size_t n = utf8_to_utf16(utf8, len, utf16);
+            jstr = (*env)->NewString(env, utf16, (jsize) n);
             free(utf16);
         } else {
             jstr = (*env)->NewStringUTF(env, "");
@@ -111,10 +76,9 @@ static jstring qjs_jsvalue_to_jstring(JNIEnv *env, JSContext *ctx, JSValueConst 
 /* ---------------- console.log / print ---------------- */
 
 static JSValue js_console_log(JSContext *ctx, JSValueConst this_val,
-                              int argc, JSValueConst *argv)
-{
+                              int argc, JSValueConst *argv) {
     size_t cap = 256, len = 0;
-    char *buf = (char *)js_malloc(ctx, cap);
+    char *buf = (char *) js_malloc(ctx, cap);
     JSValue ret = JS_UNDEFINED;
     int i;
 
@@ -133,7 +97,7 @@ static JSValue js_console_log(JSContext *ctx, JSValueConst this_val,
             if (len + slen + 2 > cap) {
                 char *nbuf;
                 cap = (len + slen + 2) * 2;
-                nbuf = (char *)js_realloc(ctx, buf, cap);
+                nbuf = (char *) js_realloc(ctx, buf, cap);
                 if (!nbuf) {
                     JS_FreeCString(ctx, str);
                     JS_FreeValue(ctx, s);
@@ -152,7 +116,7 @@ static JSValue js_console_log(JSContext *ctx, JSValueConst this_val,
     }
     buf[len] = '\0';
     LOGI("%s", buf);
-done:
+    done:
     js_free(ctx, buf);
     return ret;
 }
@@ -161,24 +125,23 @@ done:
 /* 基于 QuickJS 内置的 Uint8Array.fromBase64 / toBase64 实现，
    避免手写 Latin-1 字符串转换的坑。 */
 static const char qjs_helpers_js[] =
-    "if (typeof globalThis.atob !== 'function') {"
-    "  globalThis.atob = function(b64) {"
-    "    var bytes = Uint8Array.fromBase64(String(b64));"
-    "    var out = '', i;"
-    "    for (i = 0; i < bytes.length; i++) out += String.fromCharCode(bytes[i]);"
-    "    return out;"
-    "  };"
-    "}"
-    "if (typeof globalThis.btoa !== 'function') {"
-    "  globalThis.btoa = function(bin) {"
-    "    var s = String(bin), bytes = new Uint8Array(s.length), i;"
-    "    for (i = 0; i < s.length; i++) bytes[i] = s.charCodeAt(i) & 0xFF;"
-    "    return bytes.toBase64();"
-    "  };"
-    "}";
+        "if (typeof globalThis.atob !== 'function') {"
+        "  globalThis.atob = function(b64) {"
+        "    var bytes = Uint8Array.fromBase64(String(b64));"
+        "    var out = '', i;"
+        "    for (i = 0; i < bytes.length; i++) out += String.fromCharCode(bytes[i]);"
+        "    return out;"
+        "  };"
+        "}"
+        "if (typeof globalThis.btoa !== 'function') {"
+        "  globalThis.btoa = function(bin) {"
+        "    var s = String(bin), bytes = new Uint8Array(s.length), i;"
+        "    for (i = 0; i < s.length; i++) bytes[i] = s.charCodeAt(i) & 0xFF;"
+        "    return bytes.toBase64();"
+        "  };"
+        "}";
 
-static void qjs_register_helpers(JSContext *ctx)
-{
+static void qjs_register_helpers(JSContext *ctx) {
     JSValue global, log, console, ret;
 
     global = JS_GetGlobalObject(ctx);
@@ -206,14 +169,13 @@ static void qjs_register_helpers(JSContext *ctx)
 
 /* ---------------- JNI 方法 ---------------- */
 
-static jlong native_create_runtime(JNIEnv *env, jclass clazz)
-{
+static jlong native_create_runtime(JNIEnv *env, jclass clazz) {
     JSRuntime *rt = JS_NewRuntime();
     QJSRuntimeData *data;
 
     if (!rt)
         return 0;
-    data = (QJSRuntimeData *)calloc(1, sizeof(QJSRuntimeData));
+    data = (QJSRuntimeData *) calloc(1, sizeof(QJSRuntimeData));
     if (!data) {
         JS_FreeRuntime(rt);
         return 0;
@@ -223,12 +185,11 @@ static jlong native_create_runtime(JNIEnv *env, jclass clazz)
     JS_SetMemoryLimit(rt, QJS_MEMORY_LIMIT);
     JS_SetMaxStackSize(rt, QJS_STACK_SIZE);
     JS_SetInterruptHandler(rt, qjs_interrupt_handler, data);
-    return (jlong)(intptr_t)rt;
+    return (jlong) (intptr_t) rt;
 }
 
-static jlong native_create_context(JNIEnv *env, jclass clazz, jlong rt_ptr)
-{
-    JSRuntime *rt = (JSRuntime *)(intptr_t)rt_ptr;
+static jlong native_create_context(JNIEnv *env, jclass clazz, jlong rt_ptr) {
+    JSRuntime *rt = (JSRuntime *) (intptr_t) rt_ptr;
     JSContext *ctx;
 
     if (!rt)
@@ -237,13 +198,12 @@ static jlong native_create_context(JNIEnv *env, jclass clazz, jlong rt_ptr)
     if (!ctx)
         return 0;
     qjs_register_helpers(ctx);
-    return (jlong)(intptr_t)ctx;
+    return (jlong) (intptr_t) ctx;
 }
 
 static jstring native_evaluate(JNIEnv *env, jclass clazz, jlong ctx_ptr,
-                               jstring script, jstring filename, jstring var_name)
-{
-    JSContext *ctx = (JSContext *)(intptr_t)ctx_ptr;
+                               jstring script, jstring filename, jstring var_name) {
+    JSContext *ctx = (JSContext *) (intptr_t) ctx_ptr;
     JSRuntime *rt;
     QJSRuntimeData *data;
     const char *script_str;
@@ -258,7 +218,7 @@ static jstring native_evaluate(JNIEnv *env, jclass clazz, jlong ctx_ptr,
 
     /* 重置本次执行的超时截止时间 */
     rt = JS_GetRuntime(ctx);
-    data = (QJSRuntimeData *)JS_GetRuntimeOpaque(rt);
+    data = (QJSRuntimeData *) JS_GetRuntimeOpaque(rt);
     if (data)
         data->deadline_ms = now_ms() + QJS_TIMEOUT_MS;
 
@@ -332,7 +292,7 @@ static jstring native_evaluate(JNIEnv *env, jclass clazz, jlong ctx_ptr,
         JS_FreeValue(ctx, str_val);
     }
 
-done:
+    done:
     if (jresult == NULL)
         jresult = (*env)->NewStringUTF(env, "");
     (*env)->ReleaseStringUTFChars(env, script, script_str);
@@ -343,18 +303,16 @@ done:
     return jresult;
 }
 
-static void native_free_context(JNIEnv *env, jclass clazz, jlong ctx_ptr)
-{
-    JSContext *ctx = (JSContext *)(intptr_t)ctx_ptr;
+static void native_free_context(JNIEnv *env, jclass clazz, jlong ctx_ptr) {
+    JSContext *ctx = (JSContext *) (intptr_t) ctx_ptr;
     if (ctx)
         JS_FreeContext(ctx);
 }
 
-static void native_free_runtime(JNIEnv *env, jclass clazz, jlong rt_ptr)
-{
-    JSRuntime *rt = (JSRuntime *)(intptr_t)rt_ptr;
+static void native_free_runtime(JNIEnv *env, jclass clazz, jlong rt_ptr) {
+    JSRuntime *rt = (JSRuntime *) (intptr_t) rt_ptr;
     if (rt) {
-        QJSRuntimeData *data = (QJSRuntimeData *)JS_GetRuntimeOpaque(rt);
+        QJSRuntimeData *data = (QJSRuntimeData *) JS_GetRuntimeOpaque(rt);
         JS_FreeRuntime(rt);
         free(data);
     }
@@ -363,30 +321,29 @@ static void native_free_runtime(JNIEnv *env, jclass clazz, jlong rt_ptr)
 /* ---------------- 注册 ---------------- */
 
 static const JNINativeMethod g_methods[] = {
-    { "nativeCreateRuntime", "()J",
-      (void *)native_create_runtime },
-    { "nativeCreateContext", "(J)J",
-      (void *)native_create_context },
-    { "nativeEvaluate", "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;",
-      (void *)native_evaluate },
-    { "nativeFreeContext", "(J)V",
-      (void *)native_free_context },
-    { "nativeFreeRuntime", "(J)V",
-      (void *)native_free_runtime },
+        {"nativeCreateRuntime", "()J",
+                (void *) native_create_runtime},
+        {"nativeCreateContext", "(J)J",
+                (void *) native_create_context},
+        {"nativeEvaluate",      "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;",
+                (void *) native_evaluate},
+        {"nativeFreeContext",   "(J)V",
+                (void *) native_free_context},
+        {"nativeFreeRuntime",   "(J)V",
+                (void *) native_free_runtime},
 };
 
-JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
-{
+JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     JNIEnv *env = NULL;
     jclass clazz;
 
-    if ((*vm)->GetEnv(vm, (void **)&env, JNI_VERSION_1_6) != JNI_OK)
+    if ((*vm)->GetEnv(vm, (void **) &env, JNI_VERSION_1_6) != JNI_OK)
         return JNI_ERR;
     clazz = (*env)->FindClass(env, "com/xyrlsz/quickjs/QuickJSEngine");
     if (!clazz)
         return JNI_ERR;
     if ((*env)->RegisterNatives(env, clazz, g_methods,
-                                (int)(sizeof(g_methods) / sizeof(g_methods[0]))) != JNI_OK)
+                                (int) (sizeof(g_methods) / sizeof(g_methods[0]))) != JNI_OK)
         return JNI_ERR;
     return JNI_VERSION_1_6;
 }
