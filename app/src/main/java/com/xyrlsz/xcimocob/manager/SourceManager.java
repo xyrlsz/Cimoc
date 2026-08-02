@@ -24,6 +24,7 @@ import com.xyrlsz.xcimocob.source.MH5;
 import com.xyrlsz.xcimocob.source.MYCOMIC;
 import com.xyrlsz.xcimocob.source.ManBen;
 import com.xyrlsz.xcimocob.source.ManHuaGui;
+import com.xyrlsz.xcimocob.source.ManHuaZhiJia;
 import com.xyrlsz.xcimocob.source.ManWa;
 import com.xyrlsz.xcimocob.source.MangaBZ;
 import com.xyrlsz.xcimocob.source.Manhuatai;
@@ -149,6 +150,7 @@ public class SourceManager {
                 case DuManWuApp.TYPE -> new DuManWuApp(source);
                 case CopyMHWeb.TYPE -> new CopyMHWeb(source);
                 case DongManHi.TYPE -> new DongManHi(source);
+                case ManHuaZhiJia.TYPE -> new ManHuaZhiJia(source);
                 default -> new Null();
             };
             mParserArray.put(type, parser);
