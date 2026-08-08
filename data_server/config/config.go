@@ -23,6 +23,9 @@ type ConfigFile struct {
 	JWT struct {
 		Secret string `yaml:"secret"`
 	} `yaml:"jwt"`
+	Sources struct {
+		Dir string `yaml:"dir"` // 动态 JS 源仓库目录（静态托管 /sources/*）
+	} `yaml:"sources"`
 }
 
 type Config struct {
@@ -31,6 +34,7 @@ type Config struct {
 	DBDSN      string
 	JWTSecret  string
 	ServerPort string
+	SourcesDir string
 }
 
 // LoadWithConfig 加载配置，可指定配置文件路径（用于 set admin 命令，无需 CLI flag 解析）
@@ -92,6 +96,7 @@ func defaultConfig() *Config {
 		DBPath:     "./data/cimoc.db",
 		JWTSecret:  "",
 		ServerPort: "8080",
+		SourcesDir: "./sources",
 	}
 }
 
@@ -111,6 +116,9 @@ func applyEnvOverrides(cfg *Config) {
 	}
 	if v := os.Getenv("SERVER_PORT"); v != "" {
 		cfg.ServerPort = v
+	}
+	if v := os.Getenv("SOURCES_DIR"); v != "" {
+		cfg.SourcesDir = v
 	}
 }
 
@@ -152,6 +160,9 @@ func (cfg *Config) applyConfigFile(path string) {
 	}
 	if cf.JWT.Secret != "" {
 		cfg.JWTSecret = cf.JWT.Secret
+	}
+	if cf.Sources.Dir != "" {
+		cfg.SourcesDir = cf.Sources.Dir
 	}
 
 	fmt.Printf("[配置] 已加载配置文件: %s\n", path)

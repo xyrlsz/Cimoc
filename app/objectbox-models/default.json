@@ -392,10 +392,61 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "9:4229217708794139871",
+      "lastPropertyId": "8:2385733384224613084",
+      "name": "JsSource",
+      "properties": [
+        {
+          "id": "1:3067203286691503996",
+          "name": "id",
+          "type": 6,
+          "flags": 129
+        },
+        {
+          "id": "2:9154006968318861176",
+          "name": "type",
+          "indexId": "12:1527374127132030710",
+          "type": 5,
+          "flags": 40
+        },
+        {
+          "id": "3:8471836705323943997",
+          "name": "title",
+          "type": 9
+        },
+        {
+          "id": "4:1193133575027209183",
+          "name": "version",
+          "type": 9
+        },
+        {
+          "id": "5:1226423280035756585",
+          "name": "script",
+          "type": 9
+        },
+        {
+          "id": "6:7859180155899406301",
+          "name": "baseUrl",
+          "type": 9
+        },
+        {
+          "id": "7:2370173925622849142",
+          "name": "enable",
+          "type": 1
+        },
+        {
+          "id": "8:2385733384224613084",
+          "name": "updatedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "8:3545505946780716287",
-  "lastIndexId": "11:5927974058535691121",
+  "lastEntityId": "9:4229217708794139871",
+  "lastIndexId": "12:1527374127132030710",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,

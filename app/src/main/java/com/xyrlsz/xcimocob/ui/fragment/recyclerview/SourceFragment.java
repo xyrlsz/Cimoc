@@ -6,6 +6,7 @@ import static com.xyrlsz.xcimocob.ui.activity.WebviewActivity.EXTRA_WEB_URL;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -21,8 +22,12 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.xyrlsz.xcimocob.App;
 import com.xyrlsz.xcimocob.Constants;
 import com.xyrlsz.xcimocob.R;
+import com.xyrlsz.xcimocob.component.DialogCaller;
+import com.xyrlsz.xcimocob.manager.JsSourceManager;
+import com.xyrlsz.xcimocob.manager.PreferenceManager;
 import com.xyrlsz.xcimocob.model.Source;
 import com.xyrlsz.xcimocob.presenter.BasePresenter;
 import com.xyrlsz.xcimocob.presenter.SourcePresenter;
@@ -31,21 +36,29 @@ import com.xyrlsz.xcimocob.ui.activity.SourceDetailActivity;
 import com.xyrlsz.xcimocob.ui.activity.WebviewActivity;
 import com.xyrlsz.xcimocob.ui.adapter.BaseAdapter;
 import com.xyrlsz.xcimocob.ui.adapter.SourceAdapter;
+import com.xyrlsz.xcimocob.ui.fragment.dialog.EditorDialogFragment;
 import com.xyrlsz.xcimocob.ui.view.SourceView;
 import com.xyrlsz.xcimocob.utils.HintUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+
 
 /**
  * Created by Hiroshi on 2016/8/11.
  */
-public class SourceFragment extends RecyclerViewFragment implements SourceView, SourceAdapter.OnItemCheckedListener {
+public class SourceFragment extends RecyclerViewFragment implements SourceView, SourceAdapter.OnItemCheckedListener, DialogCaller {
+
+    private static final int REQUEST_JS_SOURCE_REPO = 1001;
 
     FrameLayout frameLayout;
     private SourcePresenter mPresenter;
     private SourceAdapter mSourceAdapter;
+    private Disposable mJsUpdateDisposable;
 
     @Override
     protected BasePresenter initPresenter() {
@@ -129,8 +142,73 @@ public class SourceFragment extends RecyclerViewFragment implements SourceView, 
                     mPresenter.update(source);
                 }
                 mSourceAdapter.notifyDataSetChanged();
+        } else if (__id == R.id.js_source_update) {
+                updateJsSources();
+        } else if (__id == R.id.js_source_repo) {
+                EditorDialogFragment fragment = EditorDialogFragment.newInstance(
+                        R.string.js_source_repo,
+                        App.getPreferenceManager().getString(PreferenceManager.PREF_JS_SOURCE_REPO, ""),
+                        REQUEST_JS_SOURCE_REPO);
+                fragment.setTargetFragment(this, REQUEST_JS_SOURCE_REPO);
+                fragment.show(getChildFragmentManager(), null);
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onDialogResult(int requestCode, Bundle bundle) {
+        if (requestCode == REQUEST_JS_SOURCE_REPO) {
+            String url = bundle.getString(DialogCaller.EXTRA_DIALOG_RESULT_VALUE);
+            if (url != null) {
+                App.getPreferenceManager().putString(PreferenceManager.PREF_JS_SOURCE_REPO, url.trim());
+                HintUtils.showToast(getActivity(), url.trim());
+            }
+        }
+    }
+
+    private void updateJsSources() {
+        String repo = App.getPreferenceManager().getString(PreferenceManager.PREF_JS_SOURCE_REPO, "");
+        if (repo == null || repo.trim().isEmpty()) {
+            HintUtils.showToast(getActivity(), R.string.js_source_repo_empty);
+            return;
+        }
+        if (mJsUpdateDisposable != null && !mJsUpdateDisposable.isDisposed()) {
+            return;
+        }
+        HintUtils.showToast(getActivity(), R.string.js_source_update_doing);
+        mJsUpdateDisposable = io.reactivex.rxjava3.core.Observable.fromCallable(() ->
+                        JsSourceManager.getInstance(this).updateFromServer(repo.trim()))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(count -> {
+                    mJsUpdateDisposable = null;
+                    if (!isAdded()) {
+                        return;
+                    }
+                    if (count != null && count > 0) {
+                        HintUtils.showToast(getActivity(),
+                                getString(R.string.js_source_update_done, count));
+                    } else {
+                        HintUtils.showToast(getActivity(), R.string.js_source_update_none);
+                    }
+                    mPresenter.load();
+                }, e -> {
+                    mJsUpdateDisposable = null;
+                    e.printStackTrace();
+                    if (isAdded()) {
+                        HintUtils.showToast(getActivity(),
+                                getString(R.string.js_source_update_fail, e.getMessage()));
+                    }
+                });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (mJsUpdateDisposable != null && !mJsUpdateDisposable.isDisposed()) {
+            mJsUpdateDisposable.dispose();
+            mJsUpdateDisposable = null;
+        }
     }
 
     @Override

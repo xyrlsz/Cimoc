@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "type": 900,
+      "title": "示例源",
+      "version": "1.0.0",
+      "url": "example.js",
+      "baseUrl": "https://example.com"
+    }
+  ]
+}

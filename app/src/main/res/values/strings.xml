@@ -82,6 +82,14 @@
     <string name="comic_inverse_selection">反选</string>
     <string name="comic_all_selection">全选</string>
     <string name="comic_all_deselect">全不选</string>
+    <string name="js_source_update">更新源</string>
+    <string name="js_source_repo">源仓库地址</string>
+    <string name="js_source_repo_hint">输入动态源仓库根地址（将请求其下的 index.json）</string>
+    <string name="js_source_repo_empty">请先设置源仓库地址</string>
+    <string name="js_source_update_doing">正在更新漫画源…</string>
+    <string name="js_source_update_done">漫画源更新完成，新增/更新 %1$d 个</string>
+    <string name="js_source_update_none">漫画源已是最新</string>
+    <string name="js_source_update_fail">漫画源更新失败：%1$s</string>
     <string name="comic_tag_select">标签选择</string>
     <string name="comic_info">漫画信息</string>
     <string name="comic_info_not_found">找不到漫画信息</string>

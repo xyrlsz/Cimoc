@@ -32,6 +32,9 @@ typedef struct {
     int64_t deadline_ms; /* 单调时钟截止时间 */
 } QJSRuntimeData;
 
+/* 全局 JavaVM 指针，用于 JS -> Java 宿主回调（hostCall） */
+static JavaVM *g_vm = NULL;
+
 /* ---------------- 工具 ---------------- */
 
 static int64_t now_ms(void) {
@@ -141,8 +144,120 @@ static const char qjs_helpers_js[] =
         "  };"
         "}";
 
+/* ---------------- JS -> Java 宿主回调 ---------------- */
+/* 安装为全局函数 hostCall(name, argsJson)：
+ *  - name     : 宿主方法名（如 "fetch" / "dom_selectAll"）
+ *  - argsJson : 参数数组的 JSON 字符串
+ * 回调 Java 静态方法 QuickJSEngine.onHostCall(name, argsJson)，
+ * 其返回值为 JSON 字符串；C 层把该 JSON 解析回 JS 值返回给脚本。
+ * 宿主侧出错时 Java 返回 null 或 {"__error__":"..."}，此处转为 JS 异常。 */
+static JSValue js_host_call(JSContext *ctx, JSValueConst this_val,
+                            int argc, JSValueConst *argv) {
+    JNIEnv *env = NULL;
+    jboolean attached = JNI_FALSE;
+    jstring name_j = NULL, args_j = NULL, result_j = NULL;
+    jclass clazz = NULL;
+    jmethodID mid = NULL;
+    const char *name_s = NULL, *args_s = NULL;
+    JSValue ret;
+
+    if (argc < 2 || !JS_IsString(argv[0]) || !JS_IsString(argv[1]))
+        return JS_ThrowTypeError(ctx, "hostCall expects (name, argsJson)");
+    if (g_vm == NULL)
+        return JS_ThrowInternalError(ctx, "host bridge not initialized");
+
+    name_s = JS_ToCString(ctx, argv[0]);
+    args_s = JS_ToCString(ctx, argv[1]);
+    if (!name_s || !args_s) {
+        if (name_s) JS_FreeCString(ctx, name_s);
+        if (args_s) JS_FreeCString(ctx, args_s);
+        return JS_EXCEPTION;
+    }
+
+    if ((*g_vm)->GetEnv(g_vm, (void **) &env, JNI_VERSION_1_6) != JNI_OK) {
+        if ((*g_vm)->AttachCurrentThread(g_vm, &env, NULL) != JNI_OK) {
+            JS_FreeCString(ctx, name_s);
+            JS_FreeCString(ctx, args_s);
+            return JS_ThrowInternalError(ctx, "failed to attach JNI thread");
+        }
+        attached = JNI_TRUE;
+    }
+
+    name_j = (*env)->NewStringUTF(env, name_s);
+    args_j = (*env)->NewStringUTF(env, args_s);
+    JS_FreeCString(ctx, name_s);
+    JS_FreeCString(ctx, args_s);
+    if (!name_j || !args_j) {
+        ret = JS_ThrowInternalError(ctx, "host call arg conversion failed");
+        goto cleanup;
+    }
+
+    clazz = (*env)->FindClass(env, "com/xyrlsz/quickjs/QuickJSEngine");
+    if (!clazz) {
+        ret = JS_ThrowInternalError(ctx, "host bridge class not found");
+        goto cleanup;
+    }
+    mid = (*env)->GetStaticMethodID(env, clazz, "onHostCall",
+                                    "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
+    if (!mid) {
+        ret = JS_ThrowInternalError(ctx, "host bridge method not found");
+        goto cleanup;
+    }
+
+    result_j = (jstring) (*env)->CallStaticObjectMethod(env, clazz, mid, name_j, args_j);
+    if ((*env)->ExceptionCheck(env)) {
+        (*env)->ExceptionClear(env);
+        ret = JS_ThrowInternalError(ctx, "host call threw an exception");
+        goto cleanup;
+    }
+
+    if (result_j == NULL) {
+        ret = JS_ThrowInternalError(ctx, "host call failed (null result)");
+        goto cleanup;
+    }
+
+    {
+        const char *res_s = (*env)->GetStringUTFChars(env, result_j, NULL);
+        if (res_s == NULL) {
+            ret = JS_ThrowInternalError(ctx, "host call result conversion failed");
+            goto cleanup;
+        }
+        ret = JS_ParseJSON(ctx, res_s, strlen(res_s), "<host>");
+        (*env)->ReleaseStringUTFChars(env, result_j, res_s);
+        if (JS_IsException(ret)) {
+            /* 宿主返回了非法 JSON（理论上不会发生），转成可读错误 */
+            JSValue exc = JS_GetException(ctx);
+            const char *msg = JS_ToCString(ctx, exc);
+            JS_FreeValue(ctx, exc);
+            JS_FreeValue(ctx, ret);
+            ret = JS_ThrowInternalError(ctx, "host returned invalid JSON: %s",
+                                        msg ? msg : "unknown");
+            if (msg) JS_FreeCString(ctx, msg);
+        }
+    }
+
+    /* 宿主调用结束后重置本次执行的超时截止时间，避免长网络请求吃掉脚本剩余配额 */
+    {
+        JSRuntime *rt = JS_GetRuntime(ctx);
+        QJSRuntimeData *data = (QJSRuntimeData *) JS_GetRuntimeOpaque(rt);
+        if (data)
+            data->deadline_ms = now_ms() + QJS_TIMEOUT_MS;
+    }
+
+    goto cleanup;
+
+    cleanup:
+    if (name_j) (*env)->DeleteLocalRef(env, name_j);
+    if (args_j) (*env)->DeleteLocalRef(env, args_j);
+    if (result_j) (*env)->DeleteLocalRef(env, result_j);
+    if (clazz) (*env)->DeleteLocalRef(env, clazz);
+    if (attached)
+        (*g_vm)->DetachCurrentThread(g_vm);
+    return ret;
+}
+
 static void qjs_register_helpers(JSContext *ctx) {
-    JSValue global, log, console, ret;
+    JSValue global, log, console, host, ret;
 
     global = JS_GetGlobalObject(ctx);
 
@@ -151,6 +266,9 @@ static void qjs_register_helpers(JSContext *ctx) {
     JS_SetPropertyStr(ctx, console, "log", JS_DupValue(ctx, log));
     JS_SetPropertyStr(ctx, global, "console", console);
     JS_SetPropertyStr(ctx, global, "print", log);
+
+    host = JS_NewCFunction(ctx, js_host_call, "hostCall", 2);
+    JS_SetPropertyStr(ctx, global, "hostCall", host);
 
     JS_FreeValue(ctx, global);
 
@@ -303,6 +421,230 @@ static jstring native_evaluate(JNIEnv *env, jclass clazz, jlong ctx_ptr,
     return jresult;
 }
 
+/* 调用全局 JS 函数：argsJson 为参数数组的 JSON 字符串（如 "[\"a\",\"b\"]"），
+ * 结果以 JSON 字符串返回（JS_JSONStringify）。函数不存在返回 "null"；
+ * 执行抛异常时转成 Java RuntimeException 抛出。 */
+static jstring native_call_function(JNIEnv *env, jclass clazz, jlong ctx_ptr,
+                                    jstring name, jstring args_json, jlong timeout_ms) {
+    JSContext *ctx = (JSContext *) (intptr_t) ctx_ptr;
+    JSRuntime *rt;
+    QJSRuntimeData *data;
+    const char *name_s = NULL;
+    const char *args_s = NULL;
+    JSValue global, func, args_val, ret;
+    JSValue len_val;
+    int argc = 0, i;
+    int func_valid = 0, args_valid = 0;
+    JSValue *argv = NULL;
+    jstring jresult = NULL;
+
+    if (!ctx)
+        return (*env)->NewStringUTF(env, "null");
+
+    /* 重置本次调用的超时截止时间 */
+    rt = JS_GetRuntime(ctx);
+    data = (QJSRuntimeData *) JS_GetRuntimeOpaque(rt);
+    if (data)
+        data->deadline_ms = now_ms() + (timeout_ms > 0 ? timeout_ms : QJS_TIMEOUT_MS);
+
+    name_s = (*env)->GetStringUTFChars(env, name, NULL);
+    if (!name_s)
+        return (*env)->NewStringUTF(env, "null");
+    args_s = (*env)->GetStringUTFChars(env, args_json, NULL);
+    if (!args_s) {
+        (*env)->ReleaseStringUTFChars(env, name, name_s);
+        return (*env)->NewStringUTF(env, "null");
+    }
+
+    global = JS_GetGlobalObject(ctx);
+    func = JS_GetPropertyStr(ctx, global, name_s);
+    JS_FreeValue(ctx, global);
+
+    if (JS_IsException(func)) {
+        JSValue exc = JS_GetException(ctx);
+        JS_FreeValue(ctx, exc);
+        JS_FreeValue(ctx, func);
+        jresult = (*env)->NewStringUTF(env, "null");
+        goto done;
+    }
+    if (!JS_IsFunction(ctx, func)) {
+        /* 函数未定义 -> 返回 "null"，不视为错误 */
+        JS_FreeValue(ctx, func);
+        jresult = (*env)->NewStringUTF(env, "null");
+        goto done;
+    }
+    func_valid = 1;
+
+    /* 解析参数数组 */
+    args_val = JS_ParseJSON(ctx, args_s, strlen(args_s), "<args>");
+    if (JS_IsException(args_val)) {
+        JSValue exc = JS_GetException(ctx);
+        JS_FreeValue(ctx, exc);
+        JS_FreeValue(ctx, args_val);
+        (*env)->ThrowNew(env, "java/lang/RuntimeException", "invalid args JSON");
+        jresult = NULL;
+        goto done;
+    }
+    if (!JS_IsArray(args_val)) {
+        JS_FreeValue(ctx, args_val);
+        (*env)->ThrowNew(env, "java/lang/RuntimeException", "args JSON must be an array");
+        jresult = NULL;
+        goto done;
+    }
+    args_valid = 1;
+
+    len_val = JS_GetPropertyStr(ctx, args_val, "length");
+    JS_ToInt32(ctx, &argc, len_val);
+    JS_FreeValue(ctx, len_val);
+    if (argc < 0)
+        argc = 0;
+
+    if (argc > 0) {
+        argv = (JSValue *) malloc(sizeof(JSValue) * argc);
+        if (!argv) {
+            (*env)->ThrowNew(env, "java/lang/RuntimeException", "out of memory");
+            jresult = NULL;
+            goto done;
+        }
+        for (i = 0; i < argc; i++) {
+            argv[i] = JS_GetPropertyUint32(ctx, args_val, i);
+            if (JS_IsException(argv[i])) {
+                JSValue exc = JS_GetException(ctx);
+                JS_FreeValue(ctx, exc);
+                while (--i >= 0)
+                    JS_FreeValue(ctx, argv[i]);
+                free(argv);
+                argv = NULL;
+                (*env)->ThrowNew(env, "java/lang/RuntimeException", "invalid arg");
+                jresult = NULL;
+                goto done;
+            }
+        }
+    }
+
+    ret = JS_Call(ctx, func, JS_UNDEFINED, argc, argv);
+    if (argv) {
+        for (i = 0; i < argc; i++)
+            JS_FreeValue(ctx, argv[i]);
+        free(argv);
+        argv = NULL;
+    }
+    JS_FreeValue(ctx, args_val);
+    args_valid = 0;
+    JS_FreeValue(ctx, func);
+    func_valid = 0;
+
+    if (JS_IsException(ret)) {
+        JSValue exc = JS_GetException(ctx);
+        const char *msg = JS_ToCString(ctx, exc);
+        LOGE("JS exception in %s: %s", name_s, msg ? msg : "(unknown)");
+        if (msg) {
+            jclass rte = (*env)->FindClass(env, "java/lang/RuntimeException");
+            if (rte) {
+                (*env)->ThrowNew(env, rte, msg);
+                (*env)->DeleteLocalRef(env, rte);
+            }
+            JS_FreeCString(ctx, msg);
+        }
+        JS_FreeValue(ctx, exc);
+        JS_FreeValue(ctx, ret);
+        jresult = NULL;
+        goto done;
+    }
+
+    /* 结果 JSON 序列化返回 */
+    {
+        JSValue str_val = JS_JSONStringify(ctx, ret, JS_UNDEFINED, JS_UNDEFINED);
+        JS_FreeValue(ctx, ret);
+        if (JS_IsException(str_val)) {
+            JSValue exc = JS_GetException(ctx);
+            JS_FreeValue(ctx, exc);
+            JS_FreeValue(ctx, str_val);
+            jresult = (*env)->NewStringUTF(env, "null");
+            goto done;
+        }
+        jresult = qjs_jsvalue_to_jstring(env, ctx, str_val);
+        JS_FreeValue(ctx, str_val);
+    }
+
+    done:
+    if (jresult == NULL)
+        jresult = (*env)->NewStringUTF(env, "null");
+    if (args_valid)
+        JS_FreeValue(ctx, args_val);
+    if (func_valid)
+        JS_FreeValue(ctx, func);
+    (*env)->ReleaseStringUTFChars(env, name, name_s);
+    (*env)->ReleaseStringUTFChars(env, args_json, args_s);
+    return jresult;
+}
+
+/* 检测全局函数是否已定义 */
+static jboolean native_has_global_function(JNIEnv *env, jclass clazz, jlong ctx_ptr,
+                                           jstring name) {
+    JSContext *ctx = (JSContext *) (intptr_t) ctx_ptr;
+    const char *name_s;
+    JSValue global, func;
+    jboolean result = JNI_FALSE;
+
+    if (!ctx)
+        return JNI_FALSE;
+    name_s = (*env)->GetStringUTFChars(env, name, NULL);
+    if (!name_s)
+        return JNI_FALSE;
+    global = JS_GetGlobalObject(ctx);
+    func = JS_GetPropertyStr(ctx, global, name_s);
+    if (!JS_IsException(func) && JS_IsFunction(ctx, func))
+        result = JNI_TRUE;
+    if (JS_IsException(func)) {
+        JSValue exc = JS_GetException(ctx);
+        JS_FreeValue(ctx, exc);
+    }
+    JS_FreeValue(ctx, func);
+    JS_FreeValue(ctx, global);
+    (*env)->ReleaseStringUTFChars(env, name, name_s);
+    return result;
+}
+
+/* 读取全局变量的 JSON 序列化值（用于读取源脚本元数据，如 SOURCE 对象）。
+ * 变量缺失/出错时返回 "null"。 */
+static jstring native_get_global_json(JNIEnv *env, jclass clazz, jlong ctx_ptr,
+                                      jstring name) {
+    JSContext *ctx = (JSContext *) (intptr_t) ctx_ptr;
+    const char *name_s;
+    JSValue global, prop, str_val;
+    jstring jresult;
+
+    if (!ctx)
+        return (*env)->NewStringUTF(env, "null");
+    name_s = (*env)->GetStringUTFChars(env, name, NULL);
+    if (!name_s)
+        return (*env)->NewStringUTF(env, "null");
+    global = JS_GetGlobalObject(ctx);
+    prop = JS_GetPropertyStr(ctx, global, name_s);
+    JS_FreeValue(ctx, global);
+    if (JS_IsException(prop)) {
+        JSValue exc = JS_GetException(ctx);
+        JS_FreeValue(ctx, exc);
+        JS_FreeValue(ctx, prop);
+        (*env)->ReleaseStringUTFChars(env, name, name_s);
+        return (*env)->NewStringUTF(env, "null");
+    }
+    str_val = JS_JSONStringify(ctx, prop, JS_UNDEFINED, JS_UNDEFINED);
+    JS_FreeValue(ctx, prop);
+    if (JS_IsException(str_val)) {
+        JSValue exc = JS_GetException(ctx);
+        JS_FreeValue(ctx, exc);
+        JS_FreeValue(ctx, str_val);
+        (*env)->ReleaseStringUTFChars(env, name, name_s);
+        return (*env)->NewStringUTF(env, "null");
+    }
+    jresult = qjs_jsvalue_to_jstring(env, ctx, str_val);
+    JS_FreeValue(ctx, str_val);
+    (*env)->ReleaseStringUTFChars(env, name, name_s);
+    return jresult;
+}
+
 static void native_free_context(JNIEnv *env, jclass clazz, jlong ctx_ptr) {
     JSContext *ctx = (JSContext *) (intptr_t) ctx_ptr;
     if (ctx)
@@ -327,6 +669,12 @@ static const JNINativeMethod g_methods[] = {
                 (void *) native_create_context},
         {"nativeEvaluate",      "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;",
                 (void *) native_evaluate},
+        {"nativeCallFunction",  "(JLjava/lang/String;Ljava/lang/String;J)Ljava/lang/String;",
+                (void *) native_call_function},
+        {"nativeHasGlobalFunction", "(JLjava/lang/String;)Z",
+                (void *) native_has_global_function},
+        {"nativeGetGlobalJson", "(JLjava/lang/String;)Ljava/lang/String;",
+                (void *) native_get_global_json},
         {"nativeFreeContext",   "(J)V",
                 (void *) native_free_context},
         {"nativeFreeRuntime",   "(J)V",
@@ -337,6 +685,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     JNIEnv *env = NULL;
     jclass clazz;
 
+    g_vm = vm;
     if ((*vm)->GetEnv(vm, (void **) &env, JNI_VERSION_1_6) != JNI_OK)
         return JNI_ERR;
     clazz = (*env)->FindClass(env, "com/xyrlsz/quickjs/QuickJSEngine");

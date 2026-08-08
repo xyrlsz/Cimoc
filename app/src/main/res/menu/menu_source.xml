@@ -18,4 +18,12 @@
         android:id="@+id/comic_AllDeselect"
         android:title="@string/comic_all_deselect"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/js_source_update"
+        android:title="@string/js_source_update"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/js_source_repo"
+        android:title="@string/js_source_repo"
+        app:showAsAction="never" />
 </menu>

@@ -157,11 +157,18 @@ public class UpdateHelper {
 
     private static void updateComicSource(BoxStore boxStore) {
         Box<Source> sourceBox = boxStore.boxFor(Source.class);
+        // 动态 JS 源对应的 type 不应被清理（在线安装的源不在内置表里）
+        Box<com.xyrlsz.xcimocob.model.JsSource> jsSourceBox =
+                boxStore.boxFor(com.xyrlsz.xcimocob.model.JsSource.class);
         List<Source> sourceList = sourceBox.getAll();
         List<Source> sourcesToDelete = new ArrayList<>();
         List<Source> sourcesToAdd = new ArrayList<>();
         for (Source source : sourceList) {
-            if (!ComicSourceTable.containsKey(source.getType())) {
+            boolean hasJs = jsSourceBox.query()
+                    .equal(com.xyrlsz.xcimocob.model.JsSource_.type, source.getType())
+                    .build()
+                    .findFirst() != null;
+            if (!ComicSourceTable.containsKey(source.getType()) && !hasJs) {
                 sourcesToDelete.add(source);
             }
         }

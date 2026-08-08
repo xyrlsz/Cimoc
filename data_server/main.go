@@ -163,6 +163,18 @@ func main() {
 		serveAdmin(c)
 	})
 
+	// 动态 JS 源仓库（静态托管，供客户端在线更新源脚本）
+	// 仓库目录结构：<sources_dir>/index.json + <sources_dir>/*.js
+	// 客户端配置的仓库地址即 http://<host>:<port>/sources
+	if cfg.SourcesDir != "" {
+		if _, err := os.Stat(cfg.SourcesDir); err == nil {
+			r.Static("/sources", cfg.SourcesDir)
+			log.Printf("JS 源仓库已挂载: /sources -> %s", cfg.SourcesDir)
+		} else {
+			log.Printf("[警告] 源仓库目录不存在，跳过挂载: %s", cfg.SourcesDir)
+		}
+	}
+
 	// 根路径和 /login 重定向到管理后台
 	r.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusFound, "/admin")

@@ -3,9 +3,11 @@ package com.xyrlsz.xcimocob.manager;
 import android.util.SparseArray;
 
 import com.xyrlsz.xcimocob.component.AppGetter;
+import com.xyrlsz.xcimocob.model.JsSource;
 import com.xyrlsz.xcimocob.model.Source;
 import com.xyrlsz.xcimocob.model.Source_;
 import com.xyrlsz.xcimocob.parser.MangaParser;
+import com.xyrlsz.xcimocob.source.js.JsMangaParser;
 import com.xyrlsz.xcimocob.source.Baozi;
 import com.xyrlsz.xcimocob.source.BuKa;
 import com.xyrlsz.xcimocob.source.CopyMH;
@@ -54,9 +56,11 @@ public class SourceManager {
     // 1. 修改：使用 ObjectBox 的 Box 替代 SourceDao
     private final Box<Source> mSourceBox;
     private final SparseArray<MangaParser> mParserArray = new SparseArray<>();
+    private final AppGetter mGetter;
 
     private SourceManager(AppGetter getter) {
         // 2. 修改：从 BoxStore 获取 Box
+        mGetter = getter;
         BoxStore boxStore = getter.getAppInstance().getBoxStore();
         mSourceBox = boxStore.boxFor(Source.class);
     }
@@ -117,11 +121,26 @@ public class SourceManager {
         mSourceBox.put(source);
     }
 
+    /**
+     * 清除解析器缓存（JS 源增删改后调用，强制下次 getParser 重建）。
+     */
+    public void invalidateParserCache() {
+        mParserArray.clear();
+    }
+
     // 6. 保持不变：解析器管理逻辑（这部分与数据库无关）
     public MangaParser getParser(int type) {
         MangaParser parser = mParserArray.get(type);
         if (parser == null) {
             Source source = load(type);
+            // 优先使用动态 JS 源：存在 JS 脚本且源未被用户禁用时覆盖内置实现。
+            // 以 Source 表的 enable 为准，保证源列表里的开关对 JS 源同样生效。
+            JsSource jsSource = JsSourceManager.getInstance(mGetter).load(type);
+            if (jsSource != null && (source == null || source.getEnable())) {
+                parser = new JsMangaParser(jsSource);
+                mParserArray.put(type, parser);
+                return parser;
+            }
             parser = switch (type) {
                 case ManHuaGui.TYPE -> new ManHuaGui(source);
                 case DM5.TYPE -> new DM5(source);

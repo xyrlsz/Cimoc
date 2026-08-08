@@ -52,3 +52,4 @@ data_server/xcimoc-data-server.exe~
 data_server/data/cimoc.db
 release_body.md
 app/libs/quickjs-release.aar
+app/libs/quickjs-debug.aar

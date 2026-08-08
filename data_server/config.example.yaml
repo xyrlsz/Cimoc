@@ -12,3 +12,8 @@ database:
 
 jwt:
   secret: "" # JWT 签名密钥（为空则首次启动自动生成）
+
+# 动态 JS 源仓库目录（可选）：将该目录静态托管到 /sources/*
+# 目录需包含 index.json 清单与各源脚本（见 docs/js-source.md）
+sources:
+  dir: "./sources"

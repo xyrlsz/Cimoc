@@ -47,6 +47,11 @@ public class PreferenceManager {
 
     public static final String PREF_APP_VERSION = "pref_app_version";
 
+    /**
+     * 动态 JS 源仓库地址（根 URL，客户端请求其下的 index.json）。
+     */
+    public static final String PREF_JS_SOURCE_REPO = "pref_js_source_repo";
+
     public static final String PREF_MAIN_NOTICE = "pref_main_notice";
     public static final String PREF_MAIN_NOTICE_LAST = "pref_main_notice_last";
 
