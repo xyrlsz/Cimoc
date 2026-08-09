@@ -227,7 +227,7 @@ public class FrescoUtils {
                 .setBaseDirectoryPathSupplier(context::getCacheDir)
                 .build();
         MyImageCacheStatsTracker imageCacheStatsTracker = new MyImageCacheStatsTracker();
-        OkHttpNetworkFetcher fetcher = new OkHttpNetworkFetcher(App.getHttpClient(), null);
+        OkHttpNetworkFetcher fetcher = new OkHttpNetworkFetcher(App.getHttpClient());
         ImagePipelineConfig config = OkHttpImagePipelineConfigFactory
                 .newBuilder(context, Objects.requireNonNull(App.getHttpClient()))
                 .setMainDiskCacheConfig(diskCacheConfig)
