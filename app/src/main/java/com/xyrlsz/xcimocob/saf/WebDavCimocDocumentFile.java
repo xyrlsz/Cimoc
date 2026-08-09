@@ -3,74 +3,44 @@ package com.xyrlsz.xcimocob.saf;
 import android.net.Uri;
 import android.webkit.MimeTypeMap;
 
-import com.thegrizzlylabs.sardineandroid.DavResource;
-import com.thegrizzlylabs.sardineandroid.Sardine;
+import com.xyrlsz.xcimocob.core.DavResourceInfo;
+import com.xyrlsz.xcimocob.core.WebDavClient;
 import com.xyrlsz.xcimocob.core.WebDavConf;
 import com.xyrlsz.xcimocob.utils.BinStreamUtils;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
-import io.reactivex.rxjava3.schedulers.Schedulers;
-
-
+/**
+ * WebDAV 版 {@link CimocDocumentFile}，基于 dav4jvm。
+ *
+ * 注意：构造器不做网络请求（主线程安全）；所有网络操作（exists/findFile/
+ * listFiles/createFile 等）都是阻塞调用，必须在后台线程执行。
+ */
 public class WebDavCimocDocumentFile extends CimocDocumentFile {
-    private static final Sardine mSardine = WebDavConf.sardine;
-    private final String mWebDavUrl = WebDavConf.url + "/cimoc";
-    private final String mCurrentPath;
-    private DavResource mDavResource;
 
+    private final WebDavClient mClient;
+    private final String mCurrentPath;
+    private DavResourceInfo mResource;
+
+    /** 根目录构造：对应 WebDAV 服务器上的 /cimoc 集合。不做网络请求。 */
     public WebDavCimocDocumentFile(CimocDocumentFile parent) {
         super(parent);
-        if (parent == null) {
-            mCurrentPath = mWebDavUrl;
-        } else {
-            WebDavCimocDocumentFile tmp = (WebDavCimocDocumentFile) parent;
-            mCurrentPath = tmp.getCurrentPath();
-        }
-
-        // 使用 RxJava 异步获取 DavResource
-        Observable.create((io.reactivex.rxjava3.core.ObservableOnSubscribe<DavResource>) emitter -> {
-                    try {
-                        List<DavResource> resources = mSardine.list(mWebDavUrl, 0);
-                        if (!resources.isEmpty()) {
-                            emitter.onNext(resources.get(0));
-                        }
-                        emitter.onComplete();
-                        return;
-                    } catch (IOException e) {
-                        emitter.onError(e);
-                        return;
-                    }
-                })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                    resource -> mDavResource = resource,
-                    Throwable::printStackTrace
-                );
+        mClient = WebDavConf.client;
+        mCurrentPath = WebDavConf.url + "/cimoc";
+        mResource = null;
     }
 
-    // 传入currPath
-    WebDavCimocDocumentFile(CimocDocumentFile parent, String currPath, DavResource resource) {
-        super(parent);
-        mCurrentPath = currPath;
-        mDavResource = resource;
-    }
-
-    // 传入相对路径
+    /** 相对路径构造：parent 目录下的 path。不做网络请求（目录由使用时确保）。 */
     public WebDavCimocDocumentFile(WebDavCimocDocumentFile parent, String path) {
         super(parent);
-
+        mClient = WebDavConf.client;
         if (path.startsWith("/")) {
             path = path.substring(1);
         }
@@ -78,29 +48,15 @@ public class WebDavCimocDocumentFile extends CimocDocumentFile {
             path = path.substring(0, path.length() - 1);
         }
         mCurrentPath = parent.getCurrentPath() + "/" + path;
-        Observable.create((io.reactivex.rxjava3.core.ObservableOnSubscribe<DavResource>) emitter -> {
-                    try {
-                        if (!mSardine.exists(mCurrentPath)) {
-                            mSardine.createDirectory(mCurrentPath);
-                        }
-                        List<DavResource> resources = mSardine.list(mCurrentPath, 0);
-                        if (!resources.isEmpty()) {
-                            emitter.onNext(resources.get(0));
-                        }
-                        emitter.onComplete();
-                        return;
-                    } catch (IOException e) {
-                        emitter.onError(e);
-                        return;
-                    }
-                })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                    resource -> mDavResource = resource,
-                    Throwable::printStackTrace
-                );
+        mResource = null;
+    }
 
+    /** 内部构造：已知完整路径与资源信息。 */
+    private WebDavCimocDocumentFile(WebDavCimocDocumentFile parent, String path, DavResourceInfo resource) {
+        super(parent);
+        mClient = WebDavConf.client;
+        mCurrentPath = path;
+        mResource = resource;
     }
 
     private static String getTypeForName(String name) {
@@ -115,31 +71,49 @@ public class WebDavCimocDocumentFile extends CimocDocumentFile {
         return "application/octet-stream";
     }
 
-    public static void UploadFile(File src, String urlPath) {
+    /**
+     * 确保当前目录在服务器上存在（不存在则创建），并刷新自身资源信息。
+     * 阻塞调用，请在后台线程执行。
+     */
+    public void ensureDirectory() {
+        mClient.createDirectory(mCurrentPath);
+        mResource = mClient.getResource(mCurrentPath);
+    }
 
+    public static void UploadFile(File src, String urlPath) {
+        WebDavClient client = WebDavConf.client;
+        if (client == null) {
+            return;
+        }
         try {
             // 上传文件到 WebDAV 服务器
-            mSardine.put(urlPath, src, "application/octet-stream");
-
-        } catch (IOException e) {
+            client.put(urlPath, src, "application/octet-stream");
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public static void UploadStreamFile(InputStream inputStream, String urlPath) {
-
+        WebDavClient client = WebDavConf.client;
+        if (client == null) {
+            return;
+        }
         try {
             // 上传文件到 WebDAV 服务器
-            mSardine.put(urlPath, BinStreamUtils.readAllBytesCompat(inputStream));
-        } catch (IOException e) {
+            client.put(urlPath, BinStreamUtils.readAllBytesCompat(inputStream));
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public static InputStream getInputStream(String path) throws FileNotFoundException {
+        WebDavClient client = WebDavConf.client;
+        if (client == null) {
+            throw new FileNotFoundException("WebDAV 未初始化");
+        }
         try {
-            return new BufferedInputStream(mSardine.get(path));
-        } catch (IOException e) {
+            return new BufferedInputStream(client.get(path));
+        } catch (Exception e) {
             throw new FileNotFoundException(e.getMessage());
         }
     }
@@ -152,15 +126,15 @@ public class WebDavCimocDocumentFile extends CimocDocumentFile {
     public CimocDocumentFile createFile(String displayName) {
         String newPath = mCurrentPath + "/" + displayName;
         try {
-            if (!mSardine.exists(newPath)) {
+            if (!mClient.exists(newPath)) {
                 // 创建一个空文件
-                mSardine.put(newPath, new byte[0]);
-                List<DavResource> resources = mSardine.list(newPath, 0);
-                if (!resources.isEmpty()) {
-                    return new WebDavCimocDocumentFile(this, newPath, resources.get(0));
+                mClient.put(newPath, new byte[0]);
+                DavResourceInfo resource = mClient.getResource(newPath);
+                if (resource != null) {
+                    return new WebDavCimocDocumentFile(this, newPath, resource);
                 }
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -170,14 +144,14 @@ public class WebDavCimocDocumentFile extends CimocDocumentFile {
     public CimocDocumentFile createDirectory(String displayName) {
         String newPath = mCurrentPath + "/" + displayName;
         try {
-            if (!mSardine.exists(newPath)) {
-                mSardine.createDirectory(newPath);
-                List<DavResource> resources = mSardine.list(newPath, 0);
-                if (!resources.isEmpty()) {
-                    return new WebDavCimocDocumentFile(this, newPath, resources.get(0));
+            if (!mClient.exists(newPath)) {
+                mClient.createDirectory(newPath);
+                DavResourceInfo resource = mClient.getResource(newPath);
+                if (resource != null) {
+                    return new WebDavCimocDocumentFile(this, newPath, resource);
                 }
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -190,56 +164,48 @@ public class WebDavCimocDocumentFile extends CimocDocumentFile {
 
     @Override
     public String getName() {
-        return mDavResource != null ? mDavResource.getName() : "";
+        return mResource != null ? mResource.getName() : "";
     }
 
     @Override
     public String getType() {
-        if (mDavResource != null && !mDavResource.isDirectory()) {
-            return getTypeForName(mDavResource.getName());
+        if (mResource != null && !mResource.isDirectory()) {
+            return getTypeForName(mResource.getName());
         }
         return null;
     }
 
     @Override
     public boolean isDirectory() {
-        return mDavResource != null && mDavResource.isDirectory();
+        return mResource != null && mResource.isDirectory();
     }
 
     @Override
     public boolean isFile() {
-        return mDavResource != null && !mDavResource.isDirectory();
+        return mResource != null && !mResource.isDirectory();
     }
 
     @Override
     public long length() {
-        return mDavResource != null ? mDavResource.getContentLength() : 0;
+        return mResource != null ? mResource.getContentLength() : 0;
     }
 
     @Override
     public boolean canRead() {
-        try {
-            return mSardine.exists(mCurrentPath);
-        } catch (IOException e) {
-            return false;
-        }
+        return mClient.exists(mCurrentPath);
     }
 
     @Override
     public boolean canWrite() {
-        try {
-            return mSardine.exists(mCurrentPath);
-        } catch (IOException e) {
-            return false;
-        }
+        return mClient.exists(mCurrentPath);
     }
 
     @Override
     public boolean delete() {
         try {
-            mSardine.delete(mCurrentPath);
+            mClient.delete(mCurrentPath);
             return true;
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
@@ -247,18 +213,14 @@ public class WebDavCimocDocumentFile extends CimocDocumentFile {
 
     @Override
     public boolean exists() {
-        try {
-            return mSardine.exists(mCurrentPath);
-        } catch (IOException e) {
-            return false;
-        }
+        return mClient.exists(mCurrentPath);
     }
 
     @Override
     public InputStream openInputStream() throws FileNotFoundException {
         try {
-            return new BufferedInputStream(mSardine.get(mCurrentPath));
-        } catch (IOException e) {
+            return new BufferedInputStream(mClient.get(mCurrentPath));
+        } catch (Exception e) {
             throw new FileNotFoundException(e.getMessage());
         }
     }
@@ -266,19 +228,13 @@ public class WebDavCimocDocumentFile extends CimocDocumentFile {
     @Override
     public List<CimocDocumentFile> listFiles(DocumentFileFilter filter, Comparator<? super CimocDocumentFile> comp) {
         final ArrayList<CimocDocumentFile> results = new ArrayList<>();
-        try {
-            List<DavResource> resources = mSardine.list(mCurrentPath);
-            // 跳过第一个资源，因为它是当前目录
-            for (int i = 1; i < resources.size(); i++) {
-                DavResource resource = resources.get(i);
-                String path = mCurrentPath + "/" + resource.getName();
-                CimocDocumentFile doc = new WebDavCimocDocumentFile(this, path, resource);
-                if (filter == null || filter.call(doc)) {
-                    results.add(doc);
-                }
+        List<DavResourceInfo> resources = mClient.listChildren(mCurrentPath);
+        for (DavResourceInfo resource : resources) {
+            String path = mCurrentPath + "/" + resource.getName();
+            CimocDocumentFile doc = new WebDavCimocDocumentFile(this, path, resource);
+            if (filter == null || filter.call(doc)) {
+                results.add(doc);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
 
         if (comp != null) {
@@ -295,27 +251,20 @@ public class WebDavCimocDocumentFile extends CimocDocumentFile {
 
     @Override
     public void refresh() {
-        try {
-            List<DavResource> resources = mSardine.list(mCurrentPath, 0);
-            if (!resources.isEmpty()) {
-                mDavResource = resources.get(0);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        mResource = mClient.getResource(mCurrentPath);
     }
 
     @Override
     public CimocDocumentFile findFile(String displayName) {
         String targetPath = mCurrentPath + "/" + displayName;
         try {
-            if (mSardine.exists(targetPath)) {
-                List<DavResource> resources = mSardine.list(targetPath, 0);
-                if (!resources.isEmpty()) {
-                    return new WebDavCimocDocumentFile(this, targetPath, resources.get(0));
+            if (mClient.exists(targetPath)) {
+                DavResourceInfo resource = mClient.getResource(targetPath);
+                if (resource != null) {
+                    return new WebDavCimocDocumentFile(this, targetPath, resource);
                 }
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -325,10 +274,10 @@ public class WebDavCimocDocumentFile extends CimocDocumentFile {
     public boolean renameTo(String displayName) {
         String newPath = mCurrentPath.substring(0, mCurrentPath.lastIndexOf('/')) + "/" + displayName;
         try {
-            mSardine.move(mCurrentPath, newPath);
-            mDavResource = mSardine.list(newPath, 0).get(0);
+            mClient.move(mCurrentPath, newPath);
+            mResource = mClient.getResource(newPath);
             return true;
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }

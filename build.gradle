@@ -12,6 +12,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:9.3.1'
         classpath 'io.objectbox:objectbox-gradle-plugin:5.4.2'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.10'
     }
 }
 

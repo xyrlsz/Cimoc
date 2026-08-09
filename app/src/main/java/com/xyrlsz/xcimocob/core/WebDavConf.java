@@ -4,18 +4,14 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.thegrizzlylabs.sardineandroid.Sardine;
-import com.thegrizzlylabs.sardineandroid.impl.OkHttpSardine;
 import com.xyrlsz.xcimocob.Constants;
-
-import java.io.IOException;
 
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class WebDavConf {
     public static String url = "";
-    public static Sardine sardine = null;
+    public static WebDavClient client = null;
     public static boolean isInit = false;
 
     public static void init(Context context) {
@@ -23,20 +19,19 @@ public class WebDavConf {
         url = sharedPreferences.getString(Constants.WEBDAV_SHARED_URL, "");
         String username = sharedPreferences.getString(Constants.WEBDAV_SHARED_USERNAME, "");
         String password = sharedPreferences.getString(Constants.WEBDAV_SHARED_PASSWORD, "");
-        sardine = new OkHttpSardine();
+        if (client != null) {
+            client.close();
+        }
+        client = WebDavClient.create(username, password);
+        isInit = false;
         if (!(username.isEmpty() || password.isEmpty() || url.isEmpty())) {
-            sardine.setCredentials(username, password);
             Observable.create((io.reactivex.rxjava3.core.ObservableOnSubscribe<Void>) emitter -> {
                         try {
-                            String mWebDavUrl = url + "/cimoc";
-                            if (!sardine.exists(mWebDavUrl)) {
-                                sardine.createDirectory(mWebDavUrl);
-                            }
+                            // 在后台线程检查/创建 /cimoc 目录
+                            client.createDirectory(url + "/cimoc");
                             emitter.onComplete();
-                            return;
-                        } catch (IOException e) {
+                        } catch (Exception e) {
                             emitter.onError(e);
-                            return;
                         }
                     })
                     .subscribeOn(Schedulers.io())
@@ -61,7 +56,7 @@ public class WebDavConf {
 
     public static void update(Context context) {
         url = null;
-        sardine = null;
+        client = null;
         isInit = false;
         init(context);
     }

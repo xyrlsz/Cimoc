@@ -187,9 +187,13 @@ dependencies {
     //noinspection GradleDependency
     implementation "androidx.core:core-ktx:1.17.0"
     implementation 'com.github.xyrlsz:android-opencc:1.4.2'
-    implementation('com.github.thegrizzlylabs:sardine-android:0.9') {
-        exclude group: 'xpp3', module: 'xpp3'
+    // WebDAV 客户端：dav4jvm（基于 Ktor 3.5.1）。Android 系统自带 XmlPullParser，排除 xpp3 避免重复类
+    implementation('com.github.bitfireAT:dav4jvm:4.0.0') {
+        exclude group: 'org.ogce', module: 'xpp3'
     }
+    implementation 'io.ktor:ktor-client-okhttp:3.5.2'
+    implementation 'io.ktor:ktor-client-auth:3.5.2'
+    implementation 'io.ktor:ktor-client-encoding:3.5.2'
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
     // AndroidX Test libraries
     testImplementation 'junit:junit:4.13.2'
@@ -200,4 +204,11 @@ dependencies {
 
 repositories {
     mavenCentral()
+}
+
+// Kotlin 编译目标与 Java 17 对齐
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    }
 }
