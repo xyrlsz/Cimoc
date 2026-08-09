@@ -138,10 +138,18 @@ createApp({
 
     const apiBase = window.location.origin;
 
+    // JWT payload 是 base64url（使用 -/_）且不带 padding；
+    // 浏览器 atob 只接受标准 base64（+/）且依赖 padding，需先转换再补齐
+    function base64UrlDecode(str) {
+      let b64 = str.replace(/-/g, '+').replace(/_/g, '/');
+      while (b64.length % 4 !== 0) b64 += '=';
+      return atob(b64);
+    }
+
     // 解码 JWT payload 获取 exp
     function jwtExp(jwtToken) {
       try {
-        const payload = JSON.parse(atob(jwtToken.split('.')[1]));
+        const payload = JSON.parse(base64UrlDecode(jwtToken.split('.')[1]));
         return payload.exp ? payload.exp * 1000 : 0;
       } catch (e) { return 0; }
     }

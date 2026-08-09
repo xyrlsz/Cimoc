@@ -6,6 +6,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -114,14 +116,53 @@ func applyEnvOverrides(cfg *Config) {
 	}
 }
 
-// ensureJWT 确保 JWT 密钥已设置，未设置则自动生成
+// ensureJWT 确保 JWT 密钥已设置，未设置则自动生成并持久化（重启后旧 token 仍有效）
 func ensureJWT(cfg *Config) {
 	if cfg.JWTSecret != "" {
 		return
 	}
+
+	// 优先从持久化文件恢复上次生成的密钥，避免重启后所有已签发 token 失效
+	if secret, err := loadPersistedJWTSecret(cfg); err == nil && secret != "" {
+		cfg.JWTSecret = secret
+		fmt.Println("[提示] 已从持久化文件恢复 JWT 密钥，重启不影响已签发 token")
+		return
+	}
+
 	cfg.JWTSecret = generateRandomKey(32)
-	fmt.Printf("[提示] 未设置 JWT_SECRET，已自动生成: %s\n", cfg.JWTSecret)
-	fmt.Println("[提示] 建议通过配置文件、环境变量或 --jwtsecret 固定密钥，以免重启后旧 token 失效")
+	if err := persistJWTSecret(cfg, cfg.JWTSecret); err != nil {
+		fmt.Printf("[警告] JWT 密钥持久化失败: %v（重启后旧 token 将失效）\n", err)
+		fmt.Printf("[提示] 本次密钥: %s\n", cfg.JWTSecret)
+	} else {
+		fmt.Println("[提示] 未设置 JWT_SECRET，已自动生成并持久化（重启后旧 token 仍有效）")
+	}
+}
+
+// jwtSecretFile 返回 JWT 密钥持久化文件路径（与数据库同目录）
+func jwtSecretFile(cfg *Config) string {
+	dir := filepath.Dir(cfg.DBPath)
+	if dir == "." || dir == "" {
+		dir = "."
+	}
+	return filepath.Join(dir, ".jwt_secret")
+}
+
+// loadPersistedJWTSecret 从持久化文件读取 JWT 密钥
+func loadPersistedJWTSecret(cfg *Config) (string, error) {
+	data, err := os.ReadFile(jwtSecretFile(cfg))
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(string(data)), nil
+}
+
+// persistJWTSecret 将 JWT 密钥写入持久化文件（0600 权限，仅本用户可读）
+func persistJWTSecret(cfg *Config, secret string) error {
+	dir := filepath.Dir(cfg.DBPath)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return err
+	}
+	return os.WriteFile(jwtSecretFile(cfg), []byte(secret+"\n"), 0600)
 }
 
 // applyConfigFile 从 YAML 文件加载配置

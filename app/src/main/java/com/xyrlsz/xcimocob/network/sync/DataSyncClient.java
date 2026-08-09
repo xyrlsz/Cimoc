@@ -105,10 +105,11 @@ public class DataSyncClient {
         if (TextUtils.isEmpty(token)) return false;
         try {
             // JWT 格式: header.payload.signature
+            // 服务端签发的 payload 是 base64url 且不带 padding（NO_PADDING 确保解码兼容）
             String[] parts = token.split("\\.");
             if (parts.length < 2) return false;
 
-            byte[] payload = Base64.decode(parts[1], Base64.URL_SAFE);
+            byte[] payload = Base64.decode(parts[1], Base64.URL_SAFE | Base64.NO_PADDING);
             String json = new String(payload, "UTF-8");
 
             // 快速解析 exp 字段
@@ -158,12 +159,39 @@ public class DataSyncClient {
             return token; // token 仍然有效
         }
 
+        // 即将过期 → 预刷新（网络失败时回退旧 token，因为 token 此刻仍有效）
+        return refreshOrRelogin(true);
+    }
+
+    /**
+     * 强制刷新 token；刷新失败（401/null）时用本地保存的账号密码自动重新登录。
+     * 通常在收到服务端 401 后调用（token 已被服务端拒绝，不能回退旧 token）。
+     *
+     * @return 新的有效 token；无法自动恢复时返回 null
+     */
+    public static String refreshOrRelogin() {
+        return refreshOrRelogin(false);
+    }
+
+    /**
+     * 刷新 token 并（必要时）自动重新登录。
+     *
+     * @param fallbackToOldToken true：刷新遇到网络/服务器错误（非 401）时回退返回旧 token
+     *        （用于"预刷新"场景——token 仍有效只是快过期）；
+     *        false：已确认 token 被服务端拒绝（401），不回退旧 token，全部失败返回 null
+     * @return 可用的 token；无法获得时返回 null
+     */
+    public static String refreshOrRelogin(boolean fallbackToOldToken) {
+        PreferenceManager pm = App.getPreferenceManager();
+        String token = pm.getString(PreferenceManager.PREFERENCES_USER_TOCKEN, "");
+        if (TextUtils.isEmpty(token)) return null;
+
         String serverUrl = pm.getString(PreferenceManager.PREF_DATA_SERVER_URL, "");
-        if (TextUtils.isEmpty(serverUrl)) return token;
+        if (TextUtils.isEmpty(serverUrl)) return fallbackToOldToken ? token : null;
 
         DataSyncClient client = new DataSyncClient(serverUrl);
 
-        // 尝试刷新
+        // 1) 尝试刷新 token（延长有效期）
         try {
             String newToken = client.refreshToken(token);
             if (newToken != null) {
@@ -174,18 +202,22 @@ public class DataSyncClient {
             // refresh 返回 null → 继续尝试自动登录
             Log.w("DataSyncClient", "Token refresh returned null, trying auto re-login");
         } catch (DataSyncException e) {
-            if (e.httpCode == 401) {
-                Log.w("DataSyncClient", "Token refresh unauthorized (401), trying auto re-login", e);
-            } else {
-                Log.w("DataSyncClient", "Token refresh failed, using old token", e);
+            if (e.httpCode != 401 && fallbackToOldToken) {
+                // 预刷新场景：非 401 错误（500 等），旧 token 仍可能有效，回退
+                Log.w("DataSyncClient", "Token refresh failed (HTTP " + e.httpCode + "), using old token", e);
                 return token;
             }
+            Log.w("DataSyncClient", "Token refresh unauthorized/failed (HTTP " + e.httpCode + "), trying auto re-login", e);
         } catch (Exception e) {
-            Log.w("DataSyncClient", "Token refresh failed, using old token", e);
-            return token;
+            if (fallbackToOldToken) {
+                // 预刷新场景：网络问题，旧 token 仍可能有效，回退
+                Log.w("DataSyncClient", "Token refresh failed (network), using old token", e);
+                return token;
+            }
+            Log.w("DataSyncClient", "Token refresh failed (network), trying auto re-login", e);
         }
 
-        // ======== 自动重新登录 ========
+        // 2) 自动重新登录（用本地保存的账号密码换取新 token）
         String username = pm.getString(PreferenceManager.PREFERENCES_USER_NAME, "");
         String password = pm.getString(PreferenceManager.PREFERENCES_USER_PASSWORD, "");
         if (!TextUtils.isEmpty(username) && !TextUtils.isEmpty(password)) {
@@ -415,7 +447,39 @@ public class DataSyncClient {
         return execute(builder.build());
     }
 
+    /**
+     * 执行 HTTP 请求。若受保护接口返回 401（token 被服务端拒绝——过期、
+     * 服务端重启换了密钥、密码被改导致 token_version 失效等），自动刷新
+     * token 或自动重新登录，并用新 token 重试一次，避免用户手动登录。
+     */
     private String execute(Request request) throws IOException, DataSyncException {
+        // 认证接口本身（login/refresh）不做 401 重试，避免递归
+        String path = request.url().encodedPath();
+        if (path.startsWith("/api/auth/")) {
+            return executeInternal(request);
+        }
+
+        try {
+            return executeInternal(request);
+        } catch (DataSyncException e) {
+            if (e.httpCode != 401) {
+                throw e;
+            }
+            // token 已被服务端拒绝 → 强制刷新或自动重登（不回退旧 token）
+            String newToken = refreshOrRelogin();
+            if (newToken == null) {
+                throw e; // 无法自动恢复，维持原 401
+            }
+            Request retry = rebuildWithToken(request, newToken);
+            if (retry == null) {
+                throw e;
+            }
+            Log.d("DataSyncClient", "Got 401, refreshed token and retrying request: " + path);
+            return executeInternal(retry);
+        }
+    }
+
+    private String executeInternal(Request request) throws IOException, DataSyncException {
         Response response = mHttpClient.newCall(request).execute();
         String body = response.body() != null ? response.body().string() : "";
 
@@ -435,6 +499,20 @@ public class DataSyncClient {
         }
 
         return body;
+    }
+
+    /**
+     * 用新 token 重建请求（替换 Authorization 头）。
+     * 若原请求没有 Authorization 头则返回 null（无需重试）。
+     */
+    private Request rebuildWithToken(Request request, String newToken) {
+        if (request.header("Authorization") == null) {
+            return null;
+        }
+        return request.newBuilder()
+                .removeHeader("Authorization")
+                .header("Authorization", "Bearer " + newToken)
+                .build();
     }
 
     /**

@@ -50,5 +50,6 @@ app/libs/xyropencc.aar
 data_server/xcimoc-data-server.exe
 data_server/xcimoc-data-server.exe~
 data_server/data/cimoc.db
+data_server/data/.jwt_secret
 release_body.md
 app/libs/quickjs-release.aar

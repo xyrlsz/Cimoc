@@ -11,4 +11,4 @@ database:
   # dsn: "host=localhost user=user password=pass dbname=cimoc port=5432 sslmode=disable"  # PgSQL
 
 jwt:
-  secret: "" # JWT 签名密钥（为空则首次启动自动生成）
+  secret: "" # JWT 签名密钥（为空则首次启动自动生成，并持久化到数据库同目录 .jwt_secret，重启后旧 token 仍有效）

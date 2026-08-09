@@ -85,7 +85,7 @@ Admin panel: http://localhost:8080/admin
 | 监听端口 | `8080` | |
 | 数据库类型 | `sqlite` | sqlite / mysql / postgres |
 | 数据库路径 | `./data/cimoc.db` | SQLite 专用 |
-| JWT 密钥 | 自动生成 | 重启后会变化，建议固定 |
+| JWT 密钥 | 自动生成并持久化 | 自动生成后保存到数据库同目录 `.jwt_secret`，重启不会失效；也可手动固定 |
 
 ### 方式一：YAML 配置文件
 
@@ -102,7 +102,7 @@ database:
   # dsn: "host=localhost user=user password=pass dbname=cimoc port=5432 sslmode=disable"  # PostgreSQL
 
 jwt:
-  secret: ""  # 留空则首次启动自动生成
+  secret: ""  # 留空则首次启动自动生成，并持久化到 .jwt_secret（重启后旧 token 仍有效）
 ```
 
 使用方式：
@@ -216,7 +216,11 @@ xcimoc-data-server.exe --config config.yaml set admin <新密码>
 
 ### 1. 固定 JWT 密钥
 
-务必通过配置文件、环境变量或 CLI 参数固定 `JWT_SECRET`，否则重启服务器后所有用户的 token 将失效。
+服务端支持两种方式保证重启后旧 token 不失效：
+
+- **留空自动生成**：首次启动自动生成密钥并持久化到数据库同目录的 `.jwt_secret` 文件（0600 权限），
+  之后每次重启都会从该文件恢复同一密钥，已签发的 token 不会失效。
+- **手动固定**（推荐，便于迁移数据库到新机器、或统一多实例密钥）：通过配置文件、环境变量或 CLI 参数固定 `JWT_SECRET`。
 
 ```bash
 xcimoc-data-server.exe --jwtsecret "your-strong-secret-key"
