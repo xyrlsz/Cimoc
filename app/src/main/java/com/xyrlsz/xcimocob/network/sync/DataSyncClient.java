@@ -1,13 +1,13 @@
 package com.xyrlsz.xcimocob.network.sync;
 
 import android.text.TextUtils;
-import android.util.Base64;
 import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.xyrlsz.xcimocob.App;
 import com.xyrlsz.xcimocob.manager.PreferenceManager;
+import com.xyrlsz.xcimocob.utils.Base64Utils;
 
 import java.io.IOException;
 import java.util.List;
@@ -105,11 +105,11 @@ public class DataSyncClient {
         if (TextUtils.isEmpty(token)) return false;
         try {
             // JWT 格式: header.payload.signature
-            // 服务端签发的 payload 是 base64url 且不带 padding（NO_PADDING 确保解码兼容）
+            // 服务端签发的 payload 是 base64url（JVM URL 解码器自动容忍无 padding）
             String[] parts = token.split("\\.");
             if (parts.length < 2) return false;
 
-            byte[] payload = Base64.decode(parts[1], Base64.URL_SAFE | Base64.NO_PADDING);
+            byte[] payload = Base64Utils.decodeUrlSafe(parts[1]);
             String json = new String(payload, "UTF-8");
 
             // 快速解析 exp 字段

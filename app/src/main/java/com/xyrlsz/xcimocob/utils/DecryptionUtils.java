@@ -1,7 +1,5 @@
 package com.xyrlsz.xcimocob.utils;
 
-import android.util.Base64;
-
 import com.xyrlsz.quickjs.QuickJSEngine;
 
 import java.io.UnsupportedEncodingException;
@@ -25,12 +23,12 @@ public class DecryptionUtils {
         SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), "AES");
         Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
         cipher.init(Cipher.DECRYPT_MODE, secretKey);
-        byte[] code = Base64.decode(value, Base64.NO_WRAP);
+        byte[] code = Base64Utils.decode(value);
         return new String(cipher.doFinal(code));
     }
 
     public static String desDecrypt(String keyString, String cipherString) throws Exception {
-        byte[] cipherBytes = Base64.decode(cipherString, Base64.DEFAULT);
+        byte[] cipherBytes = Base64Utils.decode(cipherString);
         DESKeySpec keySpec = new DESKeySpec(keyString.getBytes());
         Key key = SecretKeyFactory.getInstance("DES").generateSecret(keySpec);
         Cipher cipher = Cipher.getInstance("DES");
@@ -45,12 +43,12 @@ public class DecryptionUtils {
         IvParameterSpec iv = new IvParameterSpec(ivs.getBytes(StandardCharsets.UTF_8));
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding");
         cipher.init(Cipher.DECRYPT_MODE, secretKey, iv);
-        byte[] code = Base64.decode(value, Base64.DEFAULT);
+        byte[] code = Base64Utils.decode(value);
         return new String(cipher.doFinal(code));
     }
 
     public static String base64Decrypt(String cipherString) throws UnsupportedEncodingException {
-        byte[] cipherBytes = Base64.decode(cipherString, Base64.DEFAULT);
+        byte[] cipherBytes = Base64Utils.decode(cipherString);
         return new String(cipherBytes, StandardCharsets.UTF_8);
     }
 

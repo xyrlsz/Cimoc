@@ -3,8 +3,6 @@ package com.xyrlsz.xcimocob.utils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Base64;
-
 public  class JwtManualParser {
     private String jwt;
     public JwtManualParser(String jwt){
@@ -22,7 +20,7 @@ public  class JwtManualParser {
             return "";
         }
         // 解码Payload
-        String payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]));
+        String payloadJson = new String(Base64Utils.decodeUrlSafe(parts[1]));
         System.out.println("Payload: " + payloadJson);
         return payloadJson;
     }

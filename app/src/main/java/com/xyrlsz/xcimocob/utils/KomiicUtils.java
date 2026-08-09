@@ -92,9 +92,8 @@ public class KomiicUtils {
             Matcher matcher = pattern.matcher(cookieStr);
             if (matcher.find()) {
                 String payload = matcher.group(2);
-                // JWT payload 为 base64url 且不带 padding（与 DataSyncClient 保持一致）
-                byte[] decoded = android.util.Base64.decode(payload,
-                        android.util.Base64.URL_SAFE | android.util.Base64.NO_PADDING);
+                // JWT payload 为 base64url（Base64Utils 自动容忍无 padding/换行）
+                byte[] decoded = Base64Utils.decodeUrlSafe(payload);
                 JSONObject json = new JSONObject(new String(decoded, StandardCharsets.UTF_8));
                 if (json.has("exp")) {
                     return json.getLong("exp");
