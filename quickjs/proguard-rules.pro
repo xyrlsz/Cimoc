@@ -7,3 +7,33 @@
 -keepclassmembers class com.xyrlsz.quickjs.QuickJSEngine {
     private static native <methods>;
 }
+
+# ========== Rhino 兼容 API ==========
+# 公开 API 层保持类名与方法名，便于宿主直接引用（无需反射）。
+-keep public class com.xyrlsz.quickjs.Context {
+    public *;
+}
+-keep public class com.xyrlsz.quickjs.ScriptableObject {
+    public *;
+}
+-keep public interface com.xyrlsz.quickjs.Scriptable {
+    public *;
+}
+-keep public interface com.xyrlsz.quickjs.Function {
+    public *;
+}
+-keep public class com.xyrlsz.quickjs.BaseFunction {
+    public *;
+}
+-keep public class com.xyrlsz.quickjs.RhinoException {
+    public *;
+}
+-keep public class com.xyrlsz.quickjs.JavaScriptException {
+    public *;
+}
+-keep public class com.xyrlsz.quickjs.EvaluatorException {
+    public *;
+}
+-keep public class com.xyrlsz.quickjs.Undefined {
+    public *;
+}
