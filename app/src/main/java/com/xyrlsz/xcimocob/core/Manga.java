@@ -477,7 +477,7 @@ public class Manga {
                         .subscribeOn(Schedulers.io())  // 每个 Comic 分配到不同的 IO 线程
                         .flatMap(c -> {
                             try {
-                                Parser parser = manager.getParser(c.getSource());
+                                MangaParser parser = manager.getParser(c.getSource());
                                 Request request = parser.getCheckRequest(c.getCid());
                                 if (request == null) {
                                     request = parser.getInfoRequest(c.getCid());
@@ -486,30 +486,44 @@ public class Manga {
                                     return Observable.just(new CheckUpdateEvent(c, false));
                                 }
 
-                                // 使用 per-request 超时控制（复用共享连接池）
-                                okhttp3.Call call = sharedClient.newCall(request);
-                                call.timeout().timeout(3, TimeUnit.SECONDS);
+                                // 使用 WebView 渲染的源（info 环节配置了 useWebParser，如全站
+                                // Cloudflare 或需执行 JS 才能拿到内容的站点）走 WebParser 抓取
+                                // 渲染后的 HTML，否则 OkHttp 直连（带 per-request 超时）
+                                WebParserConfig infoConfig = parser.getInfoConfig();
+                                String reqUrl = request.url().toString();
+                                Observable<String> htmlObs;
+                                if (infoConfig.isUseWebParser()) {
+                                    htmlObs = new WebParser(App.getAppContext(), reqUrl,
+                                            request.headers(), "", infoConfig).getHtmlObservable();
+                                } else {
+                                    // 使用 per-request 超时控制（复用共享连接池）
+                                    okhttp3.Call call = sharedClient.newCall(request);
+                                    call.timeout().timeout(3, TimeUnit.SECONDS);
+                                    htmlObs = Observable.fromCallable(() -> getResponseBody(call));
+                                }
 
-                                String update = parser.parseCheck(getResponseBody(call));
-                                Pair<Boolean, Integer> checkRes = new Pair<>(false, 0);
-                                if (update == null || update.isEmpty()) {
-                                    checkRes = parser.checkUpdateByChapterCount(
-                                            getResponseBody(sharedClient.newCall(request)), c);
-                                }
-                                if ((c.getUpdate() != null && update != null && !update.isEmpty() && !c.getUpdate().equals(update))
-                                        || checkRes.first) {
-                                    c.setFavorite(System.currentTimeMillis());
-                                    c.setUpdate(update);
-                                    if (checkRes.first) {
-                                        c.setChapterCount(checkRes.second);
+                                return htmlObs.map(html -> {
+                                    String update = parser.parseCheck(html);
+                                    Pair<Boolean, Integer> checkRes = new Pair<>(false, 0);
+                                    if (update == null || update.isEmpty()) {
+                                        checkRes = parser.checkUpdateByChapterCount(html, c);
                                     }
-                                    c.setHighlight(true);
-                                    return Observable.just(new CheckUpdateEvent(c, true));  // 有更新
-                                }
+                                    if ((c.getUpdate() != null && update != null && !update.isEmpty() && !c.getUpdate().equals(update))
+                                            || checkRes.first) {
+                                        c.setFavorite(System.currentTimeMillis());
+                                        c.setUpdate(update);
+                                        if (checkRes.first) {
+                                            c.setChapterCount(checkRes.second);
+                                        }
+                                        c.setHighlight(true);
+                                        return new CheckUpdateEvent(c, true);  // 有更新
+                                    }
+                                    return new CheckUpdateEvent(c, false);  // 无更新
+                                }).onErrorReturn(e -> new CheckUpdateEvent(c, false));  // 单本失败不中断整体，确保进度计数正确
                             } catch (Exception e) {
                                 e.printStackTrace();
+                                return Observable.just(new CheckUpdateEvent(c, false));  // 无更新，确保进度计数正确
                             }
-                            return Observable.just(new CheckUpdateEvent(c, false));  // 无更新，确保进度计数正确
                         }), 32  // 提高并发数到 32
                 );
     }
