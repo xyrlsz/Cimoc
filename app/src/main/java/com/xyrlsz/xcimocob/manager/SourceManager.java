@@ -30,6 +30,7 @@ import com.xyrlsz.xcimocob.source.MangaBZ;
 import com.xyrlsz.xcimocob.source.Manhuatai;
 import com.xyrlsz.xcimocob.source.Manhuayu;
 import com.xyrlsz.xcimocob.source.Null;
+import com.xyrlsz.xcimocob.source.TTKMH;
 import com.xyrlsz.xcimocob.source.Tencent;
 import com.xyrlsz.xcimocob.source.Vomicmh;
 import com.xyrlsz.xcimocob.source.YKMH;
@@ -140,6 +141,7 @@ public class SourceManager {
                 case Komiic.TYPE -> new Komiic(source);
                 case Manhuayu.TYPE -> new Manhuayu(source);
                 case GoDaManHua.TYPE -> new GoDaManHua(source);
+                case TTKMH.TYPE -> new TTKMH(source);
                 case Vomicmh.TYPE -> new Vomicmh(source);
                 case YYManHua.TYPE -> new YYManHua(source);
                 case ZaiManhua.TYPE -> new ZaiManhua(source);

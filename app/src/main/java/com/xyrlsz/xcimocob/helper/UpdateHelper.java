@@ -29,6 +29,7 @@ import com.xyrlsz.xcimocob.source.ManWa;
 import com.xyrlsz.xcimocob.source.MangaBZ;
 import com.xyrlsz.xcimocob.source.Manhuatai;
 import com.xyrlsz.xcimocob.source.Manhuayu;
+import com.xyrlsz.xcimocob.source.TTKMH;
 import com.xyrlsz.xcimocob.source.Tencent;
 import com.xyrlsz.xcimocob.source.Vomicmh;
 import com.xyrlsz.xcimocob.source.YKMH;
@@ -85,7 +86,7 @@ public class UpdateHelper {
             ComicSourceTable.put(Komiic.TYPE, Komiic.getDefaultSource());
             ComicSourceTable.put(Manhuayu.TYPE, Manhuayu.getDefaultSource());
             ComicSourceTable.put(GoDaManHua.TYPE, GoDaManHua.getDefaultSource());
-            //            ComicSourceTable.put(TTKMH.TYPE, TTKMH.getDefaultSource());
+                        ComicSourceTable.put(TTKMH.TYPE, TTKMH.getDefaultSource());
             ComicSourceTable.put(Vomicmh.TYPE, Vomicmh.getDefaultSource());
             ComicSourceTable.put(YYManHua.TYPE, YYManHua.getDefaultSource());
             //            ComicSourceTable.put(DmzjV4.TYPE, DmzjV4.getDefaultSource());
