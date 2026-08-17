@@ -1,11 +1,10 @@
 package com.xyrlsz.xcimocob.utils;
 
-import android.annotation.SuppressLint;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -18,6 +17,27 @@ import java.util.regex.Pattern;
  */
 public class StringUtils {
     private static final Gson gson = new Gson();
+
+    public static String getUrlProtocolAndDomain(String urlStr) {
+        try {
+            // 如果没有协议，添加默认协议以安全解析
+            if (!urlStr.startsWith("http://") && !urlStr.startsWith("https://")) {
+                urlStr = "http://" + urlStr;
+            }
+            URL url = new URL(urlStr);
+            String protocol = url.getProtocol();
+            String host = url.getHost();
+
+            if (host == null || host.isEmpty()) {
+                throw new IllegalArgumentException("Invalid URL");
+            }
+
+            return protocol + "://" + host;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
     public static boolean endWith(String str, String... args) {
         if (str != null) {

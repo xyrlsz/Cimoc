@@ -35,6 +35,7 @@ public class YKMH extends MangaParser {
     public static final String DEFAULT_TITLE = "优酷漫画";
     public static final String mHost = "https://m.ykmh.net/";
     public final String Host = "https://www.ykmh.com/";
+    public final String imgBaseUrl = "https://fm.haotuyk.top";
 
     public YKMH(Source source) {
         init(source);
@@ -158,11 +159,6 @@ public class YKMH extends MangaParser {
     public List<ImageUrl> parseImages(String html, Chapter chapter) throws Manga.NetworkErrorException {
         List<ImageUrl> list = new LinkedList<>();
 
-        // 1. 提取 pageImage 的完整 URL，并解析出域名
-        String baseDomain = extractDomainFromPageImage(html);
-        if (baseDomain == null) {
-            baseDomain = "";
-        }
 
         // 2. 提取 chapterImages 数组
         Matcher matcher = Pattern.compile(
@@ -179,13 +175,11 @@ public class YKMH extends MangaParser {
             JSONArray array = new JSONArray(arrayJson);
             for (int i = 0; i < array.length(); i++) {
                 String url = array.getString(i);
-                // 3. 补全域名（如果当前 URL 是相对路径）
-                String urlDomain = extractDomainFromPageImage(url);
                 String fullUrl;
-                if (StringUtils.isEmpty(urlDomain)) {
-                    fullUrl = resolveUrl(baseDomain, url);
-                } else {
+                if (url.startsWith("http")) {
                     fullUrl = url;
+                } else {
+                    fullUrl = imgBaseUrl + url;
                 }
                 long comicChapter = chapter.getId();
                 long id = IdCreator.createImageId(comicChapter, i);
