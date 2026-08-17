@@ -75,7 +75,7 @@ class WebDavClient private constructor(
         val portStr = if (u.port != u.protocol.defaultPort) ":" + u.port else ""
         var current = u.protocol.name + "://" + u.host + portStr
         for (segment in segments) {
-            current = current + "/" + segment
+            current = "$current/$segment"
             if (exists(current)) {
                 continue
             }
