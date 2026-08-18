@@ -156,11 +156,11 @@ android {
 
 dependencies {
     lintChecks project(':lintchecks')
-//    implementation project(':quickjs')
-
     implementation 'androidx.constraintlayout:constraintlayout:2.2.2'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation fileTree("libs")
+//    implementation project(':quickjs')
+//    debugImplementation project(':quickjs')
+    releaseImplementation fileTree(include: ['*.aar'], dir: 'libs')
     implementation 'androidx.legacy:legacy-support-v13:1.0.0'
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'

@@ -21,6 +21,17 @@ android {
         }
     }
 
+    buildTypes {
+        debug {
+            externalNativeBuild {
+                cmake {
+                    // 调试符号，确保 Android Studio 可断点 C/C++ 源码
+                    arguments "-DCMAKE_BUILD_TYPE=Debug"
+                }
+            }
+        }
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
