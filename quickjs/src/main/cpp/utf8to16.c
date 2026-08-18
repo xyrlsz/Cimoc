@@ -1,18 +1,14 @@
 //
 // Created by xyrlsz on 2026/8/2.
 //
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <jni.h>
+#include "utf8to16.h"
 
 #define UNI_REPLACEMENT_CHAR 0xFFFD
 
 size_t utf8_to_utf16(const char *src,
-                            size_t src_len,
-                            jchar *dst)
-{
-    const unsigned char *s = (const unsigned char *)src;
+                     size_t src_len,
+                     jchar *dst) {
+    const unsigned char *s = (const unsigned char *) src;
     const unsigned char *end = s + src_len;
     size_t out = 0;
 
@@ -23,9 +19,7 @@ size_t utf8_to_utf16(const char *src,
 
         if (c < 0x80) {
             cp = c;
-        }
-
-        else if ((c & 0xE0) == 0xC0) {
+        } else if ((c & 0xE0) == 0xC0) {
 
             if (s >= end ||
                 (s[0] & 0xC0) != 0x80) {
@@ -41,9 +35,7 @@ size_t utf8_to_utf16(const char *src,
                 else
                     s++;
             }
-        }
-
-        else if ((c & 0xF0) == 0xE0) {
+        } else if ((c & 0xF0) == 0xE0) {
 
             if (end - s < 2 ||
                 (s[0] & 0xC0) != 0x80 ||
@@ -63,9 +55,7 @@ size_t utf8_to_utf16(const char *src,
                 else
                     s += 2;
             }
-        }
-
-        else if ((c & 0xF8) == 0xF0) {
+        } else if ((c & 0xF8) == 0xF0) {
 
             if (end - s < 3 ||
                 (s[0] & 0xC0) != 0x80 ||
@@ -87,9 +77,7 @@ size_t utf8_to_utf16(const char *src,
                 else
                     s += 3;
             }
-        }
-
-        else {
+        } else {
 
             cp = UNI_REPLACEMENT_CHAR;
         }
@@ -98,17 +86,17 @@ size_t utf8_to_utf16(const char *src,
 
             if (cp <= 0xFFFF) {
 
-                dst[out++] = (jchar)cp;
+                dst[out++] = (jchar) cp;
 
             } else {
 
                 cp -= 0x10000;
 
                 dst[out++] =
-                        (jchar)(0xD800 + (cp >> 10));
+                        (jchar) (0xD800 + (cp >> 10));
 
                 dst[out++] =
-                        (jchar)(0xDC00 + (cp & 0x3FF));
+                        (jchar) (0xDC00 + (cp & 0x3FF));
             }
 
         } else {

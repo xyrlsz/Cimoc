@@ -9,6 +9,9 @@ import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.xyrlsz.xcimocob.App;
 import com.xyrlsz.xcimocob.R;
@@ -16,7 +19,6 @@ import com.xyrlsz.xcimocob.manager.PreferenceManager;
 import com.xyrlsz.xcimocob.presenter.BasePresenter;
 import com.xyrlsz.xcimocob.ui.fragment.dialog.ProgressDialogFragment;
 import com.xyrlsz.xcimocob.ui.view.BaseView;
-import com.xyrlsz.xcimocob.ui.widget.ViewUtils;
 import com.xyrlsz.xcimocob.utils.HintUtils;
 import com.xyrlsz.xcimocob.utils.ThemeUtils;
 import com.xyrlsz.xcimocob.utils.ThreadRunUtils;
@@ -134,7 +136,11 @@ public abstract class BaseActivity extends AppCompatActivity implements BaseView
                 }
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                mToolbar.setPadding(0, ViewUtils.getStatusBarHeight(this), 0, mToolbar.getPaddingBottom());
+                ViewCompat.setOnApplyWindowInsetsListener(mToolbar, (v, insets) -> {
+                    Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                    v.setPadding(0, systemBars.top, 0, v.getPaddingBottom());
+                    return insets;
+                });
             }
 //            mToolbar.setFitsSystemWindows(true);
             setSupportActionBar(mToolbar);

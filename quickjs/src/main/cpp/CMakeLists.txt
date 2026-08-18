@@ -15,7 +15,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 # 说明：QuickJS-NG 的 BigInt 已集成进 quickjs.c，不需要 libbf.c；
 # dtoa.c 为浮点打印/解析库；cutils 已改为纯头文件内联实现，
 # 内存函数（js_malloc/js_free 等）由 quickjs.c 提供，无需编译 cutils.c；
-# 版本号直接取自 quickjs.h 的 QJS_VERSION_* 宏（当前 v0.16.0）。
+# 版本号直接取自 quickjs.h 的 QJS_VERSION_* 宏。
 # ============================================================
 add_library(quickjs STATIC
         quickjs/quickjs.c
