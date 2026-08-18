@@ -57,6 +57,10 @@ public class Manga {
      * 全局强制刷新标志，用于下拉刷新时跳过所有 OkHttp 缓存（一次性）
      */
     private static volatile boolean sForceRefresh = false;
+    /**
+     * 检查漫画更新时每个漫画的单本超时时间（秒）
+     */
+    private static final long CHECK_UPDATE_TIMEOUT_SECONDS = 10;
 
     /**
      * 标记指定 URL 需要强制从网络获取，精准失效（不被其他无关请求消费）
@@ -498,11 +502,14 @@ public class Manga {
                                 } else {
                                     // 使用 per-request 超时控制（复用共享连接池）
                                     okhttp3.Call call = sharedClient.newCall(request);
-                                    call.timeout().timeout(3, TimeUnit.SECONDS);
+                                    call.timeout().timeout(CHECK_UPDATE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
                                     htmlObs = Observable.fromCallable(() -> getResponseBody(call));
                                 }
 
-                                return htmlObs.map(html -> {
+                                // 每个漫画检查更新整体限时（覆盖 OkHttp 直连与 WebParser 渲染路径）
+                                return htmlObs
+                                        .timeout(CHECK_UPDATE_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                                        .map(html -> {
                                     String update = parser.parseCheck(html);
                                     Pair<Boolean, Integer> checkRes = new Pair<>(false, 0);
                                     if (update == null || update.isEmpty()) {
@@ -524,7 +531,7 @@ public class Manga {
                                 e.printStackTrace();
                                 return Observable.just(new CheckUpdateEvent(c, false));  // 无更新，确保进度计数正确
                             }
-                        }), 32  // 提高并发数到 32
+                        }), 8  // 并发数：与 OkHttp maxRequestsPerHost(8) 对齐，避免线程空转与 WebView OOM
                 );
     }
 
