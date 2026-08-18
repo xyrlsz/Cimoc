@@ -32,8 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import okhttp3.Headers;
 import okhttp3.Request;
@@ -42,13 +40,13 @@ public class GoDaManHua extends MangaParser {
     public static final int TYPE = 108;
     public static final String DEFAULT_TITLE = "G社漫畫";
     private static final String baseUrl = "https://m.g-mh.org";
-    private static final String picBaseUrl = "https://t40-1-4.g-mh.online";
-    private static final String apiBaseUrl = "https://api-get-v3.mgsearcher.com";
+    private static final String picBaseUrl = "https://c-nd3-1.6wm.top";
+    private static final String apiBaseUrl = "https://v2.apikk.top";
     private String _mid = "";
 
     public GoDaManHua(Source source) {
         init(source);
-//        getImagesConfig().setUseWebParser(true);
+        getImagesConfig().setUseWebParser(true);
     }
 
     public static Source getDefaultSource() {
@@ -151,12 +149,12 @@ public class GoDaManHua extends MangaParser {
 
         for (int i = 0; i < chapters.length(); i++) {
             String title = chapters.getJSONObject(i).getJSONObject("attributes").getString("title");
-            String path = chapters.getJSONObject(i).getLong("id") + "";
+            String path = chapters.getJSONObject(i).getJSONObject("attributes").getString("slug");
             list.add(new Chapter(null, sourceComic, title, path));
         }
         list = Lists.reverse(list);
         for (int j = 0; j < list.size(); j++) {
-            Long id = IdCreator.createChapterId(sourceComic, j);
+            long id = IdCreator.createChapterId(sourceComic, j);
             list.get(j).setId(id);
         }
         return list;
@@ -164,34 +162,47 @@ public class GoDaManHua extends MangaParser {
 
     @Override
     public Request getImagesRequest(String cid, String path) {
-        return new Request.Builder().url(StringUtils.format(apiBaseUrl + "/api/v2/chapter/getinfo?m=%s&c=%s", _mid, path))
-                .addHeader("referer", baseUrl.concat("/"))
-                .addHeader("Accept", "application/json")
-                .addHeader("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36")
+//        return new Request.Builder().url(StringUtils.format(apiBaseUrl + "/api/v2/chapter/getinfo?m=%s&c=%s", _mid, path))
+//                .addHeader("referer", baseUrl.concat("/"))
+//                .addHeader("Accept", "application/json")
+//                .addHeader("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36")
+//                .build();
+        String url = StringUtils.format(baseUrl + "/manga/%s/%s", cid, path);
+        return new Request.Builder().url(url)
                 .build();
     }
 
     @Override
     public List<ImageUrl> parseImages(String html, Chapter chapter) throws Manga.NetworkErrorException, JSONException {
+//        List<ImageUrl> list = new ArrayList<>();
+//        Pattern pattern = Pattern.compile("\\{.*\\}");
+//        Matcher matcher = pattern.matcher(html);
+//        if (matcher.find()) {
+//            html = matcher.group(0);
+//        }
+//        assert html != null;
+//        String imagesData = new JSONObject(html)
+//                .getJSONObject("data")
+//                .getJSONObject("info")
+//                .getJSONObject("images")
+//                .getString("images");
+//        String json = DecryptUtil.decrypt(imagesData);
+//        JSONArray images = new JSONArray(json);
+
+//        for (int i = 1; i <= images.length(); i++) {
+//            long comicChapter = chapter.getId();
+//            long id = IdCreator.createImageId(comicChapter, i);
+//            String imgUrl = picBaseUrl + images.getJSONObject(i - 1).getString("url");
+//            list.add(new ImageUrl(id, comicChapter, i, imgUrl, false, getHeader()));
+//        }
         List<ImageUrl> list = new ArrayList<>();
-        Pattern pattern = Pattern.compile("\\{.*\\}");
-        Matcher matcher = pattern.matcher(html);
-        if (matcher.find()) {
-            html = matcher.group(0);
-        }
-        assert html != null;
-        String imagesData = new JSONObject(html)
-                .getJSONObject("data")
-                .getJSONObject("info")
-                .getJSONObject("images")
-                .getString("images");
-        String json = DecryptUtil.decrypt(imagesData);
-        JSONArray images = new JSONArray(json);
-        for (int i = 1; i <= images.length(); i++) {
+        Node body = new Node(html);
+        List<Node> imgNodeList = body.list("div#chapcontent > div > img");
+        for (int i = 0; i < imgNodeList.size(); i++) {
             long comicChapter = chapter.getId();
             long id = IdCreator.createImageId(comicChapter, i);
-            String imgUrl = picBaseUrl + images.getJSONObject(i - 1).getString("url");
-            list.add(new ImageUrl(id, comicChapter, i, imgUrl, false));
+            String imgUrl = imgNodeList.get(i).dataSrc();
+            list.add(new ImageUrl(id, comicChapter, imgUrl, false, getHeader()));
         }
         return list;
     }

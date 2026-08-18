@@ -66,6 +66,12 @@ public class ImageUrl {
                 false, headers);
     }
 
+    public ImageUrl(
+            long id, long comicChapter, String url, boolean lazy, Headers headers) {
+        this(id, comicChapter, 0, new String[]{url}, null, STATE_NULL, 0, 0, lazy, false, false,
+                false, headers);
+    }
+
     public ImageUrl(long id, long comicChapter, int num, String[] urls, String chapter, int state,
                     int height, int width, boolean lazy, boolean loading, boolean success, boolean download) {
         this.id = id;

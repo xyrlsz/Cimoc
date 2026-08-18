@@ -118,6 +118,7 @@ public class Node {
         }
     }
 
+
     public String attr(String cssQuery, String attr) {
         try {
             return Objects.requireNonNull(element.select(cssQuery).first()).attr(attr).trim();
@@ -194,4 +195,11 @@ public class Node {
         return splitHref(href(cssQuery), index);
     }
 
+    public String dataSrc() {
+        return attr("data-src");
+    }
+
+    public String dataSrc(String cssQuery) {
+        return attr(cssQuery, "data-src");
+    }
 }

@@ -46,7 +46,7 @@ public class YKMH extends MangaParser {
     }
 
     public static Source getDefaultSource() {
-        return new Source(null, DEFAULT_TITLE, TYPE, true, mHost);
+        return new Source(null, DEFAULT_TITLE, TYPE, false, mHost);
     }
 
     @Override
