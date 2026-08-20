@@ -1,5 +1,7 @@
 package com.xyrlsz.xcimocob.model;
 
+import com.xyrlsz.xcimocob.model.converter.ImageUrlStringConverter;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -10,7 +12,6 @@ import io.objectbox.annotation.Entity;
 import io.objectbox.annotation.Id;
 import io.objectbox.annotation.Index;
 import io.objectbox.annotation.Transient;
-import io.objectbox.converter.PropertyConverter;
 import okhttp3.Headers;
 
 /**
@@ -246,23 +247,5 @@ public class ImageUrl {
         this.headers = headers;
     }
 
-    public static class ImageUrlStringConverter implements PropertyConverter<List<String>, String> {
-        private static final String SPLIT = "##XCimoc:ImageUrl##";
 
-        @Override
-        public List<String> convertToEntityProperty(String databaseValue) {
-            if (databaseValue == null) return null;
-            return Arrays.asList(databaseValue.split(SPLIT));
-        }
-
-        @Override
-        public String convertToDatabaseValue(List<String> entityProperty) {
-            if (entityProperty == null) return null;
-            StringBuilder sb = new StringBuilder();
-            for (String str : entityProperty) {
-                sb.append(str).append(SPLIT);
-            }
-            return sb.toString();
-        }
-    }
 }
