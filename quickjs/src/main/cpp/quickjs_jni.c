@@ -73,9 +73,15 @@ static jstring qjs_utf8_to_jstring(JNIEnv *env, const char *utf8, size_t len) {
 static jstring qjs_jsvalue_to_jstring(JNIEnv *env, JSContext *ctx, JSValueConst val) {
     size_t len = 0;
     const char *utf8 = JS_ToCStringLen2(ctx, &len, val, 0);
-    jstring jstr = qjs_utf8_to_jstring(env, utf8, len);
-    if (utf8)
-        JS_FreeCString(ctx, utf8);
+    jstring jstr;
+    if (!utf8) {
+        /* ToCString 失败（如 OOM）：清异常，避免残留影响后续调用 */
+        JSValue exc = JS_GetException(ctx);
+        JS_FreeValue(ctx, exc);
+        return (*env)->NewStringUTF(env, "");
+    }
+    jstr = qjs_utf8_to_jstring(env, utf8, len);
+    JS_FreeCString(ctx, utf8);
     return jstr;
 }
 
@@ -221,6 +227,10 @@ static char *qjs_json_stringify(JSContext *ctx, JSValueConst val, size_t *out_le
             }
             JS_FreeCString(ctx, cs);
             s = copy;
+        } else {
+            /* ToCString 失败（如 OOM）：清异常，避免残留 */
+            JSValue exc = JS_GetException(ctx);
+            JS_FreeValue(ctx, exc);
         }
     }
 
@@ -257,6 +267,15 @@ static int qjs_parse_json_args(JSContext *ctx, const char *str, size_t len,
         JSValue len_val = JS_GetPropertyStr(ctx, arr, "length");
         JS_ToUint32(ctx, &n, len_val);
         JS_FreeValue(ctx, len_val);
+    }
+    if (n == 0) {
+        /* 空数组：跳过分配。js_malloc(ctx, 0) 在 quickjs-ng 中对 size==0
+           直接返回 NULL，js_malloc 会补抛一个假的 "out of memory" 异常，
+           残留 pending 异常会污染后续调用（如 BaseFunction 无参调用时
+           encodeArgs 恒返回 "[]" 就会走到这里）。 */
+        JS_FreeValue(ctx, arr);
+        *out_argv = NULL;
+        return 0;
     }
     argv = (JSValue *) js_malloc(ctx, n * sizeof(JSValue));
     if (!argv) {
@@ -436,6 +455,8 @@ static jboolean native_has_global_function(JNIEnv *env, jclass clazz, jlong ctx_
     if (!ctx || !name)
         return JNI_FALSE;
 
+    qjs_reset_deadline(ctx);
+
     name_str = (*env)->GetStringUTFChars(env, name, NULL);
     if (!name_str)
         return JNI_FALSE;
@@ -461,6 +482,8 @@ static jboolean native_has_global(JNIEnv *env, jclass clazz, jlong ctx_ptr,
 
     if (!ctx || !name)
         return JNI_FALSE;
+
+    qjs_reset_deadline(ctx);
 
     name_str = (*env)->GetStringUTFChars(env, name, NULL);
     if (!name_str)
@@ -569,6 +592,8 @@ static jstring native_get_global_json(JNIEnv *env, jclass clazz, jlong ctx_ptr,
     if (!ctx || !name)
         return (*env)->NewStringUTF(env, "null");
 
+    qjs_reset_deadline(ctx);
+
     name_str = (*env)->GetStringUTFChars(env, name, NULL);
     if (!name_str)
         return (*env)->NewStringUTF(env, "null");
@@ -614,6 +639,8 @@ static jboolean native_set_global(JNIEnv *env, jclass clazz, jlong ctx_ptr,
 
     if (!ctx || !name || !value_json)
         return JNI_FALSE;
+
+    qjs_reset_deadline(ctx);
 
     name_str = (*env)->GetStringUTFChars(env, name, NULL);
     if (!name_str)
