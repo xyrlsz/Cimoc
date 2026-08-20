@@ -30,6 +30,28 @@
 
     </style>
 
+    <!-- 阅读器快捷设置面板：浅色主题（阅读器 Activity 强制浅色，需单独指定） -->
+    <style name="ReaderBottomSheetLight" parent="Theme.MaterialComponents.Light.BottomSheetDialog">
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
+        <item name="android:textColorPrimary">@color/black</item>
+        <item name="android:textColorSecondary">#8A000000</item>
+        <item name="colorPrimary">@color/colorPrimaryOrange</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryOrangeDark</item>
+        <item name="colorAccent">@color/colorPrimaryOrangeDark</item>
+        <item name="colorSecondary">@color/colorPrimaryOrangeDark</item>
+    </style>
+
+    <!-- 阅读器快捷设置面板：深色主题（适配夜间模式） -->
+    <style name="ReaderBottomSheetDark" parent="Theme.MaterialComponents.BottomSheetDialog">
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">#B3FFFFFF</item>
+        <item name="colorPrimary">@color/colorPrimaryOrange</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryOrangeDark</item>
+        <item name="colorAccent">@color/colorPrimaryOrangeDark</item>
+        <item name="colorSecondary">@color/colorPrimaryOrangeDark</item>
+    </style>
+
     <style name="AppThemeBlue" parent="AppTheme">
         <item name="colorPrimary">@color/colorPrimaryBlue</item>
         <item name="colorPrimaryDark">@color/colorPrimaryBlueDark</item>

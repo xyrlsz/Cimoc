@@ -12,19 +12,29 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.InputDevice;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.WindowManager;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.facebook.imagepipeline.core.ImagePipelineFactory;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.slider.Slider;
 import com.xyrlsz.xcimocob.App;
 import com.xyrlsz.xcimocob.R;
@@ -38,6 +48,7 @@ import com.xyrlsz.xcimocob.model.Chapter;
 import com.xyrlsz.xcimocob.model.ImageUrl;
 import com.xyrlsz.xcimocob.presenter.BasePresenter;
 import com.xyrlsz.xcimocob.presenter.ReaderPresenter;
+import com.xyrlsz.xcimocob.ui.activity.settings.ReaderConfigActivity;
 import com.xyrlsz.xcimocob.ui.adapter.ReaderAdapter;
 import com.xyrlsz.xcimocob.ui.adapter.ReaderAdapter.OnLazyLoadListener;
 import com.xyrlsz.xcimocob.ui.view.ReaderView;
@@ -108,6 +119,7 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
     View mInfoLayout;
     SeekBar mSeekBar;
     TextView mLoadingText;
+    View mLoadingLayout;
     RecyclerView mRecyclerView;
     RelativeLayout mReaderBox;
     private boolean isSavingPicture = false;
@@ -119,6 +131,8 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
     private int _source;
     private boolean _local;
     private float mControllerTrigThreshold = 0.3f;
+    private BottomSheetDialog mSettingsSheet;
+    private float mSwipeDownY = 0f;
 
     public static Intent createIntent(Context context, long id, List<Chapter> list, int mode) {
         Intent intent = getIntent(context, mode);
@@ -174,13 +188,14 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
         mInfoLayout = findViewById(R.id.reader_info_layout);
         mSeekBar = findViewById(R.id.reader_seek_bar);
         mLoadingText = findViewById(R.id.reader_loading);
+        mLoadingLayout = findViewById(R.id.reader_loading_layout);
         mRecyclerView = findViewById(R.id.reader_recycler_view);
         mReaderBox = findViewById(R.id.reader_box);
     }
 
     @Override
     protected void initView() {
-        boolean isWhiteBackground = App.getPreferenceManager().getBoolean(PreferenceManager.PREF_READER_WHITE_BACKGROUND, false);
+        boolean isWhiteBackground = App.getPreferenceManager().getBoolean(PreferenceManager.PREF_READER_WHITE_BACKGROUND, true);
         if (isWhiteBackground) {
             mLoadingText.setTextColor(getResources().getColor(R.color.black));
         }
@@ -194,7 +209,7 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
         String key = mode == PreferenceManager.READER_MODE_PAGE ?
                 PreferenceManager.PREF_READER_PAGE_TURN : PreferenceManager.PREF_READER_STREAM_TURN;
         turn = mPreference.getNumber(key, PreferenceManager.READER_TURN_LTR).intValue();
-        if (mPreference.getBoolean(PreferenceManager.PREF_READER_WHITE_BACKGROUND, false)) {
+        if (mPreference.getBoolean(PreferenceManager.PREF_READER_WHITE_BACKGROUND, true)) {
             mReaderBox.setBackgroundResource(R.color.white);
         }
         initSeekBar(savedPrimaryColorResId);
@@ -215,6 +230,32 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
             }
         });
         findViewById(R.id.reader_back_btn).setOnClickListener(v -> onBackClick());
+        initSwipeUpSettingsHint();
+    }
+
+    /**
+     * 底部栏上滑手柄：点击或向上滑动打开快捷设置面板
+     */
+    private void initSwipeUpSettingsHint() {
+        View swipeHint = findViewById(R.id.reader_swipe_hint);
+        if (swipeHint == null) {
+            return;
+        }
+        swipeHint.setOnClickListener(v -> showReaderSettings());
+        swipeHint.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    mSwipeDownY = event.getRawY();
+                    break;
+                case MotionEvent.ACTION_UP:
+                    float distance = mSwipeDownY - event.getRawY();
+                    if (distance > ViewConfiguration.get(this).getScaledTouchSlop() * 2) {
+                        showReaderSettings();
+                    }
+                    break;
+            }
+            return false;
+        });
     }
 
     @Override
@@ -351,49 +392,75 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
 
     protected void hideControl() {
         if (mProgressLayout.isShown()) {
-            Animation upAction = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0.0f,
-                    Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF, 0.0f,
-                    Animation.RELATIVE_TO_SELF, -1.0f);
-            upAction.setDuration(300);
-            Animation downAction = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0.0f,
-                    Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF, 0.0f,
-                    Animation.RELATIVE_TO_SELF, 1.0f);
-            downAction.setDuration(300);
-            mProgressLayout.startAnimation(downAction);
-            mProgressLayout.setVisibility(View.INVISIBLE);
-            mBackLayout.startAnimation(upAction);
-            mBackLayout.setVisibility(View.INVISIBLE);
+            // 底部进度栏：向下滑出并淡出
+            playHideAnimation(mProgressLayout, 1f);
+            // 顶部栏：向上滑出并淡出
+            playHideAnimation(mBackLayout, -1f);
             if (mHideInfo) {
-                mInfoLayout.startAnimation(upAction);
-                mInfoLayout.setVisibility(View.INVISIBLE);
+                playHideAnimation(mInfoLayout, -1f);
             }
         }
     }
 
     protected void showControl() {
-        Animation upAction = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0.0f,
-                Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF, 1.0f,
-                Animation.RELATIVE_TO_SELF, 0.0f);
-        upAction.setDuration(300);
-        Animation downAction = new TranslateAnimation(Animation.RELATIVE_TO_SELF, 0.0f,
-                Animation.RELATIVE_TO_SELF, 0.0f, Animation.RELATIVE_TO_SELF, -1.0f,
-                Animation.RELATIVE_TO_SELF, 0.0f);
-        downAction.setDuration(300);
-//        mSeekBar.setValueFrom(1);
-//        if ((int) mSeekBar.getValueTo() != max) {
-//            mSeekBar.setValueTo(max);
-//        }
-//        // 确保值不小于 1（页面从 1 开始计数）
-//        mSeekBar.setValue(Math.max(progress, 1));
+        // 确保值不小于 1（页面从 1 开始计数）
         mSeekBar.setRangeSafe(1, Math.max(max, 1), Math.max(progress, 1));
-        mProgressLayout.startAnimation(upAction);
-        mProgressLayout.setVisibility(View.VISIBLE);
-        mBackLayout.startAnimation(downAction);
-        mBackLayout.setVisibility(View.VISIBLE);
+        // 底部进度栏：从下方滑入并淡入
+        playShowAnimation(mProgressLayout, 1f);
+        // 顶部栏：从上方滑入并淡入
+        playShowAnimation(mBackLayout, -1f);
         if (mHideInfo) {
-            mInfoLayout.startAnimation(downAction);
-            mInfoLayout.setVisibility(View.VISIBLE);
+            playShowAnimation(mInfoLayout, -1f);
         }
+    }
+
+    /**
+     * 播放“滑出并淡出”动画，动画结束后将视图置为不可见
+     */
+    private void playHideAnimation(final View view, float direction) {
+        AnimationSet set = new AnimationSet(true);
+        set.setInterpolator(new AccelerateInterpolator());
+        AlphaAnimation alpha = new AlphaAnimation(1f, 0f);
+        alpha.setDuration(220);
+        TranslateAnimation translate = new TranslateAnimation(
+                Animation.RELATIVE_TO_SELF, 0f, Animation.RELATIVE_TO_SELF, 0f,
+                Animation.RELATIVE_TO_SELF, 0f, Animation.RELATIVE_TO_SELF, direction);
+        translate.setDuration(220);
+        set.addAnimation(alpha);
+        set.addAnimation(translate);
+        set.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                view.setVisibility(View.INVISIBLE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+        });
+        view.startAnimation(set);
+    }
+
+    /**
+     * 播放“滑入并淡入”动画
+     */
+    private void playShowAnimation(final View view, float direction) {
+        view.setVisibility(View.VISIBLE);
+        AnimationSet set = new AnimationSet(true);
+        set.setInterpolator(new DecelerateInterpolator());
+        AlphaAnimation alpha = new AlphaAnimation(0f, 1f);
+        alpha.setDuration(220);
+        TranslateAnimation translate = new TranslateAnimation(
+                Animation.RELATIVE_TO_SELF, 0f, Animation.RELATIVE_TO_SELF, 0f,
+                Animation.RELATIVE_TO_SELF, direction, Animation.RELATIVE_TO_SELF, 0f);
+        translate.setDuration(220);
+        set.addAnimation(alpha);
+        set.addAnimation(translate);
+        view.startAnimation(set);
     }
 
     protected void updateProgress() {
@@ -450,7 +517,7 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
         if (progress != 1) {
             mRecyclerView.scrollToPosition(progress - 1);
         }
-        mLoadingText.setVisibility(View.GONE);
+        mLoadingLayout.setVisibility(View.GONE);
         mRecyclerView.setVisibility(View.VISIBLE);
         updateProgress();
     }
@@ -823,6 +890,213 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
         } else {
             showControl();
         }
+    }
+
+    /**
+     * 底部上滑弹出的阅读快捷设置面板
+     */
+    private void showReaderSettings() {
+        if (mSettingsSheet != null && mSettingsSheet.isShowing()) {
+            mSettingsSheet.dismiss();
+            return;
+        }
+        boolean dark = ThemeUtils.isDarkMode(this);
+        BottomSheetDialog dialog = new BottomSheetDialog(this, dark ?
+                R.style.ReaderBottomSheetDark : R.style.ReaderBottomSheetLight);
+        // 必须用 dialog 的 context（已应用所选主题）来 inflate，
+        // 否则 ?android:attr/textColorPrimary 会按 Activity 的浅色主题解析，深色模式下文字仍是黑色
+        View view = LayoutInflater.from(dialog.getContext())
+                .inflate(R.layout.layout_reader_settings_sheet, null);
+        dialog.setContentView(view);
+        mSettingsSheet = dialog;
+
+        MaterialButtonToggleGroup turnGroup = view.findViewById(R.id.reader_turn_group);
+        MaterialButtonToggleGroup orientationGroup = view.findViewById(R.id.reader_orientation_group);
+        MaterialButtonToggleGroup modeGroup = view.findViewById(R.id.reader_mode_group);
+        SwitchCompat nightSwitch = view.findViewById(R.id.reader_switch_night);
+        SwitchCompat whiteBgSwitch = view.findViewById(R.id.reader_switch_white_background);
+        SwitchCompat keepBrightSwitch = view.findViewById(R.id.reader_switch_keep_bright);
+        SwitchCompat hideInfoSwitch = view.findViewById(R.id.reader_switch_hide_info);
+        SwitchCompat volumeKeySwitch = view.findViewById(R.id.reader_switch_volume_key);
+        MaterialButton fullSettingsBtn = view.findViewById(R.id.reader_settings_full);
+
+        // 按钮文本（复用现有选项数组）
+        String[] turnItems = getResources().getStringArray(R.array.reader_turn_items);
+        String[] orientationItems = getResources().getStringArray(R.array.reader_orientation_items);
+        String[] modeItems = getResources().getStringArray(R.array.reader_mode_items);
+        for (int i = 0; i < turnGroup.getChildCount() && i < turnItems.length; i++) {
+            ((MaterialButton) turnGroup.getChildAt(i)).setText(turnItems[i]);
+        }
+        for (int i = 0; i < orientationGroup.getChildCount() && i < orientationItems.length; i++) {
+            ((MaterialButton) orientationGroup.getChildAt(i)).setText(orientationItems[i]);
+        }
+        for (int i = 0; i < modeGroup.getChildCount() && i < modeItems.length; i++) {
+            ((MaterialButton) modeGroup.getChildAt(i)).setText(modeItems[i]);
+        }
+
+        // 初始化选中状态
+        String turnKey = mode == PreferenceManager.READER_MODE_PAGE ?
+                PreferenceManager.PREF_READER_PAGE_TURN : PreferenceManager.PREF_READER_STREAM_TURN;
+        int currentTurn = mPreference.getNumber(turnKey, PreferenceManager.READER_TURN_LTR).intValue();
+        if (currentTurn < turnGroup.getChildCount()) {
+            turnGroup.check(turnGroup.getChildAt(currentTurn).getId());
+        }
+
+        String orientationKey = mode == PreferenceManager.READER_MODE_PAGE ?
+                PreferenceManager.PREF_READER_PAGE_ORIENTATION : PreferenceManager.PREF_READER_STREAM_ORIENTATION;
+        int currentOrientation = mPreference.getNumber(orientationKey, PreferenceManager.READER_ORIENTATION_PORTRAIT).intValue();
+        if (currentOrientation < orientationGroup.getChildCount()) {
+            orientationGroup.check(orientationGroup.getChildAt(currentOrientation).getId());
+        }
+
+        if (mode < modeGroup.getChildCount()) {
+            modeGroup.check(modeGroup.getChildAt(mode).getId());
+        }
+
+        nightSwitch.setChecked(mPreference.getBoolean(PreferenceManager.PREF_NIGHT, false));
+        whiteBgSwitch.setChecked(mPreference.getBoolean(PreferenceManager.PREF_READER_WHITE_BACKGROUND, true));
+        keepBrightSwitch.setChecked(mPreference.getBoolean(PreferenceManager.PREF_READER_KEEP_BRIGHT, false));
+        hideInfoSwitch.setChecked(mPreference.getBoolean(PreferenceManager.PREF_READER_HIDE_INFO, false));
+        volumeKeySwitch.setChecked(mPreference.getBoolean(PreferenceManager.PREF_READER_VOLUME_KEY_CONTROLS_PAGE_TURNING, false));
+
+        // 阅读方向
+        turnGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (!isChecked) {
+                return;
+            }
+            int index = group.indexOfChild(group.findViewById(checkedId));
+            applyTurn(index);
+        });
+        // 屏幕方向
+        orientationGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (!isChecked) {
+                return;
+            }
+            int index = group.indexOfChild(group.findViewById(checkedId));
+            applyOrientation(index);
+        });
+        // 阅读模式（切换需要重启阅读器）
+        modeGroup.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (!isChecked) {
+                return;
+            }
+            int index = group.indexOfChild(group.findViewById(checkedId));
+            if (index != mode) {
+                // switchMode 内部依据当前 mode 判断目标模式，此处不要修改 mode
+                switchMode();
+            }
+        });
+        // 夜间模式
+        nightSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked != mPreference.getBoolean(PreferenceManager.PREF_NIGHT, false)) {
+                switchNight();
+            }
+        });
+        // 白色背景
+        whiteBgSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            mPreference.putBoolean(PreferenceManager.PREF_READER_WHITE_BACKGROUND, isChecked);
+            applyWhiteBackground(isChecked);
+        });
+        // 保持常亮
+        keepBrightSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            mPreference.putBoolean(PreferenceManager.PREF_READER_KEEP_BRIGHT, isChecked);
+            applyKeepBright(isChecked);
+        });
+        // 隐藏信息
+        hideInfoSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            mPreference.putBoolean(PreferenceManager.PREF_READER_HIDE_INFO, isChecked);
+            applyHideInfo(isChecked);
+        });
+        // 音量键翻页
+        volumeKeySwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            mPreference.putBoolean(PreferenceManager.PREF_READER_VOLUME_KEY_CONTROLS_PAGE_TURNING, isChecked);
+            applyVolumeKey(isChecked);
+        });
+        // 完整设置
+        fullSettingsBtn.setOnClickListener(v -> {
+            dialog.dismiss();
+            startActivity(new Intent(this, ReaderConfigActivity.class));
+        });
+
+        dialog.show();
+    }
+
+    /**
+     * 应用阅读方向（从左到右 / 从右到左 / 从上到下）
+     */
+    private void applyTurn(int newTurn) {
+        if (newTurn == turn) {
+            return;
+        }
+        turn = newTurn;
+        String key = mode == PreferenceManager.READER_MODE_PAGE ?
+                PreferenceManager.PREF_READER_PAGE_TURN : PreferenceManager.PREF_READER_STREAM_TURN;
+        mPreference.putNumber(key, newTurn);
+        mLayoutManager.setOrientation(turn == PreferenceManager.READER_TURN_ATB ?
+                LinearLayoutManager.VERTICAL : LinearLayoutManager.HORIZONTAL);
+        mLayoutManager.setReverseLayout(turn == PreferenceManager.READER_TURN_RTL);
+        mReaderAdapter.setVertical(turn == PreferenceManager.READER_TURN_ATB);
+        mSeekBar.setLayoutDirection(turn == PreferenceManager.READER_TURN_RTL ?
+                View.LAYOUT_DIRECTION_RTL : View.LAYOUT_DIRECTION_LTR);
+        mReaderAdapter.notifyDataSetChanged();
+        int pos = getCurPosition();
+        mRecyclerView.scrollToPosition(Math.max(pos, 0));
+        updateProgress();
+    }
+
+    /**
+     * 应用屏幕方向（竖屏 / 横屏 / 跟随系统）
+     */
+    private void applyOrientation(int newOrientation) {
+        String key = mode == PreferenceManager.READER_MODE_PAGE ?
+                PreferenceManager.PREF_READER_PAGE_ORIENTATION : PreferenceManager.PREF_READER_STREAM_ORIENTATION;
+        mPreference.putNumber(key, newOrientation);
+        orientation = newOrientation;
+        final int[] oArray = {ActivityInfo.SCREEN_ORIENTATION_PORTRAIT,
+                ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE, ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED};
+        setRequestedOrientation(oArray[newOrientation]);
+    }
+
+    /**
+     * 应用白色/黑色背景
+     */
+    private void applyWhiteBackground(boolean white) {
+        if (white) {
+            mReaderBox.setBackgroundResource(R.color.white);
+            mLoadingText.setTextColor(getResources().getColor(R.color.black));
+        } else {
+            mReaderBox.setBackgroundResource(R.color.black);
+            mLoadingText.setTextColor(getResources().getColor(R.color.white));
+        }
+        mReaderAdapter.notifyDataSetChanged();
+    }
+
+    /**
+     * 应用保持屏幕常亮
+     */
+    private void applyKeepBright(boolean keep) {
+        if (keep) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        } else {
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        }
+    }
+
+    /**
+     * 应用隐藏阅读信息
+     */
+    private void applyHideInfo(boolean hide) {
+        mHideInfo = hide;
+        mInfoLayout.setVisibility(hide ? View.INVISIBLE : View.VISIBLE);
+    }
+
+    /**
+     * 应用音量键翻页（重新读取点击事件配置）
+     */
+    private void applyVolumeKey(boolean enable) {
+        mClickArray = mode == PreferenceManager.READER_MODE_PAGE ?
+                ClickEvents.getPageClickEventChoice(mPreference) :
+                ClickEvents.getStreamClickEventChoice(mPreference);
     }
 
 }

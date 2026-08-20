@@ -145,7 +145,7 @@ public class ReaderAdapter extends BaseAdapter<ImageUrl> {
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         boolean isWhiteBackground = App.getPreferenceManager()
-                .getBoolean(PreferenceManager.PREF_READER_WHITE_BACKGROUND, false);
+                .getBoolean(PreferenceManager.PREF_READER_WHITE_BACKGROUND, true);
 
         int resId;
 

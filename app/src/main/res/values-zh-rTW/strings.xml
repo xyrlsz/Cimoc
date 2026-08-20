@@ -108,12 +108,17 @@
     <string name="reader_load_error">載入錯誤</string>
     <string name="reader_load_success">載入成功</string>
     <string name="reader_picture_loading">正在載入中..</string>
+    <string name="action_back">返回</string>
     <string name="reader_picture_save_success">儲存成功</string>
     <string name="reader_picture_save_fail">儲存失敗</string>
 
     <string name="reader_config_title">閱讀配置</string>
     <string name="reader_config_page">翻頁模式</string>
     <string name="reader_config_stream">捲紙模式</string>
+    <string name="reader_settings_sheet_title">閱讀設定</string>
+    <string name="reader_settings_mode">閱讀模式</string>
+    <string name="reader_settings_swipe_up">上滑開啟閱讀設定</string>
+    <string name="reader_settings_full">完整設定</string>
 
     <string name="source_detail">圖源詳情</string>
     <string name="source_detail_type">圖源 ID</string>

@@ -1,18 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- 现代化阅读器顶部栏：渐变遮罩 + 圆形返回按钮 + 居中章节标题 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/reader_back_layout"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_alignParentLeft="true"
     android:layout_alignParentTop="true"
-    android:background="@color/trans_light_black"
+    android:background="@drawable/bg_reader_top_scrim"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="6dp"
+    android:paddingEnd="20dp"
+    android:paddingTop="6dp"
+    android:paddingBottom="10dp"
     android:visibility="invisible">
 
-    <ImageView
+    <ImageButton
         android:id="@+id/reader_back_btn"
-        android:layout_width="wrap_content"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="@drawable/bg_reader_icon_btn"
+        android:contentDescription="@string/action_back"
+        android:padding="12dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_arrow_back_white_24dp" />
+
+    <TextView
+        android:id="@+id/reader_chapter_title"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:clickable="true"
-        android:padding="4dp"
-        android:src="@drawable/ic_navigate_before_white_24dp" />
-</FrameLayout>
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center"
+        android:maxLines="1"
+        android:textColor="@color/white"
+        android:textSize="17sp"
+        android:textStyle="bold" />
+</LinearLayout>

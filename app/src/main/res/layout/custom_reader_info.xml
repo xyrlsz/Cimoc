@@ -1,39 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 现代化阅读器信息胶囊：圆角半透明背景，右上角常驻显示页码/时钟/电量 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/reader_info_layout"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_alignParentRight="true"
-    android:background="@color/trans_light_black"
+    android:layout_alignParentEnd="true"
+    android:layout_alignParentTop="true"
+    android:layout_margin="12dp"
+    android:background="@drawable/bg_reader_info_pill"
+    android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingTop="2dp"
-    android:paddingBottom="2dp">
-
-    <TextView
-        android:id="@+id/reader_chapter_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:paddingLeft="4dp"
-        android:paddingRight="4dp"
-        android:textColor="@color/white"
-        android:textSize="12sp" />
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp"
+    android:paddingTop="5dp"
+    android:paddingBottom="5dp">
 
     <TextView
         android:id="@+id/reader_chapter_page"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="4dp"
-        android:paddingRight="4dp"
+        android:fontFamily="sans-serif-medium"
         android:textColor="@color/white"
         android:textSize="12sp" />
 
     <com.xyrlsz.xcimocob.ui.widget.MiniClockText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="4dp"
-        android:paddingRight="4dp"
+        android:layout_marginStart="8dp"
         android:textColor="@color/white"
         android:textSize="12sp" />
 
@@ -41,8 +34,7 @@
         android:id="@+id/reader_battery"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="4dp"
-        android:paddingRight="4dp"
+        android:layout_marginStart="8dp"
         android:textColor="@color/white"
         android:textSize="12sp" />
 </LinearLayout>
