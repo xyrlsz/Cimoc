@@ -42,6 +42,11 @@ def _keyPassword = System.getenv("KEY_PASSWORD")
 android {
     compileSdk 37
     namespace "com.xyrlsz.xcimocob"
+    kotlin {
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_17
+        }
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
@@ -60,10 +65,10 @@ android {
         buildConfigField "String", "REPOSITORIE_NAME", '"XCimoc"'
         buildConfigField "String", "OWNER_NAME", '"xyrlsz"'
 
-        // 最终 APK 打包的 ABI 范围（原生库来自 :quickjs 模块），与 splits.abi 保持一致
         ndk {
             abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64'
         }
+
     }
 
     signingConfigs {
@@ -158,9 +163,8 @@ dependencies {
     lintChecks project(':lintchecks')
     implementation 'androidx.constraintlayout:constraintlayout:2.2.2'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-//    implementation project(':quickjs')
-//    debugImplementation project(':quickjs')
-    releaseImplementation fileTree(include: ['*.aar'], dir: 'libs')
+    implementation fileTree(include: ['*.aar'], dir: 'libs')
+    implementation project(':quickjs')
     implementation 'androidx.legacy:legacy-support-v13:1.0.0'
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
@@ -210,9 +214,3 @@ repositories {
     mavenCentral()
 }
 
-// Kotlin 编译目标与 Java 17 对齐
-kotlin {
-    compilerOptions {
-        jvmTarget = JvmTarget.JVM_17
-    }
-}
