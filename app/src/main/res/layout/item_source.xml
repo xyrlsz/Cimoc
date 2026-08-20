@@ -5,38 +5,35 @@
     android:layout_height="wrap_content"
     android:clickable="true"
     android:focusable="true"
-    app:cardCornerRadius="10dp">
+    android:foreground="?android:attr/selectableItemBackground"
+    app:cardBackgroundColor="?attr/colorAutoWG"
+    app:cardCornerRadius="10dp"
+    app:contentPaddingBottom="5dp"
+    app:contentPaddingLeft="10dp"
+    app:contentPaddingTop="5dp">
 
-    <FrameLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="?attr/colorAutoWG"
-        android:foreground="?android:attr/selectableItemBackground"
-        android:padding="10dp">
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+        android:layout_height="wrap_content">
 
-            <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/item_source_switch"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true" />
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/item_source_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true" />
 
-            <TextView
-                android:id="@+id/item_source_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:layout_toStartOf="@id/item_source_switch"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:textColor="?android:attr/textColorPrimary"
-                android:textSize="16sp" />
-        </RelativeLayout>
+        <TextView
+            android:id="@+id/item_source_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_toStartOf="@id/item_source_switch"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="16sp" />
+    </RelativeLayout>
 
-
-    </FrameLayout>
 </androidx.cardview.widget.CardView>
