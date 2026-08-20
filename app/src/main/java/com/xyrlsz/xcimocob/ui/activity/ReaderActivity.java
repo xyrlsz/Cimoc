@@ -22,6 +22,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.TranslateAnimation;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -929,8 +930,13 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
                 R.style.ReaderBottomSheetDark : R.style.ReaderBottomSheetLight);
         // 必须用 dialog 的 context（已应用所选主题）来 inflate，
         // 否则 ?android:attr/textColorPrimary 会按 Activity 的浅色主题解析，深色模式下文字仍是黑色
+        // 注：BottomSheetDialog.setContentView 内部会把 view 放到 design_bottom_sheet 容器，
+        // 但 inflate 时不传 parent 会导致 layout_width/layout_height/margin 等 layout_* 属性丢失，
+        // 最终 sheet 被压缩成 WRAP_CONTENT，影响显示高度；因此传一个临时 FrameLayout parent
+        // （attachToRoot=false）仅用于生成 LayoutParams。
+        FrameLayout sheetContainer = new FrameLayout(dialog.getContext());
         View view = LayoutInflater.from(dialog.getContext())
-                .inflate(R.layout.layout_reader_settings_sheet, null);
+                .inflate(R.layout.layout_reader_settings_sheet, sheetContainer, false);
         dialog.setContentView(view);
         mSettingsSheet = dialog;
 

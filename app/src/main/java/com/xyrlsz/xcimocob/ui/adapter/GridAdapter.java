@@ -32,6 +32,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by Hiroshi on 2016/7/1.
@@ -215,8 +216,9 @@ public class GridAdapter extends BaseAdapter<Object> {
         }
         for (Object O_comic : mDataSet) {
             MiniComic comic = (MiniComic) O_comic;
-            String title = STConvertUtils.T2S(comic.getTitle()).toUpperCase();
-            if (title.contains(STConvertUtils.T2S(keyword.toUpperCase()))) {
+            // 显式指定 Locale，防止在土耳其语等特殊语言下 toUpperCase 行为异常（如 i→İ）
+            String title = STConvertUtils.T2S(comic.getTitle()).toUpperCase(Locale.getDefault());
+            if (title.contains(STConvertUtils.T2S(keyword.toUpperCase(Locale.getDefault())))) {
                 temp.add(comic);
             }
         }
@@ -235,8 +237,8 @@ public class GridAdapter extends BaseAdapter<Object> {
         }
         for (Object O_comic : mDataSet) {
             MiniComic comic = (MiniComic) O_comic;
-            String title = STConvertUtils.T2S(comic.getTitle()).toUpperCase();
-            if (title.contains(STConvertUtils.T2S(keyword.toUpperCase())) || keyword.isEmpty()) {
+            String title = STConvertUtils.T2S(comic.getTitle()).toUpperCase(Locale.getDefault());
+            if (title.contains(STConvertUtils.T2S(keyword.toUpperCase(Locale.getDefault()))) || keyword.isEmpty()) {
                 if (isCompleted && comic.isFinish()) {
                     temp.add(comic);
                 } else if (isNotCompleted && !comic.isFinish()) {

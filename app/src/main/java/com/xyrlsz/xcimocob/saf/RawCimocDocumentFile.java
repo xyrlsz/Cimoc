@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -32,7 +33,7 @@ class RawCimocDocumentFile extends CimocDocumentFile {
     private static String getTypeForName(String name) {
         final int lastDot = name.lastIndexOf('.');
         if (lastDot >= 0) {
-            final String extension = name.substring(lastDot + 1).toLowerCase();
+            final String extension = name.substring(lastDot + 1).toLowerCase(Locale.ROOT);
             final String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
             if (mime != null) {
                 return mime;

@@ -5,6 +5,8 @@ import android.content.Context;
 import com.xyrlsz.xcimocob.R;
 import com.xyrlsz.xcimocob.manager.PreferenceManager;
 
+import java.io.Serializable;
+
 /**
  * Created by Hiroshi on 2016/10/9.
  */
@@ -188,9 +190,15 @@ public class ClickEvents {
         return mEventTitle[value];
     }
 
-    public enum JoyLocks {
+    /**
+     * 左右侧手柄点击事件（枚举实现 Serializable，避免在偏好持久化 / 跨组件传递
+     * 反序列化时因缺 serialVersionUID 抛出 InvalidClassException）。
+     */
+    public enum JoyLocks implements Serializable {
         LT,
-        RT
+        RT;
+
+        private static final long serialVersionUID = 1L;
     }
 
 }

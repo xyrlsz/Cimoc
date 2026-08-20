@@ -5,11 +5,13 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.annotations.SerializedName;
 import com.xyrlsz.xcimocob.App;
 import com.xyrlsz.xcimocob.manager.PreferenceManager;
 import com.xyrlsz.xcimocob.utils.Base64Utils;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -93,6 +95,7 @@ public class DataSyncClient {
     }
 
     private static class RefreshTokenResponse {
+        @SerializedName("token")
         public String token;
     }
 
@@ -516,9 +519,13 @@ public class DataSyncClient {
     }
 
     /**
-     * 自定义异常，包含 HTTP 状态码
+     * 自定义异常，包含 HTTP 状态码。
+     * 显式加 serialVersionUID：异常通过 RxJava/RxBus 跨层传递，若对象被写入持久化
+     * 队列（崩溃日志/同步重放）后反序列化，缺该字段会抛 InvalidClassException。
      */
-    public static class DataSyncException extends Exception {
+    public static class DataSyncException extends Exception implements Serializable {
+        private static final long serialVersionUID = 1L;
+
         public final int httpCode;
 
         public DataSyncException(int httpCode, String message) {

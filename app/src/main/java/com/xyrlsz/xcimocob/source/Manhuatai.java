@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -92,7 +93,7 @@ public class Manhuatai extends MangaParser {
                 String author = object.getString("comic_author");
                 Long timestamp = object.getLong("update_time");
                 Date date = new Date(timestamp);
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
                 String update = sdf.format(date);
                 return new Comic(TYPE, cid, title, cover, update, author);
             }

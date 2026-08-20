@@ -42,6 +42,7 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
 /**
@@ -214,7 +215,11 @@ public class ComicUtils {
             index++;
         }
 
-        Observable.merge(tasks)
+        // 显式接住 Disposable 引用，消除 CheckResult 警告。
+        // exportComic 是一次性导出任务（回调即终点，无外部取消句柄），不加入生命周期管理，
+        // 正常结束时 RxJava 会自动 dispose；异常时统一在 onError 中交给全局 handler。
+        @SuppressWarnings("unused")
+        Disposable exportDisposable = Observable.merge(tasks)
                 .toList()
 //                .observeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

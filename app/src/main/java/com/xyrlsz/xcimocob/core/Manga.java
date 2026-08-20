@@ -26,8 +26,10 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.InterruptedIOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
@@ -72,7 +74,9 @@ public class Manga {
     }
 
     private static boolean indexOfIgnoreCase(String str, String search) {
-        return str.toLowerCase().contains(search.toLowerCase());
+        // 显式使用 Locale.ROOT 执行大小写无关比较：搜索属于语义操作，
+        // 不应受土耳其语/i 等区域性大小写映射影响。
+        return str.toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT));
     }
 
 
@@ -81,13 +85,13 @@ public class Manga {
             try {
                 String s1 = STConvertUtils.T2S(str);
                 String s2 = STConvertUtils.T2S(search);
-                return s1.toLowerCase().contains(s2.toLowerCase());
+                return s1.toLowerCase(Locale.ROOT).contains(s2.toLowerCase(Locale.ROOT));
             } catch (Exception e) {
                 e.printStackTrace();
                 return false;
             }
         } else {
-            return str.toLowerCase().contains(search.toLowerCase());
+            return str.toLowerCase(Locale.ROOT).contains(search.toLowerCase(Locale.ROOT));
         }
     }
 
@@ -621,7 +625,13 @@ public class Manga {
     }
 
 
-    public static class NetworkErrorException extends Exception {
+    /**
+     * 漫画抓取网络异常（如第三方源加载失败）。
+     * 显式加 serialVersionUID：异常在 RxJava/RxBus 事件中流转，
+     * 若对象被落盘/跨组件序列化后反序列化，缺少该字段会抛 InvalidClassException。
+     */
+    public static class NetworkErrorException extends Exception implements Serializable {
+        private static final long serialVersionUID = 1L;
     }
 
 }

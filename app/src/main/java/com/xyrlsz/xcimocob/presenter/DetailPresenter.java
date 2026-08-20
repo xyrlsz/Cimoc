@@ -336,7 +336,9 @@ public class DetailPresenter extends BasePresenter<DetailView> {
     }
 
     public void backup(CimocDocumentFile file) {
-        mComicManager.listFavoriteOrHistoryInRx()
+        // 将订阅加入 Presenter 的 CompositeDisposable，Presenter detach 时会自动取消，
+        // 避免用户切换页面后仍持有 Activity 引用导致内存泄漏。
+        mCompositeSubscription.add(mComicManager.listFavoriteOrHistoryInRx()
                 .doOnNext(new Consumer<List<Comic>>() {
                     @Override
                     public void accept(List<Comic> list) {
@@ -345,7 +347,7 @@ public class DetailPresenter extends BasePresenter<DetailView> {
                     }
                 })
                 .subscribe(result -> {
-                }, throwable -> Log.e("RX", "Chapter error", throwable));
+                }, throwable -> Log.e("RX", "Chapter error", throwable)));
     }
 
     public void favoriteComic() {

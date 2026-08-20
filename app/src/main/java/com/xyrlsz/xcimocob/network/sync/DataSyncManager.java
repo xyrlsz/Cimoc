@@ -13,7 +13,9 @@ import com.xyrlsz.xcimocob.model.MiniComic;
 import com.xyrlsz.xcimocob.rx.RxBus;
 import com.xyrlsz.xcimocob.rx.RxEvent;
 import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -246,7 +248,15 @@ public class DataSyncManager {
 
     // ==================== 防抖触发 ====================
 
-    private enum SyncType {COMIC, ALL}
+    /**
+     * 同步触发类型（枚举实现 Serializable，防抖/状态持久化落盘后反序列化需要
+     * serialVersionUID，否则在 R8 重命名或版本升级后恢复时抛 InvalidClassException）。
+     */
+    private enum SyncType implements Serializable {
+        COMIC, ALL;
+
+        private static final long serialVersionUID = 1L;
+    }
 
     /**
      * 各类同步的上次执行时间
@@ -468,7 +478,12 @@ public class DataSyncManager {
     // ==================== 全量双向同步（事件驱动 + 设置，前台触发） ====================
 
     private void doSyncAllBidirectional() {
-        Observable.fromCallable(() -> {
+        // 显式接住 subscribe() 返回的 Disposable，消除 CheckResult 警告。
+        // doSyncAllBidirectional 被防抖一次性调度，流程内部使用 mSyncRunning 原子量去重，
+        // 这里不与 App 生命周期绑定：任务完成 RxJava 会自动 dispose，失败时在 onError 中消费，
+        // 因此不会因为未取消而产生长期引用。
+        @SuppressWarnings("unused")
+        io.reactivex.rxjava3.disposables.Disposable syncDisposable = Observable.fromCallable(() -> {
             if (!mSyncRunning.compareAndSet(false, true)) {
                 Log.d(TAG, "[EventSync] Sync already running, skip");
                 return false;
@@ -974,43 +989,43 @@ public class DataSyncManager {
     // ==================== 事件 Payload 内部类 ====================
 
     private static class FavoritePayload {
-        int source;
-        String cid;
-        String title;
-        String cover;
-        String update;
-        boolean finish;
-        Integer chapter_count;
-        long timestamp;
+        @SerializedName("source")        int source;
+        @SerializedName("cid")           String cid;
+        @SerializedName("title")         String title;
+        @SerializedName("cover")         String cover;
+        @SerializedName("update")        String update;
+        @SerializedName("finish")        boolean finish;
+        @SerializedName("chapter_count") Integer chapter_count;
+        @SerializedName("timestamp")     long timestamp;
     }
 
     private static class UnfavoritePayload {
-        int source;
-        String cid;
+        @SerializedName("source") int source;
+        @SerializedName("cid")    String cid;
     }
 
     private static class ReadPayload {
-        int source;
-        String cid;
-        String chapter;
-        int page;
-        String last;
-        long timestamp;
+        @SerializedName("source")    int source;
+        @SerializedName("cid")       String cid;
+        @SerializedName("chapter")   String chapter;
+        @SerializedName("page")      int page;
+        @SerializedName("last")      String last;
+        @SerializedName("timestamp") long timestamp;
     }
 
     private static class ClearHistoryPayload {
-        int source;
-        String cid;
+        @SerializedName("source") int source;
+        @SerializedName("cid")    String cid;
     }
 
     private static class UpdateInfoPayload {
-        int source;
-        String cid;
-        String title;
-        String cover;
-        String update;
-        boolean finish;
-        Integer chapter_count;
+        @SerializedName("source")        int source;
+        @SerializedName("cid")           String cid;
+        @SerializedName("title")         String title;
+        @SerializedName("cover")         String cover;
+        @SerializedName("update")        String update;
+        @SerializedName("finish")        boolean finish;
+        @SerializedName("chapter_count") Integer chapter_count;
     }
 
     /** 上传本地设置到服务端（只同步 SYNCABLE_SETTINGS 白名单内的用户设置） */

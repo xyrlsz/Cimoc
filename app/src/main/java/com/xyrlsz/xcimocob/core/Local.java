@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -165,7 +166,7 @@ public class Local {
     private static String findCover(CimocDocumentFile dir) {
         for (CimocDocumentFile file : dir.listFiles()) {
             if (file.isFile()) {
-                String name = file.getName().toLowerCase();
+                String name = file.getName().toLowerCase(Locale.ROOT);
                 if (name.equals("cover.jpg") || name.equals("cover.png") || name.equals("cover.jpeg") || name.startsWith("cover.")) {
                     return file.getUri().toString();
                 }

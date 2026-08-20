@@ -2,6 +2,7 @@ package com.xyrlsz.xcimocob.utils;
 
 import android.util.Log;
 
+import java.io.Serializable;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -165,8 +166,15 @@ public class Logger {
         return sb.toString();
     }
 
-    enum Level {
-        V, D, I, W, E,
+    /**
+     * 日志级别（枚举天然实现 Serializable，Android 进程间通过 Bundle / Intent 传
+     * 枚举时，若没有显式 serialVersionUID 会在不同组件（或 R8 混淆后）版本间出现
+     * InvalidClassException。）
+     */
+    enum Level implements Serializable {
+        V, D, I, W, E;
+
+        private static final long serialVersionUID = 1L;
     }
 
 }

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * WebDAV 版 {@link CimocDocumentFile}，基于 dav4jvm。
@@ -62,7 +63,7 @@ public class WebDavCimocDocumentFile extends CimocDocumentFile {
     private static String getTypeForName(String name) {
         final int lastDot = name.lastIndexOf('.');
         if (lastDot >= 0) {
-            final String extension = name.substring(lastDot + 1).toLowerCase();
+            final String extension = name.substring(lastDot + 1).toLowerCase(Locale.ROOT);
             final String mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
             if (mime != null) {
                 return mime;

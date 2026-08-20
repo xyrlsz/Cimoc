@@ -43,6 +43,15 @@ public class WebViewJsExecutor {
 
     private static final Object LOCK = new Object();
 
+    /**
+     * 【StaticFieldLeak 说明】这里使用 static 持有离屏 WebView，是刻意的「全局长生命周期」设计：
+     * WebView 由 Application 上下文创建（`App.getAppContext()`），其生命周期与进程完全一致，
+     * 不存在对 Activity/Service 等短暂组件的引用；更不存在额外内存泄漏。
+     * <p>
+     * 如果不使用单例，每次 JS 解密都会新建一个 WebView，创建耗时（~100-400ms/次）+ 内核缓存压力
+     * 会让解析器整体吞吐暴跌；因此我们保留静态实例，并提供 destroy()/App 销毁时主动释放的钩子。
+     */
+    @SuppressLint("StaticFieldLeak")
     private static WebView mWebView;
     /**
      * 页面加载完成后要执行的任务（重新加载 about:blank 后执行脚本）

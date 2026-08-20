@@ -12,11 +12,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import com.xyrlsz.xcimocob.R;
@@ -64,7 +64,13 @@ public class MultiAdpaterDialogFragment extends DialogFragment implements Dialog
         }
 
         LayoutInflater inflater = getLayoutInflater();
-        getlistview = inflater.inflate(R.layout.listview_adapter, null);
+        // 提供父容器（由 AlertDialog 内部的 android.R.id/custom 区域作为 parent）
+        // 否则 inflate 时布局根元素的 layout_width/height 会被丢弃（换成 WRAP_CONTENT），
+        // 在某些机型上整个自定义区域被压得只剩一小条。attachToRoot=false，
+        // 因为稍后会通过 builder.setView(getlistview) 再附加到真正的容器上。
+        android.widget.FrameLayout dialogContentParent =
+                new android.widget.FrameLayout(requireContext());
+        getlistview = inflater.inflate(R.layout.listview_adapter, dialogContentParent, false);
         ListView listview = (ListView) getlistview.findViewById(R.id.listview_adapter);
 
         adapter = new SetSimpleAdapter(getActivity(), arrayList, R.layout.item_select_mutil, new String[]{"text"}, new int[]{R.id.item_select_title_mutil});
@@ -148,7 +154,13 @@ public class MultiAdpaterDialogFragment extends DialogFragment implements Dialog
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) convertView = LinearLayout.inflate(getActivity(), R.layout.item_select_mutil, null);
+            if (convertView == null) {
+                // 提供 ListView 作为 parent + attachToRoot=false；否则 item 的
+                // android:layout_width="match_parent" 等 layout_* 属性将被丢弃，
+                // 导致条目宽度仅占内容（CheckBox/标题挤在左侧）。
+                LayoutInflater inflater = LayoutInflater.from(getContext());
+                convertView = inflater.inflate(R.layout.item_select_mutil, parent, false);
+            }
             CheckBox ckBox = (CheckBox) convertView.findViewById(R.id.item_select_checkbox_mutil);
             if (mCheckArray[position] == true) {
                 ckBox.setChecked(true);

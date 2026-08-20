@@ -24,6 +24,7 @@ import com.xyrlsz.xcimocob.utils.pictureUtils;
 import java.io.File;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 import io.reactivex.rxjava3.core.Observable;
@@ -182,7 +183,7 @@ public class ReaderPresenter extends BasePresenter<ReaderView> {
 
     private String buildPictureName(String title, int page, String url) {
         String suffix = StringUtils.split(url, "\\.", -1);
-        String suffixOriginal = suffix.split("\\?")[0].toLowerCase();
+        String suffixOriginal = suffix.split("\\?")[0].toLowerCase(Locale.ROOT);
         if (!pictureUtils.isPictureFormat(suffixOriginal)) {
             suffixOriginal = "jpg";
         }

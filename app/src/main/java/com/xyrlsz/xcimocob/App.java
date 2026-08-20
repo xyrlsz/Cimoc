@@ -76,6 +76,8 @@ public class App extends Application implements AppGetter, Thread.UncaughtExcept
     private RecyclerView.RecycledViewPool mRecycledPool;
     private BoxStore mBoxStore;
     private ActivityLifecycle mActivityLifecycle;
+    /** 应用层设置自定义 UncaughtExceptionHandler 前的系统/第三方旧处理器；处理完自定义日志后必须委托回去 */
+    private Thread.UncaughtExceptionHandler mOldUncaughtExceptionHandler;
 
     public static Context getAppContext() {
         return mApp.getApplicationContext();
@@ -221,6 +223,8 @@ public class App extends Application implements AppGetter, Thread.UncaughtExcept
     public void onCreate() {
         super.onCreate();
         // initXCrash();
+        // 先拿到系统默认 handler 再替换，保证最终仍会触发 Android 的崩溃上报/ANR 对话流程
+        mOldUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
         Thread.setDefaultUncaughtExceptionHandler(this);
         mActivityLifecycle = new ActivityLifecycle();
         registerActivityLifecycleCallbacks(mActivityLifecycle);
@@ -421,7 +425,14 @@ public class App extends Application implements AppGetter, Thread.UncaughtExcept
         if (mActivityLifecycle != null) {
             mActivityLifecycle.clear();
         }
-        System.exit(1);
+        // 关键：自定义日志保存完成后，必须将异常回传给原先的 UncaughtExceptionHandler，
+        // 否则 Android 系统默认的崩溃收集/弹窗流程（包括 ACRA/XCrash 等嵌入 SDK）会被吞掉，
+        // 导致应用「僵死」而不是崩溃，用户体验更差且难以定位问题。
+        if (mOldUncaughtExceptionHandler != null && mOldUncaughtExceptionHandler != this) {
+            mOldUncaughtExceptionHandler.uncaughtException(t, e);
+        } else {
+            System.exit(1);
+        }
     }
 
     @Override

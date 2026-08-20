@@ -29,6 +29,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
@@ -112,8 +113,8 @@ public class GoDaManHua extends MangaParser {
                 }
             }
             String update = data.getJSONObject("hasPart").getString("datePublished");
-            SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-            isoFormat.setTimeZone(TimeZone.getDefault());
+            SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ROOT);
+            isoFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
             Date date = null;
             try {
@@ -122,7 +123,7 @@ public class GoDaManHua extends MangaParser {
                 e.printStackTrace();
             }
 
-            SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
             outputFormat.setTimeZone(TimeZone.getDefault());
 
             update = outputFormat.format(Objects.requireNonNull(date));

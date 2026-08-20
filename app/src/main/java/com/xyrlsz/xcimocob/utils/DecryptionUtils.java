@@ -2,6 +2,8 @@ package com.xyrlsz.xcimocob.utils;
 
 import com.xyrlsz.quickjs.QuickJSEngine;
 
+import android.annotation.SuppressLint;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -19,6 +21,18 @@ import javax.crypto.spec.SecretKeySpec;
  * Created by Hiroshi on 2016/7/8.
  */
 public class DecryptionUtils {
+    /**
+     * 使用 AES/ECB/PKCS5Padding 对第三方漫画源返回的密文进行解密。
+     * <p>
+     * 【安全说明】ECB 模式本身并不推荐用于新建加密方案（相同明文块会产生相同密文块），
+     * 但本方法作为「解密」端，需要严格兼容各漫画源服务器指定的加密参数（漫画图源协议固定，
+     * 客户端无法更改算法/模式），因此只能继续使用 ECB。若未来切换为新的加密协议，
+     * 应优先选用 AES/CBC/PKCS7Padding 或 AES/GCM/NoPadding 并配合随机 IV。
+     *
+     * @param value Base64 编码的密文
+     * @param key   原始密钥字符串（UTF-8）
+     */
+    @SuppressLint("GetInstance")
     public static String decryptAES(String value, String key) throws Exception {
         SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(), "AES");
         Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
@@ -27,6 +41,18 @@ public class DecryptionUtils {
         return new String(cipher.doFinal(code));
     }
 
+    /**
+     * 使用 DES（ECB）对第三方漫画源返回的密文进行解密。
+     * <p>
+     * 【安全说明】DES 本身密钥长度过短（56 bit），且 Cipher.getInstance("DES") 在
+     * Android 上默认使用 ECB 模式；与 {@link #decryptAES} 一样，这里只是作为「解密」端
+     * 还原漫画图源定义的协议，客户端无法更改算法。后续若漫画源升级协议，应替换为更强
+     * 的 AES-CBC/GCM。
+     *
+     * @param keyString   DES 密钥字符串
+     * @param cipherString Base64 编码的密文
+     */
+    @SuppressLint("GetInstance")
     public static String desDecrypt(String keyString, String cipherString) throws Exception {
         byte[] cipherBytes = Base64Utils.decode(cipherString);
         DESKeySpec keySpec = new DESKeySpec(keyString.getBytes());
