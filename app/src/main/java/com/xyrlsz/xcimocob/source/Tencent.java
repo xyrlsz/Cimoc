@@ -52,8 +52,10 @@ public class Tencent extends MangaParser {
     public Request getSearchRequest(String keyword, int page) throws UnsupportedEncodingException {
         String url = "";
         if (page == 1)
-            url = "https://m.ac.qq.com/search/result?word=%s".concat(keyword);
-        return new Request.Builder().url(url).build();
+            url = "https://m.ac.qq.com/search/result?word=".concat(keyword);
+        return new Request.Builder().url(url)
+                .headers(getHeader())
+                .build();
     }
 
     @Override
@@ -87,7 +89,9 @@ public class Tencent extends MangaParser {
     @Override
     public Request getInfoRequest(String cid) {
         String url = "https://m.ac.qq.com/comic/index/id/".concat(cid);
-        return new Request.Builder().url(url).build();
+        return new Request.Builder().url(url)
+                .headers(getHeader())
+                .build();
     }
 
     @Override
@@ -98,7 +102,7 @@ public class Tencent extends MangaParser {
         String update = "";
         String author = body.text("li.author-wr");
         String intro = body.text("div.head-info-desc");
-        boolean status = isFinish("连载中");//todo: fix here
+        boolean status = !html.contains("连载中");
         comic.setInfo(title, cover, update, intro, author, status);
         return comic;
     }
@@ -107,6 +111,7 @@ public class Tencent extends MangaParser {
     public Request getChapterRequest(String html, String cid) {
         String url = "https://m.ac.qq.com/comic/chapterList/id/".concat(cid);
         return new Request.Builder()
+                .headers(getHeader())
                 .url(url)
                 .build();
     }
@@ -122,7 +127,7 @@ public class Tencent extends MangaParser {
         }
         list = Lists.reverse(list);
         for (int j = 0; j < list.size(); j++) {
-            Long id = IdCreator.createChapterId(sourceComic, j);
+            long id = IdCreator.createChapterId(sourceComic, j);
             list.get(j).setId(id);
         }
         return list;
@@ -132,12 +137,13 @@ public class Tencent extends MangaParser {
     public Request getImagesRequest(String cid, String path) {
         String url = StringUtils.format("https://m.ac.qq.com/chapter/index/id/%s/cid/%s", cid, path);
         return new Request.Builder()
+                .headers(getHeader())
                 .url(url)
                 .build();
     }
 
     private String splice(String str, int from, int length) {
-        return str.substring(0, from) + str.substring(from + length, str.length());
+        return str.substring(0, from) + str.substring(from + length);
     }
 
     private String decodeData(String str, String nonce) {
@@ -169,9 +175,9 @@ public class Tencent extends MangaParser {
                 JSONObject object = new JSONObject(str);
                 JSONArray array = object.getJSONArray("picture");
                 for (int i = 0; i != array.length(); ++i) {
-                    Long comicChapter = chapter.getId();
-                    Long id = IdCreator.createImageId(comicChapter, i);
-                    list.add(new ImageUrl(id, comicChapter, i + 1, array.getJSONObject(i).getString("url"), false));
+                    long comicChapter = chapter.getId();
+                    long id = IdCreator.createImageId(comicChapter, i);
+                    list.add(new ImageUrl(id, comicChapter, i + 1, array.getJSONObject(i).getString("url"), false, getHeader()));
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -207,7 +213,8 @@ public class Tencent extends MangaParser {
 
     @Override
     public Headers getHeader() {
-        return Headers.of("Referer", "https://m.ac.qq.com");
+        return Headers.of("Referer", "https://m.ac.qq.com",
+                "user-agent", "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36");
     }
 
 }
