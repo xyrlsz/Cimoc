@@ -196,7 +196,7 @@ dependencies {
     implementation 'com.google.re2j:re2j:1.8'
     implementation 'io.reactivex.rxjava3:rxjava:3.1.12'
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.2'
-    api 'com.google.guava:guava:33.6.0-android'
+    api 'com.google.guava:guava:33.7.1-android'
     implementation 'com.google.code.gson:gson:2.14.0'
 
     implementation 'com.github.xyrlsz:android-opencc:1.4.2'
