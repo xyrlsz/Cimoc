@@ -8,7 +8,6 @@ import android.content.pm.ActivityInfo;
 import android.content.res.ColorStateList;
 import android.graphics.Point;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.InputDevice;
 import android.view.KeyEvent;
@@ -28,6 +27,11 @@ import android.widget.TextView;
 
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -155,9 +159,10 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
         super.initTheme();
         mHideNav = mPreference.getBoolean(PreferenceManager.PREF_READER_HIDE_NAV, false);
         mShowTopbar = mPreference.getBoolean(PreferenceManager.PREF_OTHER_SHOW_TOPBAR, false);
-        if (!mHideNav) {
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        }
+
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        // 提前应用系统栏可见性，避免首帧闪烁（用 WindowInsetsControllerCompat 替代已废弃的 FLAG_FULLSCREEN）
+        applySystemBarVisibility();
         if (mPreference.getBoolean(PreferenceManager.PREF_READER_KEEP_BRIGHT, false)) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
@@ -195,6 +200,14 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
 
     @Override
     protected void initView() {
+        // 手动处理系统栏 insets（替代布局里的 fitsSystemWindows）：
+        // 状态栏 / 导航栏可见时给 reader_box 留出对应高度的 padding；
+        // 隐藏时 insets 归零、padding 归零，避免隐藏导航栏后底部残留一大段空白。
+        ViewCompat.setOnApplyWindowInsetsListener(mReaderBox, (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(0, systemBars.top, 0, systemBars.bottom);
+            return insets;
+        });
         boolean isWhiteBackground = App.getPreferenceManager().getBoolean(PreferenceManager.PREF_READER_WHITE_BACKGROUND, true);
         if (isWhiteBackground) {
             mLoadingText.setTextColor(getResources().getColor(R.color.black));
@@ -258,28 +271,39 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
         });
     }
 
+
+    private void applySystemBarVisibility() {
+        if (getWindow() == null || getWindow().getDecorView() == null) {
+            return;
+        }
+        WindowInsetsControllerCompat controller =
+                WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        if (mHideNav) {
+            // 隐藏底部导航栏
+            controller.hide(WindowInsetsCompat.Type.navigationBars());
+            // 边缘滑动可临时唤出，几秒后自动隐藏（对应原来的 IMMERSIVE_STICKY 效果）
+            controller.setSystemBarsBehavior(
+                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+        } else {
+            controller.show(WindowInsetsCompat.Type.navigationBars());
+        }
+        if (mShowTopbar) {
+            // 显示状态栏
+            controller.show(WindowInsetsCompat.Type.statusBars());
+        } else {
+            // 隐藏状态栏
+            controller.hide(WindowInsetsCompat.Type.statusBars());
+            controller.setSystemBarsBehavior(
+                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+        }
+    }
+
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
-        if (mHideNav) {
-            int options = getWindow().getDecorView().getSystemUiVisibility();
-
-            options |= View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                options |= View.SYSTEM_UI_FLAG_FULLSCREEN;
-            }
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                options |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-            }
-
-            getWindow().getDecorView().setSystemUiVisibility(options);
-        }
-
-        if (mShowTopbar) {
-            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        } else {
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        // 重新获得焦点时（进入页面 / 从弹窗返回）重新应用系统栏可见性；
+        // 失去焦点时不做处理，避免在弹窗、输入法弹出时强制隐藏系统栏
+        if (hasFocus) {
+            applySystemBarVisibility();
         }
     }
 

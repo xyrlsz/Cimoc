@@ -77,6 +77,24 @@ public class DecryptionUtils {
         }
     }
 
+    /**
+     * 通过 WebView 执行一段 JS 脚本，返回表达式结果字符串。
+     * 与 {@link #evalDecrypt(String)}（QuickJS）不同，这里运行在真实浏览器环境，
+     * 支持脚本使用 window / document / atob / btoa 等浏览器 API；
+     * 主线程调用或 WebView 异常时自动回退到 QuickJS。
+     */
+    public static String evalDecryptWithWebView(String jsCode) {
+        return WebViewJsExecutor.evaluate(jsCode);
+    }
+
+    /**
+     * 通过 WebView 执行一段 JS 脚本，返回指定全局变量的字符串值
+     * （如 DM5 的 "newImgs"）。主线程调用或 WebView 异常时自动回退到 QuickJS。
+     */
+    public static String evalDecryptWithWebView(String jsCode, String varName) {
+        return WebViewJsExecutor.evaluate(jsCode, varName);
+    }
+
     public static String urlDecrypt(String str) {
         try {
             return URLDecoder.decode(str, "utf-8");
