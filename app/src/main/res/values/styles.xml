@@ -19,6 +19,11 @@
         <item name="backgroundTint">?attr/colorAccent</item>
     </style>
 
+    <!-- 阅读器快捷设置面板：描边按钮（边框颜色按明暗模式自适应，深色下更亮） -->
+    <style name="Widget.MyApp.MaterialButton.Outlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="strokeColor">@color/reader_outline</item>
+    </style>
+
     <style name="AppThemeNoDark" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!--        // 防止miui及其他魔改ROM启用反色-->
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
@@ -50,6 +55,8 @@
         <item name="colorPrimaryDark">@color/colorPrimaryOrangeDark</item>
         <item name="colorAccent">@color/colorPrimaryOrangeDark</item>
         <item name="colorSecondary">@color/colorPrimaryOrangeDark</item>
+        <!-- 深色模式下默认 colorOutline 太暗，描边按钮边框看不清，单独指定更亮的描边色 -->
+        <item name="materialButtonOutlinedStyle">@style/Widget.MyApp.MaterialButton.Outlined</item>
     </style>
 
     <style name="AppThemeBlue" parent="AppTheme">

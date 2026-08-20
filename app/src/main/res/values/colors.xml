@@ -36,6 +36,8 @@
 
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <!-- 阅读器快捷设置面板描边按钮的边框色（浅色模式） -->
+    <color name="reader_outline">#FF79747E</color>
     <color name="trans_black">#B0000000</color>
     <color name="trans_light_black">#4F000000</color>
 </resources>
