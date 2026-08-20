@@ -19,7 +19,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -90,26 +89,33 @@ public class DocumentUtils {
         }
     }
 
-    // 试图从 parent 获得稳定标识（优先 URI 或 document id），若失败则 fallback 到 toString()
+    // 试图从 parent 获得稳定标识（优先 URI），若失败则 fallback 到 name / toString()
     private static String getStableKeyForParent(CimocDocumentFile parent) {
-        if (parent == null) return "null-parent";
+        if (parent == null) {
+            return "null-parent";
+        }
+
         try {
-            // 常见方法名尝试：getUri, getDocumentUri, getUriString, getUriStr, getDocumentId
-            String[] candidates = new String[]{"getUri", "getDocumentUri", "getUriString", "getDocumentId", "getName"};
-            for (String m : candidates) {
-                try {
-                    Method method = parent.getClass().getMethod(m);
-                    Object val = method.invoke(parent);
-                    if (val != null)
-                        return parent.getClass().getSimpleName() + "@" + val;
-                } catch (NoSuchMethodException ignored) {
+            Uri uri = parent.getUri();
+            if (uri != null) {
+                String uriString = uri.toString();
+                if (!uriString.isEmpty()) {
+                    return parent.getClass().getName() + "@" + uriString;
                 }
             }
-        } catch (Throwable t) {
-            // ignore reflection problems
+        } catch (Throwable ignored) {
         }
-        // 最后退回到 toString；尽管不够稳定，但至少可用
-        return parent.getClass().getSimpleName() + "@" + parent;
+
+        try {
+            String name = parent.getName();
+            if (name != null && !name.isEmpty()) {
+                return parent.getClass().getName() + "@name:" + name;
+            }
+        } catch (Throwable ignored) {
+        }
+
+        return parent.getClass().getName() + "@object:" +
+                Integer.toHexString(System.identityHashCode(parent));
     }
 
     public static int countWithoutSuffix(CimocDocumentFile dir, String suffix) {
