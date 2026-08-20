@@ -1,9 +1,9 @@
 apply plugin: 'com.android.library'
 
 android {
-    namespace "com.xyrlsz.quickjs"
+    namespace = "com.xyrlsz.quickjs"
     compileSdk 37
-    ndkVersion "29.0.14206865"
+    ndkVersion = "29.0.14206865"
 
     defaultConfig {
         minSdkVersion 21

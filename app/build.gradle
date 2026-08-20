@@ -4,6 +4,11 @@ apply plugin: 'com.android.application'
 apply plugin: 'io.objectbox'
 apply from: rootProject.file('check_r8_keep.gradle')
 
+// 输出过时 API 的具体位置（-Xlint:deprecation），便于排查弃用警告
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += ['-Xlint:deprecation']
+}
+
 def getGitTagName = { ->
     try {
         def process = 'git describe --tags'.execute()
@@ -41,7 +46,7 @@ def _keyPassword = System.getenv("KEY_PASSWORD")
 
 android {
     compileSdk 37
-    namespace "com.xyrlsz.xcimocob"
+    namespace = "com.xyrlsz.xcimocob"
     kotlin {
         compilerOptions {
             jvmTarget = JvmTarget.JVM_17
@@ -50,7 +55,7 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
-        coreLibraryDesugaringEnabled true
+        coreLibraryDesugaringEnabled = true
     }
     defaultConfig {
         applicationId "com.xyrlsz.xcimocob"
@@ -59,7 +64,7 @@ android {
         versionCode buildVersion // 动态生成的版本号
         versionName version
         resourceConfigurations += ['en', 'zh']
-        multiDexEnabled true
+        multiDexEnabled = true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField "String", "REPOSITORIE_NAME", '"XCimoc"'
@@ -95,26 +100,26 @@ android {
                     keyPassword '123456'
                 }
             }
-            enableV1Signing true
-            enableV2Signing true
-            enableV3Signing true
-            enableV4Signing true
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
+            enableV4Signing = true
         }
         debug {
             storeFile file("../xcimoc.jks")
             storePassword '123456'
             keyAlias 'xc'
             keyPassword '123456'
-            enableV1Signing true
-            enableV2Signing true
-            enableV3Signing true
-            enableV4Signing true
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
+            enableV4Signing = true
         }
     }
 
     buildFeatures {
-        buildConfig true
-        viewBinding true
+        buildConfig = true
+        viewBinding = true
     }
     buildTypes {
         release {
@@ -133,10 +138,10 @@ android {
     }
     splits {
         abi {
-            enable true // 启用 ABI 分架构编译
+            enable = true // 启用 ABI 分架构编译
             reset() // 重置所有 ABI 配置
             include 'armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64' // 包含的 ABI 类型
-            universalApk true // 是否生成包含所有 ABI 的通用 APK
+            universalApk = true // 是否生成包含所有 ABI 的通用 APK
         }
     }
 
@@ -152,7 +157,7 @@ android {
     }
 
     lint {
-        abortOnError true
+        abortOnError = true
         fatal "NewApi"
         // 分析依赖库（AAR）字节码，供自定义 Lint 检测器（如 R8LibraryReflection）使用
         checkDependencies = true

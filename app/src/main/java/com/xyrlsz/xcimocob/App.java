@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.Rect;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.util.DisplayMetrics;
@@ -428,9 +429,19 @@ public class App extends Application implements AppGetter, Thread.UncaughtExcept
         return this;
     }
 
+    @SuppressWarnings("deprecation")
     private void initPixels() {
         DisplayMetrics metrics = new DisplayMetrics();
-        ((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay().getMetrics(metrics);
+        WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // API 30+：使用新的 WindowManager#getCurrentWindowMetrics
+            Rect bounds = windowManager.getCurrentWindowMetrics().getBounds();
+            metrics.widthPixels = bounds.width();
+            metrics.heightPixels = bounds.height();
+        } else {
+            // API 29 及以下：旧的 getDefaultDisplay 仍可用（已弃用，见 @SuppressWarnings）
+            windowManager.getDefaultDisplay().getMetrics(metrics);
+        }
         mWidthPixels = metrics.widthPixels;
         mHeightPixels = metrics.heightPixels;
         mCoverWidthPixels = mWidthPixels / 3;
