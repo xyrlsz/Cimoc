@@ -11,6 +11,7 @@ import (
 
 	"xcimoc-data-server/config"
 	"xcimoc-data-server/models"
+	"xcimoc-data-server/query"
 	"xcimoc-data-server/utils"
 
 	"gorm.io/driver/mysql"
@@ -59,7 +60,17 @@ func Init(cfg *config.Config) {
 func openGorm(cfg *config.Config, dialector gorm.Dialector) {
 	var err error
 	DB, err = gorm.Open(dialector, &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Warn),
+		// gorm Warn 级别默认会把“查询无结果”(record not found) 也打印成日志。
+		// 全量同步时每个漫画都会查一次墓碑表，绝大多数没有墓碑，
+		// 导致每次同步刷大量 record not found（正常现象、非错误）。
+		// IgnoreRecordNotFoundError 只在日志层面忽略该场景，
+		// 不影响任何查询返回的 error 值或业务错误处理。
+		Logger: logger.New(log.New(os.Stdout, "\r\n", log.LstdFlags), logger.Config{
+			SlowThreshold:             time.Second,
+			LogLevel:                  logger.Warn,
+			IgnoreRecordNotFoundError: true,
+			Colorful:                  false,
+		}),
 	})
 	if err != nil {
 		log.Fatalf("failed to connect database: %v", err)
@@ -101,6 +112,14 @@ func openGorm(cfg *config.Config, dialector gorm.Dialector) {
 		DB.Exec("SET FOREIGN_KEY_CHECKS = 1")
 	}
 
+	// 将已初始化的 *gorm.DB 绑定到 gorm.io/gen 生成的 query 单例。
+	// 之后所有 handler/middleware/maintenance 都可以用 query.Q（即 query.User /
+	// query.Comic / query.SyncEvent 等包级快捷）来进行类型安全的查询与写入，
+	// 不必再手写 database.DB.Where("user_id = ? AND id > ?", ...) 这种字符串 Where，
+	// 从编译期避免字段名拼写错误、重构不一致与潜在的拼接式 SQL 注入问题。
+	// 原 database.DB 仍保留可用，作为复杂原生 SQL / 事务兜底。
+	query.SetDefault(DB)
+
 	// 首次启动自动创建默认管理员账户
 	ensureAdminExists()
 
@@ -122,8 +141,11 @@ func generateRandomPassword() (string, error) {
 }
 
 func ensureAdminExists() {
-	var count int64
-	DB.Model(&models.User{}).Where("is_admin = ?", true).Count(&count)
+	// 用生成的 query.User 统计管理员数，避免裸字符串 "is_admin = ?"。
+	count, err := query.User.Where(query.User.IsAdmin.Eq(true)).Count()
+	if err != nil {
+		log.Fatalf("failed to count admin users: %v", err)
+	}
 	if count > 0 {
 		return // 管理员已存在
 	}
@@ -138,15 +160,16 @@ func ensureAdminExists() {
 		log.Fatalf("failed to generate admin password: %v", err)
 	}
 
-	admin := models.User{
+	admin := &models.User{
 		Username: DefaultAdminUsername,
 		Password: utils.HashPassword(adminPassword, salt),
 		Salt:     salt,
 		IsAdmin:  true,
 	}
 
-	if result := DB.Create(&admin); result.Error != nil {
-		log.Fatalf("failed to create default admin: %v", result.Error)
+	// 使用生成 query 的 Create；如果后续 User 表字段结构变了，编译期会直接拦截。
+	if err := query.User.Create(admin); err != nil {
+		log.Fatalf("failed to create default admin: %v", err)
 	}
 
 	log.Printf("========================================")

@@ -12,11 +12,10 @@ import (
 	"xcimoc-data-server/database"
 	"xcimoc-data-server/handlers"
 	"xcimoc-data-server/middleware"
-	"xcimoc-data-server/models"
+	"xcimoc-data-server/query"
 	"xcimoc-data-server/utils"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 //go:embed admin/index.html
@@ -53,15 +52,18 @@ func main() {
 			log.Fatalf("生成盐值失败: %v", err)
 		}
 
-		result := database.DB.Model(&models.User{}).
-			Where("is_admin = ?", true).
-			Updates(map[string]interface{}{
-				"password":      utils.HashPassword(newPassword, salt),
-				"salt":          salt,
-				"token_version": gorm.Expr("token_version + 1"),
-			})
-		if result.RowsAffected == 0 {
+		// 使用生成的 query.User 定位管理员；
+		// WHERE is_admin=true 通过字段 Eq 表达，避免裸字符串列名。
+		admin, findErr := query.User.Where(query.User.IsAdmin.Eq(true)).Take()
+		if findErr != nil || admin == nil {
 			log.Fatalf("未找到管理员账户，请先启动服务器以初始化数据库")
+		}
+		admin.Password = utils.HashPassword(newPassword, salt)
+		admin.Salt = salt
+		admin.TokenVersion++
+		// Save 走主键更新；TokenVersion 已自增，确保旧 token 失效。
+		if saveErr := database.DB.Save(admin).Error; saveErr != nil {
+			log.Fatalf("保存管理员账户失败: %v", saveErr)
 		}
 
 		fmt.Println("管理员密码已更新")

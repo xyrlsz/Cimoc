@@ -6,59 +6,66 @@ import (
 
 	"xcimoc-data-server/database"
 	"xcimoc-data-server/models"
+	"xcimoc-data-server/query"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type TagHandler struct{}
 
-func NewTagHandler() *TagHandler {
-	return &TagHandler{}
-}
+func NewTagHandler() *TagHandler { return &TagHandler{} }
 
-// List returns all tags with their associated comics for the authenticated user.
-// Optimized: 使用批量查询替代 N+1 循环查询
+// List 返回标签及关联漫画；使用 query.Tag / query.TagRef 做两次批量查询，
+// 避免 N+1 查询，并且所有 WHERE 条件都通过生成字段进行类型安全表达。
 func (h *TagHandler) List(c *gin.Context) {
 	userID := c.GetUint("user_id")
 
-	var tags []models.Tag
-	database.DB.Where("user_id = ?", userID).Find(&tags)
+	tagRows, err := query.Tag.Where(query.Tag.UserID.Eq(userID)).Find()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "查询标签失败: " + err.Error()})
+		return
+	}
+	refRows, err := query.TagRef.Where(query.TagRef.UserID.Eq(userID)).Find()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "查询标签关联失败: " + err.Error()})
+		return
+	}
 
-	// 批量查询所有 tag_id 的关联漫画
-	var allRefs []models.TagRef
-	database.DB.Where("user_id = ?", userID).Find(&allRefs)
-
-	// 按 tag_id 分组
-	refsByTagID := make(map[uint][]models.TagRef, len(tags))
-	for _, ref := range allRefs {
-		refsByTagID[ref.TagID] = append(refsByTagID[ref.TagID], ref)
+	refsByTagID := make(map[uint][]models.TagRef, len(tagRows))
+	for _, r := range refRows {
+		if r == nil {
+			continue
+		}
+		refsByTagID[r.TagID] = append(refsByTagID[r.TagID], *r)
 	}
 
 	type TagWithComics struct {
 		models.Tag
 		Comics []models.TagRef `json:"comics"`
 	}
-
-	result := make([]TagWithComics, 0, len(tags))
-	for _, tag := range tags {
-		refs := refsByTagID[tag.ID]
+	result := make([]TagWithComics, 0, len(tagRows))
+	for _, t := range tagRows {
+		if t == nil {
+			continue
+		}
+		refs := refsByTagID[t.ID]
 		if refs == nil {
 			refs = []models.TagRef{}
 		}
-		result = append(result, TagWithComics{
-			Tag:    tag,
-			Comics: refs,
-		})
+		result = append(result, TagWithComics{Tag: *t, Comics: refs})
 	}
 
 	c.JSON(http.StatusOK, gin.H{"tags": result})
 }
 
-// Sync uploads/merges tags and their comic references.
-// 改进：合并策略 (merge) 替代原来的全量替换策略
-// - 客户端上传的标签：如果标题匹配则更新关联，否则新建
-// - 客户端未提及的标签：保留（多端支持，不会丢失其他设备的标签）
-// - 标签关联：通过 added_comics 和 removed_comics 增量更新
+// Sync 上传/合入标签与关联漫画。
+//   - 标签匹配键：(user_id, title)，支持复用，不会出现重名重复创建；
+//   - 关联键：(user_id, tag_id, source, cid)，做幂等插入；
+//   - 当 partial_update=false 时执行全量语义：删除客户端未提及的标签与其关联。
+//
+// 整段放在事务闭包中执行，并通过 query.Use(tx) 生成事务绑定的临时 query 句柄，
+// 确保所有写入都是事务一致的，避免中途失败造成标签/关联不同步。
 func (h *TagHandler) Sync(c *gin.Context) {
 	userID := c.GetUint("user_id")
 
@@ -68,131 +75,139 @@ func (h *TagHandler) Sync(c *gin.Context) {
 		return
 	}
 
-	// 未传 partial_update 时，默认 true（增量），避免误删服务端已有标签
 	partialUpdate := true
 	if req.PartialUpdate != nil {
 		partialUpdate = *req.PartialUpdate
 	}
 
-	tx := database.DB.Begin()
-	defer tx.Rollback()
-
-	// Step 1: 获取服务端现有标签（按 title 索引，用于合并不是替换）
-	var existingTags []models.Tag
-	tx.Where("user_id = ?", userID).Find(&existingTags)
-	existingByTitle := make(map[string]uint, len(existingTags)) // title -> tag_id
-	for _, t := range existingTags {
-		existingByTitle[t.Title] = t.ID
+	type syncResult struct {
+		syncedTags int
+		syncedRefs int
 	}
 
-	syncedTags := 0
-	syncedRefs := 0
-	clientTagTitles := make(map[string]bool) // 跟踪客户端上传的标签标题
+	var res syncResult
+	txErr := database.DB.Transaction(func(tx *gorm.DB) error {
+		qTx := query.Use(tx)
+		tgTx := qTx.Tag
+		trTx := qTx.TagRef
 
-	for _, item := range req.Tags {
-		if item.Title == "" {
-			continue
+		existingTags, err := tgTx.Where(tgTx.UserID.Eq(userID)).Find()
+		if err != nil {
+			return err
 		}
-		clientTagTitles[item.Title] = true
-
-		var tagID uint
-		if existingID, exists := existingByTitle[item.Title]; exists {
-			// 标签已存在 → 复用
-			tagID = existingID
-		} else {
-			// 新标签 → 创建
-			tag := models.Tag{
-				UserID: userID,
-				Title:  item.Title,
-			}
-			if result := tx.Create(&tag); result.Error != nil {
-				tx.Rollback()
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "保存标签失败: " + result.Error.Error()})
-				return
-			}
-			tagID = tag.ID
-			existingByTitle[item.Title] = tagID // 更新本地索引
-			syncedTags++
-		}
-
-		// 查找客户端请求中已有的 cid 集合（用于增量更新）
-		clientRefKeys := make(map[string]bool, len(item.Comics))
-		for _, comic := range item.Comics {
-			if comic.Cid == "" {
+		existingByTitle := make(map[string]uint, len(existingTags))
+		for _, t := range existingTags {
+			if t == nil {
 				continue
 			}
-			key := comicKey(comic.Source, comic.Cid)
-			clientRefKeys[key] = true
+			existingByTitle[t.Title] = t.ID
 		}
 
-		// 获取该标签现有的 TagRef
-		var existingRefs []models.TagRef
-		tx.Where("user_id = ? AND tag_id = ?", userID, tagID).Find(&existingRefs)
-		existingRefKeys := make(map[string]uint, len(existingRefs)) // key -> TagRef.ID
-		for _, ref := range existingRefs {
-			existingRefKeys[comicKey(ref.Source, ref.Cid)] = ref.ID
+		clientTagTitles := make(map[string]bool)
+
+		for _, item := range req.Tags {
+			if item.Title == "" {
+				continue
+			}
+			clientTagTitles[item.Title] = true
+
+			var tagID uint
+			if existingID, ok := existingByTitle[item.Title]; ok {
+				tagID = existingID
+			} else {
+				tag := &models.Tag{UserID: userID, Title: item.Title}
+				if createErr := tgTx.Create(tag); createErr != nil {
+					return createErr
+				}
+				tagID = tag.ID
+				existingByTitle[item.Title] = tagID
+				res.syncedTags++
+			}
+
+			clientRefKeys := make(map[string]bool, len(item.Comics))
+			for _, comic := range item.Comics {
+				if comic.Cid == "" {
+					continue
+				}
+				clientRefKeys[comicKey(comic.Source, comic.Cid)] = true
+			}
+
+			existingRefs, err := trTx.Where(
+				trTx.UserID.Eq(userID),
+				trTx.TagID.Eq(tagID),
+			).Find()
+			if err != nil {
+				return err
+			}
+			existingRefKeys := make(map[string]uint, len(existingRefs))
+			for _, ref := range existingRefs {
+				if ref == nil {
+					continue
+				}
+				existingRefKeys[comicKey(ref.Source, ref.Cid)] = ref.ID
+			}
+
+			if !partialUpdate {
+				for key, refID := range existingRefKeys {
+					if !clientRefKeys[key] {
+						if _, delErr := trTx.Where(trTx.ID.Eq(refID)).Delete(); delErr != nil {
+							return delErr
+						}
+					}
+				}
+			}
+
+			refs := make([]*models.TagRef, 0, len(item.Comics))
+			for _, comic := range item.Comics {
+				if comic.Cid == "" {
+					continue
+				}
+				key := comicKey(comic.Source, comic.Cid)
+				if _, exists := existingRefKeys[key]; !exists {
+					refs = append(refs, &models.TagRef{
+						UserID: userID,
+						TagID:  tagID,
+						Source: comic.Source,
+						Cid:    comic.Cid,
+					})
+				}
+			}
+			if len(refs) > 0 {
+				if createErr := trTx.Create(refs...); createErr != nil {
+					return createErr
+				}
+				res.syncedRefs += len(refs)
+			}
 		}
 
-		// 删除客户端不再包含的关联（客户端没传 = 用户在客户端删除了）
-		// 但如果客户端使用的是增量模式（partial_update），则保留未提及的关联
 		if !partialUpdate {
-			for key, refID := range existingRefKeys {
-				if !clientRefKeys[key] {
-					tx.Delete(&models.TagRef{}, refID)
+			for _, t := range existingTags {
+				if t == nil {
+					continue
+				}
+				if !clientTagTitles[t.Title] {
+					if _, delErr := trTx.Where(trTx.TagID.Eq(t.ID)).Delete(); delErr != nil {
+						return delErr
+					}
+					if _, delErr := tgTx.Where(tgTx.ID.Eq(t.ID)).Delete(); delErr != nil {
+						return delErr
+					}
 				}
 			}
 		}
 
-		// 插入或保留客户端指定的关联
-		refs := make([]models.TagRef, 0, len(item.Comics))
-		for _, comic := range item.Comics {
-			if comic.Cid == "" {
-				continue
-			}
-			key := comicKey(comic.Source, comic.Cid)
-			if _, exists := existingRefKeys[key]; !exists {
-				// 新关联
-				refs = append(refs, models.TagRef{
-					UserID: userID,
-					TagID:  tagID,
-					Source: comic.Source,
-					Cid:    comic.Cid,
-				})
-			}
-			// 如果已存在，保持不动
-		}
-		if len(refs) > 0 {
-			if result := tx.Create(&refs); result.Error != nil {
-				tx.Rollback()
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "保存标签关联失败"})
-				return
-			}
-			syncedRefs += len(refs)
-		}
+		return nil
+	})
+	if txErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "标签同步失败: " + txErr.Error()})
+		return
 	}
-
-	// 如果客户端使用全量同步模式，删除服务端有但客户端没有的标签
-	// 以此支持跨端标签删除
-	if !partialUpdate {
-		// 收集客户端没有提及的标签，并删除它们
-		for _, t := range existingTags {
-			if !clientTagTitles[t.Title] {
-				// 先删除关联
-				tx.Where("tag_id = ?", t.ID).Delete(&models.TagRef{})
-				tx.Delete(&t)
-			}
-		}
-	}
-
-	tx.Commit()
 
 	c.JSON(http.StatusOK, gin.H{
-		"synced":      syncedTags,
-		"synced_refs": syncedRefs,
+		"synced":      res.syncedTags,
+		"synced_refs": res.syncedRefs,
 		"message":     "标签同步完成",
 	})
 }
 
-func comicKey(source int, cid string) string {
-	return fmt.Sprintf("%d:%s", source, cid)
-}
+func comicKey(source int, cid string) string { return fmt.Sprintf("%d:%s", source, cid) }

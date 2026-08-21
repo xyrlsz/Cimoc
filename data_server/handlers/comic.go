@@ -8,59 +8,68 @@ import (
 
 	"xcimoc-data-server/database"
 	"xcimoc-data-server/models"
+	"xcimoc-data-server/query"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type ComicHandler struct{}
 
-func NewComicHandler() *ComicHandler {
-	return &ComicHandler{}
-}
+func NewComicHandler() *ComicHandler { return &ComicHandler{} }
 
-// List returns all comics for the authenticated user.
-// Supports incremental pull via ?since=<unix_millis> query parameter.
+// List 返回当前用户的漫画列表；支持 ?since=millis 做增量拉取。
+// 所有过滤条件（user_id / updated_at / 排序）统一通过 gorm.io/gen 生成的字段表达，
+// 避免在代码中出现 "user_id = ?"、"updated_at > ?" 这类字符串 WHERE。
 func (h *ComicHandler) List(c *gin.Context) {
 	userID := c.GetUint("user_id")
 
-	var comics []models.Comic
-	query := database.DB.Where("user_id = ?", userID)
+	cm := query.Comic
+	q := cm.Where(cm.UserID.Eq(userID))
 
-	// 增量拉取：如果客户端传了 since 参数，只返回该时间之后更新过的漫画
 	if sinceStr := c.Query("since"); sinceStr != "" {
 		if sinceMillis, err := strconv.ParseInt(sinceStr, 10, 64); err == nil && sinceMillis > 0 {
 			sinceTime := time.Unix(0, sinceMillis*int64(time.Millisecond))
-			query = query.Where("updated_at > ?", sinceTime)
+			q = q.Where(cm.UpdatedAt.Gt(sinceTime))
 		}
 	}
 
-	result := query.Order("updated_at DESC").Find(&comics)
-	if result.Error != nil {
-		log.Printf("获取漫画列表失败 (user_id=%d): %v", userID, result.Error)
+	rows, err := q.Order(cm.UpdatedAt.Desc()).Find()
+	if err != nil {
+		log.Printf("获取漫画列表失败 (user_id=%d): %v", userID, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取漫画列表失败"})
 		return
+	}
+	comics := make([]models.Comic, 0, len(rows))
+	for _, r := range rows {
+		if r != nil {
+			comics = append(comics, *r)
+		}
 	}
 
 	serverTime := time.Now().UnixMilli()
 
-	// 增量拉取时，同时返回其他设备的删除记录
 	var deletes []models.ComicDeleteItem
 	if c.Query("since") != "" {
-		var comicDeletes []models.ComicDelete
+		cd := query.ComicDelete
+		dq := cd.Where(cd.UserID.Eq(userID))
 		if sinceMillis, err := strconv.ParseInt(c.Query("since"), 10, 64); err == nil && sinceMillis > 0 {
 			sinceTime := time.Unix(0, sinceMillis*int64(time.Millisecond))
-			database.DB.Where("user_id = ? AND created_at > ?", userID, sinceTime).
-				Find(&comicDeletes)
-		} else {
-			database.DB.Where("user_id = ?", userID).Find(&comicDeletes)
+			dq = dq.Where(cd.CreatedAt.Gt(sinceTime))
 		}
-		deletes = make([]models.ComicDeleteItem, len(comicDeletes))
-		for i, d := range comicDeletes {
-			deletes[i] = models.ComicDeleteItem{
-				Source:    d.Source,
-				Cid:       d.Cid,
-				DeleteFav: d.DeleteFav,
-				DeleteHis: d.DeleteHis,
+		delRows, dErr := dq.Find()
+		if dErr == nil {
+			deletes = make([]models.ComicDeleteItem, 0, len(delRows))
+			for _, d := range delRows {
+				if d == nil {
+					continue
+				}
+				deletes = append(deletes, models.ComicDeleteItem{
+					Source:    d.Source,
+					Cid:       d.Cid,
+					DeleteFav: d.DeleteFav,
+					DeleteHis: d.DeleteHis,
+				})
 			}
 		}
 	}
@@ -72,12 +81,8 @@ func (h *ComicHandler) List(c *gin.Context) {
 	})
 }
 
-// Sync merges uploaded comics with the server data.
-// Merge strategy: match by (source, cid) per user.
-// - If the comic exists on server: compare timestamps, keep newer version
-// - If the comic doesn't exist: create
-// - Check ComicDelete table to prevent re-uploading data deleted by another device
-// - Returns server_time for client to store as last_synced_at
+// Sync 按 (user_id, source, cid) 复合匹配合并客户端上传的漫画状态。
+// 这里的比较/写入/删表操作都通过生成的 query 字段执行，保证字段名/类型在编译期一致。
 func (h *ComicHandler) Sync(c *gin.Context) {
 	userID := c.GetUint("user_id")
 
@@ -90,39 +95,36 @@ func (h *ComicHandler) Sync(c *gin.Context) {
 	synced := 0
 	skipped := 0
 
+	cm := query.Comic
+	cd := query.ComicDelete
+
 	for _, item := range req.Comics {
 		if item.Cid == "" {
 			continue
 		}
 
-		// ---- 检查多端删除标记：如果其他设备已删除了此漫画的数据 ----
-		var delRecord models.ComicDelete
-		delResult := database.DB.Where("user_id = ? AND source = ? AND cid = ?",
-			userID, item.Source, item.Cid).Limit(1).Find(&delRecord)
+		// 1) 查询多端删除墓碑（按 (user_id, source, cid) 唯一键）
+		delRecord, delErr := cd.Where(
+			cd.UserID.Eq(userID),
+			cd.Source.Eq(item.Source),
+			cd.Cid.Eq(item.Cid),
+		).Take()
 
-		// favResolved/hisResolved 标记本次请求是否已"解决"对应墓碑（客户端确认清除）。
-		// 已解决的墓碑不应再被底部的 recordDelete 重新创建，否则墓碑永不清理，
-		// 且该漫画将永远无法重新收藏/恢复（服务器会一直强制清除）。
 		favResolved := false
 		hisResolved := false
 
-		if delResult.RowsAffected > 0 {
-			// 有其他设备删除了此漫画的数据，检查是否需要跳过
+		if delErr == nil && delRecord != nil {
 			if delRecord.DeleteFav && item.Favorite != nil && !item.ClearFavorite {
-				// 其他设备已取消收藏 → 拒绝恢复，强制客户端清除
 				item.Favorite = nil
 				item.ClearFavorite = true
 				log.Printf("多端冲突: 漫画 %d:%s 的收藏被其他设备删除，拒绝恢复", item.Source, item.Cid)
 			}
 			if delRecord.DeleteHis && item.History != nil && !item.ClearHistory {
-				// 其他设备已清除历史 → 拒绝恢复
 				item.History = nil
 				item.ClearHistory = true
 				log.Printf("多端冲突: 漫画 %d:%s 的历史被其他设备删除，拒绝恢复", item.Source, item.Cid)
 			}
 
-			// 冲突解决：客户端确认清除（clear_xxx=true）即视为认可该删除，
-			// 从墓碑中移除对应标志；两个标志都移除后删除整条墓碑记录。
 			if delRecord.DeleteFav && item.ClearFavorite {
 				delRecord.DeleteFav = false
 				favResolved = true
@@ -132,22 +134,35 @@ func (h *ComicHandler) Sync(c *gin.Context) {
 				hisResolved = true
 			}
 			if !delRecord.DeleteFav && !delRecord.DeleteHis {
-				database.DB.Delete(&delRecord)
+				// Save 语义在 gorm.io/gen 中等价于 ON CONFLICT UPDATE ALL，
+				// 这里明确用 SELECT 后 Save，保持与原 GORM Save 的主键落库语义一致：
+				// 记录已存在且主键已知，直接写回。
+				if err := database.DB.Save(delRecord).Error; err != nil {
+					log.Printf("清理漫画墓碑失败: %v", err)
+				}
+				// 原逻辑：当两个标志都清掉后整条删除。Save 成功后再显式删。
+				if _, err := cd.Where(
+					cd.ID.Eq(delRecord.ID),
+				).Delete(); err != nil {
+					log.Printf("删除空墓碑失败: %v", err)
+				}
 			} else {
-				database.DB.Save(&delRecord)
+				if err := database.DB.Save(delRecord).Error; err != nil {
+					log.Printf("更新漫画墓碑失败: %v", err)
+				}
 			}
 		}
 
-		// Look for existing comic by (source, cid)
-		var existing models.Comic
-		result := database.DB.Where("user_id = ? AND source = ? AND cid = ?",
-			userID, item.Source, item.Cid).Limit(1).Find(&existing)
+		// 2) 查找现有漫画记录
+		existing, findErr := cm.Where(
+			cm.UserID.Eq(userID),
+			cm.Source.Eq(item.Source),
+			cm.Cid.Eq(item.Cid),
+		).Take()
 
-		if result.RowsAffected > 0 {
-			// Comic exists — merge
+		if findErr == nil && existing != nil {
 			needsUpdate := false
 
-			// Prefer newer history — also update metadata
 			if item.History != nil && (existing.History == nil || *item.History > *existing.History) {
 				existing.History = item.History
 				existing.Last = item.Last
@@ -162,15 +177,10 @@ func (h *ComicHandler) Sync(c *gin.Context) {
 				}
 				needsUpdate = true
 			}
-
-			// Prefer newer favorite
 			if item.Favorite != nil && (existing.Favorite == nil || *item.Favorite > *existing.Favorite) {
 				existing.Favorite = item.Favorite
 				needsUpdate = true
 			}
-
-			// Client explicit clear history — always honor and record deletion
-			// （本次请求已解决墓碑的，不再重复记录，避免墓碑被重新创建）
 			if item.ClearHistory {
 				if existing.History != nil {
 					existing.History = nil
@@ -180,8 +190,6 @@ func (h *ComicHandler) Sync(c *gin.Context) {
 					h.recordDelete(userID, item.Source, item.Cid, false, true)
 				}
 			}
-
-			// Client explicit clear favorite — always honor and record deletion
 			if item.ClearFavorite {
 				if existing.Favorite != nil {
 					existing.Favorite = nil
@@ -193,55 +201,60 @@ func (h *ComicHandler) Sync(c *gin.Context) {
 			}
 
 			if needsUpdate {
-				if err := database.DB.Save(&existing).Error; err != nil {
-					log.Printf("更新漫画失败 (user_id=%d, source=%d, cid=%s): %v", userID, item.Source, item.Cid, err)
+				// gen 的 Save(...) 会走 ON CONFLICT(主键) UPDATE ALL，这里直接复用 GORM Save
+				// 避免额外的冲突列配置（Comic 的唯一键是复合唯一索引，非主键）。
+				if err := database.DB.Save(existing).Error; err != nil {
+					log.Printf("更新漫画失败 (user_id=%d, source=%d, cid=%s): %v",
+						userID, item.Source, item.Cid, err)
 					continue
 				}
 				synced++
 			} else {
 				skipped++
 			}
-
-		} else {
-			// New comic — create (unless it's just a delete marker with no data)
-			if item.Favorite == nil && item.History == nil {
-				// 纯删除标记（clear_history/clear_favorite），没有实际数据，记录删除即可
-				if item.ClearHistory && !hisResolved {
-					h.recordDelete(userID, item.Source, item.Cid, false, true)
-				}
-				if item.ClearFavorite && !favResolved {
-					h.recordDelete(userID, item.Source, item.Cid, true, false)
-				}
-				skipped++
-				continue
-			}
-
-			comic := models.Comic{
-				UserID:       userID,
-				Source:       item.Source,
-				Cid:          item.Cid,
-				Title:        item.Title,
-				Cover:        item.Cover,
-				Update:       item.Update,
-				Finish:       item.Finish,
-				Favorite:     item.Favorite,
-				History:      item.History,
-				Last:         item.Last,
-				Page:         item.Page,
-				Chapter:      item.Chapter,
-				ChapterCount: item.ChapterCount,
-			}
-			if err := database.DB.Create(&comic).Error; err != nil {
-				log.Printf("创建漫画失败 (user_id=%d, source=%d, cid=%s): %v", userID, item.Source, item.Cid, err)
-				continue
-			}
-			synced++
+			continue
+		} else if findErr != nil && !isNotFound(findErr) {
+			log.Printf("查询漫画失败 (user_id=%d, source=%d, cid=%s): %v",
+				userID, item.Source, item.Cid, findErr)
+			continue
 		}
+
+		// 3) 新建分支
+		if item.Favorite == nil && item.History == nil {
+			if item.ClearHistory && !hisResolved {
+				h.recordDelete(userID, item.Source, item.Cid, false, true)
+			}
+			if item.ClearFavorite && !favResolved {
+				h.recordDelete(userID, item.Source, item.Cid, true, false)
+			}
+			skipped++
+			continue
+		}
+
+		newComic := &models.Comic{
+			UserID:       userID,
+			Source:       item.Source,
+			Cid:          item.Cid,
+			Title:        item.Title,
+			Cover:        item.Cover,
+			Update:       item.Update,
+			Finish:       item.Finish,
+			Favorite:     item.Favorite,
+			History:      item.History,
+			Last:         item.Last,
+			Page:         item.Page,
+			Chapter:      item.Chapter,
+			ChapterCount: item.ChapterCount,
+		}
+		if err := cm.Create(newComic); err != nil {
+			log.Printf("创建漫画失败 (user_id=%d, source=%d, cid=%s): %v",
+				userID, item.Source, item.Cid, err)
+			continue
+		}
+		synced++
 	}
 
 	serverTime := time.Now().UnixMilli()
-
-	// 如果客户端只想推送变更（push_only），不返回全量数据
 	if req.PushOnly {
 		c.JSON(http.StatusOK, models.ComicSyncResponse{
 			Synced:     synced,
@@ -252,19 +265,30 @@ func (h *ComicHandler) Sync(c *gin.Context) {
 		return
 	}
 
-	// 全量模式：返回所有漫画 + 删除记录（兼容旧客户端）
-	var comics []models.Comic
-	database.DB.Where("user_id = ?", userID).Order("updated_at DESC").Find(&comics)
-
-	var comicDeletes []models.ComicDelete
-	database.DB.Where("user_id = ?", userID).Find(&comicDeletes)
-	deletes := make([]models.ComicDeleteItem, len(comicDeletes))
-	for i, d := range comicDeletes {
-		deletes[i] = models.ComicDeleteItem{
-			Source:    d.Source,
-			Cid:       d.Cid,
-			DeleteFav: d.DeleteFav,
-			DeleteHis: d.DeleteHis,
+	cmRows, err := cm.Where(cm.UserID.Eq(userID)).Order(cm.UpdatedAt.Desc()).Find()
+	if err != nil {
+		log.Printf("全量读取漫画失败 (user_id=%d): %v", userID, err)
+	}
+	comics := make([]models.Comic, 0, len(cmRows))
+	for _, r := range cmRows {
+		if r != nil {
+			comics = append(comics, *r)
+		}
+	}
+	cdRows, dErr := query.ComicDelete.Where(query.ComicDelete.UserID.Eq(userID)).Find()
+	deletes := []models.ComicDeleteItem{}
+	if dErr == nil {
+		deletes = make([]models.ComicDeleteItem, 0, len(cdRows))
+		for _, d := range cdRows {
+			if d == nil {
+				continue
+			}
+			deletes = append(deletes, models.ComicDeleteItem{
+				Source:    d.Source,
+				Cid:       d.Cid,
+				DeleteFav: d.DeleteFav,
+				DeleteHis: d.DeleteHis,
+			})
 		}
 	}
 
@@ -278,34 +302,46 @@ func (h *ComicHandler) Sync(c *gin.Context) {
 	})
 }
 
-// recordDelete 记录删除操作，用于多端传播
+// recordDelete 按 (user_id, source, cid) 更新或创建 ComicDelete 墓碑。
 func (h *ComicHandler) recordDelete(userID uint, source int, cid string, deleteFav, deleteHis bool) {
-	var existing models.ComicDelete
-	result := database.DB.Where("user_id = ? AND source = ? AND cid = ?",
-		userID, source, cid).Limit(1).Find(&existing)
-
-	if result.RowsAffected > 0 {
-		// 更新已有记录
-		if deleteFav {
+	cd := query.ComicDelete
+	existing, err := cd.Where(
+		cd.UserID.Eq(userID),
+		cd.Source.Eq(source),
+		cd.Cid.Eq(cid),
+	).Take()
+	if err == nil && existing != nil {
+		changed := false
+		if deleteFav && !existing.DeleteFav {
 			existing.DeleteFav = true
+			changed = true
 		}
-		if deleteHis {
+		if deleteHis && !existing.DeleteHis {
 			existing.DeleteHis = true
+			changed = true
 		}
-		database.DB.Save(&existing)
-	} else {
-		// 新建记录
-		database.DB.Create(&models.ComicDelete{
-			UserID:    userID,
-			Source:    source,
-			Cid:       cid,
-			DeleteFav: deleteFav,
-			DeleteHis: deleteHis,
-		})
+		if changed {
+			// 复合唯一键不是主键，走 GORM Save 最稳。
+			_ = database.DB.Save(existing).Error
+		}
+		return
+	}
+	if err != nil && !isNotFound(err) {
+		log.Printf("查询删除墓碑失败: %v", err)
+		return
+	}
+	if createErr := cd.Create(&models.ComicDelete{
+		UserID:    userID,
+		Source:    source,
+		Cid:       cid,
+		DeleteFav: deleteFav,
+		DeleteHis: deleteHis,
+	}); createErr != nil {
+		log.Printf("创建删除墓碑失败: %v", createErr)
 	}
 }
 
-// Delete removes a specific comic sync record.
+// Delete 按漫画主键删除（仅允许本人）。
 func (h *ComicHandler) Delete(c *gin.Context) {
 	userID := c.GetUint("user_id")
 	idStr := c.Param("id")
@@ -314,25 +350,40 @@ func (h *ComicHandler) Delete(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "无效的ID"})
 		return
 	}
-
-	result := database.DB.Where("id = ? AND user_id = ?", id, userID).Delete(&models.Comic{})
-	if result.RowsAffected == 0 {
+	cm := query.Comic
+	res, err := cm.Where(cm.ID.Eq(uint(id)), cm.UserID.Eq(userID)).Delete()
+	if err != nil {
+		log.Printf("删除漫画失败 (id=%s): %v", idStr, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "删除失败"})
+		return
+	}
+	if res.RowsAffected == 0 {
 		c.JSON(http.StatusNotFound, gin.H{"error": "记录不存在"})
 		return
 	}
-
 	c.JSON(http.StatusOK, gin.H{"message": "删除成功"})
 }
 
-// SyncStatus returns the current server time and comic count for this user.
+// SyncStatus 轻量接口：返回服务器时间与用户漫画总数。
 func (h *ComicHandler) SyncStatus(c *gin.Context) {
 	userID := c.GetUint("user_id")
 
-	var count int64
-	database.DB.Model(&models.Comic{}).Where("user_id = ?", userID).Count(&count)
+	count, err := query.Comic.Where(query.Comic.UserID.Eq(userID)).Count()
+	if err != nil {
+		log.Printf("统计漫画数失败 (user_id=%d): %v", userID, err)
+		count = 0
+	}
 
 	c.JSON(http.StatusOK, models.SyncStatus{
 		ServerTime: time.Now().UnixMilli(),
 		ComicCount: int(count),
 	})
+}
+
+// isNotFound helper：同时兼容 gorm.ErrRecordNotFound 以及 gen 的 Take/First 找不到的情形。
+func isNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+	return err == gorm.ErrRecordNotFound || err.Error() == gorm.ErrRecordNotFound.Error()
 }

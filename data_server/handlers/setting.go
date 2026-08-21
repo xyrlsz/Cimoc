@@ -3,36 +3,41 @@ package handlers
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"xcimoc-data-server/database"
 	"xcimoc-data-server/models"
+	"xcimoc-data-server/query"
 
 	"github.com/gin-gonic/gin"
 )
 
 type SettingHandler struct{}
 
-func NewSettingHandler() *SettingHandler {
-	return &SettingHandler{}
-}
+func NewSettingHandler() *SettingHandler { return &SettingHandler{} }
 
-// List returns all settings for the authenticated user.
+// List 返回当前用户的所有设置。
 func (h *SettingHandler) List(c *gin.Context) {
 	userID := c.GetUint("user_id")
 
-	var settings []models.Setting
-	result := database.DB.Where("user_id = ?", userID).Find(&settings)
-	if result.Error != nil {
-		log.Printf("获取设置失败 (user_id=%d): %v", userID, result.Error)
+	rows, err := query.Setting.Where(query.Setting.UserID.Eq(userID)).Find()
+	if err != nil {
+		log.Printf("获取设置失败 (user_id=%d): %v", userID, err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "获取设置失败"})
 		return
+	}
+	settings := make([]models.Setting, 0, len(rows))
+	for _, r := range rows {
+		if r != nil {
+			settings = append(settings, *r)
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{"settings": settings})
 }
 
-// Sync merges uploaded settings with the server data.
-// Client settings take precedence (client is source of truth for user preferences).
+// Sync 合并客户端上传的设置。
+// upsert 查找键为 (user_id, key)；不存在则创建，存在则覆盖 Value。
 func (h *SettingHandler) Sync(c *gin.Context) {
 	userID := c.GetUint("user_id")
 
@@ -43,31 +48,44 @@ func (h *SettingHandler) Sync(c *gin.Context) {
 	}
 
 	synced := 0
+	st := query.Setting
+	now := time.Now()
 
 	for _, item := range req.Settings {
 		if item.Key == "" {
 			continue
 		}
 
-		var existing models.Setting
-		result := database.DB.Where("user_id = ? AND key = ?", userID, item.Key).Limit(1).Find(&existing)
+		existing, err := st.Where(
+			st.UserID.Eq(userID),
+			st.Key.Eq(item.Key),
+		).Take()
+		if err != nil && !isNotFound(err) {
+			log.Printf("查询设置失败 (user_id=%d, key=%s): %v", userID, item.Key, err)
+			continue
+		}
 
-		if result.RowsAffected > 0 {
-			// Update existing setting
+		if existing != nil {
+			if existing.Value == item.Value {
+				synced++
+				continue
+			}
 			existing.Value = item.Value
-			if err := database.DB.Save(&existing).Error; err != nil {
-				log.Printf("更新设置失败 (user_id=%d, key=%s): %v", userID, item.Key, err)
+			existing.UpdatedAt = now
+			// 主键写回：复合唯一键 (user_id,key) 非主键，直接 Save 更稳
+			if saveErr := database.DB.Save(existing).Error; saveErr != nil {
+				log.Printf("更新设置失败 (user_id=%d, key=%s): %v", userID, item.Key, saveErr)
 				continue
 			}
 		} else {
-			// Create new setting
-			setting := models.Setting{
-				UserID: userID,
-				Key:    item.Key,
-				Value:  item.Value,
-			}
-			if err := database.DB.Create(&setting).Error; err != nil {
-				log.Printf("创建设置失败 (user_id=%d, key=%s): %v", userID, item.Key, err)
+			if createErr := st.Create(&models.Setting{
+				UserID:    userID,
+				Key:       item.Key,
+				Value:     item.Value,
+				CreatedAt: now,
+				UpdatedAt: now,
+			}); createErr != nil {
+				log.Printf("创建设置失败 (user_id=%d, key=%s): %v", userID, item.Key, createErr)
 				continue
 			}
 		}

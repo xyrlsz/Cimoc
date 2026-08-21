@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"xcimoc-data-server/config"
-	"xcimoc-data-server/database"
 	"xcimoc-data-server/models"
+	"xcimoc-data-server/query"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -28,7 +28,7 @@ func GenerateToken(user *models.User, cfg *config.Config) (string, error) {
 		IsAdmin:      user.IsAdmin,
 		TokenVersion: user.TokenVersion,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)), // 7 天
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
 	}
@@ -37,8 +37,8 @@ func GenerateToken(user *models.User, cfg *config.Config) (string, error) {
 	return token.SignedString([]byte(cfg.JWTSecret))
 }
 
-// parseToken 解析 token 并校验 token_version 与数据库一致
-// leeway 控制 exp 等时间声明的容忍窗口，AuthRequired 传 30s，AuthRefresh 传 7d
+// parseToken 解析 token；用户存在性与 token_version 校验改用生成 query 的类型安全查询，
+// 避免手写 `WHERE id = ?`。
 func parseToken(tokenStr string, cfg *config.Config, leeway time.Duration) (*Claims, error) {
 	claims := &Claims{}
 	opts := []jwt.ParserOption{jwt.WithLeeway(leeway)}
@@ -49,29 +49,25 @@ func parseToken(tokenStr string, cfg *config.Config, leeway time.Duration) (*Cla
 		return nil, err
 	}
 
-	// 校验用户是否存在以及 token_version 是否匹配
-	var user models.User
-	if result := database.DB.Where("id = ?", claims.UserID).Limit(1).Find(&user); result.RowsAffected == 0 {
-		return nil, jwt.ErrSignatureInvalid // 用户不存在
+	user, findErr := query.User.Where(query.User.ID.Eq(claims.UserID)).Take()
+	if findErr != nil || user == nil {
+		return nil, jwt.ErrSignatureInvalid
 	}
 	if user.TokenVersion != claims.TokenVersion {
-		return nil, jwt.ErrSignatureInvalid // 密码已修改，旧 token 失效
+		return nil, jwt.ErrSignatureInvalid
 	}
 
 	return claims, nil
 }
 
-// AuthRequired 普通用户认证（带 30 秒 leeway，防止时钟偏差）
 func AuthRequired(cfg *config.Config) gin.HandlerFunc {
 	return authMiddleware(cfg, false, 30*time.Second)
 }
 
-// AdminRequired 管理员认证（带 30 秒 leeway）
 func AdminRequired(cfg *config.Config) gin.HandlerFunc {
 	return authMiddleware(cfg, true, 30*time.Second)
 }
 
-// AuthRefresh 用于 refresh 端点，允许 token 已过期但在 7 天内仍可刷新
 func AuthRefresh(cfg *config.Config) gin.HandlerFunc {
 	return authMiddleware(cfg, false, 7*24*time.Hour)
 }

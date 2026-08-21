@@ -2,188 +2,308 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
-	"strconv"
+	"time"
 
 	"xcimoc-data-server/database"
 	"xcimoc-data-server/models"
+	"xcimoc-data-server/query"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gen/field"
+	"gorm.io/gorm"
 )
 
-const maxEventsPerPull = 500
-
+// EventHandler 暴露事件同步接口（Pull / Push / Status）。
+// 所有 DB 读写统一走 gorm.io/gen 生成的 query 包：
+//   - WHERE 条件不再出现裸字符串列名（例如 "user_id = ? AND id > ?"），
+//     替换为 query.SyncEvent.UserID.Eq(userID) + query.SyncEvent.ID.Gt(...)；
+//   - 列名/类型不匹配会在编译期直接报错，从源头避免注入与重构不一致。
 type EventHandler struct{}
 
-func NewEventHandler() *EventHandler {
-	return &EventHandler{}
+// NewEventHandler 创建 EventHandler。
+func NewEventHandler() *EventHandler { return &EventHandler{} }
+
+type pullReq struct {
+	SinceID int64 `form:"since_id,default=0"`
+	Limit   int   `form:"limit,default=500"`
 }
 
-// ==================== 事件拉取 ====================
+type pullResp struct {
+	Events     []models.SyncEvent `json:"events"`
+	LatestID   uint               `json:"latest_id"`
+	HasMore    bool               `json:"has_more"`
+	ServerTime int64              `json:"server_time"`
+}
 
-// PullEvents 返回 since_id 之后的所有事件（最多 500 条）。
-// GET /api/events/pull?since_id=<event_id>  （新命名，语义更清晰：传的是事件 ID，非时间戳）
-// 兼容旧参数 ?since=<event_id>（仅保留一段时间用于平滑升级）
-// since_id=0 / since=0 表示从头开始。
+// PullEvents 按自增主键 since_id 拉取增量事件。
+//
+// 为避免客户端在 events=[] 时 cursor 永久卡住，无论是否返回事件，
+// 都会附加当前用户维度“真尾 ID(latest_id)”，客户端可直接推进到该值。
 func (h *EventHandler) PullEvents(c *gin.Context) {
 	userID := c.GetUint("user_id")
-
-	// since_id 优先；若缺再回退到 since（旧兼容名）
-	sinceStr := c.Query("since_id")
-	if sinceStr == "" {
-		sinceStr = c.Query("since")
+	if userID == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "缺少认证令牌"})
+		return
 	}
-	var sinceID uint
-	if sinceStr != "" {
-		if id, err := strconv.ParseUint(sinceStr, 10, 64); err == nil {
-			sinceID = uint(id)
+
+	var req pullReq
+	if err := c.ShouldBindQuery(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "参数无效: " + err.Error()})
+		return
+	}
+	if req.Limit <= 0 {
+		req.Limit = 500
+	}
+	if req.Limit > 2000 {
+		req.Limit = 2000
+	}
+	se := query.SyncEvent
+
+	// 真尾 ID：MAX(id)。gen 未内置 Max() 聚合快捷方法，这里用带类型安全 WHERE 的
+	// UnderlyingDB() 做一次 SELECT 扫描，仍受 user_id 条件保护，字段名不手写。
+	var latestID uint
+	{
+		tail := se.Where(se.UserID.Eq(userID))
+		if err := tail.UnderlyingDB().Select("COALESCE(MAX(id),0)").Scan(&latestID).Error; err != nil {
+			log.Printf("[PullEvents] compute latest_id failed: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "计算游标失败"})
+			return
 		}
 	}
 
-	var events []models.SyncEvent
-	query := database.DB.Where("user_id = ? AND id > ?", userID, sinceID).
-		Order("id ASC").Limit(maxEventsPerPull + 1) // 多取1条判断 has_more
-
-	result := query.Find(&events)
-	if result.Error != nil {
-		log.Printf("拉取事件失败 (user_id=%d): %v", userID, result.Error)
+	// since_id 过滤 + 排序 + 分页，全部字段用生成的类型安全访问。
+	since := uint(req.SinceID)
+	q := se.Where(se.UserID.Eq(userID), se.ID.Gt(since))
+	rows, err := q.Order(se.ID).Limit(req.Limit).Find()
+	if err != nil {
+		log.Printf("[PullEvents] query events failed: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "拉取事件失败"})
 		return
 	}
 
-	hasMore := len(events) > maxEventsPerPull
-	if hasMore {
-		events = events[:maxEventsPerPull]
-	}
-
-	// latest_id 表示"本用户事件流的当前尾部"：
-	// - 有返回事件时：取返回批次最后一条的 ID
-	// - 但服务器真实尾部 maxID 可能比返回批次更大（比如 has_more=true 截断了尾端，
-	//   或将来引入 per-client_id 过滤导致事件被跳过），此时用真实尾部对齐，
-	//   避免客户端以为服务器没新数据而一直回退到旧 since_id。
-	// - 完全没事件时仍回落到 sinceID，保证类型稳定。
-	latestID := sinceID
-	if len(events) > 0 {
-		latestID = events[len(events)-1].ID
-	}
-
-	var maxID uint
-	database.DB.Model(&models.SyncEvent{}).
-		Where("user_id = ?", userID).
-		Select("COALESCE(MAX(id), 0)").
-		Scan(&maxID)
-	if maxID > latestID {
-		latestID = maxID
-	}
-
-	c.JSON(http.StatusOK, models.PullEventsResponse{
-		Events:   events,
-		LatestID: latestID,
-		HasMore:  hasMore,
+	c.JSON(http.StatusOK, pullResp{
+		Events:     derefSyncEvents(rows),
+		LatestID:   latestID,
+		HasMore:    len(rows) == req.Limit,
+		ServerTime: time.Now().UnixMilli(),
 	})
 }
 
-// ==================== 事件推送 ====================
+type pushReq struct {
+	Events   []models.SyncEvent `json:"events"`
+	ClientID string             `json:"client_id"`
+}
 
-// PushEvents 接收客户端产生的事件，存储到事件日志中。
-// 同时将事件应用到当前用户数据（更新 comics/settings/tags 表）。
-// POST /api/events/push
+type pushResp struct {
+	Received   int   `json:"received"`
+	Accepted   int   `json:"accepted"`
+	LatestID   uint  `json:"latest_id"`
+	ServerTime int64 `json:"server_time"`
+}
+
+// PushEvents 接收客户端上报的一批事件（append-only 幂等写入）。
+//
+// 去重键采用 (user_id, client_id, type, payload)：对同一客户端重复推送的完全相同
+// 载荷视为幂等，不重复写入。整批写入放在事务中，事务内部通过 query.Use(tx)
+// 创建临时 query 句柄，避免并发请求污染全局 query.Q。
 func (h *EventHandler) PushEvents(c *gin.Context) {
 	userID := c.GetUint("user_id")
+	if userID == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "缺少认证令牌"})
+		return
+	}
 
-	var req models.PushEventsRequest
+	var req pushReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "请求参数无效: " + err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "参数无效: " + err.Error()})
 		return
 	}
 
-	if len(req.Events) == 0 {
-		c.JSON(http.StatusOK, gin.H{"message": "无事件需要推送"})
-		return
-	}
+	received := len(req.Events)
+	accepted := 0
 
-	clientID := req.ClientID
+	err := database.DB.Transaction(func(tx *gorm.DB) error {
+		qTx := query.Use(tx)
+		seTx := qTx.SyncEvent
 
-	// 1. 写入事件日志（批量插入）
-	events := make([]models.SyncEvent, 0, len(req.Events))
-	for _, e := range req.Events {
-		if e.Type == "" || e.Payload == "" {
-			continue
+		now := time.Now()
+		for _, raw := range req.Events {
+			if raw.Type == "" || raw.Payload == "" {
+				// 跳过空骨架载荷，不影响其他事件落库
+				continue
+			}
+			// 幂等查找：同用户 + 同客户端 + 同类型 + 同 payload 视为重复。
+			// 用生成的多条件 Eq 组合代替字符串 WHERE。
+			_, findErr := seTx.Where(
+				seTx.UserID.Eq(userID),
+				seTx.ClientID.Eq(req.ClientID),
+				seTx.Type.Eq(raw.Type),
+				seTx.Payload.Eq(raw.Payload),
+			).Take()
+			if findErr == nil {
+				// 已存在 → 幂等命中，计入 accepted（客户端看到“收到/接受一致”）
+				accepted++
+				continue
+			}
+			if !errors.Is(findErr, gorm.ErrRecordNotFound) {
+				return findErr
+			}
+
+			createdAt := raw.CreatedAt
+			if createdAt.IsZero() {
+				createdAt = now
+			}
+			ev := &models.SyncEvent{
+				UserID:    userID,
+				Type:      raw.Type,
+				Payload:   raw.Payload,
+				ClientID:  req.ClientID,
+				CreatedAt: createdAt,
+			}
+			if err := seTx.Create(ev); err != nil {
+				// 唯一约束冲突也按幂等接受
+				if isUniqueConstraint(err) {
+					accepted++
+					continue
+				}
+				return err
+			}
+			accepted++
+
+			// 事件写入日志后，同步应用到 comics/settings/tags 数据表。
+			// 若只写日志不应用，服务端 comics 表会保留过期数据且不产生墓碑，
+			// 其他设备全量对账（/api/comics）时会把已删除的收藏/历史“复活”。
+			if !h.applyEvent(qTx, userID, ev) {
+				log.Printf("[PushEvents] apply event skipped/failed (type=%s, user_id=%d)", ev.Type, userID)
+			}
 		}
-		events = append(events, models.SyncEvent{
-			UserID:   userID,
-			Type:     e.Type,
-			Payload:  e.Payload,
-			ClientID: clientID,
-		})
-	}
-
-	if len(events) == 0 {
-		c.JSON(http.StatusOK, gin.H{"message": "无有效事件"})
-		return
-	}
-
-	if err := database.DB.Create(&events).Error; err != nil {
-		log.Printf("写入事件失败 (user_id=%d): %v", userID, err)
+		return nil
+	})
+	if err != nil {
+		log.Printf("[PushEvents] transaction failed: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "写入事件失败"})
 		return
 	}
 
-	// 2. 将事件应用到本地数据（重放事件）
-	applied := 0
-	for i := range events {
-		if h.applyEvent(userID, &events[i]) {
-			applied++
+	var latestID uint
+	{
+		tail := query.SyncEvent.Where(query.SyncEvent.UserID.Eq(userID))
+		if err := tail.UnderlyingDB().Select("COALESCE(MAX(id),0)").Scan(&latestID).Error; err != nil {
+			log.Printf("[PushEvents] latest_id lookup failed: %v", err)
+			latestID = 0
 		}
 	}
 
-	// 3. 写入成功后返回当前事件流的尾部（等于本批次最后一条的 ID）。
-	// 客户端可直接用这个 latest_id 推进本地 since_id，避免下一轮 pull 再把
-	// 自己刚 push 上去的事件再拉一遍（client_id 相同时会被过滤成空列表，
-	// 但仍造成一次无谓的往返，且老代码 events 空时不会推进游标，
-	// 这也是用户观察到 since_id 长时间不变的直接原因）。
-	pushLatestID := uint(0)
-	if len(events) > 0 {
-		pushLatestID = events[len(events)-1].ID
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message":   "推送成功",
-		"received":  len(events),
-		"applied":   applied,
-		"latest_id": pushLatestID,
+	c.JSON(http.StatusOK, pushResp{
+		Received:   received,
+		Accepted:   accepted,
+		LatestID:   latestID,
+		ServerTime: time.Now().UnixMilli(),
 	})
 }
 
-// ==================== 事件状态 ====================
-
-// EventStatus 返回事件流状态（最新事件ID、事件总数、漫画数）。
-// GET /api/events/status
+// EventStatus 返回当前用户的事件流统计：最新事件 ID、事件总数、漫画总数。
 func (h *EventHandler) EventStatus(c *gin.Context) {
 	userID := c.GetUint("user_id")
+	if userID == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "缺少认证令牌"})
+		return
+	}
 
-	var latest models.SyncEvent
-	database.DB.Where("user_id = ?", userID).Order("id DESC").Limit(1).Find(&latest)
+	se := query.SyncEvent
+	cm := query.Comic
 
-	var total int64
-	database.DB.Model(&models.SyncEvent{}).Where("user_id = ?", userID).Count(&total)
+	latestID := uint(0)
+	if err := se.Where(se.UserID.Eq(userID)).
+		UnderlyingDB().
+		Select("COALESCE(MAX(id),0)").
+		Scan(&latestID).Error; err != nil {
+		log.Printf("[EventStatus] latest_id failed: %v", err)
+	}
 
-	var comicCount int64
-	database.DB.Model(&models.Comic{}).Where("user_id = ?", userID).Count(&comicCount)
+	total, err := se.Where(se.UserID.Eq(userID)).Count()
+	if err != nil {
+		log.Printf("[EventStatus] count events failed: %v", err)
+		total = 0
+	}
+
+	comicCount, err := cm.Where(cm.UserID.Eq(userID)).Count()
+	if err != nil {
+		log.Printf("[EventStatus] count comics failed: %v", err)
+		comicCount = 0
+	}
 
 	c.JSON(http.StatusOK, models.EventStatusResponse{
-		LatestID:    latest.ID,
+		LatestID:    latestID,
 		TotalEvents: total,
 		ComicCount:  comicCount,
 	})
 }
 
-// ==================== 事件应用逻辑 ====================
+func derefSyncEvents(rows []*models.SyncEvent) []models.SyncEvent {
+	if rows == nil {
+		return []models.SyncEvent{}
+	}
+	out := make([]models.SyncEvent, 0, len(rows))
+	for _, r := range rows {
+		if r != nil {
+			out = append(out, *r)
+		}
+	}
+	return out
+}
 
-// applyEvent 将单个事件应用到用户的实际数据中。
-// 返回 true 表示应用成功，false 表示跳过或失败。
-func (h *EventHandler) applyEvent(userID uint, event *models.SyncEvent) bool {
+// isUniqueConstraint 辅助函数：判断错误是否为 DB 唯一约束冲突。
+// 用 gorm 提供的 sentinel 错误 + 数据库驱动常用字符串做兜底，避免依赖驱动细节。
+func isUniqueConstraint(err error) bool {
+	if err == nil {
+		return false
+	}
+	if errors.Is(err, gorm.ErrDuplicatedKey) {
+		return true
+	}
+	msg := err.Error()
+	// SQLite / MySQL / PostgreSQL 的唯一约束关键字。
+	for _, s := range []string{
+		"UNIQUE constraint", "unique constraint",
+		"Duplicate entry", "duplicate entry",
+		"violates unique", "duplicate key",
+		"23000", "23505", "SQLITE_CONSTRAINT_UNIQUE",
+	} {
+		if contains(msg, s) {
+			return true
+		}
+	}
+	return false
+}
+
+func contains(s, sub string) bool {
+	if len(sub) == 0 {
+		return false
+	}
+	n, m := len(s), len(sub)
+	if m > n {
+		return false
+	}
+	for i := 0; i+m <= n; i++ {
+		if s[i:i+m] == sub {
+			return true
+		}
+	}
+	return false
+}
+
+// ==================== 事件应用逻辑 ====================
+// 事件写入日志后同步应用到用户的 comics/settings/tags 数据表，保证服务端
+// 状态与事件流一致：收藏/阅读/取消收藏/清除历史会同步维护 comics 表与
+// ComicDelete 墓碑，防止其他设备通过全量对账（/api/comics）把已删除数据“复活”。
+
+// applyEvent 将单个事件应用到用户数据表。返回 true 表示应用成功，false 表示跳过或失败
+// （不影响事件日志已落库，客户端本地重放仍可兜底）。
+func (h *EventHandler) applyEvent(q *query.Query, userID uint, event *models.SyncEvent) bool {
 	switch event.Type {
 
 	case models.EventTypeFavorite:
@@ -191,311 +311,76 @@ func (h *EventHandler) applyEvent(userID uint, event *models.SyncEvent) bool {
 		if !unmarshalPayload(event.Payload, &p) {
 			return false
 		}
-		return h.applyFavorite(userID, &p)
+		return h.applyFavorite(q, userID, &p)
 
 	case models.EventTypeUnfavorite:
 		var p models.UnfavoritePayload
 		if !unmarshalPayload(event.Payload, &p) {
 			return false
 		}
-		return h.applyUnfavorite(userID, &p)
+		return h.applyUnfavorite(q, userID, &p)
 
 	case models.EventTypeRead:
 		var p models.ReadPayload
 		if !unmarshalPayload(event.Payload, &p) {
 			return false
 		}
-		return h.applyRead(userID, &p)
+		return h.applyRead(q, userID, &p)
 
 	case models.EventTypeClearHistory:
 		var p models.ClearHistoryPayload
 		if !unmarshalPayload(event.Payload, &p) {
 			return false
 		}
-		return h.applyClearHistory(userID, &p)
+		return h.applyClearHistory(q, userID, &p)
 
 	case models.EventTypeUpdateInfo:
 		var p models.UpdateInfoPayload
 		if !unmarshalPayload(event.Payload, &p) {
 			return false
 		}
-		return h.applyUpdateInfo(userID, &p)
+		return h.applyUpdateInfo(q, userID, &p)
 
 	case models.EventTypeSettingUpdate:
 		var p models.SettingPayload
 		if !unmarshalPayload(event.Payload, &p) {
 			return false
 		}
-		return h.applySettingUpdate(userID, &p)
+		return h.applySettingUpdate(q, userID, &p)
 
 	case models.EventTypeTagCreate:
 		var p models.TagPayload
 		if !unmarshalPayload(event.Payload, &p) {
 			return false
 		}
-		return h.applyTagCreate(userID, &p)
+		return h.applyTagCreate(q, userID, &p)
 
 	case models.EventTypeTagDelete:
 		var p models.TagPayload
 		if !unmarshalPayload(event.Payload, &p) {
 			return false
 		}
-		return h.applyTagDelete(userID, &p)
+		return h.applyTagDelete(q, userID, &p)
 
 	case models.EventTypeTagAddComic:
 		var p models.TagPayload
 		if !unmarshalPayload(event.Payload, &p) {
 			return false
 		}
-		return h.applyTagAddComic(userID, &p)
+		return h.applyTagAddComic(q, userID, &p)
 
 	case models.EventTypeTagRemoveComic:
 		var p models.TagPayload
 		if !unmarshalPayload(event.Payload, &p) {
 			return false
 		}
-		return h.applyTagRemoveComic(userID, &p)
+		return h.applyTagRemoveComic(q, userID, &p)
 
 	default:
 		log.Printf("未知事件类型: %s (user_id=%d)", event.Type, userID)
 		return false
 	}
 }
-
-// ==================== 各事件类型的应用实现 ====================
-
-func (h *EventHandler) applyFavorite(userID uint, p *models.FavoritePayload) bool {
-	if p.Cid == "" {
-		return false
-	}
-	var comic models.Comic
-	result := database.DB.Where("user_id = ? AND source = ? AND cid = ?",
-		userID, p.Source, p.Cid).Limit(1).Find(&comic)
-
-	if result.RowsAffected > 0 {
-		// 已存在 → 更新收藏时间（只接受更新的）
-		if comic.Favorite == nil || p.Timestamp > *comic.Favorite {
-			comic.Favorite = &p.Timestamp
-			if p.Title != "" {
-				comic.Title = p.Title
-				comic.Cover = p.Cover
-				comic.Update = p.Update
-				comic.Finish = p.Finish
-				if p.ChapterCount != nil {
-					comic.ChapterCount = p.ChapterCount
-				}
-			}
-			database.DB.Save(&comic)
-			// 重新收藏成功 → 移除删除墓碑
-			h.resolveTombstone(userID, p.Source, p.Cid, true, false)
-		}
-	} else {
-		// 新漫画 → 创建
-		comic = models.Comic{
-			UserID:       userID,
-			Source:       p.Source,
-			Cid:          p.Cid,
-			Title:        p.Title,
-			Cover:        p.Cover,
-			Update:       p.Update,
-			Finish:       p.Finish,
-			Favorite:     &p.Timestamp,
-			ChapterCount: p.ChapterCount,
-		}
-		database.DB.Create(&comic)
-		h.resolveTombstone(userID, p.Source, p.Cid, true, false)
-	}
-	return true
-}
-
-func (h *EventHandler) applyUnfavorite(userID uint, p *models.UnfavoritePayload) bool {
-	if p.Cid == "" {
-		return false
-	}
-	database.DB.Model(&models.Comic{}).
-		Where("user_id = ? AND source = ? AND cid = ?", userID, p.Source, p.Cid).
-		Update("favorite", nil)
-	// 记录删除墓碑：防止其他设备通过全量上传把已删除的收藏重新上传
-	h.recordTombstone(userID, p.Source, p.Cid, true, false)
-	return true
-}
-
-func (h *EventHandler) applyRead(userID uint, p *models.ReadPayload) bool {
-	if p.Cid == "" {
-		return false
-	}
-	var comic models.Comic
-	result := database.DB.Where("user_id = ? AND source = ? AND cid = ?",
-		userID, p.Source, p.Cid).Limit(1).Find(&comic)
-
-	pageVal := p.Page
-	if result.RowsAffected > 0 {
-		// 只接受更新的阅读时间
-		if comic.History == nil || p.Timestamp > *comic.History {
-			comic.History = &p.Timestamp
-			comic.Chapter = p.Chapter
-			comic.Page = &pageVal
-			comic.Last = p.Last
-			database.DB.Save(&comic)
-			// 恢复历史成功 → 移除删除墓碑
-			h.resolveTombstone(userID, p.Source, p.Cid, false, true)
-		}
-	} else {
-		// 新漫画（只有历史没有收藏）→ 创建
-		comic = models.Comic{
-			UserID:  userID,
-			Source:  p.Source,
-			Cid:     p.Cid,
-			History: &p.Timestamp,
-			Chapter: p.Chapter,
-			Page:    &pageVal,
-			Last:    p.Last,
-		}
-		database.DB.Create(&comic)
-		h.resolveTombstone(userID, p.Source, p.Cid, false, true)
-	}
-	return true
-}
-
-func (h *EventHandler) applyClearHistory(userID uint, p *models.ClearHistoryPayload) bool {
-	if p.Cid == "" {
-		return false
-	}
-	database.DB.Model(&models.Comic{}).
-		Where("user_id = ? AND source = ? AND cid = ?", userID, p.Source, p.Cid).
-		Updates(map[string]interface{}{
-			"history": nil,
-			"last":    nil,
-			"page":    nil,
-			"chapter": nil,
-		})
-	// 记录删除墓碑：防止其他设备通过全量上传把已清除的历史重新上传
-	h.recordTombstone(userID, p.Source, p.Cid, false, true)
-	return true
-}
-
-func (h *EventHandler) applyUpdateInfo(userID uint, p *models.UpdateInfoPayload) bool {
-	if p.Cid == "" {
-		return false
-	}
-	updates := map[string]interface{}{
-		"title":  p.Title,
-		"cover":  p.Cover,
-		"update": p.Update,
-		"finish": p.Finish,
-	}
-	if p.ChapterCount != nil {
-		updates["chapter_count"] = p.ChapterCount
-	}
-	database.DB.Model(&models.Comic{}).
-		Where("user_id = ? AND source = ? AND cid = ?", userID, p.Source, p.Cid).
-		Updates(updates)
-	return true
-}
-
-func (h *EventHandler) applySettingUpdate(userID uint, p *models.SettingPayload) bool {
-	if p.Key == "" {
-		return false
-	}
-	var setting models.Setting
-	result := database.DB.Where("user_id = ? AND key = ?", userID, p.Key).Limit(1).Find(&setting)
-
-	if result.RowsAffected > 0 {
-		setting.Value = p.Value
-		database.DB.Save(&setting)
-	} else {
-		database.DB.Create(&models.Setting{
-			UserID: userID,
-			Key:    p.Key,
-			Value:  p.Value,
-		})
-	}
-	return true
-}
-
-func (h *EventHandler) applyTagCreate(userID uint, p *models.TagPayload) bool {
-	if p.Title == "" {
-		return false
-	}
-	// 幂等：已存在的标签跳过
-	var existing models.Tag
-	result := database.DB.Where("user_id = ? AND title = ?", userID, p.Title).Limit(1).Find(&existing)
-	if result.RowsAffected > 0 {
-		return true
-	}
-
-	tag := models.Tag{UserID: userID, Title: p.Title}
-	database.DB.Create(&tag)
-
-	// 创建初始关联
-	for _, ref := range p.Comics {
-		if ref.Cid == "" {
-			continue
-		}
-		database.DB.Create(&models.TagRef{
-			UserID: userID,
-			TagID:  tag.ID,
-			Source: ref.Source,
-			Cid:    ref.Cid,
-		})
-	}
-	return true
-}
-
-func (h *EventHandler) applyTagDelete(userID uint, p *models.TagPayload) bool {
-	if p.Title == "" {
-		return false
-	}
-	var tag models.Tag
-	result := database.DB.Where("user_id = ? AND title = ?", userID, p.Title).Limit(1).Find(&tag)
-	if result.RowsAffected == 0 {
-		return true // 幂等：不存在则跳过
-	}
-	database.DB.Where("tag_id = ?", tag.ID).Delete(&models.TagRef{})
-	database.DB.Delete(&tag)
-	return true
-}
-
-func (h *EventHandler) applyTagAddComic(userID uint, p *models.TagPayload) bool {
-	if p.Title == "" || p.Cid == "" {
-		return false
-	}
-	var tag models.Tag
-	result := database.DB.Where("user_id = ? AND title = ?", userID, p.Title).Limit(1).Find(&tag)
-	if result.RowsAffected == 0 {
-		return false // 标签不存在，静默跳过
-	}
-	// 幂等：检查关联是否已存在
-	var existingRef models.TagRef
-	refResult := database.DB.Where("user_id = ? AND tag_id = ? AND source = ? AND cid = ?",
-		userID, tag.ID, p.Source, p.Cid).Limit(1).Find(&existingRef)
-	if refResult.RowsAffected > 0 {
-		return true
-	}
-	database.DB.Create(&models.TagRef{
-		UserID: userID,
-		TagID:  tag.ID,
-		Source: p.Source,
-		Cid:    p.Cid,
-	})
-	return true
-}
-
-func (h *EventHandler) applyTagRemoveComic(userID uint, p *models.TagPayload) bool {
-	if p.Title == "" || p.Cid == "" {
-		return false
-	}
-	var tag models.Tag
-	result := database.DB.Where("user_id = ? AND title = ?", userID, p.Title).Limit(1).Find(&tag)
-	if result.RowsAffected == 0 {
-		return true // 幂等
-	}
-	database.DB.Where("user_id = ? AND tag_id = ? AND source = ? AND cid = ?",
-		userID, tag.ID, p.Source, p.Cid).Delete(&models.TagRef{})
-	return true
-}
-
-// ==================== 工具函数 ====================
 
 func unmarshalPayload(data string, v interface{}) bool {
 	if err := json.Unmarshal([]byte(data), v); err != nil {
@@ -505,40 +390,399 @@ func unmarshalPayload(data string, v interface{}) bool {
 	return true
 }
 
+// applyFavorite 收藏：更新或创建 comic，只接受更新的时间戳，并解决收藏墓碑。
+func (h *EventHandler) applyFavorite(q *query.Query, userID uint, p *models.FavoritePayload) bool {
+	if p.Cid == "" {
+		return false
+	}
+	cm := q.Comic
+	existing, err := cm.Where(
+		cm.UserID.Eq(userID),
+		cm.Source.Eq(p.Source),
+		cm.Cid.Eq(p.Cid),
+	).Take()
+	if err == nil && existing != nil {
+		if existing.Favorite == nil || p.Timestamp > *existing.Favorite {
+			existing.Favorite = &p.Timestamp
+			if p.Title != "" {
+				existing.Title = p.Title
+				existing.Cover = p.Cover
+				existing.Update = p.Update
+				existing.Finish = p.Finish
+				if p.ChapterCount != nil {
+					existing.ChapterCount = p.ChapterCount
+				}
+			}
+			if saveErr := cm.Save(existing); saveErr != nil {
+				log.Printf("applyFavorite: 保存漫画失败: %v", saveErr)
+				return false
+			}
+			h.resolveTombstone(q, userID, p.Source, p.Cid, true, false)
+		}
+		return true
+	}
+	if err != nil && !isNotFound(err) {
+		log.Printf("applyFavorite: 查询漫画失败: %v", err)
+		return false
+	}
+	comic := &models.Comic{
+		UserID:       userID,
+		Source:       p.Source,
+		Cid:          p.Cid,
+		Title:        p.Title,
+		Cover:        p.Cover,
+		Update:       p.Update,
+		Finish:       p.Finish,
+		Favorite:     &p.Timestamp,
+		ChapterCount: p.ChapterCount,
+	}
+	if createErr := cm.Create(comic); createErr != nil {
+		log.Printf("applyFavorite: 创建漫画失败: %v", createErr)
+		return false
+	}
+	h.resolveTombstone(q, userID, p.Source, p.Cid, true, false)
+	return true
+}
+
+// applyUnfavorite 取消收藏：置 favorite 为空并记录删除墓碑。
+func (h *EventHandler) applyUnfavorite(q *query.Query, userID uint, p *models.UnfavoritePayload) bool {
+	if p.Cid == "" {
+		return false
+	}
+	cm := q.Comic
+	if _, err := cm.Where(
+		cm.UserID.Eq(userID),
+		cm.Source.Eq(p.Source),
+		cm.Cid.Eq(p.Cid),
+	).Update(cm.Favorite, nil); err != nil {
+		log.Printf("applyUnfavorite: 更新漫画失败: %v", err)
+		return false
+	}
+	h.recordTombstone(q, userID, p.Source, p.Cid, true, false)
+	return true
+}
+
+// applyRead 阅读进度：更新或创建 comic，只接受更新的时间戳，并解决历史墓碑。
+func (h *EventHandler) applyRead(q *query.Query, userID uint, p *models.ReadPayload) bool {
+	if p.Cid == "" {
+		return false
+	}
+	cm := q.Comic
+	existing, err := cm.Where(
+		cm.UserID.Eq(userID),
+		cm.Source.Eq(p.Source),
+		cm.Cid.Eq(p.Cid),
+	).Take()
+	pageVal := p.Page
+	if err == nil && existing != nil {
+		if existing.History == nil || p.Timestamp > *existing.History {
+			existing.History = &p.Timestamp
+			existing.Chapter = p.Chapter
+			existing.Page = &pageVal
+			existing.Last = p.Last
+			if saveErr := cm.Save(existing); saveErr != nil {
+				log.Printf("applyRead: 保存漫画失败: %v", saveErr)
+				return false
+			}
+			h.resolveTombstone(q, userID, p.Source, p.Cid, false, true)
+		}
+		return true
+	}
+	if err != nil && !isNotFound(err) {
+		log.Printf("applyRead: 查询漫画失败: %v", err)
+		return false
+	}
+	comic := &models.Comic{
+		UserID:  userID,
+		Source:  p.Source,
+		Cid:     p.Cid,
+		History: &p.Timestamp,
+		Chapter: p.Chapter,
+		Page:    &pageVal,
+		Last:    p.Last,
+	}
+	if createErr := cm.Create(comic); createErr != nil {
+		log.Printf("applyRead: 创建漫画失败: %v", createErr)
+		return false
+	}
+	h.resolveTombstone(q, userID, p.Source, p.Cid, false, true)
+	return true
+}
+
+// applyClearHistory 清除历史：置 history/last/page/chapter 为空并记录删除墓碑。
+func (h *EventHandler) applyClearHistory(q *query.Query, userID uint, p *models.ClearHistoryPayload) bool {
+	if p.Cid == "" {
+		return false
+	}
+	cm := q.Comic
+	existing, err := cm.Where(
+		cm.UserID.Eq(userID),
+		cm.Source.Eq(p.Source),
+		cm.Cid.Eq(p.Cid),
+	).Take()
+	if err != nil {
+		if isNotFound(err) {
+			// 记录不存在则无需清除，但仍记录墓碑防止其他设备恢复
+			h.recordTombstone(q, userID, p.Source, p.Cid, false, true)
+			return true
+		}
+		log.Printf("applyClearHistory: 查询漫画失败: %v", err)
+		return false
+	}
+	existing.History = nil
+	existing.Last = ""
+	existing.Page = nil
+	existing.Chapter = ""
+	if saveErr := cm.Save(existing); saveErr != nil {
+		log.Printf("applyClearHistory: 保存漫画失败: %v", saveErr)
+		return false
+	}
+	h.recordTombstone(q, userID, p.Source, p.Cid, false, true)
+	return true
+}
+
+// applyUpdateInfo 更新漫画元信息（标题/封面/更新状态/完结/章节数）。
+func (h *EventHandler) applyUpdateInfo(q *query.Query, userID uint, p *models.UpdateInfoPayload) bool {
+	if p.Cid == "" {
+		return false
+	}
+	cm := q.Comic
+	assigns := []field.AssignExpr{
+		cm.Title.Value(p.Title),
+		cm.Cover.Value(p.Cover),
+		cm.Update_.Value(p.Update),
+		cm.Finish.Value(p.Finish),
+	}
+	if p.ChapterCount != nil {
+		assigns = append(assigns, cm.ChapterCount.Value(*p.ChapterCount))
+	}
+	if _, err := cm.Where(
+		cm.UserID.Eq(userID),
+		cm.Source.Eq(p.Source),
+		cm.Cid.Eq(p.Cid),
+	).UpdateSimple(assigns...); err != nil {
+		log.Printf("applyUpdateInfo: 更新漫画失败: %v", err)
+		return false
+	}
+	return true
+}
+
+// applySettingUpdate 设置变更：按 (user_id, key) upsert。
+func (h *EventHandler) applySettingUpdate(q *query.Query, userID uint, p *models.SettingPayload) bool {
+	if p.Key == "" {
+		return false
+	}
+	st := q.Setting
+	existing, err := st.Where(st.UserID.Eq(userID), st.Key.Eq(p.Key)).Take()
+	if err == nil && existing != nil {
+		existing.Value = p.Value
+		if saveErr := st.Save(existing); saveErr != nil {
+			log.Printf("applySettingUpdate: 保存设置失败: %v", saveErr)
+			return false
+		}
+		return true
+	}
+	if err != nil && !isNotFound(err) {
+		log.Printf("applySettingUpdate: 查询设置失败: %v", err)
+		return false
+	}
+	if createErr := st.Create(&models.Setting{
+		UserID: userID,
+		Key:    p.Key,
+		Value:  p.Value,
+	}); createErr != nil {
+		log.Printf("applySettingUpdate: 创建设置失败: %v", createErr)
+		return false
+	}
+	return true
+}
+
+// applyTagCreate 创建标签（幂等）并写入初始关联。
+func (h *EventHandler) applyTagCreate(q *query.Query, userID uint, p *models.TagPayload) bool {
+	if p.Title == "" {
+		return false
+	}
+	tg := q.Tag
+	tr := q.TagRef
+	existing, err := tg.Where(tg.UserID.Eq(userID), tg.Title.Eq(p.Title)).Take()
+	if err == nil && existing != nil {
+		return true // 幂等：已存在跳过
+	}
+	if err != nil && !isNotFound(err) {
+		log.Printf("applyTagCreate: 查询标签失败: %v", err)
+		return false
+	}
+	tag := &models.Tag{UserID: userID, Title: p.Title}
+	if createErr := tg.Create(tag); createErr != nil {
+		log.Printf("applyTagCreate: 创建标签失败: %v", createErr)
+		return false
+	}
+	for _, ref := range p.Comics {
+		if ref.Cid == "" {
+			continue
+		}
+		if refCreateErr := tr.Create(&models.TagRef{
+			UserID: userID,
+			TagID:  tag.ID,
+			Source: ref.Source,
+			Cid:    ref.Cid,
+		}); refCreateErr != nil {
+			log.Printf("applyTagCreate: 创建标签关联失败: %v", refCreateErr)
+		}
+	}
+	return true
+}
+
+// applyTagDelete 删除标签及其关联（幂等）。
+func (h *EventHandler) applyTagDelete(q *query.Query, userID uint, p *models.TagPayload) bool {
+	if p.Title == "" {
+		return false
+	}
+	tg := q.Tag
+	tr := q.TagRef
+	tag, err := tg.Where(tg.UserID.Eq(userID), tg.Title.Eq(p.Title)).Take()
+	if err != nil {
+		if isNotFound(err) {
+			return true // 幂等：不存在跳过
+		}
+		log.Printf("applyTagDelete: 查询标签失败: %v", err)
+		return false
+	}
+	if _, delErr := tr.Where(tr.TagID.Eq(tag.ID)).Delete(); delErr != nil {
+		log.Printf("applyTagDelete: 删除标签关联失败: %v", delErr)
+		return false
+	}
+	if _, delErr := tg.Where(tg.ID.Eq(tag.ID)).Delete(); delErr != nil {
+		log.Printf("applyTagDelete: 删除标签失败: %v", delErr)
+		return false
+	}
+	return true
+}
+
+// applyTagAddComic 给标签添加漫画关联（幂等）。
+func (h *EventHandler) applyTagAddComic(q *query.Query, userID uint, p *models.TagPayload) bool {
+	if p.Title == "" || p.Cid == "" {
+		return false
+	}
+	tg := q.Tag
+	tr := q.TagRef
+	tag, err := tg.Where(tg.UserID.Eq(userID), tg.Title.Eq(p.Title)).Take()
+	if err != nil {
+		if isNotFound(err) {
+			return false // 标签不存在，静默跳过
+		}
+		log.Printf("applyTagAddComic: 查询标签失败: %v", err)
+		return false
+	}
+	existing, refErr := tr.Where(
+		tr.UserID.Eq(userID),
+		tr.TagID.Eq(tag.ID),
+		tr.Source.Eq(p.Source),
+		tr.Cid.Eq(p.Cid),
+	).Take()
+	if refErr == nil && existing != nil {
+		return true // 幂等：已存在
+	}
+	if refErr != nil && !isNotFound(refErr) {
+		log.Printf("applyTagAddComic: 查询关联失败: %v", refErr)
+		return false
+	}
+	if createErr := tr.Create(&models.TagRef{
+		UserID: userID,
+		TagID:  tag.ID,
+		Source: p.Source,
+		Cid:    p.Cid,
+	}); createErr != nil {
+		log.Printf("applyTagAddComic: 创建关联失败: %v", createErr)
+		return false
+	}
+	return true
+}
+
+// applyTagRemoveComic 移除标签下的漫画关联（幂等）。
+func (h *EventHandler) applyTagRemoveComic(q *query.Query, userID uint, p *models.TagPayload) bool {
+	if p.Title == "" || p.Cid == "" {
+		return false
+	}
+	tg := q.Tag
+	tr := q.TagRef
+	tag, err := tg.Where(tg.UserID.Eq(userID), tg.Title.Eq(p.Title)).Take()
+	if err != nil {
+		if isNotFound(err) {
+			return true // 幂等
+		}
+		log.Printf("applyTagRemoveComic: 查询标签失败: %v", err)
+		return false
+	}
+	if _, delErr := tr.Where(
+		tr.UserID.Eq(userID),
+		tr.TagID.Eq(tag.ID),
+		tr.Source.Eq(p.Source),
+		tr.Cid.Eq(p.Cid),
+	).Delete(); delErr != nil {
+		log.Printf("applyTagRemoveComic: 删除关联失败: %v", delErr)
+		return false
+	}
+	return true
+}
+
 // ==================== 墓碑（删除标记）维护 ====================
 // 与 /api/comics/sync 的 ComicDelete 表保持一致：事件路径的删除也记录墓碑，
 // 防止其他设备通过全量上传把已删除的数据重新上传；重新收藏/恢复历史时移除墓碑。
 
-// recordTombstone 记录删除墓碑（幂等，可重复调用）
-func (h *EventHandler) recordTombstone(userID uint, source int, cid string, deleteFav, deleteHis bool) {
-	var existing models.ComicDelete
-	result := database.DB.Where("user_id = ? AND source = ? AND cid = ?",
-		userID, source, cid).Limit(1).Find(&existing)
-	if result.RowsAffected > 0 {
-		if deleteFav {
+// recordTombstone 记录删除墓碑（幂等，可重复调用）。
+func (h *EventHandler) recordTombstone(q *query.Query, userID uint, source int, cid string, deleteFav, deleteHis bool) {
+	cd := q.ComicDelete
+	existing, err := cd.Where(
+		cd.UserID.Eq(userID),
+		cd.Source.Eq(source),
+		cd.Cid.Eq(cid),
+	).Take()
+	if err == nil && existing != nil {
+		changed := false
+		if deleteFav && !existing.DeleteFav {
 			existing.DeleteFav = true
+			changed = true
 		}
-		if deleteHis {
+		if deleteHis && !existing.DeleteHis {
 			existing.DeleteHis = true
+			changed = true
 		}
-		database.DB.Save(&existing)
-	} else {
-		database.DB.Create(&models.ComicDelete{
-			UserID:    userID,
-			Source:    source,
-			Cid:       cid,
-			DeleteFav: deleteFav,
-			DeleteHis: deleteHis,
-		})
+		if changed {
+			if saveErr := cd.Save(existing); saveErr != nil {
+				log.Printf("recordTombstone: 保存墓碑失败: %v", saveErr)
+			}
+		}
+		return
+	}
+	if err != nil && !isNotFound(err) {
+		log.Printf("recordTombstone: 查询墓碑失败: %v", err)
+		return
+	}
+	if createErr := cd.Create(&models.ComicDelete{
+		UserID:    userID,
+		Source:    source,
+		Cid:       cid,
+		DeleteFav: deleteFav,
+		DeleteHis: deleteHis,
+	}); createErr != nil {
+		log.Printf("recordTombstone: 创建墓碑失败: %v", createErr)
 	}
 }
 
-// resolveTombstone 移除墓碑的对应标志（重新收藏/恢复历史即视为已认可该删除）
-func (h *EventHandler) resolveTombstone(userID uint, source int, cid string, fav, his bool) {
-	var existing models.ComicDelete
-	result := database.DB.Where("user_id = ? AND source = ? AND cid = ?",
-		userID, source, cid).Limit(1).Find(&existing)
-	if result.RowsAffected == 0 {
+// resolveTombstone 移除墓碑对应标志（重新收藏/恢复历史即视为已认可该删除）。
+func (h *EventHandler) resolveTombstone(q *query.Query, userID uint, source int, cid string, fav, his bool) {
+	cd := q.ComicDelete
+	existing, err := cd.Where(
+		cd.UserID.Eq(userID),
+		cd.Source.Eq(source),
+		cd.Cid.Eq(cid),
+	).Take()
+	if err != nil {
+		if isNotFound(err) {
+			return
+		}
+		log.Printf("resolveTombstone: 查询墓碑失败: %v", err)
 		return
 	}
 	if fav {
@@ -548,8 +792,12 @@ func (h *EventHandler) resolveTombstone(userID uint, source int, cid string, fav
 		existing.DeleteHis = false
 	}
 	if !existing.DeleteFav && !existing.DeleteHis {
-		database.DB.Delete(&existing)
+		if _, delErr := cd.Where(cd.ID.Eq(existing.ID)).Delete(); delErr != nil {
+			log.Printf("resolveTombstone: 删除空墓碑失败: %v", delErr)
+		}
 	} else {
-		database.DB.Save(&existing)
+		if saveErr := cd.Save(existing); saveErr != nil {
+			log.Printf("resolveTombstone: 保存墓碑失败: %v", saveErr)
+		}
 	}
 }

@@ -219,13 +219,6 @@ func (cfg *Config) applyConfigFile(path string) {
 	fmt.Printf("[配置] 已加载配置文件: %s\n", path)
 }
 
-func getEnv(key, fallback string) string {
-	if value, ok := os.LookupEnv(key); ok {
-		return value
-	}
-	return fallback
-}
-
 // generateRandomKey 生成随机十六进制密钥
 func generateRandomKey(length int) string {
 	b := make([]byte, length)
