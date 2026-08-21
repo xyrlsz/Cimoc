@@ -22,7 +22,7 @@ import java.util.Locale;
 
 /**
  * WebDAV 版 {@link CimocDocumentFile}，基于 dav4jvm。
- *
+ * <p>
  * 注意：构造器不做网络请求（主线程安全）；所有网络操作（exists/findFile/
  * listFiles/createFile 等）都是阻塞调用，必须在后台线程执行。
  */
@@ -32,7 +32,9 @@ public class WebDavCimocDocumentFile extends CimocDocumentFile {
     private final String mCurrentPath;
     private DavResourceInfo mResource;
 
-    /** 根目录构造：对应 WebDAV 服务器上的 /cimoc 集合。不做网络请求。 */
+    /**
+     * 根目录构造：对应 WebDAV 服务器上的 /cimoc 集合。不做网络请求。
+     */
     public WebDavCimocDocumentFile(CimocDocumentFile parent) {
         super(parent, null);
         mClient = WebDavConf.client;
@@ -40,7 +42,9 @@ public class WebDavCimocDocumentFile extends CimocDocumentFile {
         mResource = null;
     }
 
-    /** 相对路径构造：parent 目录下的 path。不做网络请求（目录由使用时确保）。 */
+    /**
+     * 相对路径构造：parent 目录下的 path。不做网络请求（目录由使用时确保）。
+     */
     public WebDavCimocDocumentFile(WebDavCimocDocumentFile parent, String path) {
         super(parent, null);
         mClient = WebDavConf.client;
@@ -54,7 +58,9 @@ public class WebDavCimocDocumentFile extends CimocDocumentFile {
         mResource = null;
     }
 
-    /** 内部构造：已知完整路径与资源信息。 */
+    /**
+     * 内部构造：已知完整路径与资源信息。
+     */
     private WebDavCimocDocumentFile(WebDavCimocDocumentFile parent, String path, DavResourceInfo resource) {
         super(parent, null);
         mClient = WebDavConf.client;
@@ -195,8 +201,8 @@ public class WebDavCimocDocumentFile extends CimocDocumentFile {
 
     @Override
     public long lastModified() {
-        // DavResourceInfo 未提供修改时间，返回 0（未知）
-        return 0;
+        // 服务器返回的修改时间（epoch 毫秒），未知时为 0
+        return mResource != null ? mResource.getLastModified() : 0;
     }
 
     @Override

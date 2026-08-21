@@ -6,6 +6,7 @@ import at.bitfire.dav4jvm.ktor.Response
 import at.bitfire.dav4jvm.ktor.responses
 import at.bitfire.dav4jvm.ktor.responsesWithRelation
 import at.bitfire.dav4jvm.property.webdav.GetContentLength
+import at.bitfire.dav4jvm.property.webdav.GetLastModified
 import at.bitfire.dav4jvm.property.webdav.ResourceType
 import at.bitfire.dav4jvm.property.webdav.WebDAV
 import io.ktor.client.HttpClient
@@ -32,12 +33,14 @@ import java.io.InputStream
  * @param isDirectory   是否为集合目录
  * @param contentLength 文件大小（目录为 0）
  * @param url           资源的完整 URL
+ * @param lastModified  服务器返回的修改时间（epoch 毫秒，未知时为 0）
  */
 data class DavResourceInfo(
     val name: String,
     val isDirectory: Boolean,
     val contentLength: Long,
-    val url: String
+    val url: String,
+    val lastModified: Long
 )
 
 /**
@@ -89,7 +92,7 @@ class WebDavClient private constructor(
     fun listChildren(url: String): List<DavResourceInfo> = runBlocking {
         try {
             DavResource(httpClient, Url(url))
-                .propfind(1, WebDAV.ResourceType, WebDAV.GetContentLength)
+                .propfind(1, WebDAV.ResourceType, WebDAV.GetContentLength, WebDAV.GetLastModified)
                 .responsesWithRelation()
                 .toList()
                 .filter { it.relation == Response.HrefRelation.MEMBER }
@@ -103,7 +106,7 @@ class WebDavClient private constructor(
     fun getResource(url: String): DavResourceInfo? = runBlocking {
         try {
             DavResource(httpClient, Url(url))
-                .propfind(0, WebDAV.ResourceType, WebDAV.GetContentLength)
+                .propfind(0, WebDAV.ResourceType, WebDAV.GetContentLength, WebDAV.GetLastModified)
                 .responses()
                 .firstOrNull()
                 ?.toResourceInfo()
@@ -157,7 +160,8 @@ class WebDavClient private constructor(
             name = hrefName(),
             isDirectory = type?.types?.contains(WebDAV.Collection) == true,
             contentLength = this[GetContentLength::class.java]?.contentLength ?: 0L,
-            url = href.toString()
+            url = href.toString(),
+            lastModified = this[GetLastModified::class.java]?.lastModified?.toEpochMilli() ?: 0L
         )
     }
 
