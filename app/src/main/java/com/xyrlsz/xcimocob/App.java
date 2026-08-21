@@ -160,6 +160,7 @@ public class App extends Application implements AppGetter, Thread.UncaughtExcept
                                     // 图片已有 Fresco 自己的缓存（image_cache/），OkHttp 再缓存是双重缓存，只浪费空间
                                     // 只缓存 HTML/文本/JSON 等页面内容，不缓存图片/视频/音频
                                     String contentType = response.header("Content-Type", "");
+                                    assert contentType != null;
                                     if (!contentType.startsWith("image/")
                                             && !contentType.startsWith("video/")
                                             && !contentType.startsWith("audio/")) {

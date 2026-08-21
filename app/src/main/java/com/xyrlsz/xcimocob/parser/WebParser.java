@@ -3,6 +3,7 @@ package com.xyrlsz.xcimocob.parser;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -19,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.xyrlsz.xcimocob.App;
+import com.xyrlsz.xcimocob.manager.PreferenceManager;
 import com.xyrlsz.xcimocob.utils.StringUtils;
 
 import java.util.Map;
@@ -120,6 +122,7 @@ public class WebParser {
     private long cloudflareStartTime = 0;
     private ViewGroup mChallengeContainer;
     private boolean cfNotified = false;
+    private boolean disable = false;
 
     public WebParser(Context context, String url, Headers headers) {
         this(context, url, headers, "", new WebParserConfig());
@@ -140,10 +143,17 @@ public class WebParser {
         this.interactiveChallenge = config.isInteractiveChallenge();
         this.sourceTitle = config.getSourceTitle();
         this.mContext = context.getApplicationContext();
-
+        boolean onlyWifi =
+                App.getPreferenceManager().getBoolean(PreferenceManager.PREF_OTHER_CONNECT_ONLY_WIFI, false);
+        WifiManager manager_wifi = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        disable = !manager_wifi.isWifiEnabled() && onlyWifi;
         // 在 UI 线程创建 WebView 并开始加载
         new Handler(Looper.getMainLooper()).post(() -> {
             try {
+                if (disable) {
+                    emitError(new Exception("仅允许 Wi-Fi 网络，但当前 Wi-Fi 未开启"));
+                    return;
+                }
                 mWebView = new WebView(mContext);
                 initWebViewSettings(mWebView);
                 initWebViewForRequest();
@@ -193,6 +203,7 @@ public class WebParser {
                 mWebView = null;
             });
         }
+        disable = false;
     }
 
     /**

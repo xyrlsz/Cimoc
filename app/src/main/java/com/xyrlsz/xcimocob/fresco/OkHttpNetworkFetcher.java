@@ -87,7 +87,10 @@ public class OkHttpNetworkFetcher extends
                 .url(uri.toString())
                 .get()
                 .build();
-        final Call call = mOkHttpClient.newCall(request);
+        // 关键：每次 fetch 都实时获取当前 App 的 HttpClient（支持“仅WiFi联网”等设置的运行时切换），
+        // 而不是使用初始化/构建管道时捕获的旧实例，否则 Fresco 会一直用旧的 HTTP 引擎
+        final OkHttpClient client = App.getHttpClient();
+        final Call call = client.newCall(request);
 
         fetchState.getContext().addCallbacks(
                 new BaseProducerContextCallbacks() {
