@@ -567,6 +567,23 @@ public class DataSyncManager {
                 break;
             }
 
+            // 游标失效自愈：服务端真尾 latest_id 小于本地游标，即游标已失效。
+            // 典型场景：服务端数据库被重置/清空，事件 ID 从头计数，旧的 since_id（例如 1578）
+            // 已远大于新库 MAX(id)（例如 22）。注意不能依赖 events 是否为空——服务端兜底
+            // （since > 真尾时从 0 返回）可能已经返回了全部事件（events 非空），但那些事件的
+            // ID 仍全部小于旧游标，正常推进逻辑（max(current, latest_id/event.id)）永远无法把
+            // 游标降下来，游标会永久卡死。因此只要 latest_id < sinceID 就重置为 0 全量重拉。
+            // 不会死循环：重置为 0 后再拉，latest_id >= 0，游标会被正常推进到 latest_id；
+            // 若服务端确实一条事件都没有（latest_id=0），则 sinceID=0 不满足 sinceID>0，
+            // 直接走下方正常逻辑并以游标 0 退出。
+            if (sinceID > 0 && resp.latest_id < sinceID) {
+                Log.w(TAG, "[EventSync] Cursor " + sinceID + " is ahead of server tail "
+                        + resp.latest_id + " (server data was reset?), resetting cursor to 0");
+                sinceID = 0;
+                setLastEventId(0);
+                continue;
+            }
+
             // 无论 events 是否为空，都先把游标推进到服务器返回的 latest_id：
             // - 若 events 非空：latest_id >= 最后一条事件的 ID，用它更"靠尾"，
             //   不会因 replay 时客户端按 client_id 过滤掉自己的事件而造成漏推进。

@@ -74,8 +74,17 @@ func (h *EventHandler) PullEvents(c *gin.Context) {
 		}
 	}
 
-	// since_id 过滤 + 排序 + 分页，全部字段用生成的类型安全访问。
+	// 游标失效兜底：客户端 since_id 大于服务端真尾 MAX(id)，典型场景是服务端数据库被重置
+	// （事件 ID 从头计数，旧游标如 1578 已远大于新库 MAX(id)=22）。此时按原 since 过滤永远
+	// 查不到事件，客户端游标会永久卡死、服务端已有的新事件永远拉不到。检测到则从 0 重新
+	// 拉取全部事件，配合客户端侧"游标失效自愈"逻辑一起让客户端自动恢复。
 	since := uint(req.SinceID)
+	if since > latestID {
+		log.Printf("[PullEvents] cursor %d ahead of tail %d (server data was reset?), resetting to 0", since, latestID)
+		since = 0
+	}
+
+	// since_id 过滤 + 排序 + 分页，全部字段用生成的类型安全访问。
 	q := se.Where(se.UserID.Eq(userID), se.ID.Gt(since))
 	rows, err := q.Order(se.ID).Limit(req.Limit).Find()
 	if err != nil {
