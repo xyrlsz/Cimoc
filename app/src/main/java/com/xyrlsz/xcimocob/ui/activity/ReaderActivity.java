@@ -909,13 +909,17 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
 
     protected void switchMode() {
         Intent intent = getIntent();
+        int newMode;
         if (mode == PreferenceManager.READER_MODE_PAGE) {
             intent.setClass(this, StreamReaderActivity.class);
-            intent.putExtra(Extra.EXTRA_MODE, PreferenceManager.READER_MODE_STREAM);
+            newMode = PreferenceManager.READER_MODE_STREAM;
         } else {
             intent.setClass(this, PageReaderActivity.class);
-            intent.putExtra(Extra.EXTRA_MODE, PreferenceManager.READER_MODE_PAGE);
+            newMode = PreferenceManager.READER_MODE_PAGE;
         }
+        // 同步更新默认阅读模式，下次打开漫画时沿用新选择的模式
+        mPreference.putNumber(PreferenceManager.PREF_READER_MODE, newMode);
+        intent.putExtra(Extra.EXTRA_MODE, newMode);
         finish();
         startActivity(intent);
     }
