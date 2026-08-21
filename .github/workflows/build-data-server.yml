@@ -1,0 +1,225 @@
+name: Build data_server (Go, CGO + SQLite)
+
+# ------------------------------------------------------------------
+# 用途：只负责编译 Go 服务器（xcimoc-data-server），完全独立于 APK 打包。
+#
+# 触发方式：
+#   · 手动（Actions 页面点 Run workflow 即可 → workflow_dispatch）
+#     输入项：
+#       upload_release : true/false，默认 false
+#           true 会把 3 个二进制 + config.example.yaml 追加到当前引用的 tag 上
+#           （注意：如果 ref 不是 tag，upload_release=true 会报错并跳过 Release 上传，
+#            artifact 仍然可用）
+#   · 推 tag (v*) 时自动：把它作为 APK workflow 的轻量补充，保证 tag 上总有 Go 二进制
+#   · 手动触发不受分支/tag 限制（workflow_dispatch 本身允许在任意分支点跑）
+#
+# 说明：SQLite 驱动使用 gorm.io/driver/sqlite（底层 mattn/go-sqlite3，需 CGO），
+# 所以所有目标都强制 CGO_ENABLED=1 + 对应 C 工具链。
+#
+# 产物：
+#   xcimoc-data-server-linux-amd64
+#   xcimoc-data-server-linux-arm64   (交叉：gcc-aarch64-linux-gnu)
+#   xcimoc-data-server-windows-amd64.exe (MinGW-w64)
+# 以及合并后的 artifact `data-server-binaries`（方便一次下载 3 个 + config 示例）。
+# ------------------------------------------------------------------
+
+on:
+  workflow_dispatch:
+    inputs:
+      upload_release:
+        description: |
+          Append binaries to the current tag Release.
+          Only works if the workflow was triggered on a tag (refs/tags/v*).
+        required: false
+        default: false
+        type: boolean
+      go_version:
+        description: 'Go toolchain version (passed to setup-go). Defaults to >=1.25 (same as go.mod).'
+        required: false
+        default: '>=1.25'
+        type: string
+  # push:
+  #   tags: ["v*"]
+
+permissions:
+  contents: write   # 为了能往 Release 追加二进制（action-gh-release 需要）
+
+env:
+  # SQLite 现在就是 mattn/go-sqlite3，必 CGO
+  CGO_ENABLED: "1"
+
+jobs:
+  # ----------------------------------------------------------------
+  # 单文件单 job：3 条 matrix，各自打一个平台
+  # ----------------------------------------------------------------
+  build:
+    name: Build · ${{ matrix.label }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: linux-amd64
+            runner: ubuntu-latest
+            goos: linux
+            goarch: amd64
+            cc: x86_64-linux-gnu-gcc
+            ext: ""
+            install: |
+              set -eux
+              sudo apt-get update -y
+              sudo apt-get install -y --no-install-recommends \
+                build-essential ca-certificates curl
+
+          - label: linux-arm64
+            runner: ubuntu-latest
+            goos: linux
+            goarch: arm64
+            cc: aarch64-linux-gnu-gcc
+            ext: ""
+            install: |
+              set -eux
+              sudo apt-get update -y
+              sudo apt-get install -y --no-install-recommends \
+                build-essential ca-certificates curl \
+                gcc-aarch64-linux-gnu libc6-dev-arm64-cross
+
+          - label: windows-amd64
+            runner: windows-latest
+            goos: windows
+            goarch: amd64
+            cc: gcc
+            ext: ".exe"
+            install: |
+              $ErrorActionPreference = "Continue"
+              $candidates = @(
+                "C:\ProgramData\mingw64\bin",
+                "C:\Program Files\mingw-w64\x86_64-8.1.0-posix-seh-rt_v6-rev0\mingw64\bin",
+                "C:\msys64\ucrt64\bin",
+                "C:\msys64\mingw64\bin",
+                "C:\tools\msys64\ucrt64\bin",
+                "C:\tools\msys64\mingw64\bin"
+              )
+              $found = $null
+              foreach ($p in $candidates) { if (Test-Path (Join-Path $p "gcc.exe")) { $found = $p; break } }
+              if (-not $found) {
+                choco install -y mingw --prefer-binary --no-progress --timeout 600 || $null
+                foreach ($p in $candidates) { if (Test-Path (Join-Path $p "gcc.exe")) { $found = $p; break } }
+              }
+              if (-not $found) {
+                foreach ($msys in @("C:\msys64","C:\tools\msys64")) {
+                  if (-not (Test-Path $msys)) { continue }
+                  & "$msys\usr\bin\bash.exe" -lc "pacman --noconfirm -S --needed mingw-w64-ucrt-x86_64-gcc" || $null
+                  $ucrt = "$msys\ucrt64\bin"
+                  if (Test-Path (Join-Path $ucrt "gcc.exe")) { $found = $ucrt; break }
+                }
+              }
+              if (-not $found) { throw "MinGW-w64 gcc not found on this runner." }
+              Write-Host "FOUND gcc at: $found"
+              $found | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+          submodules: recursive
+
+      - name: Set up Go ${{ inputs.go_version || '>=1.25' }}
+        uses: actions/setup-go@v6
+        with:
+          go-version: ${{ inputs.go_version || '>=1.25' }}
+          cache-dependency-path: data_server/go.sum
+
+      # 安装 C 工具链 —— 不指定 shell，让运行器使用默认（Linux: bash / Windows: powershell）
+      - name: Install C toolchain (${{ matrix.label }})
+        run: ${{ matrix.install }}
+
+      - name: Sanity go list all packages
+        working-directory: data_server
+        shell: bash
+        run: go list ./... > /dev/null
+
+      - name: Build binary ${{ matrix.label }}
+        working-directory: data_server
+        shell: bash
+        env:
+          GOOS:   ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CC:     ${{ matrix.cc }}
+        run: |
+          set -eux
+          mkdir -p dist
+          BIN="dist/xcimoc-data-server-${{ matrix.label }}${{ matrix.ext }}"
+          go build -ldflags="-s -w" -o "$BIN" .
+          ls -lh dist/
+          echo "BIN=$BIN"                       >> "$GITHUB_ENV"
+          echo "BIN_NAME=$(basename "$BIN")"     >> "$GITHUB_ENV"
+
+      - name: Upload per-target artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: data-server-${{ matrix.label }}
+          path: data_server/${{ env.BIN }}
+
+      - name: Append to GitHub Release (tag only)
+        if: |
+          (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
+          (github.event_name == 'workflow_dispatch' && inputs.upload_release == true && startsWith(github.ref, 'refs/tags/v'))
+        uses: softprops/action-gh-release@v3
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: |
+            data_server/${{ env.BIN }}
+
+  # ----------------------------------------------------------------
+  # 收尾：聚合 3 个 artifact + config 示例 → data-server-binaries
+  # ----------------------------------------------------------------
+  bundle:
+    name: Bundle all targets + config.example.yaml
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Download per-target artifacts
+        uses: actions/download-artifact@v8
+        with:
+          pattern: data-server-*
+          path: data_server/dist_raw/
+          merge-multiple: true
+
+      - name: Assemble bundle
+        run: |
+          set -eux
+          cd data_server
+          mkdir -p dist
+          if [ -d dist_raw ]; then
+            find dist_raw -maxdepth 2 -type f -exec cp -f {} dist/ \;
+          fi
+          cp -f config.example.yaml dist/
+          ls -lh dist/
+
+      - name: Upload data-server-binaries (bundle)
+        uses: actions/upload-artifact@v6
+        with:
+          name: data-server-binaries
+          path: data_server/dist/
+
+      - name: Append bundle to Release
+        if: |
+          (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
+          (github.event_name == 'workflow_dispatch' && inputs.upload_release == true && startsWith(github.ref, 'refs/tags/v'))
+        uses: softprops/action-gh-release@v3
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          files: |
+            data_server/dist/xcimoc-data-server-linux-amd64
+            data_server/dist/xcimoc-data-server-linux-arm64
+            data_server/dist/xcimoc-data-server-windows-amd64.exe
+            data_server/dist/config.example.yaml

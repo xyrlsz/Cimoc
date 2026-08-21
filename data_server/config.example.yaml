@@ -1,9 +1,22 @@
 # Cimoc Data Sync Server 配置示例
 # 使用方式: ./xcimoc-data-server --config config.yaml
 #
+# 【构建环境要求】默认 SQLite 驱动使用 gorm.io/driver/sqlite
+# （底层 mattn/go-sqlite3，需要 CGO）。本地构建步骤：
+#   Linux:  sudo apt-get install -y gcc
+#   macOS:  xcode-select --install
+#   Windows: 推荐 MSYS2 UCRT (ucrt64/bin/gcc.exe) 或 MinGW-w64：
+#              choco install -y mingw   # 或：winget install -e --id msys2.msys2
+#           然后把 gcc 所在目录加入 PATH，确保命令行 `gcc --version` 能执行。
+#           再运行：
+#              $env:CGO_ENABLED="1" ; go build .
+#           如果不装 gcc / 没开 CGO_ENABLED=1，编译阶段会报错
+#           "github.com/mattn/go-sqlite3: C source files not allowed when not using cgo"
+#
 # 【优先级】同一配置项可出现在多处，按下列顺序后写入者生效：
-#   config.yaml (cors / database / jwt / server)
-#     → 环境变量覆盖：CORS_ORIGINS / DB_TYPE / DB_PATH / DB_DSN / JWT_SECRET / SERVER_PORT
+#   config.yaml (database / jwt / server / cors)
+#     → 环境变量覆盖：DB_TYPE / DB_PATH / DB_DSN / JWT_SECRET / SERVER_PORT
+#                    CORS_ORIGINS
 #       → CLI 参数覆盖：--dbtype / --data / --dbdsn / --jwtsecret / --port
 
 server:
@@ -60,20 +73,16 @@ cors:
   #
   # （本地联调）Vite / Create React App / Next.js 常见端口：
   origins:
-    - "http://localhost:3000"
-    - "http://localhost:5173"
-    - "http://127.0.0.1:5173"
 
-# ============================================================================
-# CORS 中间件还会自动下发以下 HTTP 响应头（无需在 YAML 里再配）：
-#   Access-Control-Allow-Methods : GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
-#   Access-Control-Allow-Headers : Origin, Content-Type, Authorization,
-#                                   Accept, Accept-Language, Accept-Encoding,
-#                                   X-Requested-With, X-Client-Id,
-#                                   Cache-Control, Pragma,
-#                                   If-None-Match, If-Modified-Since
-#   Access-Control-Expose-Headers: Content-Length, X-Request-Id,
-#                                   X-Latest-Event-Id, X-Server-Time
-#   Access-Control-Max-Age       : 86400（预检结果缓存 1 天）
-# ============================================================================
-
+    # ============================================================================
+    # CORS 中间件还会自动下发以下 HTTP 响应头（无需在 YAML 里再配）：
+    #   Access-Control-Allow-Methods : GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+    #   Access-Control-Allow-Headers : Origin, Content-Type, Authorization,
+    #                                   Accept, Accept-Language, Accept-Encoding,
+    #                                   X-Requested-With, X-Client-Id,
+    #                                   Cache-Control, Pragma,
+    #                                   If-None-Match, If-Modified-Since
+    #   Access-Control-Expose-Headers: Content-Length, X-Request-Id,
+    #                                   X-Latest-Event-Id, X-Server-Time
+    #   Access-Control-Max-Age       : 86400（预检结果缓存 1 天）
+    # ============================================================================

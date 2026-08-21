@@ -13,9 +13,9 @@ import (
 	"xcimoc-data-server/models"
 	"xcimoc-data-server/utils"
 
-	"github.com/glebarez/sqlite"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -25,8 +25,6 @@ var DB *gorm.DB
 const DefaultAdminUsername = "admin"
 
 func Init(cfg *config.Config) {
-	var dialector gorm.Dialector
-
 	switch cfg.DBType {
 	case "mysql":
 		if cfg.DBDSN == "" {
@@ -40,22 +38,25 @@ func Init(cfg *config.Config) {
 				cfg.DBDSN += "?parseTime=True"
 			}
 		}
-		dialector = mysql.Open(cfg.DBDSN)
+		openGorm(cfg, mysql.Open(cfg.DBDSN))
 
 	case "postgres", "pgsql":
 		if cfg.DBDSN == "" {
 			log.Fatalf("使用 PostgreSQL 时必须设置 --dbdsn 或 DB_DSN，例如: host=localhost user=user password=pass dbname=cimoc port=5432 sslmode=disable")
 		}
-		dialector = postgres.Open(cfg.DBDSN)
+		openGorm(cfg, postgres.Open(cfg.DBDSN))
 
 	default: // sqlite
 		dbDir := filepath.Dir(cfg.DBPath)
 		if err := os.MkdirAll(dbDir, 0755); err != nil {
 			log.Fatalf("failed to create database directory %s: %v", dbDir, err)
 		}
-		dialector = sqlite.Open(cfg.DBPath)
+		openGorm(cfg, sqlite.Open(cfg.DBPath))
 	}
+}
 
+// openGorm 封装 GORM 初始化 + 迁移 + 连接池 + 默认管理员
+func openGorm(cfg *config.Config, dialector gorm.Dialector) {
 	var err error
 	DB, err = gorm.Open(dialector, &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Warn),

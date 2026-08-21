@@ -36,12 +36,12 @@ type ConfigFile struct {
 }
 
 type Config struct {
-	DBType       string
-	DBPath       string
-	DBDSN        string
-	JWTSecret    string
-	ServerPort   string
-	CORSOrigins  []string // CORS 允许的 Origin 白名单；空数组则使用 "*"
+	DBType      string
+	DBPath      string
+	DBDSN       string
+	JWTSecret   string
+	ServerPort  string
+	CORSOrigins []string // CORS 允许的 Origin 白名单；空数组则使用 "*"
 }
 
 // LoadWithConfig 加载配置，可指定配置文件路径（用于 set admin 命令，无需 CLI flag 解析）
