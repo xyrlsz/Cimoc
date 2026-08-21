@@ -326,12 +326,14 @@ public class DataSyncClient {
     // ==================== Event-based Sync ====================
 
     /**
-     * 拉取事件：获取 since_id 之后的所有事件
+     * 拉取事件：获取 since_id 之后的所有事件。
+     * 注意：参数名使用 since_id，刻意与 GET /api/comics?since=（毫秒时间戳）区分开，
+     * 避免未来维护者把两种 since 参数搞混。服务端同时兼容旧名 ?since= 一段时间。
      * @param sinceID 上次拉取到的事件ID，0 表示从头开始
      */
     public DataSyncModels.PullEventsResponse pullEvents(String token, long sinceID)
             throws IOException, DataSyncException {
-        String path = "/api/events/pull?since=" + sinceID;
+        String path = "/api/events/pull?since_id=" + sinceID;
         String body = get(path, token);
         return GSON.fromJson(body, DataSyncModels.PullEventsResponse.class);
     }

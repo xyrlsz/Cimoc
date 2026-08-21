@@ -68,6 +68,12 @@ func (h *TagHandler) Sync(c *gin.Context) {
 		return
 	}
 
+	// 未传 partial_update 时，默认 true（增量），避免误删服务端已有标签
+	partialUpdate := true
+	if req.PartialUpdate != nil {
+		partialUpdate = *req.PartialUpdate
+	}
+
 	tx := database.DB.Begin()
 	defer tx.Rollback()
 
@@ -129,7 +135,7 @@ func (h *TagHandler) Sync(c *gin.Context) {
 
 		// 删除客户端不再包含的关联（客户端没传 = 用户在客户端删除了）
 		// 但如果客户端使用的是增量模式（partial_update），则保留未提及的关联
-		if !req.PartialUpdate {
+		if !partialUpdate {
 			for key, refID := range existingRefKeys {
 				if !clientRefKeys[key] {
 					tx.Delete(&models.TagRef{}, refID)
@@ -167,7 +173,7 @@ func (h *TagHandler) Sync(c *gin.Context) {
 
 	// 如果客户端使用全量同步模式，删除服务端有但客户端没有的标签
 	// 以此支持跨端标签删除
-	if !req.PartialUpdate {
+	if !partialUpdate {
 		// 收集客户端没有提及的标签，并删除它们
 		for _, t := range existingTags {
 			if !clientTagTitles[t.Title] {

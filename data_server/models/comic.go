@@ -43,8 +43,11 @@ type SyncStatus struct {
 }
 
 // ComicSyncRequest is the payload for uploading/merging comics.
+// Comics 不再使用 binding:"required"：允许客户端上传空数组（"我这边没变化"），
+// 否则空漫画库 / 仅下载 / 只拉取增量的场景会被 Gin 在 400 就挡掉。
+// handler 内部会按业务判断 len(Comics)==0 的分支。
 type ComicSyncRequest struct {
-	Comics   []ComicSyncItem `json:"comics" binding:"required"`
+	Comics   []ComicSyncItem `json:"comics"`
 	Since    *int64          `json:"since"`     // 客户端上次同步时间，服务端可用此过滤（可选）
 	PushOnly bool            `json:"push_only"` // 仅推送变更，不返回全量数据
 }
@@ -180,8 +183,10 @@ type SettingPayload struct {
 }
 
 // PushEventsRequest 客户端推送事件
+// Events 不使用 binding:"required"：允许客户端推送空事件数组（心跳/拉取触发空推送等）。
+// 空数组分支由 handlers/events.PushEvents 业务层直接返回 {"received":0}。
 type PushEventsRequest struct {
-	Events   []SyncEvent `json:"events" binding:"required"`
+	Events   []SyncEvent `json:"events"`
 	ClientID string      `json:"client_id"`
 }
 

@@ -13,8 +13,9 @@ type Setting struct {
 }
 
 // SettingSyncRequest is the payload for uploading/merging settings.
+// Settings 不使用 binding:"required"：允许空数组（客户端无变更时也能安全同步而不会 400）。
 type SettingSyncRequest struct {
-	Settings []SettingItem `json:"settings" binding:"required"`
+	Settings []SettingItem `json:"settings"`
 }
 
 type SettingItem struct {

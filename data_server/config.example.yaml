@@ -1,5 +1,10 @@
 # Cimoc Data Sync Server 配置示例
 # 使用方式: ./xcimoc-data-server --config config.yaml
+#
+# 【优先级】同一配置项可出现在多处，按下列顺序后写入者生效：
+#   config.yaml (cors / database / jwt / server)
+#     → 环境变量覆盖：CORS_ORIGINS / DB_TYPE / DB_PATH / DB_DSN / JWT_SECRET / SERVER_PORT
+#       → CLI 参数覆盖：--dbtype / --data / --dbdsn / --jwtsecret / --port
 
 server:
   port: "8080" # 监听端口
@@ -12,3 +17,63 @@ database:
 
 jwt:
   secret: "" # JWT 签名密钥（为空则首次启动自动生成，并持久化到数据库同目录 .jwt_secret，重启后旧 token 仍有效）
+
+# ============================================================================
+# CORS 配置 —— 控制哪些浏览器端来源(Origin)可以通过跨域访问本服务
+# ----------------------------------------------------------------------------
+# 一般规则：
+#   · Android 原生客户端（OkHttp）不会发 CORS 预检，这块配置对它没影响。
+#   · 对 Web 管理后台、浏览器插件、内嵌 WebView 的 fetch/XHR 直接访问 API 的场景，
+#     下面的 cors.origins 决定浏览器是否允许本页面跨域读响应。
+#
+# 配置方式（二选一；两者都写时，环境变量会再叠加 YAML 的值）：
+#
+# 方式 A：在本文件里写 cors.origins 白名单（推荐）
+# 方式 B：用环境变量 CORS_ORIGINS，多个 Origin 用英文逗号 / 分号 / 空格分隔，例如：
+#         export CORS_ORIGINS="https://admin.example.com,https://m.example.com:8443"
+#
+# 行为规则：
+#   1. 【cors.origins 为空 + 也没设置 CORS_ORIGINS 环境变量】
+#        → Access-Control-Allow-Origin: *
+#        兼容性最好，但浏览器禁止携带 credentials（Cookie / Authorization 带 cookie 模式），
+#        本项目 Authorization 用 Bearer Token（不依赖 Cookie 凭证模式），所以 * 仍然可用。
+#   2. 【配置了白名单，请求的 Origin 在白名单中】
+#        → Access-Control-Allow-Origin 精确回显该 Origin（Vary: Origin 已自动加上）
+#        对浏览器 / CDN / 反向代理缓存都正确，不会错用其它 Origin 的缓存。
+#   3. 【配置了白名单，但请求的 Origin 不在白名单中】
+#        → Access-Control-Allow-Origin 回显白名单的第一项，浏览器会判定跨域失败。
+#        这是【有意】的安全策略：确保白名单之外的来源页无法读取到响应内容。
+#
+# 常见 Origin 写法注意：
+#   - 必须带 scheme（http:// 或 https://）
+#   - 若端口不是 80/443，必须写完整端口号（如 https://admin.local:8081）
+#   - 尾部不要带斜杠 / 路径，Origin 只到 host[:port]
+#   - 本地开发常用：
+#       http://localhost:3000   http://127.0.0.1:5173
+#       http://localhost:5173   http://localhost:8000
+# ============================================================================
+cors:
+  # （推荐部署）把示例换成你真实部署的管理后台域名，至少一个。
+  # origins:
+  #   - "https://admin.example.com"
+  #   - "https://m.example.com"
+  #
+  # （本地联调）Vite / Create React App / Next.js 常见端口：
+  origins:
+    - "http://localhost:3000"
+    - "http://localhost:5173"
+    - "http://127.0.0.1:5173"
+
+# ============================================================================
+# CORS 中间件还会自动下发以下 HTTP 响应头（无需在 YAML 里再配）：
+#   Access-Control-Allow-Methods : GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD
+#   Access-Control-Allow-Headers : Origin, Content-Type, Authorization,
+#                                   Accept, Accept-Language, Accept-Encoding,
+#                                   X-Requested-With, X-Client-Id,
+#                                   Cache-Control, Pragma,
+#                                   If-None-Match, If-Modified-Since
+#   Access-Control-Expose-Headers: Content-Length, X-Request-Id,
+#                                   X-Latest-Event-Id, X-Server-Time
+#   Access-Control-Max-Age       : 86400（预检结果缓存 1 天）
+# ============================================================================
+

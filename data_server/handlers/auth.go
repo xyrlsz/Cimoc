@@ -67,7 +67,12 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"token": token})
+	c.JSON(http.StatusOK, gin.H{
+		"token": token,
+		// 附带 user：和 /api/auth/login 的响应形状保持一致，
+		// 管理后台在 refresh 时能直接读取最新的 user 信息(管理员标志等)。
+		"user": user,
+	})
 }
 
 // ==================== 管理员用户管理 ====================

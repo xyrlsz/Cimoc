@@ -25,14 +25,23 @@ type ConfigFile struct {
 	JWT struct {
 		Secret string `yaml:"secret"`
 	} `yaml:"jwt"`
+	// CORS 允许的 Origin 白名单，例如：
+	//   cors:
+	//     origins:
+	//       - https://admin.example.com
+	// 为空时回退到 "*"，但允许携带凭证的客户端将无法使用 CORS。
+	CORS struct {
+		Origins []string `yaml:"origins"`
+	} `yaml:"cors"`
 }
 
 type Config struct {
-	DBType     string
-	DBPath     string
-	DBDSN      string
-	JWTSecret  string
-	ServerPort string
+	DBType       string
+	DBPath       string
+	DBDSN        string
+	JWTSecret    string
+	ServerPort   string
+	CORSOrigins  []string // CORS 允许的 Origin 白名单；空数组则使用 "*"
 }
 
 // LoadWithConfig 加载配置，可指定配置文件路径（用于 set admin 命令，无需 CLI flag 解析）
@@ -114,6 +123,15 @@ func applyEnvOverrides(cfg *Config) {
 	if v := os.Getenv("SERVER_PORT"); v != "" {
 		cfg.ServerPort = v
 	}
+	// CORS_ORIGINS 支持英文逗号分隔，例如：https://a.example.com,https://b.example.com
+	if v := os.Getenv("CORS_ORIGINS"); v != "" {
+		parts := strings.FieldsFunc(v, func(r rune) bool { return r == ',' || r == ' ' || r == ';' })
+		for _, p := range parts {
+			if p != "" {
+				cfg.CORSOrigins = append(cfg.CORSOrigins, p)
+			}
+		}
+	}
 }
 
 // ensureJWT 确保 JWT 密钥已设置，未设置则自动生成并持久化（重启后旧 token 仍有效）
@@ -193,6 +211,9 @@ func (cfg *Config) applyConfigFile(path string) {
 	}
 	if cf.JWT.Secret != "" {
 		cfg.JWTSecret = cf.JWT.Secret
+	}
+	if len(cf.CORS.Origins) > 0 {
+		cfg.CORSOrigins = append(cfg.CORSOrigins, cf.CORS.Origins...)
 	}
 
 	fmt.Printf("[配置] 已加载配置文件: %s\n", path)

@@ -93,9 +93,34 @@ func main() {
 
 	// CORS middleware
 	r.Use(func(c *gin.Context) {
-		c.Header("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization")
+		// Origin 白名单：CORS_ORIGINS 或 config.yaml 的 cors.origins 有值 → 精确匹配并回显；否则 "*"
+		origin := c.GetHeader("Origin")
+		allowOrigin := "*"
+		if len(cfg.CORSOrigins) > 0 && origin != "" {
+			ok := false
+			for _, o := range cfg.CORSOrigins {
+				if o == origin {
+					ok = true
+					break
+				}
+			}
+			if ok {
+				allowOrigin = origin
+			} else {
+				// 请求来源不在白名单：返回第一个配置的允许 Origin，浏览器将拒绝跨域访问（安全）
+				allowOrigin = cfg.CORSOrigins[0]
+			}
+		}
+		c.Header("Access-Control-Allow-Origin", allowOrigin)
+		c.Header("Vary", "Origin")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS, HEAD")
+		// 补上常见请求头：X-Requested-With/Accept*/Cache-Control/X-Client-Id/If-None-Match 等
+		c.Header("Access-Control-Allow-Headers",
+			"Origin, Content-Type, Authorization, Accept, Accept-Language, Accept-Encoding, "+
+				"X-Requested-With, X-Client-Id, Cache-Control, Pragma, If-None-Match, If-Modified-Since")
+		c.Header("Access-Control-Expose-Headers",
+			"Content-Length, X-Request-Id, X-Latest-Event-Id, X-Server-Time")
+		c.Header("Access-Control-Max-Age", "86400") // 预检缓存 1 天
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)
 			return

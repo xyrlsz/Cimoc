@@ -23,12 +23,17 @@ func NewEventHandler() *EventHandler {
 // ==================== 事件拉取 ====================
 
 // PullEvents 返回 since_id 之后的所有事件（最多 500 条）。
-// GET /api/events/pull?since=<event_id>
-// since=0 表示从头开始。
+// GET /api/events/pull?since_id=<event_id>  （新命名，语义更清晰：传的是事件 ID，非时间戳）
+// 兼容旧参数 ?since=<event_id>（仅保留一段时间用于平滑升级）
+// since_id=0 / since=0 表示从头开始。
 func (h *EventHandler) PullEvents(c *gin.Context) {
 	userID := c.GetUint("user_id")
 
-	sinceStr := c.Query("since")
+	// since_id 优先；若缺再回退到 since（旧兼容名）
+	sinceStr := c.Query("since_id")
+	if sinceStr == "" {
+		sinceStr = c.Query("since")
+	}
 	var sinceID uint
 	if sinceStr != "" {
 		if id, err := strconv.ParseUint(sinceStr, 10, 64); err == nil {

@@ -21,9 +21,11 @@ type TagRef struct {
 }
 
 // TagSyncRequest is the payload for uploading/merging tags with their comic references.
+// Tags 不使用 binding:"required"：允许上传空数组；PartialUpdate 默认 true，
+// 客户端未传 partial_update 时按「增量同步」处理，避免误删服务端已存在的其它标签。
 type TagSyncRequest struct {
-	Tags          []TagSyncItem `json:"tags" binding:"required"`
-	PartialUpdate bool          `json:"partial_update"` // true 时只更新传了的标签，不删除服务端已有的
+	Tags          []TagSyncItem `json:"tags"`
+	PartialUpdate *bool         `json:"partial_update"` // 非空 bool；nil = true（默认增量）
 }
 
 type TagSyncItem struct {
