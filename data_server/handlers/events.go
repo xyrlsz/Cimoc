@@ -57,9 +57,24 @@ func (h *EventHandler) PullEvents(c *gin.Context) {
 		events = events[:maxEventsPerPull]
 	}
 
+	// latest_id 表示"本用户事件流的当前尾部"：
+	// - 有返回事件时：取返回批次最后一条的 ID
+	// - 但服务器真实尾部 maxID 可能比返回批次更大（比如 has_more=true 截断了尾端，
+	//   或将来引入 per-client_id 过滤导致事件被跳过），此时用真实尾部对齐，
+	//   避免客户端以为服务器没新数据而一直回退到旧 since_id。
+	// - 完全没事件时仍回落到 sinceID，保证类型稳定。
 	latestID := sinceID
 	if len(events) > 0 {
 		latestID = events[len(events)-1].ID
+	}
+
+	var maxID uint
+	database.DB.Model(&models.SyncEvent{}).
+		Where("user_id = ?", userID).
+		Select("COALESCE(MAX(id), 0)").
+		Scan(&maxID)
+	if maxID > latestID {
+		latestID = maxID
 	}
 
 	c.JSON(http.StatusOK, models.PullEventsResponse{
@@ -123,10 +138,21 @@ func (h *EventHandler) PushEvents(c *gin.Context) {
 		}
 	}
 
+	// 3. 写入成功后返回当前事件流的尾部（等于本批次最后一条的 ID）。
+	// 客户端可直接用这个 latest_id 推进本地 since_id，避免下一轮 pull 再把
+	// 自己刚 push 上去的事件再拉一遍（client_id 相同时会被过滤成空列表，
+	// 但仍造成一次无谓的往返，且老代码 events 空时不会推进游标，
+	// 这也是用户观察到 since_id 长时间不变的直接原因）。
+	pushLatestID := uint(0)
+	if len(events) > 0 {
+		pushLatestID = events[len(events)-1].ID
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"message":  "推送成功",
-		"received": len(events),
-		"applied":  applied,
+		"message":   "推送成功",
+		"received":  len(events),
+		"applied":   applied,
+		"latest_id": pushLatestID,
 	})
 }
 

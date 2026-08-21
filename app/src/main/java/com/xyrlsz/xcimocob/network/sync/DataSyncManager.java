@@ -553,6 +553,7 @@ public class DataSyncManager {
      */
     private void pullAndReplayEvents(DataSyncClient client, String token) throws Exception {
         long sinceID = getLastEventId();
+        long initialSinceId = sinceID;
         int totalReplayed = 0;
         int pageCount = 0;
 
@@ -562,7 +563,21 @@ public class DataSyncManager {
 
         while (true) {
             DataSyncModels.PullEventsResponse resp = client.pullEvents(token, sinceID);
-            if (resp == null || resp.events == null || resp.events.isEmpty()) {
+            if (resp == null) {
+                break;
+            }
+
+            // 无论 events 是否为空，都先把游标推进到服务器返回的 latest_id：
+            // - 若 events 非空：latest_id >= 最后一条事件的 ID，用它更"靠尾"，
+            //   不会因 replay 时客户端按 client_id 过滤掉自己的事件而造成漏推进。
+            // - 若 events 为空：常见情况是服务器虽没新的可分发事件，但 latest_id
+            //   已因为本端前一步 pushEvents 或其它设备写入而增长（单设备场景尤其容易
+            //   遇到）。若不在这里对齐 latest_id，下一轮 since_id 永远不变。
+            if (resp.latest_id > sinceID) {
+                sinceID = resp.latest_id;
+            }
+
+            if (resp.events == null || resp.events.isEmpty()) {
                 break;
             }
 
@@ -580,7 +595,9 @@ public class DataSyncManager {
                         historyChanged.add(result.comic);
                     }
                 }
-                sinceID = event.id; // 逐条推进，确保中断后能续传
+                if (event.id > sinceID) {
+                    sinceID = event.id;
+                }
             }
 
             if (!resp.has_more) {
@@ -588,6 +605,7 @@ public class DataSyncManager {
             }
         }
 
+        // 游标推进要与本地持久化比较（防御 putNumber 实现差异），单调前进。
         if (sinceID > getLastEventId()) {
             setLastEventId(sinceID);
         }
@@ -595,6 +613,7 @@ public class DataSyncManager {
         Log.d(TAG, "[EventSync] Pulled " + totalReplayed + " events in " + pageCount
                 + " pages, favChanged=" + favoriteChanged.size()
                 + " histChanged=" + historyChanged.size()
+                + ", previous_id=" + initialSinceId
                 + ", latest_id=" + sinceID);
 
         // 通知 UI 刷新
@@ -619,15 +638,32 @@ public class DataSyncManager {
         List<DataSyncModels.SyncEvent> batch = new ArrayList<>(mPendingEvents);
 
         Log.d(TAG, "[EventSync] Pushing " + batch.size() + " pending events");
+        DataSyncModels.PushEventsResponse resp;
         try {
-            client.pushEvents(token, batch, getClientId());
+            resp = client.pushEvents(token, batch, getClientId());
         } catch (Exception e) {
             Log.w(TAG, "[EventSync] Push failed, keeping " + batch.size()
                     + " pending events for retry", e);
             throw e;
         }
         mPendingEvents.removeAll(batch);
-        Log.d(TAG, "[EventSync] Pushed " + batch.size() + " events successfully");
+
+        // 服务端在 Push 响应中返回了该用户当前事件流尾部 latest_id。
+        // 立即推进本地游标：后续 pull 就不会再把这批"自己刚写进去、client_id 相同
+        // 会被 replayEvent 过滤成 SKIP"的事件再拉一遍；同时彻底消除"pull 返回空
+        // events 时游标不前进"遗留的 since_id 卡死现象。
+        long local = getLastEventId();
+        if (resp != null && resp.latest_id > local) {
+            setLastEventId(resp.latest_id);
+            Log.d(TAG, "[EventSync] Push advanced lastEventId " + local
+                    + " -> " + resp.latest_id);
+        }
+
+        int received = resp != null ? resp.received : 0;
+        int applied = resp != null ? resp.applied : 0;
+        Log.d(TAG, "[EventSync] Pushed " + batch.size()
+                + " events successfully (received=" + received
+                + ", applied=" + applied + ")");
     }
 
     /**

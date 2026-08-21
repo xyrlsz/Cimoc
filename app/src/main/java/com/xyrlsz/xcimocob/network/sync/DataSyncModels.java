@@ -365,6 +365,19 @@ public class DataSyncModels {
         }
     }
 
+    /** 事件推送的响应体（与服务端 gin.H 字段对齐） */
+    public static class PushEventsResponse {
+        @SerializedName("message")
+        public String message;
+        @SerializedName("received")
+        public int received;
+        @SerializedName("applied")
+        public int applied;
+        /** 写入后服务端该用户事件流当前尾部（>0 时可直接用于推进本地 since_id） */
+        @SerializedName("latest_id")
+        public long latest_id;
+    }
+
     public static class PullEventsResponse {
         @SerializedName("events")
         public List<SyncEvent> events;

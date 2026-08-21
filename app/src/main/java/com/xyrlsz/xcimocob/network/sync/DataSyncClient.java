@@ -339,13 +339,21 @@ public class DataSyncClient {
     }
 
     /**
-     * 推送事件：将本地产生的事件发送到服务端
+     * 推送事件：将本地产生的事件发送到服务端。
+     * 返回服务端写入成功后该用户事件流的尾部 latest_id（可用于推进本地 since_id）。
      */
-    public void pushEvents(String token, List<DataSyncModels.SyncEvent> events, String clientId)
+    public DataSyncModels.PushEventsResponse pushEvents(String token,
+            List<DataSyncModels.SyncEvent> events, String clientId)
             throws IOException, DataSyncException {
         DataSyncModels.PushEventsRequest req = new DataSyncModels.PushEventsRequest(events, clientId);
         String json = GSON.toJson(req);
-        post("/api/events/push", json, token);
+        String body = post("/api/events/push", json, token);
+        DataSyncModels.PushEventsResponse resp = GSON.fromJson(body,
+                DataSyncModels.PushEventsResponse.class);
+        if (resp == null) {
+            resp = new DataSyncModels.PushEventsResponse();
+        }
+        return resp;
     }
 
     /**
