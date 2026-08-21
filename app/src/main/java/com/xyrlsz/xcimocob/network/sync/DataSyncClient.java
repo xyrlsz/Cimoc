@@ -10,10 +10,12 @@ import com.xyrlsz.xcimocob.App;
 import com.xyrlsz.xcimocob.manager.PreferenceManager;
 import com.xyrlsz.xcimocob.utils.Base64Utils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.GZIPOutputStream;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -303,7 +305,7 @@ public class DataSyncClient {
             throws IOException, DataSyncException {
         DataSyncModels.ComicSyncRequest req = new DataSyncModels.ComicSyncRequest(comics, since, pushOnly);
         String json = GSON.toJson(req);
-        String body = post("/api/comics/sync", json, token);
+        String body = postGzipped("/api/comics/sync", json, token);
         return GSON.fromJson(body, DataSyncModels.ComicSyncResponse.class);
     }
 
@@ -444,6 +446,26 @@ public class DataSyncClient {
         Request.Builder builder = new Request.Builder()
                 .url(mBaseUrl + path)
                 .post(RequestBody.create(jsonBody, JSON));
+        if (token != null) {
+            builder.header("Authorization", "Bearer " + token);
+        }
+        return execute(builder.build());
+    }
+
+    /**
+     * gzip 压缩请求体后 POST。设 Content-Encoding: gzip，
+     * 服务端中间件自动解压。适合大请求体（如 comics/sync 全量上传 449 条 ~154KB → ~15-30KB）。
+     */
+    private String postGzipped(String path, String jsonBody, String token) throws IOException, DataSyncException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try (GZIPOutputStream gos = new GZIPOutputStream(bos)) {
+            gos.write(jsonBody.getBytes("UTF-8"));
+        }
+        byte[] gzipped = bos.toByteArray();
+        Request.Builder builder = new Request.Builder()
+                .url(mBaseUrl + path)
+                .header("Content-Encoding", "gzip")
+                .post(RequestBody.create(gzipped, JSON));
         if (token != null) {
             builder.header("Authorization", "Bearer " + token);
         }

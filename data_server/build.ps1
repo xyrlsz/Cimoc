@@ -142,7 +142,7 @@ if ($LASTEXITCODE -ne 0) { throw 'go env GOARCH failed' }
 
 # -----------------------------------------------------------------------------
 # Step 0: Regenerate gorm.io/gen query code BEFORE every build.
-# 代码生成阶段使用纯 Go 版 SQLite 驱动（libtnb/sqlite），无需 gcc，
+# 代码生成阶段使用纯 Go 版 SQLite 驱动（glebarez/sqlite），无需 gcc，
 # 所以这里 CGO_ENABLED=0；并且 gen 工具内部用 --gen-config 替代 --config，
 # 避免和 config.Load() 的 flag 解析互相冲突。
 # 注：先做代码生成，再检查 gcc——gcc 只在随后真正 CGO 编译时才需要。

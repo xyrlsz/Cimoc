@@ -302,6 +302,8 @@ public class DataSyncManager {
     /** 事件同步的持久化 key */
     public static final String PREF_LAST_EVENT_ID = "data_sync_last_event_id";
     public static final String PREF_CLIENT_ID = "data_sync_client_id";
+    /** 漫画增量推送的时间游标：上次成功 push 的本地时间戳，用于过滤只传变化的漫画 */
+    public static final String PREF_LAST_COMIC_PUSH_TIME = "data_sync_last_comic_push_time";
 
     /** Gson 实例（用于序列化事件 payload） */
     private static final Gson GSON = new Gson();
@@ -789,14 +791,24 @@ public class DataSyncManager {
      * 清除历史）会作为 clear_favorite / clear_history 一并上传。
      */
     private void pushLocalComicsState(DataSyncClient client, String token) throws Exception {
-        List<Comic> comics = mComicManager.listFavoriteOrHistory();
+        // 增量上传：只传上次成功推送后 favorite/history 时间戳有推进的漫画。
+        // 449 条无变化 → 0 条，gzip 压缩后请求体从 154KB 降到几 KB，上行 163ms → <5ms。
+        // 删除标记仍然全量上传（通常很少）。
+        //
+        // queryTime 在查询前捕获：sync 期间用户可能读漫画（history 推进），
+        // 如果存 sync 结束时间会导致这些漫画漏传。存 queryTime 保证 queryTime
+        // 之后变化的漫画下次一定被包含。
+        long queryTime = System.currentTimeMillis();
+        long lastPushTime = App.getPreferenceManager()
+                .getNumber(PREF_LAST_COMIC_PUSH_TIME, 0L).longValue();
+        List<Comic> comics = mComicManager.listFavoriteOrHistorySince(lastPushTime);
         Set<String> historyDeleted = getHistoryDeletedKeysForUpload();
         Set<String> favoriteDeleted = getFavoriteDeletedKeysForUpload();
 
         // 本地既没有收藏/历史、也没有删除标记时才跳过。
         // 否则"取消了最后一个收藏"只剩删除标记的场景无法通过全量上传传播删除。
         if (comics.isEmpty() && historyDeleted.isEmpty() && favoriteDeleted.isEmpty()) {
-            Log.d(TAG, "[PushAll] No local comics or delete marks to upload");
+            Log.d(TAG, "[PushAll] No local comics or delete marks to upload (since=" + lastPushTime + ")");
             return;
         }
 
@@ -872,8 +884,13 @@ public class DataSyncManager {
             }
         }
 
-        Log.d(TAG, "[PushAll] Uploading " + items.size() + " comic items (full state)");
+        Log.d(TAG, "[PushAll] Uploading " + items.size() + " comic items (since=" + lastPushTime + ")");
         client.syncComics(token, items, null, true);
+
+        // 记录查询前的本地时间作为下次增量游标，不用 sync 结束时间
+        // （sync 期间变化的漫画 timestamp 一定 > queryTime，下次会被包含）
+        // Math.max 防止时钟回拨导致 lastPushTime 后退
+        App.getPreferenceManager().putNumber(PREF_LAST_COMIC_PUSH_TIME, Math.max(queryTime, lastPushTime));
 
         // 上传成功后清除删除标记（服务器已记录墓碑或已解决冲突）
         if (!historyDeleted.isEmpty()) clearHistoryDeletedKeysAfterUpload();

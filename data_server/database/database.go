@@ -52,7 +52,15 @@ func Init(cfg *config.Config) {
 		if err := os.MkdirAll(dbDir, 0755); err != nil {
 			log.Fatalf("failed to create database directory %s: %v", dbDir, err)
 		}
-		openGorm(cfg, sqlite.Open(cfg.DBPath))
+		// mattn/go-sqlite3 DSN 参数（数据量大时性能提升最明显）：
+		//   _journal_mode=WAL   —— 读写不再互斥，读请求不会被写事务阻塞；WAL 模式持久化到
+		//                          数据库文件头，重启后依然生效
+		//   _busy_timeout=5000  —— 写锁竞争时最多等待 5 秒，而不是立刻报 "database is locked"
+		//   _synchronous=NORMAL —— WAL 模式下把同步级别降为 NORMAL，大幅减少 fsync，
+		//                          仍保持持久安全（WAL 自身 crash-safe 兜底）
+		//   _cache_size=-20000  —— 页缓存 20MB（负数表示 KB 单位），减少磁盘读
+		dsn := cfg.DBPath + "?_journal_mode=WAL&_busy_timeout=5000&_synchronous=NORMAL&_cache_size=-20000"
+		openGorm(cfg, sqlite.Open(dsn))
 	}
 }
 

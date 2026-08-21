@@ -99,7 +99,7 @@ OUT_FILE="$OUT_DIR/xcimoc-data-server-${host_os}-${host_arch}${ext}"
 
 # ---- Step 0: regenerate query package (每次编译都重新生成) -------------
 # 说明：
-#   - CGO_ENABLED=0：gen 内部用 github.com/libtnb/sqlite（纯 Go，modernc），
+#   - CGO_ENABLED=0：gen 内部用 github.com/glebarez/sqlite（纯 Go，modernc），
 #     不需要 gcc，也避免了生成阶段和 CGO 驱动冲突。
 #   - --gen-config 是 gen/gen.go 自己解析的参数；之所以不叫 --config，
 #     是因为 config.Load() 内部会声明 --config flag，两者冲突时 gen 自定义

@@ -74,6 +74,28 @@ public class ComicManager {
         return queryBuilder.build().find();
     }
 
+    /**
+     * 增量查询：只返回 favorite 或 history 时间戳 >= since 的漫画。
+     * since <= 0 时退化为全量查询（首次同步或重置后）。
+     * 用于 pushLocalComicsState 增量上传，449 条无变化 → 0 条，请求体从 154KB → 几 KB。
+     * 用 >= 而非 > 是为了避免 favorite/history 恰好等于 lastPushTime 时漏传。
+     */
+    public List<Comic> listFavoriteOrHistorySince(long since) {
+        if (since <= 0) {
+            return listFavoriteOrHistory();
+        }
+        List<Comic> all = listFavoriteOrHistory();
+        List<Comic> filtered = new ArrayList<>();
+        for (Comic c : all) {
+            Long fav = c.getFavorite();
+            Long his = c.getHistory();
+            if ((fav != null && fav >= since) || (his != null && his >= since)) {
+                filtered.add(c);
+            }
+        }
+        return filtered;
+    }
+
     public List<Comic> listFavorite() {
         return mComicBox.query(Comic_.favorite.notNull()).build().find();
     }

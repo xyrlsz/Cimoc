@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cimoc 数据同步服务器 - 管理后台</title>
-  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <!-- Vue 已本地化（go:embed 打进二进制），完全离线可用，不再依赖 unpkg CDN -->
+  <script src="/admin/vue.global.prod.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif; background: #f5f5f5; color: #333; }
@@ -206,6 +207,13 @@ createApp({
           }
         } catch (e) { /* 重试失败 */ }
       }
+      // 刷新也拿不到新 token（密码被修改 / token_version 失配 / token 真过期）：
+      // 旧登录态已无法恢复，直接退出登录并跳回登录页，避免"看似登录但操作一直 401"。
+      if (resp.status === 401 && token.value) {
+        logout();
+        loginMsg.value = '登录状态已失效（token 过期或密码已修改），请重新登录';
+        loginMsgType.value = 'err';
+      }
       return resp.json().catch(() => ({ error: '请求失败' }));
     }
 
@@ -215,10 +223,6 @@ createApp({
       try {
         const resp = await api('/api/auth/login', { username: loginUsername.value, password: loginPassword.value });
         if (resp.token) {
-          if (!resp.user.is_admin) {
-            loginMsg.value = '该用户不是管理员，无法登录管理后台'; loginMsgType.value = 'err';
-            return;
-          }
           token.value = resp.token; username.value = resp.user.username;
           localStorage.setItem('admin_token', resp.token);
           localStorage.setItem('admin_username', resp.user.username);
@@ -266,8 +270,12 @@ createApp({
       try {
         const resp = await api('/api/admin/password', { username: username.value, new_password: myNewPassword.value });
         if (resp.message) {
-          msg.value = resp.message; msgType.value = 'ok';
+          // 改的是自己的密码：服务端已递增 token_version，当前 token 立即失效。
+          // 必须清空登录态并跳回登录页用新密码重新登录，否则后续操作会一直 401。
           myNewPassword.value = '';
+          logout();
+          loginMsg.value = '密码修改成功，请使用新密码重新登录';
+          loginMsgType.value = 'ok';
         } else {
           msg.value = resp.error || '修改失败'; msgType.value = 'err';
         }
@@ -283,7 +291,14 @@ createApp({
         const resp = await api('/api/admin/password', { username: chgUsername.value, new_password: chgPassword.value });
         if (resp.message) {
           msg.value = resp.message; msgType.value = 'ok';
+          const changedSelf = chgUsername.value === username.value;
           chgUsername.value = ''; chgPassword.value = '';
+          if (changedSelf) {
+            // 改的是自己 → 当前 token 已失效，需用新密码重新登录
+            logout();
+            loginMsg.value = '密码修改成功，请使用新密码重新登录';
+            loginMsgType.value = 'ok';
+          }
         } else {
           msg.value = resp.error || '修改失败'; msgType.value = 'err';
         }

@@ -164,9 +164,29 @@ public class App extends Application implements AppGetter, Thread.UncaughtExcept
                                     if (!contentType.startsWith("image/")
                                             && !contentType.startsWith("video/")
                                             && !contentType.startsWith("audio/")) {
-                                        return response.newBuilder()
-                                                .header("Cache-Control", "max-age=300, stale-while-revalidate=300")
-                                                .build();
+                                        Response.Builder b = response.newBuilder()
+                                                .header("Cache-Control", "max-age=300, stale-while-revalidate=300");
+                                        // 加固：如果上游没声明 Vary: Accept-Encoding，主动补一条。
+                                        // 场景：同一 URL 可能以 gzip/identity 两种编码返回；
+                                        //       缺少 Vary: Accept-Encoding 时，OkHttp Cache 不会按编码分流，
+                                        //       会把「请求了 gzip 的那次响应」缓存下来，下次命中请求若没带
+                                        //       Accept-Encoding: gzip 也直接回 gzip 字节，导致解析器看到
+                                        //       \u001f (gzip 魔数) 却直接按 HTML/JSON 解析出错。
+                                        String vary = response.header("Vary");
+                                        boolean hasAcceptEncoding = false;
+                                        if (vary != null && !vary.isEmpty()) {
+                                            String[] parts = vary.split(",");
+                                            for (String p : parts) {
+                                                if (p.trim().equalsIgnoreCase("Accept-Encoding")) {
+                                                    hasAcceptEncoding = true;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        if (!hasAcceptEncoding) {
+                                            b.addHeader("Vary", "Accept-Encoding");
+                                        }
+                                        return b.build();
                                     }
                                 }
                                 return response;

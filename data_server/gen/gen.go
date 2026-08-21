@@ -33,7 +33,7 @@ import (
 	"xcimoc-data-server/config"
 	"xcimoc-data-server/models"
 
-	"github.com/libtnb/sqlite" // 代码生成阶段专用：纯 Go 实现（modernc.org/sqlite），无需 gcc/CGO。
+	"github.com/glebarez/sqlite" // 代码生成阶段专用：纯 Go 实现（modernc.org/sqlite），无需 gcc/CGO。
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gen"

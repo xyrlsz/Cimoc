@@ -6,7 +6,7 @@ import "time"
 // Mirrors the Android app's Comic entity fields.
 type Comic struct {
 	ID           uint      `gorm:"primaryKey" json:"id"`
-	UserID       uint      `gorm:"index;not null;uniqueIndex:idx_user_source_cid" json:"user_id"`
+	UserID       uint      `gorm:"index:idx_user_updated,priority:1;not null;uniqueIndex:idx_user_source_cid" json:"user_id"`
 	Source       int       `gorm:"not null;uniqueIndex:idx_user_source_cid" json:"source"`
 	Cid          string    `gorm:"size:256;not null;uniqueIndex:idx_user_source_cid" json:"cid"`
 	Title        string    `gorm:"size:512" json:"title"`
@@ -20,7 +20,7 @@ type Comic struct {
 	Chapter      string    `gorm:"size:256" json:"chapter"`
 	ChapterCount *int      `json:"chapter_count"`
 	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	UpdatedAt    time.Time `gorm:"index:idx_user_updated,priority:2" json:"updated_at"`
 }
 
 // ComicDelete 记录漫画删除操作，用于多端同步时传播删除信息。
@@ -28,12 +28,12 @@ type Comic struct {
 // 其他设备同步时查询此表，避免将已删除的数据重新上传。
 type ComicDelete struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
-	UserID    uint      `gorm:"index;not null;uniqueIndex:idx_user_del_source_cid" json:"user_id"`
+	UserID    uint      `gorm:"index:idx_del_user_created,priority:1;not null;uniqueIndex:idx_user_del_source_cid" json:"user_id"`
 	Source    int       `gorm:"not null;uniqueIndex:idx_user_del_source_cid" json:"source"`
 	Cid       string    `gorm:"size:256;not null;uniqueIndex:idx_user_del_source_cid" json:"cid"`
-	DeleteFav bool      `json:"delete_fav"` // 是否清除了收藏
-	DeleteHis bool      `json:"delete_his"` // 是否清除了历史
-	CreatedAt time.Time `json:"created_at"` // 删除时间（用于增量查询 since）
+	DeleteFav bool      `json:"delete_fav"`                                              // 是否清除了收藏
+	DeleteHis bool      `json:"delete_his"`                                              // 是否清除了历史
+	CreatedAt time.Time `gorm:"index:idx_del_user_created,priority:2" json:"created_at"` // 删除时间（用于增量查询 since）
 }
 
 // SyncStatus 服务端同步状态信息
