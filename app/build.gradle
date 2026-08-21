@@ -4,10 +4,10 @@ apply plugin: 'com.android.application'
 apply plugin: 'io.objectbox'
 apply from: rootProject.file('check_r8_keep.gradle')
 
-// 输出过时 API 的具体位置（-Xlint:deprecation），便于排查弃用警告
-tasks.withType(JavaCompile).configureEach {
-    options.compilerArgs += ['-Xlint:deprecation']
-}
+//// 输出过时 API 的具体位置（-Xlint:deprecation），便于排查弃用警告
+//tasks.withType(JavaCompile).configureEach {
+//    options.compilerArgs += ['-Xlint:deprecation']
+//}
 
 def getGitTagName = { ->
     try {
@@ -171,6 +171,7 @@ dependencies {
     implementation fileTree(include: ['*.aar'], dir: 'libs')
     implementation project(':quickjs')
     implementation 'androidx.legacy:legacy-support-v13:1.0.0'
+    //noinspection GradleDependency
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
     //noinspection GradleDependency
@@ -179,6 +180,7 @@ dependencies {
     implementation 'androidx.activity:activity-ktx:1.11.0'
     //noinspection GradleDependency
     implementation "androidx.core:core-ktx:1.17.0"
+    implementation 'androidx.documentfile:documentfile:1.1.0'
 
     implementation 'io.objectbox:objectbox-android:5.4.2'
     annotationProcessor 'io.objectbox:objectbox-processor:5.4.2'

@@ -1,5 +1,6 @@
 package com.xyrlsz.xcimocob.ui.activity;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -7,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.ColorStateList;
 import android.graphics.Point;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.InputDevice;
@@ -23,9 +25,11 @@ import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
@@ -127,6 +131,7 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
     View mLoadingLayout;
     RecyclerView mRecyclerView;
     RelativeLayout mReaderBox;
+    ProgressBar mLoadingIcon;
     private boolean isSavingPicture = false;
     private boolean mHideInfo;
     private boolean mHideNav;
@@ -197,6 +202,7 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
         mLoadingLayout = findViewById(R.id.reader_loading_layout);
         mRecyclerView = findViewById(R.id.reader_recycler_view);
         mReaderBox = findViewById(R.id.reader_box);
+        mLoadingIcon = findViewById(R.id.reader_loading_icon);
     }
 
     @Override
@@ -212,6 +218,8 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
         boolean isWhiteBackground = App.getPreferenceManager().getBoolean(PreferenceManager.PREF_READER_WHITE_BACKGROUND, true);
         if (isWhiteBackground) {
             mLoadingText.setTextColor(getResources().getColor(R.color.black));
+            Drawable customDrawable = AppCompatResources.getDrawable(this, R.drawable.reader_progress_2);
+            mLoadingIcon.setIndeterminateDrawable(customDrawable);
         }
         mHideInfo = mPreference.getBoolean(PreferenceManager.PREF_READER_HIDE_INFO, false);
         mControllerTrigThreshold = mPreference.getNumber(PreferenceManager.PREF_READER_CONTROLLER_TRIG_THRESHOLD, 30).intValue() * 0.01f;
@@ -250,6 +258,7 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
     /**
      * 底部栏上滑手柄：点击或向上滑动打开快捷设置面板
      */
+    @SuppressLint("ClickableViewAccessibility")
     private void initSwipeUpSettingsHint() {
         View swipeHint = findViewById(R.id.reader_swipe_hint);
         if (swipeHint == null) {
@@ -274,8 +283,10 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
 
 
     private void applySystemBarVisibility() {
-        if (getWindow() == null || getWindow().getDecorView() == null) {
+        if (getWindow() == null) {
             return;
+        } else {
+            getWindow().getDecorView();
         }
         WindowInsetsControllerCompat controller =
                 WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
@@ -1094,9 +1105,13 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
         if (white) {
             mReaderBox.setBackgroundResource(R.color.white);
             mLoadingText.setTextColor(getResources().getColor(R.color.black));
+            Drawable customDrawable = AppCompatResources.getDrawable(this, R.drawable.reader_progress_2);
+            mLoadingIcon.setIndeterminateDrawable(customDrawable);
         } else {
             mReaderBox.setBackgroundResource(R.color.black);
             mLoadingText.setTextColor(getResources().getColor(R.color.white));
+            Drawable customDrawable = AppCompatResources.getDrawable(this, R.drawable.reader_progress);
+            mLoadingIcon.setIndeterminateDrawable(customDrawable);
         }
         mReaderAdapter.notifyDataSetChanged();
     }

@@ -3,6 +3,8 @@ package com.xyrlsz.xcimocob.saf;
 import android.net.Uri;
 import android.webkit.MimeTypeMap;
 
+import androidx.documentfile.provider.DocumentFile;
+
 import com.xyrlsz.xcimocob.core.DavResourceInfo;
 import com.xyrlsz.xcimocob.core.WebDavClient;
 import com.xyrlsz.xcimocob.core.WebDavConf;
@@ -32,7 +34,7 @@ public class WebDavCimocDocumentFile extends CimocDocumentFile {
 
     /** 根目录构造：对应 WebDAV 服务器上的 /cimoc 集合。不做网络请求。 */
     public WebDavCimocDocumentFile(CimocDocumentFile parent) {
-        super(parent);
+        super(parent, null);
         mClient = WebDavConf.client;
         mCurrentPath = WebDavConf.url + "/cimoc";
         mResource = null;
@@ -40,7 +42,7 @@ public class WebDavCimocDocumentFile extends CimocDocumentFile {
 
     /** 相对路径构造：parent 目录下的 path。不做网络请求（目录由使用时确保）。 */
     public WebDavCimocDocumentFile(WebDavCimocDocumentFile parent, String path) {
-        super(parent);
+        super(parent, null);
         mClient = WebDavConf.client;
         if (path.startsWith("/")) {
             path = path.substring(1);
@@ -54,7 +56,7 @@ public class WebDavCimocDocumentFile extends CimocDocumentFile {
 
     /** 内部构造：已知完整路径与资源信息。 */
     private WebDavCimocDocumentFile(WebDavCimocDocumentFile parent, String path, DavResourceInfo resource) {
-        super(parent);
+        super(parent, null);
         mClient = WebDavConf.client;
         mCurrentPath = path;
         mResource = resource;
@@ -124,7 +126,7 @@ public class WebDavCimocDocumentFile extends CimocDocumentFile {
     }
 
     @Override
-    public CimocDocumentFile createFile(String displayName) {
+    public CimocDocumentFile createFile(String mimeType, String displayName) {
         String newPath = mCurrentPath + "/" + displayName;
         try {
             if (!mClient.exists(newPath)) {
@@ -184,6 +186,17 @@ public class WebDavCimocDocumentFile extends CimocDocumentFile {
     @Override
     public boolean isFile() {
         return mResource != null && !mResource.isDirectory();
+    }
+
+    @Override
+    public boolean isVirtual() {
+        return false;
+    }
+
+    @Override
+    public long lastModified() {
+        // DavResourceInfo 未提供修改时间，返回 0（未知）
+        return 0;
     }
 
     @Override
@@ -282,5 +295,11 @@ public class WebDavCimocDocumentFile extends CimocDocumentFile {
             e.printStackTrace();
             return false;
         }
+    }
+
+    @Override
+    protected CimocDocumentFile wrap(DocumentFile delegate) {
+        // WebDAV 不使用官方 delegate，此方法不会被调用
+        return null;
     }
 }
