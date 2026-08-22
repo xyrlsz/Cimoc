@@ -161,17 +161,17 @@ jobs:
           name: data-server-${{ matrix.label }}
           path: data_server/${{ env.BIN }}
 
-      - name: Append to GitHub Release (tag only)
-        if: |
-          (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
-          (github.event_name == 'workflow_dispatch' && inputs.upload_release == true && startsWith(github.ref, 'refs/tags/v'))
-        uses: softprops/action-gh-release@v3
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref_name }}
-          files: |
-            data_server/${{ env.BIN }}
+      # - name: Append to GitHub Release (tag only)
+      #   if: |
+      #     (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
+      #     (github.event_name == 'workflow_dispatch' && inputs.upload_release == true && startsWith(github.ref, 'refs/tags/v'))
+      #   uses: softprops/action-gh-release@v3
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     tag_name: ${{ github.ref_name }}
+      #     files: |
+      #       data_server/${{ env.BIN }}
 
   # ----------------------------------------------------------------
   # 收尾：聚合 3 个 artifact + config 示例 → data-server-binaries
@@ -209,17 +209,17 @@ jobs:
           name: data-server-binaries
           path: data_server/dist/
 
-      - name: Append bundle to Release
-        if: |
-          (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
-          (github.event_name == 'workflow_dispatch' && inputs.upload_release == true && startsWith(github.ref, 'refs/tags/v'))
-        uses: softprops/action-gh-release@v3
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref_name }}
-          files: |
-            data_server/dist/xcimoc-data-server-linux-amd64
-            data_server/dist/xcimoc-data-server-linux-arm64
-            data_server/dist/xcimoc-data-server-windows-amd64.exe
-            data_server/dist/config.example.yaml
+      # - name: Append bundle to Release
+      #   if: |
+      #     (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
+      #     (github.event_name == 'workflow_dispatch' && inputs.upload_release == true && startsWith(github.ref, 'refs/tags/v'))
+      #   uses: softprops/action-gh-release@v3
+      #   env:
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     tag_name: ${{ github.ref_name }}
+      #     files: |
+      #       data_server/dist/xcimoc-data-server-linux-amd64
+      #       data_server/dist/xcimoc-data-server-linux-arm64
+      #       data_server/dist/xcimoc-data-server-windows-amd64.exe
+      #       data_server/dist/config.example.yaml

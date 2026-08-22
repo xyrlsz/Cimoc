@@ -146,15 +146,6 @@ jobs:
           name: data-server-${{ matrix.label }}
           path: ${{ env.BIN_PATH }}
 
-      - name: Append binary to GitHub Release
-        uses: softprops/action-gh-release@v3
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref_name }}
-          files: |
-            ${{ env.BIN_PATH }}
-
   # ============================================================
   # 2) APK 构建 + 上传默认产物（config.example.yaml 等）
   #    这部分与原逻辑保持一致，只是不再混打 Go 二进制。

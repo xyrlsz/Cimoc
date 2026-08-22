@@ -1,9 +1,96 @@
 > [!TIP]
 > `v1.10.9及以下的版本更新到v1.11.0以及以上的版本`
-> 
+>
 > 1. 由于更新了数据库框架，原有的数据需要迁移。
 > 2. 请使用软件的备份恢复功能进行数据迁移。
 > 3. 已下载漫画可以在设置里找到扫描选项
+
+## v1.14.0
+
+### feat
+
+- 集成 QuickJS JavaScript 引擎（quickjs-ng），添加 JNI 封装、兼容层及 UTF-8/UTF-16 Native 转换，支持自定义 JS 脚本执行
+- 添加基于 WebView 的 JS 执行工具（WebViewJsExecutor），支持在真实浏览器环境中执行脚本
+- 新增漫画源：漫画之家（ManHuaZhiJia）、动漫嗨（DongManHi）
+- 添加 Cloudflare 认证处理功能，支持自动等待和交互式验证
+- 新增搜索关键词历史记录管理，支持自动补全与持久化
+- 详情界面和结果界面新增下拉刷新功能；OkHttp 缓存调整为 5 分钟 + 内存缓存 + 超时降级展示
+- 深色模式切换不再需要重启应用即可生效
+- 阅读界面全面现代化改造，优化快捷设置面板描边按钮边框色，支持明暗模式自适应；新增阅读器加载图标
+- 切换默认阅读模式时同步保存，下次打开自动生效
+- 集成 dav4jvm WebDAV 客户端替换 sardine-android；WebDavClient 新增获取资源最后修改时间的能力，WebDav 文档文件处理更完整
+- 添加 Base64Utils 工具类，统一替换各处 Base64 解码逻辑
+- 数据同步引入事件驱动（event-based）机制，实现漫画与标签的增量同步
+- 事件推送 / 拉取接口新增最新事件流尾部返回（latest_id），配合 since_id 参数推进同步游标
+- 优化 CORS 配置，允许空数组上传，增强跨域兼容性
+
+### fix
+
+- 修复 QuickJS JNI 构建与字符转换等兼容性问题
+- 修复 build.gradle 语法、Gradle JVM 参数，移除不必要的 Kotlin 插件/依赖
+- 修复腾讯漫画、G社漫画（GFMH）、TTKMH、YKMH、古风漫画、MYCOMIC 等多个漫画源；优化 Cloudflare 提示与配置
+- 修复取消收藏后同步到服务端的逻辑错误
+- 修复导出漫画出现重复章节、下载漫画的潜在错误
+- 修复章节数据更新、数据修复、数据加载等流程的 bug
+- 修复结果界面 / 其他界面被系统返回键或底部控件遮挡的问题
+- 修复闪退 bug：多处空值处理、序列化、反射调用、WebParser 初始化
+- 修复 OkHttp 缓存：清理策略改为自动清理、仅缓存文本，统一缓存时长并修复错误缓存 / 一直加载旧缓存的问题
+- 自定义 Snackbar 重构：底部居中布局、文字颜色修复，切换到 Material 主题
+- 修复搜索界面关键词自动补全、布局样式
+- 简化下载通知更新逻辑
+- 漫画更新检查：增加超时时间、优化并发数、失败不中断整体进度；优化 Manga 类解析逻辑与更新检查流程
+- 修复 Headers / ImageUrl 转换器，移除不必要的转换器，加强空值处理
+- 修复获取稳定标识的逻辑，改进空值处理和反射调用
+- 修复 OkHttpNetworkFetcher 构造函数 headers 传递，改为实时获取 HttpClient 以支持运行时网络设置切换
+- WebParser：新增 Wi-Fi 网络检查（仅 Wi-Fi 下加载 WebView）；优化滚动等待时间、JS 桥接接口与异常处理，增加详细错误信息
+- 优化 ReaderActivity 中系统栏可见性处理，移除不必要代码
+- 优化 DecryptionUtils 字符集处理，统一为 UTF-8
+- 修复 R8 混淆前的 Keep 规则检查，更新 ProGuard 规则
+- 修复文件目录读取检查，确保源目录存在且可读
+- 修复数据同步入口在设置页的位置、属性和文档说明
+- 修复自动登录数据同步服务器的流程
+- 修复 Gson 模型缺少 @SerializedName 的检测（SerializationDetector），支持 TypeToken / toJson
+- 文件处理类切换到官方 DocumentFile，增强兼容性和稳定性
+- SeekBar 组件重写并加固边界值处理，避免崩溃；ReaderPresenter 空列表从页码 1 开始
+- 增强 JWT 密钥管理，持久化存储避免重启失效
+
+### refactor
+
+- 重构 WebParser：每个实例独立 WebView，移除静态实例管理；清理缓存与请求头逻辑、精简配置参数
+- 重构适应 AGP 10（Android Gradle Plugin 10.x），移除旧的强制解析策略，Gradle/Lint 依赖升级
+- 重构请求头管理：移除 ComicFrescoHeaders 类，支持更灵活的调用上下文
+- 精简 CategoryActivity 与布局，移除不必要的 Spinner 逻辑
+- 数据服务器全面迁移到 gorm.io/gen 类型安全 SQL 代码，移除手写字符串 WHERE 条件
+- 移除 ObjectBox-go 相关代码，数据服务器存储全部切换到 CGO+GORM+SQLite
+- 代码清理与样式统一（style：清理代码、翻译资源、工具命名空间修正）
+- UI：优化 item_source 布局，简化结构并调整属性
+
+### build
+
+- 数据服务器：build.ps1 / build.sh 每次编译前自动重新运行 `go run ./gen`，支持 --gen-config 参数；调整 CGO 检查顺序
+- 数据服务器：移除 ObjectBox 安装与 build tag，改为纯 CGO + gorm.io/driver/sqlite 构建
+- 数据服务器：升级 Gin 到 v1.12.0 并启用 gin-contrib/gzip 压缩中间件，防止 Vary 头被覆盖
+- 更新 QuickJS 子模块到 quickjs-ng 版本；更新 quickjs 子项目
+- 多轮依赖更新（Gradle 插件、Lint、OkHttp、网络库、QuickJS 等）
+- 多轮编译脚本修改（PowerShell / Bash）与 GitHub Actions 工作流调整
+- compileSdk / targetSdk 升级到 37，新增 ACCESS_LOCAL_NETWORK 权限
+- minSdkVersion 降低到 21，覆盖更多设备
+- ProGuard 规则更新，添加反射检测器；新增自定义 Lint 检查以验证 R8 Keep 规则
+
+### perf
+
+- 漫画同步逻辑改为批量处理，减少数据库查询次数；更新数据模型索引提升查询效率
+- 网络请求与下载管理引入专用线程池，提升并发性能
+- 注释掉 Sync 方法中的性能计时逻辑，精简运行时开销
+- 同步游标失效自愈：客户端在服务端数据重置时自动恢复（since_id 不再卡死）
+- 新增去重合并功能，优化漫画恢复时的显示逻辑
+
+### docs
+
+- README.md 多项更新说明
+- 更新数据同步服务器文档 / 部署说明
+
+---
 
 ## v1.13.3
 
