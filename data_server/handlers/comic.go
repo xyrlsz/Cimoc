@@ -94,16 +94,16 @@ func (h *ComicHandler) List(c *gin.Context) {
 //  3. 循环结束后用 4~5 条批量 SQL（Save/Create/批量 Delete）一次性写入；
 //  4. 非 PushOnly 时基于内存 map 用协程并行构建响应切片，省掉两次全表 SELECT。
 func (h *ComicHandler) Sync(c *gin.Context) {
-	t0 := time.Now()
+	// t0 := time.Now()
 	userID := c.GetUint("user_id")
-	bodyKB := c.Request.ContentLength / 1024
+	// bodyKB := c.Request.ContentLength / 1024
 
 	var req models.ComicSyncRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "请求参数无效: " + err.Error()})
 		return
 	}
-	tParse := time.Since(t0)
+	// tParse := time.Since(t0)
 
 	synced := 0
 	skipped := 0
@@ -122,7 +122,7 @@ func (h *ComicHandler) Sync(c *gin.Context) {
 		tombstoneIDsToDelete []uint
 	)
 
-	tTxStart := time.Now()
+	// tTxStart := time.Now()
 	err := database.DB.Transaction(func(tx *gorm.DB) error {
 		qTx := query.Use(tx)
 		cm := qTx.Comic
@@ -153,10 +153,10 @@ func (h *ComicHandler) Sync(c *gin.Context) {
 				delMap[comicKey(r.Source, r.Cid)] = r
 			}
 		}
-		tPreload := time.Since(tTxStart)
+		// tPreload := time.Since(tTxStart)
 
 		// 3) 循环对账：只收集写入目标，不执行任何 SQL
-		tLoopStart := time.Now()
+		// tLoopStart := time.Now()
 		for _, item := range req.Comics {
 			if item.Cid == "" {
 				continue
@@ -283,12 +283,12 @@ func (h *ComicHandler) Sync(c *gin.Context) {
 			comicsToCreate = append(comicsToCreate, newComic)
 			newComics = append(newComics, newComic)
 		}
-		tLoop := time.Since(tLoopStart)
+		// tLoop := time.Since(tLoopStart)
 
 		// 4) 批量执行：分块避免 SQLite 单语句变量数上限（默认 998，
 		// 每行 ~15 列 → 每块 ≤ 60 行），MySQL/PG 同样安全。
 		const batchSize = 50
-		tBulkStart := time.Now()
+		// tBulkStart := time.Now()
 		if len(comicsToUpdate) > 0 {
 			for i := 0; i < len(comicsToUpdate); i += batchSize {
 				end := i + batchSize
@@ -332,14 +332,14 @@ func (h *ComicHandler) Sync(c *gin.Context) {
 				log.Printf("批量删除墓碑失败 (user_id=%d, n=%d): %v", userID, len(tombstoneIDsToDelete), err)
 			}
 		}
-		tBulk := time.Since(tBulkStart)
+		// tBulk := time.Since(tBulkStart)
 
-		log.Printf("[comics/sync timing] user=%d items=%d body=%dKB parse=%v "+
-			"preload=%v loop=%v bulk=%v (up=%d cr=%d tu=%d tc=%d td=%d skipped=%d)",
-			userID, len(req.Comics), bodyKB, tParse,
-			tPreload, tLoop, tBulk,
-			len(comicsToUpdate), len(comicsToCreate), len(tombstoneUpdates),
-			len(tombstoneCreates), len(tombstoneIDsToDelete), skipped)
+		// log.Printf("[comics/sync timing] user=%d items=%d body=%dKB parse=%v "+
+		// 	"preload=%v loop=%v bulk=%v (up=%d cr=%d tu=%d tc=%d td=%d skipped=%d)",
+		// 	userID, len(req.Comics), bodyKB, tParse,
+		// 	tPreload, tLoop, tBulk,
+		// 	len(comicsToUpdate), len(comicsToCreate), len(tombstoneUpdates),
+		// 	len(tombstoneCreates), len(tombstoneIDsToDelete), skipped)
 		return nil
 	})
 	if err != nil {
@@ -356,8 +356,8 @@ func (h *ComicHandler) Sync(c *gin.Context) {
 			Message:    "同步完成",
 			ServerTime: serverTime,
 		})
-		log.Printf("[comics/sync timing] user=%d total=%v (pushOnly, tx=%v)",
-			userID, time.Since(t0), time.Since(tTxStart))
+		// log.Printf("[comics/sync timing] user=%d total=%v (pushOnly, tx=%v)",
+		// 	userID, time.Since(t0), time.Since(tTxStart))
 		return
 	}
 
@@ -413,8 +413,8 @@ func (h *ComicHandler) Sync(c *gin.Context) {
 		Comics:     comics,
 		Deletes:    deletes,
 	})
-	log.Printf("[comics/sync timing] user=%d total=%v (tx=%v, build+marshal=%v)",
-		userID, time.Since(t0), time.Since(tTxStart), time.Since(t0)-time.Since(tTxStart))
+	// log.Printf("[comics/sync timing] user=%d total=%v (tx=%v, build+marshal=%v)",
+	// 	userID, time.Since(t0), time.Since(tTxStart), time.Since(t0)-time.Since(tTxStart))
 }
 
 // recordDelete 按 (user_id, source, cid) 更新或创建 ComicDelete 墓碑。
