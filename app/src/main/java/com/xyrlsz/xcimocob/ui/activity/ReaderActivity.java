@@ -501,6 +501,10 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
 
     protected void updateProgress() {
         mChapterPage.setText(StringUtils.getProgress(progress, max));
+        // 进度栏可见时同步 SeekBar 滑块位置，避免快速滑动后滑块与实际进度不一致
+        if (mProgressLayout != null && mProgressLayout.isShown() && mSeekBar != null) {
+            mSeekBar.setValue(Math.max(progress, 1));
+        }
     }
 
     @Override

@@ -50,6 +50,22 @@ public class StreamReaderActivity extends ReaderActivity {
                         hideControl();
                         break;
                     case RecyclerView.SCROLL_STATE_IDLE:
+                        // 快速滑动结束时再次同步进度，避免最后一次 onScrolled 因布局
+                        // 未完成（findFirstVisibleItemPosition 滞后）导致进度信息不更新
+                        syncStreamProgress(mLayoutManager.findFirstVisibleItemPosition(), 0, 0);
+                        if (mLoadPrev) {
+                            int item = mLayoutManager.findFirstVisibleItemPosition();
+                            if (item == 0) {
+                                mPresenter.loadPrev();
+                            }
+                        }
+                        if (mLoadNext) {
+                            int item = mLayoutManager.findLastVisibleItemPosition();
+                            if (item == mReaderAdapter.getItemCount() - 1) {
+                                mPresenter.loadNext();
+                            }
+                        }
+                        break;
                     case RecyclerView.SCROLL_STATE_SETTLING:
                         if (mLoadPrev) {
                             int item = mLayoutManager.findFirstVisibleItemPosition();
@@ -69,42 +85,52 @@ public class StreamReaderActivity extends ReaderActivity {
 
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                int target = mLayoutManager.findFirstVisibleItemPosition();
-                if (target != mLastPosition) {
-                    ImageUrl newImage = mReaderAdapter.getItem(target);
-                    ImageUrl oldImage = mReaderAdapter.getItem(mLastPosition);
-
-                    if (!oldImage.getChapter().equals(newImage.getChapter())) {
-                        switch (turn) {
-                            case PreferenceManager.READER_TURN_ATB:
-                                if (dy > 0) {
-                                    mPresenter.toNextChapter();
-                                } else if (dy < 0) {
-                                    mPresenter.toPrevChapter();
-                                }
-                                break;
-                            case PreferenceManager.READER_TURN_LTR:
-                                if (dx > 0) {
-                                    mPresenter.toNextChapter();
-                                } else if (dx < 0) {
-                                    mPresenter.toPrevChapter();
-                                }
-                                break;
-                            case PreferenceManager.READER_TURN_RTL:
-                                if (dx > 0) {
-                                    mPresenter.toPrevChapter();
-                                } else if (dx < 0) {
-                                    mPresenter.toNextChapter();
-                                }
-                                break;
-                        }
-                    }
-                    progress = mReaderAdapter.getItem(target).getNum();
-                    mLastPosition = target;
-                    updateProgress();
-                }
+                syncStreamProgress(mLayoutManager.findFirstVisibleItemPosition(), dx, dy);
             }
         });
+    }
+
+    /**
+     * 同步当前页进度。滑动过程中（dx/dy 非 0）按手势方向判定章节切换；
+     * 滑动停止（dx/dy 均为 0，如 IDLE 时兜底同步）则按位置前后判定方向。
+     * 仅当 target 与 mLastPosition 不同时才更新，避免重复触发章节切换。
+     */
+    private void syncStreamProgress(int target, int dx, int dy) {
+        if (target == RecyclerView.NO_POSITION || target == mLastPosition) {
+            return;
+        }
+        int count = mReaderAdapter.getItemCount();
+        if (target < 0 || target >= count || mLastPosition < 0 || mLastPosition >= count) {
+            return;
+        }
+        ImageUrl newImage = mReaderAdapter.getItem(target);
+        ImageUrl oldImage = mReaderAdapter.getItem(mLastPosition);
+
+        if (!oldImage.getChapter().equals(newImage.getChapter())) {
+            boolean forward;
+            switch (turn) {
+                case PreferenceManager.READER_TURN_ATB:
+                    forward = dy != 0 ? dy > 0 : target > mLastPosition;
+                    break;
+                case PreferenceManager.READER_TURN_LTR:
+                    forward = dx != 0 ? dx > 0 : target > mLastPosition;
+                    break;
+                case PreferenceManager.READER_TURN_RTL:
+                    forward = dx != 0 ? dx < 0 : target > mLastPosition;
+                    break;
+                default:
+                    forward = target > mLastPosition;
+                    break;
+            }
+            if (forward) {
+                mPresenter.toNextChapter();
+            } else {
+                mPresenter.toPrevChapter();
+            }
+        }
+        progress = newImage.getNum();
+        mLastPosition = target;
+        updateProgress();
     }
 
     @Override

@@ -54,7 +54,7 @@ public class PageReaderActivity extends ReaderActivity implements OnPageChangedL
 
     @Override
     public void OnPageChanged(int oldPosition, int newPosition) {
-        if (oldPosition < 0 || newPosition < 0) {
+        if (newPosition < 0) {
             return;
         }
 
@@ -66,13 +66,17 @@ public class PageReaderActivity extends ReaderActivity implements OnPageChangedL
         }
 
         ImageUrl newImage = mReaderAdapter.getItem(newPosition);
-        ImageUrl oldImage = mReaderAdapter.getItem(oldPosition);
 
-        if (!oldImage.getChapter().equals(newImage.getChapter())) {
-            if (newPosition > oldPosition) {
-                mPresenter.toNextChapter();
-            } else if (newPosition < oldPosition) {
-                mPresenter.toPrevChapter();
+        // 仅当 oldPosition 合法且与 newPosition 不同时才检测章节切换，
+        // 避免 mCurView 为空（oldPosition = -1）时进度不更新
+        if (oldPosition >= 0 && oldPosition != newPosition) {
+            ImageUrl oldImage = mReaderAdapter.getItem(oldPosition);
+            if (!oldImage.getChapter().equals(newImage.getChapter())) {
+                if (newPosition > oldPosition) {
+                    mPresenter.toNextChapter();
+                } else {
+                    mPresenter.toPrevChapter();
+                }
             }
         }
 
