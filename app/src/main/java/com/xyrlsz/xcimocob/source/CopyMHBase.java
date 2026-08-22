@@ -45,7 +45,7 @@ import okhttp3.Response;
 
 public abstract class CopyMHBase extends MangaParser {
 
-    public static final String website = "https://www.copy3000.com";
+    public static final String website = "https://www.copy4000.com";
 
     protected final int type;
     protected final SharedPreferences sharedPreferences;
