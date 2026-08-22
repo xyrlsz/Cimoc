@@ -76,7 +76,9 @@ public class App extends Application implements AppGetter, Thread.UncaughtExcept
     private RecyclerView.RecycledViewPool mRecycledPool;
     private BoxStore mBoxStore;
     private ActivityLifecycle mActivityLifecycle;
-    /** 应用层设置自定义 UncaughtExceptionHandler 前的系统/第三方旧处理器；处理完自定义日志后必须委托回去 */
+    /**
+     * 应用层设置自定义 UncaughtExceptionHandler 前的系统/第三方旧处理器；处理完自定义日志后必须委托回去
+     */
     private Thread.UncaughtExceptionHandler mOldUncaughtExceptionHandler;
 
     public static Context getAppContext() {
@@ -173,17 +175,26 @@ public class App extends Application implements AppGetter, Thread.UncaughtExcept
                                         //       Accept-Encoding: gzip 也直接回 gzip 字节，导致解析器看到
                                         //       \u001f (gzip 魔数) 却直接按 HTML/JSON 解析出错。
                                         String vary = response.header("Vary");
-                                        boolean hasAcceptEncoding = false;
+                                        boolean needAdd = true;
+
                                         if (vary != null && !vary.isEmpty()) {
-                                            String[] parts = vary.split(",");
-                                            for (String p : parts) {
-                                                if (p.trim().equalsIgnoreCase("Accept-Encoding")) {
-                                                    hasAcceptEncoding = true;
-                                                    break;
+                                            // 1. 检查是否包含 "*"（通配符）
+                                            if (vary.contains("*")) {
+                                                needAdd = false; // 已隐含所有依赖，无需再追加
+                                            } else {
+                                                // 2. 正常检查 Accept-Encoding
+                                                String[] parts = vary.split(",");
+                                                for (String p : parts) {
+                                                    if (p.trim().equalsIgnoreCase("Accept-Encoding")) {
+                                                        needAdd = false;
+                                                        break;
+                                                    }
                                                 }
                                             }
                                         }
-                                        if (!hasAcceptEncoding) {
+
+                                        if (needAdd) {
+                                            // 建议使用 setHeader 而非 addHeader，避免重复头
                                             b.addHeader("Vary", "Accept-Encoding");
                                         }
                                         return b.build();
