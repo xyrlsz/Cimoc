@@ -15,9 +15,8 @@ forked from https://github.com/Haleydu/Cimoc
 
 # 漫画源
 
-<!-- > 漫画源工作情况可以在[project](https://github.com/xyrlsz/Cimoc/projects/1)中进行查看，请尽量不要重复issues -->
 > - 各位大佬们提交漫画源相关issue请按照[模板](.github/ISSUE_TEMPLATE/comic-source-issues.md)填写，方便检查问题。
-> - 部分漫画源可能中国大陆无法访问，需要使用代理，具体请自行搜索。
+> - 部分漫画源可能**中国大陆网络下无法访问**，需要使用**代理**（魔法上网），具体请自行搜索。
 # 功能简介
 
 - 翻页阅读（Page Reader）
@@ -45,7 +44,6 @@ forked from https://github.com/Haleydu/Cimoc
 - [RxJava](https://github.com/ReactiveX/RxJava)
 - [RxAndroid](https://github.com/ReactiveX/RxAndroid)
 - [QuickJS](https://github.com/quickjs-ng/quickjs)
-<!-- - [AppUpdater](https://gitee.com/jenly1314/AppUpdater) -->
 - [android-opencc](https://github.com/xyrlsz/android-opencc)
 - [dav4jvm](https://github.com/bitfireAT/dav4jvm)
 
@@ -62,8 +60,6 @@ forked from https://github.com/Haleydu/Cimoc
 > 在app/src/main/java/com/xyrlsz/xcimoc/source目录里面随便找一个复制一下
 > 注释是这个：app/src/main/java/com/xyrlsz/xcimoc/parser/MangaParser.java
 
-<!-- - （可选）继承 MangaCategory 类，参照 Category 接口的注释
-> 这个没什么大用的感觉，个人不常用，直接删掉不会有什么影响 -->
 
 - 在 SourceManger 的 getParser() 方法中加入相应分支
 
