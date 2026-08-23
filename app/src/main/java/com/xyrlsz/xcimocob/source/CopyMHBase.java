@@ -107,6 +107,7 @@ public abstract class CopyMHBase extends MangaParser {
         filter.add(new UrlFilter("www.2025copy.com", "comic/(\\w+)", 1));
         filter.add(new UrlFilter("www.2026copy.com", "comic/(\\w+)", 1));
         filter.add(new UrlFilter("www.copy3000.com", "comic/(\\w+)", 1));
+        filter.add(new UrlFilter("www.copy4000.com", "comic/(\\w+)", 1));
     }
 
     @Override
