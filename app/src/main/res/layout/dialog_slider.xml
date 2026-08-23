@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.xyrlsz.xcimocob.ui.widget.SeekBar xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/dialog_slider_bar"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -8,4 +9,5 @@
     android:valueFrom="0"
     android:valueTo="100"
     android:value="0"
-    android:stepSize="1" />
+    android:stepSize="1"
+    app:labelStyle="@style/SliderTooltip" />

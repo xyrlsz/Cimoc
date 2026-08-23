@@ -15,6 +15,11 @@ public class ViewUtils {
         return dp * context.getResources().getDisplayMetrics().density;
     }
 
+    public static int dpToPixelInt(int dp, Context context) {
+        float density = context.getResources().getDisplayMetrics().density;
+        return (int) (dp * density + 0.5f); // +0.5f 是为了四舍五入
+    }
+
     public static void postOnAnimation(View view, Runnable runnable) {
         if (Build.VERSION.SDK_INT >= 16) {
             view.postOnAnimation(runnable);

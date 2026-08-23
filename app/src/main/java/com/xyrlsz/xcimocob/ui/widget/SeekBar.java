@@ -1,6 +1,8 @@
 package com.xyrlsz.xcimocob.ui.widget;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.util.AttributeSet;
 
 import androidx.annotation.NonNull;
@@ -18,16 +20,23 @@ import com.google.android.material.slider.Slider;
  */
 public class SeekBar extends Slider {
 
+
     public SeekBar(@NonNull Context context) {
         super(context);
+        setHaloRadius(0);
+        hideTricks();
     }
 
     public SeekBar(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        setHaloRadius(0);
+        hideTricks();
     }
 
     public SeekBar(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        setHaloRadius(0);
+        hideTricks();
     }
 
     @Override
@@ -80,6 +89,12 @@ public class SeekBar extends Slider {
             super.setValueTo(valueTo);
         }
         setValue(value);
+    }
+
+    private void hideTricks() {
+        super.setTickActiveTintList(ColorStateList.valueOf(Color.TRANSPARENT));
+        super.setTickInactiveTintList(ColorStateList.valueOf(Color.TRANSPARENT));
+
     }
 
 }

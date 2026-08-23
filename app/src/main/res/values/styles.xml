@@ -163,5 +163,14 @@
         <item name="colorSecondary">@color/colorPrimaryOrangeDark</item>
         <item name="android:windowBackground">@color/colorBackground</item>
     </style>
+    <style name="SliderTooltip" parent="Widget.MaterialComponents.Tooltip">
+        <item name="backgroundTint">?attr/colorPrimary</item>
+        <item name="shapeAppearanceOverlay">@style/TooltipShapeOverlay</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
 
+    <style name="TooltipShapeOverlay">
+        <item name="cornerSize">50%</item>
+        <item name="cornerFamily">rounded</item>
+    </style>
 </resources>
