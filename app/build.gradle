@@ -201,7 +201,7 @@ dependencies {
     api 'com.google.guava:guava:33.7.1-android'
     implementation 'com.google.code.gson:gson:2.14.0'
 
-    implementation 'com.github.xyrlsz:android-opencc:1.4.2'
+    implementation 'com.github.xyrlsz:android-opencc:1.4.2.1'
     // WebDAV 客户端：dav4jvm（基于 Ktor 3.5.1）。Android 系统自带 XmlPullParser，排除 xpp3 避免重复类
     implementation('com.github.bitfireAT:dav4jvm:4.0.0') {
         exclude group: 'org.ogce', module: 'xpp3'
