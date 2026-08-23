@@ -56,8 +56,10 @@ public class SeekBar extends Slider {
     public void setValue(float value) {
         if (value > getValueTo()) {
             super.setValue(getValueTo());
+            return;
         } else if (value < getValueFrom()) {
             super.setValue(getValueFrom());
+            return;
         }
         super.setValue(value);
     }

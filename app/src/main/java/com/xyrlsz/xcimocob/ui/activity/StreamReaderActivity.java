@@ -175,7 +175,11 @@ public class StreamReaderActivity extends ReaderActivity {
     public void onPrevLoadSuccess(List<ImageUrl> list) {
         super.onPrevLoadSuccess(list);
         if (mLastPosition == 0) {
+            // 用户滑到顶部触发的预加载：插入后 position 0 变为上一章第一页。
+            // 校正 mLastPosition 并主动同步一次，立即完成章节切换与进度更新，
+            // 避免用户停留（不继续滑动）时章节切换/进度迟迟不生效
             mLastPosition = list.size();
+            syncStreamProgress(0, 0, 0);
         }
     }
 

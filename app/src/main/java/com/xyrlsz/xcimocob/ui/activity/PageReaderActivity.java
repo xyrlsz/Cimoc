@@ -58,24 +58,27 @@ public class PageReaderActivity extends ReaderActivity implements OnPageChangedL
             return;
         }
 
-        if (mLoadPrev && newPosition == 0) {
-            mPresenter.loadPrev();
-        }
-        if (mLoadNext && newPosition == mReaderAdapter.getItemCount() - 1) {
-            mPresenter.loadNext();
-        }
-
         ImageUrl newImage = mReaderAdapter.getItem(newPosition);
 
-        // 仅当 oldPosition 合法且与 newPosition 不同时才检测章节切换，
-        // 避免 mCurView 为空（oldPosition = -1）时进度不更新
-        if (oldPosition >= 0 && oldPosition != newPosition) {
-            ImageUrl oldImage = mReaderAdapter.getItem(oldPosition);
-            if (!oldImage.getChapter().equals(newImage.getChapter())) {
-                if (newPosition > oldPosition) {
-                    mPresenter.toNextChapter();
-                } else {
-                    mPresenter.toPrevChapter();
+        // oldPosition 合法（非初始 -1，mCurView 非空）时才进行预加载与章节切换检测；
+        // 初始回调（oldPosition = -1）只更新进度，避免自动加载上一章/下一章
+        if (oldPosition >= 0) {
+            if (mLoadPrev && newPosition == 0) {
+                mPresenter.loadPrev();
+            }
+            if (mLoadNext && newPosition == mReaderAdapter.getItemCount() - 1) {
+                mPresenter.loadNext();
+            }
+
+            // 仅当位置真正变化时才检测章节切换，避免 mCurView 刷新时重复切换
+            if (oldPosition != newPosition) {
+                ImageUrl oldImage = mReaderAdapter.getItem(oldPosition);
+                if (!oldImage.getChapter().equals(newImage.getChapter())) {
+                    if (newPosition > oldPosition) {
+                        mPresenter.toNextChapter();
+                    } else {
+                        mPresenter.toPrevChapter();
+                    }
                 }
             }
         }
