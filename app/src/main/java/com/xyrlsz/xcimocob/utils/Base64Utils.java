@@ -17,7 +17,9 @@ public final class Base64Utils {
     private Base64Utils() {
     }
 
-    /** 解码前需要去除的空白字符：回车、换行、制表符、空格、换页符 */
+    /**
+     * 解码前需要去除的空白字符：回车、换行、制表符、空格、换页符
+     */
     private static final Pattern WHITESPACE = Pattern.compile("[\\r\\n\\t \\f]");
 
     // ==================== 标准 Base64 ====================
@@ -53,6 +55,10 @@ public final class Base64Utils {
      */
     public static String encodeToString(String data) {
         return encode(data.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static String encodeToString(byte[] data) {
+        return encode(data);
     }
 
     // ==================== URL Safe（base64url，用于 JWT 等） ====================
