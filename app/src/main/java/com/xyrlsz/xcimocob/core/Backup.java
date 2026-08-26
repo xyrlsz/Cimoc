@@ -335,10 +335,12 @@ public class Backup {
                     String cid = object.getString(JSON_CIMOC_KEY_COMIC_CID);
                     String title = object.getString(JSON_CIMOC_KEY_COMIC_TITLE);
                     String cover = object.getString(JSON_CIMOC_KEY_COMIC_COVER);
-                    String update = object.optString(JSON_CIMOC_KEY_COMIC_UPDATE, null);
+                    String update = object.optString(JSON_CIMOC_KEY_COMIC_UPDATE);
+                    if (StringUtils.isEmpty(update) || "null".equals(update)) update = null;
                     Boolean finish = object.has(JSON_CIMOC_KEY_COMIC_FINISH) ?
                             object.getBoolean(JSON_CIMOC_KEY_COMIC_FINISH) : null;
-                    String last = object.optString(JSON_CIMOC_KEY_COMIC_LAST, null);
+                    String last = object.optString(JSON_CIMOC_KEY_COMIC_LAST);
+                    if (StringUtils.isEmpty(last) || "null".equals(last)) last = null;
                     Integer page = object.has(JSON_CIMOC_KEY_COMIC_PAGE) ?
                             object.getInt(JSON_CIMOC_KEY_COMIC_PAGE) : null;
                     Integer chapterCount = object.has(JSON_KEY_COMIC_CHAPTER_COUNT) ?
@@ -355,13 +357,16 @@ public class Backup {
                     String cid = object.getString(JSON_KEY_COMIC_CID);
                     String title = object.getString(JSON_KEY_COMIC_TITLE);
                     String cover = object.getString(JSON_KEY_COMIC_COVER);
-                    String update = object.optString(JSON_KEY_COMIC_UPDATE, null);
+                    String update = object.optString(JSON_KEY_COMIC_UPDATE);
+                    if (StringUtils.isEmpty(update) || "null".equals(update)) update = null;
                     Boolean finish = object.has(JSON_KEY_COMIC_FINISH) ?
                             object.getBoolean(JSON_KEY_COMIC_FINISH) : null;
-                    String last = object.optString(JSON_KEY_COMIC_LAST, null);
+                    String last = object.optString(JSON_KEY_COMIC_LAST);
+                    if (StringUtils.isEmpty(last) || "null".equals(last)) last = null;
                     Integer page = object.has(JSON_KEY_COMIC_PAGE) ?
                             object.getInt(JSON_KEY_COMIC_PAGE) : null;
-                    String chapter = object.optString(JSON_KEY_COMIC_CHAPTER, null);
+                    String chapter = object.optString(JSON_KEY_COMIC_CHAPTER);
+                    if (StringUtils.isEmpty(chapter) || "null".equals(chapter)) chapter = null;
                     Integer chapterCount = object.has(JSON_KEY_COMIC_CHAPTER_COUNT) ?
                             object.getInt(JSON_KEY_COMIC_CHAPTER_COUNT) : 0;
                     Long favorite = object.has(JSON_KEY_COMIC_FAVORITE) ?

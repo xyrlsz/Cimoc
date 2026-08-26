@@ -4,3 +4,6 @@
 [submodule "quickjs/src/main/cpp/quickjs"]
 	path = quickjs/src/main/cpp/quickjs
 	url = https://github.com/quickjs-ng/quickjs.git
+[submodule "xcimoc-js-sources"]
+	path = xcimoc-js-sources
+	url = https://github.com/xyrlsz/xcimoc-js-sources.git

@@ -18,6 +18,14 @@ public class Source {
     private String baseUrl;
 
     public Source() {
+        // id 必须为 0：ObjectBox 对 @Id(assignable=true) 且 id<=0 的实体自动分配唯一 id；
+        // 若用负数（如 -2）会被当作固定 id，多次 put 会写入同一行互相覆盖。
+        // （JsSourceManager#syncSource 用 new Source() 写入 27 个源，曾因此只剩 1 行。）
+        this.id = 0;
+        this.title = "unknow";
+        this.type = -1;
+        this.enable = false;
+        this.baseUrl = "";
     }
 
     public Source(long id, String title, int type, boolean enable, String baseUrl) {

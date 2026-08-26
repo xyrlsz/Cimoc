@@ -39,11 +39,9 @@ import com.xyrlsz.xcimocob.ui.adapter.GridAdapter;
 import com.xyrlsz.xcimocob.utils.DocumentUtils;
 import com.xyrlsz.xcimocob.utils.FrescoUtils;
 import com.xyrlsz.xcimocob.utils.HintUtils;
-import com.xyrlsz.xcimocob.utils.KomiicUtils;
 import com.xyrlsz.xcimocob.utils.StringUtils;
 import com.xyrlsz.xcimocob.utils.ThemeUtils;
 import com.xyrlsz.xcimocob.utils.TrustAllSslUtils;
-import com.xyrlsz.xcimocob.utils.ZaiManhuaSignUtils;
 
 import java.io.File;
 import java.util.concurrent.TimeUnit;
@@ -282,6 +280,28 @@ public class App extends Application implements AppGetter, Thread.UncaughtExcept
         // 获取栈顶Activity以及当前App上下文
         mApp = this;
 
+        // 首次启动播种内置 JS 源（幂等，仅当 JsSource 表为空时写入）
+        try {
+            com.xyrlsz.xcimocob.manager.JsSourceManager.getInstance(this).seedFromAssets();
+        } catch (Throwable ignore) {
+        }
+
+        // 后台自动签到：对开启了 auto_sign 设置的源（如再漫画）在打开时签到
+        new Thread(() -> {
+            try {
+                com.xyrlsz.xcimocob.manager.JsSourceManager.getInstance(this).autoSignIn();
+            } catch (Throwable ignore) {
+            }
+        }).start();
+
+        // 打开 App 自动检查并更新漫画源（受设置开关 + 频率限制控制）
+        new Thread(() -> {
+            try {
+                com.xyrlsz.xcimocob.manager.JsSourceManager.getInstance(this).autoUpdateIfNeeded();
+            } catch (Throwable ignore) {
+            }
+        }).start();
+
         // 初始化自动数据同步管理器
         DataSyncManager dataSyncManager = DataSyncManager.getInstance();
         dataSyncManager.init();
@@ -367,48 +387,6 @@ public class App extends Application implements AppGetter, Thread.UncaughtExcept
 
         // 初始化OpenCC
         ChineseConverter.init(getApplicationContext());
-
-        // 再漫画检查登录与自动签到
-        SharedPreferences zaiSharedPreferences = getApplicationContext().getSharedPreferences(
-                Constants.ZAI_SHARED, Context.MODE_PRIVATE);
-        long timestamp = System.currentTimeMillis() / 1000;
-        long exp = zaiSharedPreferences.getLong(Constants.ZAI_SHARED_EXP, 0);
-        boolean autoSign = zaiSharedPreferences.getBoolean(Constants.ZAI_SHARED_AUTO_SIGN, false);
-        String username = zaiSharedPreferences.getString(Constants.ZAI_SHARED_USERNAME, "");
-        String passwordMd5 = zaiSharedPreferences.getString(Constants.ZAI_SHARED_PASSWD_MD5, "");
-        if (timestamp > exp && !username.isEmpty() && !passwordMd5.isEmpty()) {
-            ZaiManhuaSignUtils.LoginWithPasswdMd5(this, new ZaiManhuaSignUtils.LoginCallback() {
-                @Override
-                public void onSuccess() {
-                    if (autoSign) {
-                        ZaiManhuaSignUtils.CheckSigned(getApplicationContext(), isSigned -> {
-                            if (!isSigned) {
-                                ZaiManhuaSignUtils.SignIn(getApplicationContext());
-                            }
-                        });
-                    }
-                }
-
-                @Override
-                public void onFail() {
-                    HintUtils.showToast(getApplicationContext(), "再漫画登录失败");
-                }
-            }, username, passwordMd5);
-        } else if (timestamp > exp && !username.isEmpty()) {
-            // 有用户名但没有密码MD5（旧版本数据），提示重新登录
-            HintUtils.showToast(getApplicationContext(), "再漫画登录过期，请重新登录");
-        } else if (autoSign) {
-            ZaiManhuaSignUtils.CheckSigned(getApplicationContext(), isSigned -> {
-                if (!isSigned) {
-                    ZaiManhuaSignUtils.SignIn(getApplicationContext());
-                }
-            });
-        }
-
-        // komiic 自动刷新token
-        if (KomiicUtils.checkExpired()) {
-            KomiicUtils.refresh(this);
-        }
 
         FrescoUtils.init(this, 512);
     }

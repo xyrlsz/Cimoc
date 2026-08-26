@@ -8,6 +8,13 @@
     private static native <methods>;
 }
 
+# hostCall 桥：C 层 GetStaticMethodID 按名找 onHostCall，必须保持签名；HostBridge 接口同理。
+-keepclassmembers class com.xyrlsz.quickjs.QuickJSEngine {
+    public static java.lang.String onHostCall(java.lang.String, java.lang.String);
+    public static void setHostBridge(com.xyrlsz.quickjs.QuickJSEngine$HostBridge);
+}
+-keep interface com.xyrlsz.quickjs.QuickJSEngine$HostBridge { *; }
+
 # ========== Rhino 兼容 API ==========
 # 公开 API 层保持类名与方法名，便于宿主直接引用（无需反射）。
 -keep public class com.xyrlsz.quickjs.Context {

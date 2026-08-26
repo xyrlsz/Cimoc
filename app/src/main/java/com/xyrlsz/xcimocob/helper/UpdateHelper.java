@@ -6,37 +6,14 @@ import com.xyrlsz.opencc.android.lib.ChineseConverter;
 import com.xyrlsz.xcimocob.BuildConfig;
 import com.xyrlsz.xcimocob.manager.PreferenceManager;
 import com.xyrlsz.xcimocob.model.Comic;
+import com.xyrlsz.xcimocob.model.JsSource;
+import com.xyrlsz.xcimocob.model.JsSource_;
 import com.xyrlsz.xcimocob.model.Source;
-import com.xyrlsz.xcimocob.source.Baozi;
-import com.xyrlsz.xcimocob.source.BuKa;
-import com.xyrlsz.xcimocob.source.CopyMH;
-import com.xyrlsz.xcimocob.source.CopyMHWeb;
-import com.xyrlsz.xcimocob.source.DM5;
-import com.xyrlsz.xcimocob.source.DongManHi;
-import com.xyrlsz.xcimocob.source.DongManManHua;
-import com.xyrlsz.xcimocob.source.DuManWu;
-import com.xyrlsz.xcimocob.source.DuManWuApp;
-import com.xyrlsz.xcimocob.source.GFMH;
-import com.xyrlsz.xcimocob.source.GoDaManHua;
-import com.xyrlsz.xcimocob.source.HotManga;
-import com.xyrlsz.xcimocob.source.Komiic;
-import com.xyrlsz.xcimocob.source.MH5;
-import com.xyrlsz.xcimocob.source.MYCOMIC;
-import com.xyrlsz.xcimocob.source.ManBen;
-import com.xyrlsz.xcimocob.source.ManHuaGui;
-import com.xyrlsz.xcimocob.source.ManHuaZhiJia;
-import com.xyrlsz.xcimocob.source.ManWa;
-import com.xyrlsz.xcimocob.source.MangaBZ;
-import com.xyrlsz.xcimocob.source.Manhuatai;
-import com.xyrlsz.xcimocob.source.Manhuayu;
-import com.xyrlsz.xcimocob.source.TTKMH;
-import com.xyrlsz.xcimocob.source.Tencent;
-import com.xyrlsz.xcimocob.source.Vomicmh;
-import com.xyrlsz.xcimocob.source.YKMH;
-import com.xyrlsz.xcimocob.source.YYManHua;
-import com.xyrlsz.xcimocob.source.ZaiManhua;
+import com.xyrlsz.xcimocob.source.Locality;
+import com.xyrlsz.xcimocob.source.Null;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,54 +29,14 @@ public class UpdateHelper {
     // 1.04.08.008
     private static final int VERSION = BuildConfig.VERSION_CODE;
 
-    private static final Map<Integer, Source> ComicSourceTable = new HashMap<>();
+    /**
+     * 内置 Java 漫画源已移除，网络漫画源全部由 JS 源（JsSourceManager）提供。
+     * 该表保留为空，仅用于兼容旧的测试代码。
+     */
+    private static final Map<Integer, Source> ComicSourceTable = Collections.emptyMap();
 
     public static Map<Integer, Source> getComicSourceTable() {
-        if (ComicSourceTable.isEmpty()) {
-            initComicSourceTable();
-        }
         return ComicSourceTable;
-    }
-
-    /**
-     * 初始化图源
-     */
-    private static void initComicSourceTable() {
-        if (ComicSourceTable.isEmpty()) {
-            //            ComicSourceTable.put(Animx2.TYPE, Animx2.getDefaultSource());
-            ComicSourceTable.put(Baozi.TYPE, Baozi.getDefaultSource());
-            ComicSourceTable.put(BuKa.TYPE, BuKa.getDefaultSource());
-            //            ComicSourceTable.put(Cartoonmad.TYPE, Cartoonmad.getDefaultSource());
-            ComicSourceTable.put(CopyMH.TYPE, CopyMH.getDefaultSource());
-            ComicSourceTable.put(DM5.TYPE, DM5.getDefaultSource());
-            ComicSourceTable.put(HotManga.TYPE, HotManga.getDefaultSource());
-            ComicSourceTable.put(ManHuaGui.TYPE, ManHuaGui.getDefaultSource());
-            //            ComicSourceTable.put(Mangakakalot.TYPE, Mangakakalot.getDefaultSource());
-            ComicSourceTable.put(MangaBZ.TYPE, MangaBZ.getDefaultSource());
-            ComicSourceTable.put(Manhuatai.TYPE, Manhuatai.getDefaultSource());
-            ComicSourceTable.put(MYCOMIC.TYPE, MYCOMIC.getDefaultSource());
-            ComicSourceTable.put(Tencent.TYPE, Tencent.getDefaultSource());
-            ComicSourceTable.put(DongManManHua.TYPE, DongManManHua.getDefaultSource());
-            ComicSourceTable.put(YKMH.TYPE, YKMH.getDefaultSource());
-            ComicSourceTable.put(DuManWu.TYPE, DuManWu.getDefaultSource());
-            //            ComicSourceTable.put(DuManWuOrg.TYPE, DuManWuOrg.getDefaultSource());
-            ComicSourceTable.put(Komiic.TYPE, Komiic.getDefaultSource());
-            ComicSourceTable.put(Manhuayu.TYPE, Manhuayu.getDefaultSource());
-            ComicSourceTable.put(GoDaManHua.TYPE, GoDaManHua.getDefaultSource());
-                        ComicSourceTable.put(TTKMH.TYPE, TTKMH.getDefaultSource());
-            ComicSourceTable.put(Vomicmh.TYPE, Vomicmh.getDefaultSource());
-            ComicSourceTable.put(YYManHua.TYPE, YYManHua.getDefaultSource());
-            //            ComicSourceTable.put(DmzjV4.TYPE, DmzjV4.getDefaultSource());
-            ComicSourceTable.put(ZaiManhua.TYPE, ZaiManhua.getDefaultSource());
-            ComicSourceTable.put(ManBen.TYPE, ManBen.getDefaultSource());
-            ComicSourceTable.put(GFMH.TYPE, GFMH.getDefaultSource());
-            ComicSourceTable.put(ManWa.TYPE, ManWa.getDefaultSource());
-            ComicSourceTable.put(MH5.TYPE, MH5.getDefaultSource());
-            ComicSourceTable.put(DuManWuApp.TYPE, DuManWuApp.getDefaultSource());
-            ComicSourceTable.put(CopyMHWeb.TYPE, CopyMHWeb.getDefaultSource());
-            ComicSourceTable.put(DongManHi.TYPE, DongManHi.getDefaultSource());
-            ComicSourceTable.put(ManHuaZhiJia.TYPE,ManHuaZhiJia.getDefaultSource());
-        }
     }
 
     public static void update(PreferenceManager manager, final BoxStore boxStore, Context context) {
@@ -107,17 +44,38 @@ public class UpdateHelper {
 
         if (version != VERSION) {
             // ObjectBox会自动处理 schema 变更，不需要手动添加列
-            initComicSourceTable();
-
             // 数据清洗：删除重复的 Comic（保留唯一组合）
             if (version <= 1508) {
                 cleanupDuplicateComics(boxStore);
             }
 
+            // 清理旧版本残留的内置源（无对应 JS 源的网络源条目）
+            cleanupStaleSources(boxStore);
+
             manager.putNumber(PreferenceManager.PREF_APP_VERSION, VERSION);
-            updateComicSource(boxStore);
             ChineseConverter.clearDictDataFolder(context);
             ChineseConverter.init(context);
+        }
+    }
+
+    /**
+     * 删除 Source 表中不再有对应 JS 源的内置源残留（本地漫画 Locality 与兜底 Null 除外）。
+     */
+    private static void cleanupStaleSources(BoxStore boxStore) {
+        Box<Source> sourceBox = boxStore.boxFor(Source.class);
+        Box<JsSource> jsBox = boxStore.boxFor(JsSource.class);
+        List<Source> toRemove = new ArrayList<>();
+        for (Source source : sourceBox.getAll()) {
+            int type = source.getType();
+            if (type == Locality.TYPE || type == Null.TYPE) {
+                continue;
+            }
+            if (jsBox.query().equal(JsSource_.type, type).build().findFirst() == null) {
+                toRemove.add(source);
+            }
+        }
+        if (!toRemove.isEmpty()) {
+            sourceBox.remove(toRemove);
         }
     }
 
@@ -153,59 +111,6 @@ public class UpdateHelper {
 
         if (!toRemove.isEmpty()) {
             comicBox.remove(toRemove);
-        }
-    }
-
-    private static void updateComicSource(BoxStore boxStore) {
-        Box<Source> sourceBox = boxStore.boxFor(Source.class);
-        List<Source> sourceList = sourceBox.getAll();
-        List<Source> sourcesToDelete = new ArrayList<>();
-        List<Source> sourcesToAdd = new ArrayList<>();
-        for (Source source : sourceList) {
-            if (!ComicSourceTable.containsKey(source.getType())) {
-                sourcesToDelete.add(source);
-            }
-        }
-        for (Integer cType : ComicSourceTable.keySet()) {
-            boolean isExist = false;
-            for (Source source : sourceList) {
-                if (source.getType() == cType) {
-                    isExist = true;
-                    break;
-                }
-            }
-            if (!isExist) {
-                sourcesToAdd.add(ComicSourceTable.get(cType));
-            }
-        }
-        if (!sourcesToDelete.isEmpty()) {
-            sourceBox.remove(sourcesToDelete);
-        }
-        if (!sourcesToAdd.isEmpty()) {
-            sourceBox.put(sourcesToAdd);
-        }
-        sourceList = sourceBox.getAll();
-        for (Source source : sourceList) {
-            if (ComicSourceTable.containsKey(source.getType())) {
-                Source sourceToUpdate = ComicSourceTable.get(source.getType());
-                if (sourceToUpdate != null) {
-                    String title1 = source.getTitle();
-                    String title2 = sourceToUpdate.getTitle();
-                    String baseUrl1 = source.getBaseUrl();
-                    String baseUrl2 = sourceToUpdate.getBaseUrl();
-
-                    boolean titleDiff = (title1 == null && title2 != null)
-                            || (title1 != null && !title1.equals(title2));
-                    boolean baseUrlDiff = (baseUrl1 == null && baseUrl2 != null)
-                            || (baseUrl1 != null && !baseUrl1.equals(baseUrl2));
-
-                    if (titleDiff || baseUrlDiff) {
-                        source.setTitle(title2);
-                        source.setBaseUrl(baseUrl2);
-                        sourceBox.put(source);
-                    }
-                }
-            }
         }
     }
 }

@@ -147,6 +147,10 @@ android {
 
     sourceSets {
         main {
+            // 只打包 App 运行需要的 JS 源文件：index.json + sources/** + source_sdk.js。
+            // 文件由 syncJsSources 任务从子模块复制到 build 生成目录，
+            // 排除子模块里的开发工具（README/scripts/debug 等）。
+            assets.srcDirs += "$buildDir/generated/assets/js-sources"
         }
     }
 
@@ -162,6 +166,21 @@ android {
         // 分析依赖库（AAR）字节码，供自定义 Lint 检测器（如 R8LibraryReflection）使用
         checkDependencies = true
     }
+}
+
+// 只打包需要的 JS 源文件：从子模块复制 index.json / source_sdk.js / sources/** 到
+// build 生成目录作为 assets 源，避免把 README/scripts/debug 等开发工具一并打进 APK。
+tasks.register('syncJsSources', Copy) {
+    from('../xcimoc-js-sources') {
+        include 'index.json'
+        include 'source_sdk.js'
+        include 'sources/**'
+    }
+    into layout.buildDirectory.dir('generated/assets/js-sources')
+}
+
+tasks.named('preBuild') {
+    dependsOn 'syncJsSources'
 }
 
 dependencies {
@@ -194,15 +213,14 @@ dependencies {
     implementation "com.facebook.fresco:animated-webp:3.7.0"
     implementation 'com.facebook.infer.annotation:infer-annotation:0.18.0'
 
-    implementation 'org.jsoup:jsoup:1.23.1'
+    implementation 'org.jsoup:jsoup:1.23.2'
     implementation 'com.google.re2j:re2j:1.8'
     implementation 'io.reactivex.rxjava3:rxjava:3.1.12'
     implementation 'io.reactivex.rxjava3:rxandroid:3.0.2'
     api 'com.google.guava:guava:33.7.1-android'
     implementation 'com.google.code.gson:gson:2.14.0'
 
-    implementation 'com.github.xyrlsz:android-opencc:1.4.2.1'
-    // WebDAV 客户端：dav4jvm（基于 Ktor 3.5.1）。Android 系统自带 XmlPullParser，排除 xpp3 避免重复类
+    implementation 'com.github.xyrlsz:android-opencc:1.4.2.2'
     implementation('com.github.bitfireAT:dav4jvm:4.0.0') {
         exclude group: 'org.ogce', module: 'xpp3'
     }

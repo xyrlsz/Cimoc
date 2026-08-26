@@ -142,6 +142,9 @@ public class PreferenceManager {
     public static final String PREF_OTHER_LAUNCH = "pref_other_launch";
     public static final String PREF_OTHER_NIGHT_ALPHA = "pref_other_night_alpha";
     public static final String PREF_OTHER_SHOW_TOPBAR = "pref_other_show_topbar";
+    /** APK 版本更新时强制用打包的 JS 源覆盖更新到 app 数据目录。 */
+    public static final String PREF_OTHER_FORCE_JS_UPDATE = "pref_other_force_js_update";
+    public static final String PREF_OTHER_JS_AUTO_UPDATE = "pref_other_js_auto_update";
 
     public static final String PREF_DOWNLOAD_THREAD = "pref_download_thread";
 
@@ -265,6 +268,7 @@ public class PreferenceManager {
             PREF_OTHER_LAUNCH,
             PREF_OTHER_NIGHT_ALPHA,
             PREF_OTHER_SHOW_TOPBAR,
+            PREF_OTHER_JS_AUTO_UPDATE,
             PREF_DOWNLOAD_THREAD,
             PREF_SEARCH_AUTO_COMPLETE,
             PREF_CHAPTER_BUTTON_MODE,

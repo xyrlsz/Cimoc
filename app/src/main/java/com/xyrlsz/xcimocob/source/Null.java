@@ -21,7 +21,7 @@ import okhttp3.Request;
 public class Null extends MangaParser {
 
     public static final int TYPE = -1;
-    public static final String DEFAULT_TITLE = "(null)";
+    public static final String DEFAULT_TITLE = "unknow";
     public static final String DEFAULT_SERVER = null;
 
     public Null() {

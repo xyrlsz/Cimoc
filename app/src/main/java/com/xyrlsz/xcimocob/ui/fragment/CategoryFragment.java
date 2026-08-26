@@ -134,6 +134,12 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
                 }
             }
         }
+        if (mSourceList.isEmpty()) {
+            mSource = -1;
+            mCategorySourceSpinner.setAdapter(new CategoryAdapter(getContext(), mSourceList));
+            mCategorySourceSpinner.setSelection(0);
+            return;
+        }
         mSource = Integer.parseInt(mSourceList.get(0).second);
         mCategorySourceSpinner.setAdapter(new CategoryAdapter(getContext(), mSourceList));
         mCategorySourceSpinner.setSelection(0);
@@ -207,7 +213,9 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
         mRecyclerView.setItemAnimator(null);
         mRecyclerView.setLayoutManager(initLayoutManager());
 
-        initSpinner(mSourceList.get(0).second);
+        if (!mSourceList.isEmpty()) {
+            initSpinner(mSourceList.get(0).second);
+        }
         GridLayoutManager layoutManager = (GridLayoutManager) mRecyclerView.getLayoutManager();
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             private ScrollDirection lastDirection = ScrollDirection.NONE;
@@ -351,6 +359,13 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
         int[] type = new int[]{Category.CATEGORY_SUBJECT, Category.CATEGORY_AREA, Category.CATEGORY_READER,
                 Category.CATEGORY_YEAR, Category.CATEGORY_PROGRESS, Category.CATEGORY_ORDER};
 
+        if (mCategory == null) {
+            // 该源无分类：隐藏所有分类行，避免 NPE
+            for (int i = 0; i != type.length; ++i) {
+                mCategoryView.get(i).setVisibility(View.GONE);
+            }
+            return;
+        }
         for (int i = 0; i != type.length; ++i) {
             if (mCategory.hasAttribute(type[i])) {
                 mCategoryView.get(i).setVisibility(View.VISIBLE);
@@ -398,6 +413,10 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
     }
 
     void onActionButtonClick() {
+        if (mCategory == null) {
+            // 当前源无分类信息（理论上不会发生，buildCategory 已保证非空），防御性处理
+            return;
+        }
         String[] args = new String[mSpinnerList.size()];
         for (int i = 0; i != args.length; ++i) {
             args[i] = getSpinnerValue(mSpinnerList.get(i));

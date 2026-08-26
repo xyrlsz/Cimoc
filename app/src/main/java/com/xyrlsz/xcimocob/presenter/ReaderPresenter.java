@@ -2,6 +2,7 @@ package com.xyrlsz.xcimocob.presenter;
 
 import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
 
 import com.xyrlsz.xcimocob.core.Download;
 import com.xyrlsz.xcimocob.core.Local;
@@ -134,6 +135,8 @@ public class ReaderPresenter extends BasePresenter<ReaderView> {
             return Local.images(dir, chapter);
         }
 
+        Log.i("Reader", "[reader] getObservable local=" + mComic.getLocal()
+                + " complete=" + chapter.isComplete() + " path=" + chapter.getPath());
         return chapter.isComplete() ? Download.images(mBaseView.getAppInstance().getDocumentFile(),
                 mComic, chapter, mSourceManager.getParser(mComic.getSource()).getTitle()) :
                 Manga.getChapterImage(chapter, mSourceManager.getParser(mComic.getSource()), mComic.getCid(), chapter.getPath());

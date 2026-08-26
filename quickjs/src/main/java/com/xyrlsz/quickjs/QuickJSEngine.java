@@ -21,6 +21,48 @@ public final class QuickJSEngine {
         System.loadLibrary("quickjs_jni");
     }
 
+    /**
+     * JS→Java 宿主回调桥。由 {@link #setHostBridge(HostBridge)} 注册一个全局处理器，
+     * C 层 JS 脚本调用 {@code hostCall(name, argsJson)} 时会经
+     * {@link #onHostCall(String, String)} 分发到该处理器。
+     */
+    public interface HostBridge {
+        /**
+         * 处理一次宿主调用。
+         *
+         * @param name     调用名（如 "dom"、"md5"、"aes_cbc"、"state"、"login" 等）
+         * @param argsJson 参数 JSON 字符串
+         * @return 结果 JSON 字符串；无法处理时返回 {@code "null"}
+         */
+        String onHostCall(String name, String argsJson);
+    }
+
+    private static volatile HostBridge sHostBridge;
+
+    /**
+     * 注册全局宿主回调桥（通常只设置一次）。需要在任何脚本执行前完成。
+     */
+    public static void setHostBridge(HostBridge bridge) {
+        sHostBridge = bridge;
+    }
+
+    /**
+     * 由 C 层 {@code js_host_call} 通过 JNI 静态方法回调。
+     * 方法名与签名必须保持不变（R8 需 keep），否则 C 层 GetStaticMethodID 找不到。
+     */
+    public static String onHostCall(String name, String argsJson) {
+        HostBridge bridge = sHostBridge;
+        if (bridge == null) {
+            return "null";
+        }
+        try {
+            String result = bridge.onHostCall(name, argsJson);
+            return result == null ? "null" : result;
+        } catch (Throwable t) {
+            return "null";
+        }
+    }
+
     private static native long nativeCreateRuntime();
 
     private static native long nativeCreateContext(long runtimePtr);
@@ -163,6 +205,14 @@ public final class QuickJSEngine {
         if (contextPtr == 0) {
             throw new IllegalStateException("QuickJSEngine already closed");
         }
+    }
+
+    /**
+     * 判断引擎是否已关闭（底层 runtime/context 已释放）。
+     * 用于 ThreadLocal 会话残留检测：reactive 线程漂移时可能残留已关闭的引擎引用。
+     */
+    public boolean isClosed() {
+        return contextPtr == 0;
     }
 
     /**

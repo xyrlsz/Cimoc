@@ -53,20 +53,10 @@ forked from https://github.com/Haleydu/Cimoc
 | :---: | 
 | <img src="./screenshot/03.png" width="260">  |
 
-# 增加图源（欢迎pr）
+# 增加图源
 
-- 继承 MangaParser 类，参照 Parser 接口的注释
+[详见此仓库](https://github.com/xyrlsz/xcimoc-js-sources)
 
-> 在app/src/main/java/com/xyrlsz/xcimoc/source目录里面随便找一个复制一下
-> 注释是这个：app/src/main/java/com/xyrlsz/xcimoc/parser/MangaParser.java
-
-
-- 在 SourceManger 的 getParser() 方法中加入相应分支
-
-> case 里面无脑添加
-
-- 在 UpdateHelper 的 initComicSourceTable() 方法中初始化图源
-- 修改"app/src/main/java/com/xyrlsz/xcimoc/ui/activity/BrowserFilter.java"的registUrlListener()方法
 
 # 软件更新方向：
 

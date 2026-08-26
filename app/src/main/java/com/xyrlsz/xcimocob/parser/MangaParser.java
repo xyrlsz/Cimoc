@@ -48,17 +48,18 @@ public abstract class MangaParser implements Parser, AppGetter {
     }
 
     protected void init(Source source, Category category) {
-        mTitle = source.getTitle();
+        try {
+            mTitle = source.getTitle();
+        } catch (Exception ignore) {
+            mTitle = "未知源";
+        }
         mCategory = category;
         applyConfigSourceTitle(mTitle);
         initUrlFilterList();
     }
 
     protected void init(Source source) {
-        mTitle = source.getTitle();
-        mCategory = null;
-        applyConfigSourceTitle(mTitle);
-        initUrlFilterList();
+        init(source, null);
     }
 
     /**

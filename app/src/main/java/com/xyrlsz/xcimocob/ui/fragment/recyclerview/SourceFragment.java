@@ -6,11 +6,22 @@ import static com.xyrlsz.xcimocob.ui.activity.WebviewActivity.EXTRA_WEB_URL;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
+
+import com.xyrlsz.xcimocob.component.AppGetter;
+import com.xyrlsz.xcimocob.component.DialogCaller;
+import com.xyrlsz.xcimocob.manager.JsSourceManager;
+import com.xyrlsz.xcimocob.manager.SourceManager;
+import com.xyrlsz.xcimocob.parser.MangaParser;
+import com.xyrlsz.xcimocob.source.js.JsMangaParser;
+import com.xyrlsz.xcimocob.ui.fragment.dialog.EditorDialogFragment;
+
+import io.reactivex.rxjava3.disposables.Disposable;
 
 import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
@@ -26,6 +37,7 @@ import com.xyrlsz.xcimocob.R;
 import com.xyrlsz.xcimocob.model.Source;
 import com.xyrlsz.xcimocob.presenter.BasePresenter;
 import com.xyrlsz.xcimocob.presenter.SourcePresenter;
+import com.xyrlsz.xcimocob.ui.activity.JsSourceSettingsActivity;
 import com.xyrlsz.xcimocob.ui.activity.SearchActivity;
 import com.xyrlsz.xcimocob.ui.activity.SourceDetailActivity;
 import com.xyrlsz.xcimocob.ui.activity.WebviewActivity;
@@ -41,11 +53,14 @@ import java.util.List;
 /**
  * Created by Hiroshi on 2016/8/11.
  */
-public class SourceFragment extends RecyclerViewFragment implements SourceView, SourceAdapter.OnItemCheckedListener {
+public class SourceFragment extends RecyclerViewFragment implements SourceView, SourceAdapter.OnItemCheckedListener, DialogCaller {
+
+    private static final int DIALOG_SOURCE_REPO = 2001;
 
     FrameLayout frameLayout;
     private SourcePresenter mPresenter;
     private SourceAdapter mSourceAdapter;
+    private Disposable mUpdateDisposable;
 
     @Override
     protected BasePresenter initPresenter() {
@@ -115,6 +130,7 @@ public class SourceFragment extends RecyclerViewFragment implements SourceView, 
                     mPresenter.update(source);
                 }
                 mSourceAdapter.notifyDataSetChanged();
+                SourceManager.getInstance(this).clearParserCache();
         } else if (__id == R.id.comic_allSelection) {
                 for (int i = 0; i < mSourceAdapter.getItemCount(); i++) {
                     Source source = mSourceAdapter.getItem(i);
@@ -122,6 +138,7 @@ public class SourceFragment extends RecyclerViewFragment implements SourceView, 
                     mPresenter.update(source);
                 }
                 mSourceAdapter.notifyDataSetChanged();
+                SourceManager.getInstance(this).clearParserCache();
         } else if (__id == R.id.comic_AllDeselect) {
                 for (int i = 0; i < mSourceAdapter.getItemCount(); i++) {
                     Source source = mSourceAdapter.getItem(i);
@@ -129,8 +146,56 @@ public class SourceFragment extends RecyclerViewFragment implements SourceView, 
                     mPresenter.update(source);
                 }
                 mSourceAdapter.notifyDataSetChanged();
+                SourceManager.getInstance(this).clearParserCache();
+        } else if (__id == R.id.comic_update_source) {
+            updateSources();
+        } else if (__id == R.id.comic_source_repo) {
+            EditorDialogFragment fragment = EditorDialogFragment.newInstance(
+                    R.string.comic_source_repo,
+                    JsSourceManager.getInstance(this).getRepoUrl(),
+                    DIALOG_SOURCE_REPO);
+            fragment.setTargetFragment(this, DIALOG_SOURCE_REPO);
+            fragment.show(requireActivity().getSupportFragmentManager(), "editor_source_repo");
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onDialogResult(int requestCode, Bundle bundle) {
+        if (requestCode == DIALOG_SOURCE_REPO) {
+            String url = bundle.getString(DialogCaller.EXTRA_DIALOG_RESULT_VALUE);
+            JsSourceManager.getInstance(this).setRepoUrl(url);
+            HintUtils.showToast(requireActivity(), R.string.comic_source_repo);
+        }
+    }
+
+    private void updateSources() {
+        JsSourceManager manager = JsSourceManager.getInstance(this );
+        String repo = manager.getRepoUrl();
+        if (repo == null || repo.isEmpty()) {
+            HintUtils.showToast(requireActivity(), R.string.comic_update_source_empty_repo);
+            return;
+        }
+        HintUtils.showToast(requireActivity(), R.string.comic_update_source_running);
+        if (mUpdateDisposable != null && !mUpdateDisposable.isDisposed()) {
+            mUpdateDisposable.dispose();
+        }
+        mUpdateDisposable = manager.updateFromServer(repo).subscribe(
+                result -> {
+                    HintUtils.showToast(requireActivity(), getString(
+                            R.string.comic_update_source_success,
+                            result.added, result.updated, result.removed, result.failed));
+                    mPresenter.load();
+                },
+                e -> HintUtils.showToast(requireActivity(), R.string.common_execute_fail));
+    }
+
+    @Override
+    public void onDestroyView() {
+        if (mUpdateDisposable != null && !mUpdateDisposable.isDisposed()) {
+            mUpdateDisposable.dispose();
+        }
+        super.onDestroyView();
     }
 
     @Override
@@ -157,7 +222,13 @@ public class SourceFragment extends RecyclerViewFragment implements SourceView, 
 
     @Override
     public boolean onItemLongClick(View view, int position) {
-        Intent intent = SourceDetailActivity.createIntent(getActivity(), mSourceAdapter.getItem(position).getType());
+        Source source = mSourceAdapter.getItem(position);
+        MangaParser parser = SourceManager.getInstance(this).getParser(source.getType());
+        if (parser instanceof JsMangaParser) {
+            startActivity(JsSourceSettingsActivity.createIntent(requireActivity(), source.getType(), source.getTitle()));
+            return true;
+        }
+        Intent intent = SourceDetailActivity.createIntent(getActivity(), source.getType());
         startActivity(intent);
         return true;
     }
@@ -167,6 +238,7 @@ public class SourceFragment extends RecyclerViewFragment implements SourceView, 
         Source source = mSourceAdapter.getItem(position);
         source.setEnable(isChecked);
         mPresenter.update(source);
+        SourceManager.getInstance(this).clearParserCache();
     }
 
     @Override

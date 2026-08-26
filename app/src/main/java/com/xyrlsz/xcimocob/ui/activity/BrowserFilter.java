@@ -5,34 +5,9 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import com.xyrlsz.xcimocob.R;
+import com.xyrlsz.xcimocob.manager.JsSourceManager;
 import com.xyrlsz.xcimocob.manager.SourceManager;
-import com.xyrlsz.xcimocob.source.Baozi;
-import com.xyrlsz.xcimocob.source.BuKa;
-import com.xyrlsz.xcimocob.source.CopyMH;
-import com.xyrlsz.xcimocob.source.DM5;
-import com.xyrlsz.xcimocob.source.DongManHi;
-import com.xyrlsz.xcimocob.source.DongManManHua;
-import com.xyrlsz.xcimocob.source.DuManWu;
-import com.xyrlsz.xcimocob.source.DuManWuApp;
-import com.xyrlsz.xcimocob.source.GFMH;
-import com.xyrlsz.xcimocob.source.GoDaManHua;
-import com.xyrlsz.xcimocob.source.HotManga;
-import com.xyrlsz.xcimocob.source.Komiic;
-import com.xyrlsz.xcimocob.source.MH5;
-import com.xyrlsz.xcimocob.source.MYCOMIC;
-import com.xyrlsz.xcimocob.source.ManBen;
-import com.xyrlsz.xcimocob.source.ManHuaGui;
-import com.xyrlsz.xcimocob.source.ManHuaZhiJia;
-import com.xyrlsz.xcimocob.source.ManWa;
-import com.xyrlsz.xcimocob.source.MangaBZ;
-import com.xyrlsz.xcimocob.source.Manhuatai;
-import com.xyrlsz.xcimocob.source.Manhuayu;
-import com.xyrlsz.xcimocob.source.TTKMH;
-import com.xyrlsz.xcimocob.source.Tencent;
-import com.xyrlsz.xcimocob.source.Vomicmh;
-import com.xyrlsz.xcimocob.source.YKMH;
-import com.xyrlsz.xcimocob.source.YYManHua;
-import com.xyrlsz.xcimocob.source.ZaiManhua;
+import com.xyrlsz.xcimocob.model.JsSource;
 import com.xyrlsz.xcimocob.utils.HintUtils;
 
 import java.util.ArrayList;
@@ -67,40 +42,11 @@ public class BrowserFilter extends BaseActivity {
 //    }
 
     private List<Integer> registUrlListener() {
+        // 网络漫画源统一由 JS 源提供，按已安装的 JS 源注册 URL 监听
         List<Integer> list = new ArrayList<>();
-//        list.add(Animx2.TYPE);
-        list.add(Baozi.TYPE);
-        list.add(BuKa.TYPE);
-//        list.add(Cartoonmad.TYPE);
-        list.add(CopyMH.TYPE);
-//        list.add(CopyMHWeb.TYPE);
-        list.add(DM5.TYPE);
-        list.add(HotManga.TYPE);
-        list.add(ManHuaGui.TYPE);
-//        list.add(Mangakakalot.TYPE);
-        list.add(MangaBZ.TYPE);
-        list.add(Manhuatai.TYPE);
-        list.add(MYCOMIC.TYPE);
-        list.add(Tencent.TYPE);
-        list.add(DongManManHua.TYPE);
-        list.add(YKMH.TYPE);
-        list.add(DuManWu.TYPE);
-//        list.add(DuManWuOrg.TYPE);
-        list.add(Komiic.TYPE);
-        list.add(Manhuayu.TYPE);
-        list.add(GoDaManHua.TYPE);
-        list.add(TTKMH.TYPE);
-        list.add(Vomicmh.TYPE);
-        list.add(YYManHua.TYPE);
-//        list.add(DmzjV4.TYPE);
-        list.add(ZaiManhua.TYPE);
-        list.add(ManBen.TYPE);
-        list.add(GFMH.TYPE);
-        list.add(ManWa.TYPE);
-        list.add(MH5.TYPE);
-        list.add(DuManWuApp.TYPE);
-        list.add(DongManHi.TYPE);
-        list.add(ManHuaZhiJia.TYPE);
+        for (JsSource js : JsSourceManager.getInstance(this).listEnabled()) {
+            list.add(js.getType());
+        }
         return list;
     }
 

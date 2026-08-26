@@ -3,41 +3,16 @@ package com.xyrlsz.xcimocob.manager;
 import android.util.SparseArray;
 
 import com.xyrlsz.xcimocob.component.AppGetter;
+import com.xyrlsz.xcimocob.model.JsSource;
 import com.xyrlsz.xcimocob.model.Source;
 import com.xyrlsz.xcimocob.model.Source_;
 import com.xyrlsz.xcimocob.parser.MangaParser;
-import com.xyrlsz.xcimocob.source.Baozi;
-import com.xyrlsz.xcimocob.source.BuKa;
-import com.xyrlsz.xcimocob.source.CopyMH;
-import com.xyrlsz.xcimocob.source.CopyMHWeb;
-import com.xyrlsz.xcimocob.source.DM5;
-import com.xyrlsz.xcimocob.source.DongManHi;
-import com.xyrlsz.xcimocob.source.DongManManHua;
-import com.xyrlsz.xcimocob.source.DuManWu;
-import com.xyrlsz.xcimocob.source.DuManWuApp;
-import com.xyrlsz.xcimocob.source.GFMH;
-import com.xyrlsz.xcimocob.source.GoDaManHua;
-import com.xyrlsz.xcimocob.source.HotManga;
-import com.xyrlsz.xcimocob.source.Komiic;
 import com.xyrlsz.xcimocob.source.Locality;
-import com.xyrlsz.xcimocob.source.MH5;
-import com.xyrlsz.xcimocob.source.MYCOMIC;
-import com.xyrlsz.xcimocob.source.ManBen;
-import com.xyrlsz.xcimocob.source.ManHuaGui;
-import com.xyrlsz.xcimocob.source.ManHuaZhiJia;
-import com.xyrlsz.xcimocob.source.ManWa;
-import com.xyrlsz.xcimocob.source.MangaBZ;
-import com.xyrlsz.xcimocob.source.Manhuatai;
-import com.xyrlsz.xcimocob.source.Manhuayu;
 import com.xyrlsz.xcimocob.source.Null;
-import com.xyrlsz.xcimocob.source.TTKMH;
-import com.xyrlsz.xcimocob.source.Tencent;
-import com.xyrlsz.xcimocob.source.Vomicmh;
-import com.xyrlsz.xcimocob.source.YKMH;
-import com.xyrlsz.xcimocob.source.YYManHua;
-import com.xyrlsz.xcimocob.source.ZaiManhua;
+import com.xyrlsz.xcimocob.source.js.JsMangaParser;
 
 import java.util.List;
+import java.util.Objects;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
@@ -54,9 +29,11 @@ public class SourceManager {
 
     // 1. 修改：使用 ObjectBox 的 Box 替代 SourceDao
     private final Box<Source> mSourceBox;
+    private final AppGetter mGetter;
     private final SparseArray<MangaParser> mParserArray = new SparseArray<>();
 
     private SourceManager(AppGetter getter) {
+        mGetter = getter;
         // 2. 修改：从 BoxStore 获取 Box
         BoxStore boxStore = getter.getAppInstance().getBoxStore();
         mSourceBox = boxStore.boxFor(Source.class);
@@ -103,10 +80,11 @@ public class SourceManager {
 
     // 4. 修改：load 方法。ObjectBox 没有直接的 unique 方法，使用 findFirst
     public Source load(int type) {
-        return mSourceBox.query()
+        Source res = mSourceBox.query()
                 .equal(Source_.type, type)
                 .build()
                 .findFirst();
+        return Objects.requireNonNullElseGet(res, Source::new);
     }
 
     // 5. 修改：CRUD 操作
@@ -118,43 +96,23 @@ public class SourceManager {
         mSourceBox.put(source);
     }
 
-    // 6. 保持不变：解析器管理逻辑（这部分与数据库无关）
+    /** 清空解析器缓存（JS 源更新/启用/禁用后调用，使新配置生效）。 */
+    public void clearParserCache() {
+        mParserArray.clear();
+    }
+
+    // 6. 解析器管理：优先启用状态的 JS 源（覆盖内置），否则回退到内置实现
     public MangaParser getParser(int type) {
         MangaParser parser = mParserArray.get(type);
         if (parser == null) {
-            Source source = load(type);
-            parser = switch (type) {
-                case ManHuaGui.TYPE -> new ManHuaGui(source);
-                case DM5.TYPE -> new DM5(source);
-                case Locality.TYPE -> new Locality();
-                case Tencent.TYPE -> new Tencent(source);
-                case BuKa.TYPE -> new BuKa(source);
-                case Manhuatai.TYPE -> new Manhuatai(source);
-                case CopyMH.TYPE -> new CopyMH(source);
-                case HotManga.TYPE -> new HotManga(source);
-                case MangaBZ.TYPE -> new MangaBZ(source);
-                case DongManManHua.TYPE -> new DongManManHua(source);
-                case YKMH.TYPE -> new YKMH(source);
-                case Baozi.TYPE -> new Baozi(source);
-                case MYCOMIC.TYPE -> new MYCOMIC(source);
-                case DuManWu.TYPE -> new DuManWu(source);
-                case Komiic.TYPE -> new Komiic(source);
-                case Manhuayu.TYPE -> new Manhuayu(source);
-                case GoDaManHua.TYPE -> new GoDaManHua(source);
-                case TTKMH.TYPE -> new TTKMH(source);
-                case Vomicmh.TYPE -> new Vomicmh(source);
-                case YYManHua.TYPE -> new YYManHua(source);
-                case ZaiManhua.TYPE -> new ZaiManhua(source);
-                case ManBen.TYPE -> new ManBen(source);
-                case GFMH.TYPE -> new GFMH(source);
-                case ManWa.TYPE -> new ManWa(source);
-                case MH5.TYPE -> new MH5(source);
-                case DuManWuApp.TYPE -> new DuManWuApp(source);
-                case CopyMHWeb.TYPE -> new CopyMHWeb(source);
-                case DongManHi.TYPE -> new DongManHi(source);
-                case ManHuaZhiJia.TYPE -> new ManHuaZhiJia(source);
-                default -> new Null();
-            };
+            if (type == Locality.TYPE) {
+                // 本地漫画源（非网络源），保持内置
+                parser = new Locality();
+            } else {
+                // 网络漫画源统一由 JS 源提供；无对应 JS 源时回退到空实现
+                JsSource js = JsSourceManager.getInstance(mGetter).loadEnabledByType(type);
+                parser = (js != null) ? new JsMangaParser(js) : new Null();
+            }
             mParserArray.put(type, parser);
         }
         return parser;

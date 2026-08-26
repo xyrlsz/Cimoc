@@ -86,6 +86,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
     SliderPreference mDownloadThread;
     CheckBoxPreference mConnectOnlyWifi;
     CheckBoxPreference mLoadCoverOnlyWifi;
+    CheckBoxPreference mJsAutoUpdate;
     //    @BindView(R.id.settings_firebase_event)
 //    CheckBoxPreference mFireBaseEvent;
 //    @BindView(R.id.settings_other_reduce_ad)
@@ -109,7 +110,6 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         mTitleList.add(findViewById(R.id.settings_download_title));
         mTitleList.add(findViewById(R.id.settings_other_title));
         mTitleList.add(findViewById(R.id.settings_search_title));
-        mTitleList.add(findViewById(R.id.settings_comic_login_title));
         mSettingsLayout = findViewById(R.id.settings_layout);
         mReaderKeepBright = findViewById(R.id.settings_reader_keep_bright);
         mReaderHideInfo = findViewById(R.id.settings_reader_hide_info);
@@ -134,6 +134,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         mDownloadThread = findViewById(R.id.settings_download_thread);
         mConnectOnlyWifi = findViewById(R.id.settings_other_connect_only_wifi);
         mLoadCoverOnlyWifi = findViewById(R.id.settings_other_loadcover_only_wifi);
+        mJsAutoUpdate = findViewById(R.id.settings_other_js_auto_update);
         mDetailTextSt = findViewById(R.id.settings_detail_text_st);
         mOtherDarkMod = findViewById(R.id.settings_other_dark_mod);
         mStEngine = findViewById(R.id.settings_st_engine);
@@ -172,6 +173,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         mCheckSoftwareUpdate.bindPreference(PreferenceManager.PREF_OTHER_CHECK_SOFTWARE_UPDATE, true);
         mConnectOnlyWifi.bindPreference(PreferenceManager.PREF_OTHER_CONNECT_ONLY_WIFI, false);
         mLoadCoverOnlyWifi.bindPreference(PreferenceManager.PREF_OTHER_LOADCOVER_ONLY_WIFI, false);
+        mJsAutoUpdate.bindPreference(PreferenceManager.PREF_OTHER_JS_AUTO_UPDATE, true);
 //        mFireBaseEvent.bindPreference(PreferenceManager.PREF_OTHER_FIREBASE_EVENT, true);
 //        mReduceAd.bindPreference(PreferenceManager.PREF_OTHER_REDUCE_AD, false);
         mOtherShowTopbar.bindPreference(PreferenceManager.PREF_OTHER_SHOW_TOPBAR, false);
@@ -205,7 +207,7 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         findViewById(R.id.settings_download_scan).setOnClickListener(v -> onDownloadScanClick());
         findViewById(R.id.settings_other_permission).setOnClickListener(v -> onPermissionClick());
         findViewById(R.id.settings_other_clear_cache).setOnClickListener(v -> onOtherCacheClick());
-        findViewById(R.id.settings_comic_source_login).setOnClickListener(v -> onComicSourceLoginClick());
+        findViewById(R.id.settings_js_source).setOnClickListener(v -> onJsSourceListClick());
 
         // 服务器数据同步入口 → 跳转到独立页面
         findViewById(R.id.backup_data_server_entry).setOnClickListener(v ->
@@ -399,8 +401,8 @@ public class SettingsActivity extends BackActivity implements SettingsView {
         hideProgressDialog();
     }
 
-    void onComicSourceLoginClick() {
-        Intent intent = new Intent(this, ComicSourceLoginActivity.class);
+    void onJsSourceListClick() {
+        Intent intent = new Intent(this, JsSourceListActivity.class);
         startActivity(intent);
     }
 

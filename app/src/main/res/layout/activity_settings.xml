@@ -22,36 +22,12 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/settings_comic_login_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="16dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginRight="16dp"
-                    android:layout_marginBottom="10dp"
-                    android:text="@string/login"
-                    android:textColor="?attr/colorPrimary"
-                    android:textSize="14sp" />
-
                 <com.xyrlsz.xcimocob.ui.widget.Option
-                    android:id="@+id/settings_comic_source_login"
+                    android:id="@+id/settings_js_source"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:summary="@string/settings_comic_login_summary"
-                    app:title="@string/settings_comic_login_title" />
-
-                <!-- ========== 服务器数据同步（跳转到独立页面） ========== -->
-                <!--                    <TextView-->
-                <!--                        android:layout_width="match_parent"-->
-                <!--                        android:layout_height="wrap_content"-->
-                <!--                        android:layout_marginLeft="16dp"-->
-                <!--                        android:layout_marginTop="10dp"-->
-                <!--                        android:layout_marginRight="16dp"-->
-                <!--                        android:layout_marginBottom="10dp"-->
-                <!--                        android:text="@string/backup_data_server"-->
-                <!--                        android:textColor="?attr/colorPrimary"-->
-                <!--                        android:textSize="14sp" />-->
+                    app:summary="@string/settings_js_source_summary"
+                    app:title="@string/settings_js_source_title" />
 
                 <com.xyrlsz.xcimocob.ui.widget.Option
                     android:id="@+id/backup_data_server_entry"
@@ -284,6 +260,13 @@
                     android:layout_height="wrap_content"
                     app:summary="@string/settings_check_update_summary"
                     app:title="@string/settings_check_update" />
+
+                <com.xyrlsz.xcimocob.ui.widget.preference.CheckBoxPreference
+                    android:id="@+id/settings_other_js_auto_update"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:summary="@string/settings_other_js_auto_update_summary"
+                    app:title="@string/settings_other_js_auto_update" />
 
                 <!--                <com.xyrlsz.xcimoc.ui.widget.preference.CheckBoxPreference-->
                 <!--                    android:id="@+id/settings_firebase_event"-->

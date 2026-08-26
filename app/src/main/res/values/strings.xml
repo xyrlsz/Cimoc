@@ -82,6 +82,19 @@
     <string name="comic_inverse_selection">反选</string>
     <string name="comic_all_selection">全选</string>
     <string name="comic_all_deselect">全不选</string>
+    <string name="comic_update_source">更新源</string>
+    <string name="comic_source_repo">源仓库地址</string>
+    <string name="comic_source_repo_hint">请输入源仓库 raw 根地址（如 https://raw.githubusercontent.com/&lt;用户名&gt;/xcimoc-js-sources/main）</string>
+    <string name="comic_update_source_running">正在更新源…</string>
+    <string name="comic_update_source_empty_repo">请先设置源仓库地址</string>
+    <string name="comic_update_source_success">更新源完成：新增 %1$d，更新 %2$d，移除 %3$d，失败 %4$d</string>
+    <string name="comic_source_js_settings">JS 源设置</string>
+    <string name="comic_source_js_account">账号</string>
+    <string name="comic_source_js_password">密码</string>
+    <string name="comic_source_js_login">登录</string>
+    <string name="comic_source_js_logout">退出登录</string>
+    <string name="comic_source_js_logged_in">已登录</string>
+    <string name="comic_source_js_not_logged_in">未登录</string>
     <string name="comic_tag_select">标签选择</string>
     <string name="comic_info">漫画信息</string>
     <string name="comic_info_not_found">找不到漫画信息</string>
@@ -205,6 +218,10 @@
     <string name="settings_other_check_update_summary">WIFI 环境下自动检查漫画更新</string>
     <string name="settings_check_update">检查软件更新</string>
     <string name="settings_check_update_summary">关闭后不提示更新</string>
+    <string name="settings_other_force_js_update">更新后同步内置漫画源</string>
+    <string name="settings_other_force_js_update_summary">APK 更新时用内置 JS 源覆盖到应用数据（防止新源不生效）</string>
+    <string name="settings_other_js_auto_update">打开 App 自动检查漫画源更新</string>
+    <string name="settings_other_js_auto_update_summary">启动时后台自动检查源仓库更新，并同步移除已下线的源</string>
     <string name="settings_other_launch">默认启动页</string>
     <string name="settings_other_theme">主题颜色</string>
     <string name="settings_other_dark_mod">深色模式</string>
@@ -454,8 +471,8 @@
     <string name="register">注册</string>
     <string name="show_passwd">显示密码</string>
     <string name="dmzj_should_login">请先登录动漫之家</string>
-    <string name="settings_comic_login_title">登录漫画源</string>
-    <string name="settings_comic_login_summary">部分漫画源需要登录才能使用</string>
+    <string name="settings_js_source_title">JS 源设置</string>
+    <string name="settings_js_source_summary">按 JS 配置自动生成的登录与设置</string>
 
     <string name="settings_komiic" translatable="false">Komiic</string>
     <string name="settings_komiic_summary">未登录只能24小时内读取300张漫画内页图</string>

@@ -24,13 +24,16 @@
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
-#define QJS_TIMEOUT_MS    (10 * 1000)         /* 单次脚本执行超时 */
-#define QJS_MEMORY_LIMIT  (32 * 1024 * 1024)  /* 运行时内存上限 32MB */
-#define QJS_STACK_SIZE    (512 * 1024)        /* JS 调用栈上限 512KB */
+#define QJS_TIMEOUT_MS    (30 * 1000)         /* 单次脚本执行超时（加大，重 DOM 解析/大页面更从容） */
+#define QJS_MEMORY_LIMIT  (128 * 1024 * 1024) /* 运行时内存上限 128MB */
+#define QJS_STACK_SIZE    (2 * 1024 * 1024)   /* JS 调用栈上限 2MB */
 
 typedef struct {
     int64_t deadline_ms; /* 单调时钟截止时间 */
 } QJSRuntimeData;
+
+/* 保存 JavaVM*，供 hostCall 回调回到 Java 侧（JNI_OnLoad 时填充） */
+static JavaVM *g_vm = NULL;
 
 /* ---------------- 工具 ---------------- */
 
@@ -153,8 +156,70 @@ static const char qjs_helpers_js[] =
         "  };"
         "}";
 
+/* ---------------- hostCall 桥（JS → Java） ---------------- */
+
+/* JS 侧调用 hostCall(name, argsJson) 回调到 Java 的
+ * QuickJSEngine.onHostCall(String, String) -> String。
+ * 返回值以 JS 字符串形式返回；失败/异常时返回 "null"。 */
+static JSValue js_host_call(JSContext *ctx, JSValueConst this_val,
+                            int argc, JSValueConst *argv) {
+    JNIEnv *env = NULL;
+    jstring jname = NULL, jargs = NULL, jresult = NULL;
+    jclass clazz = NULL;
+    jmethodID mid = NULL;
+    const char *name_str = NULL, *args_str = NULL;
+    const char *r = NULL;
+    JSValue ret = JS_NULL;
+
+    if (g_vm == NULL ||
+        (*g_vm)->GetEnv(g_vm, (void **) &env, JNI_VERSION_1_6) != JNI_OK)
+        return JS_NULL;
+
+    if (argc >= 1)
+        name_str = JS_ToCString(ctx, argv[0]);
+    if (argc >= 2)
+        args_str = JS_ToCString(ctx, argv[1]);
+    if (!name_str)
+        goto done;
+
+    jname = (*env)->NewStringUTF(env, name_str);
+    jargs = (*env)->NewStringUTF(env, args_str ? args_str : "[]");
+
+    clazz = (*env)->FindClass(env, "com/xyrlsz/quickjs/QuickJSEngine");
+    if (!clazz)
+        goto done;
+    mid = (*env)->GetStaticMethodID(env, clazz, "onHostCall",
+            "(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
+    if (!mid)
+        goto done;
+    jresult = (jstring) (*env)->CallStaticObjectMethod(env, clazz, mid, jname, jargs);
+    if (jresult) {
+        r = (*env)->GetStringUTFChars(env, jresult, NULL);
+        if (r) {
+            ret = JS_NewString(ctx, r);
+            (*env)->ReleaseStringUTFChars(env, jresult, r);
+        }
+        (*env)->DeleteLocalRef(env, jresult);
+    }
+    if ((*env)->ExceptionCheck(env))
+        (*env)->ExceptionClear(env);
+
+done:
+    if (name_str)
+        JS_FreeCString(ctx, name_str);
+    if (args_str)
+        JS_FreeCString(ctx, args_str);
+    if (jname)
+        (*env)->DeleteLocalRef(env, jname);
+    if (jargs)
+        (*env)->DeleteLocalRef(env, jargs);
+    if (clazz)
+        (*env)->DeleteLocalRef(env, clazz);
+    return ret;
+}
+
 static void qjs_register_helpers(JSContext *ctx) {
-    JSValue global, log, console, ret;
+    JSValue global, log, console, ret, host;
 
     global = JS_GetGlobalObject(ctx);
 
@@ -163,6 +228,11 @@ static void qjs_register_helpers(JSContext *ctx) {
     JS_SetPropertyStr(ctx, console, "log", JS_DupValue(ctx, log));
     JS_SetPropertyStr(ctx, global, "console", console);
     JS_SetPropertyStr(ctx, global, "print", log);
+
+    /* 安装 hostCall(name, argsJson)，供宿主 SDK 回调到 Java。
+     * JS_SetPropertyStr 会消费传入的引用，故此处不再 JS_FreeValue。 */
+    host = JS_NewCFunction(ctx, js_host_call, "hostCall", 2);
+    JS_SetPropertyStr(ctx, global, "hostCall", host);
 
     JS_FreeValue(ctx, global);
 
@@ -723,6 +793,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     JNIEnv *env = NULL;
     jclass clazz;
 
+    g_vm = vm;
     if ((*vm)->GetEnv(vm, (void **) &env, JNI_VERSION_1_6) != JNI_OK)
         return JNI_ERR;
     clazz = (*env)->FindClass(env, "com/xyrlsz/quickjs/QuickJSEngine");

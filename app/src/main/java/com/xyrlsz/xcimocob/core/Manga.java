@@ -3,6 +3,7 @@ package com.xyrlsz.xcimocob.core;
 import static com.xyrlsz.xcimocob.ui.activity.SearchActivity.SEARCH_AUTHOR;
 import static com.xyrlsz.xcimocob.ui.activity.SearchActivity.SEARCH_TITLE;
 
+import android.util.Log;
 import android.util.Pair;
 
 import com.xyrlsz.xcimocob.App;
@@ -19,6 +20,7 @@ import com.xyrlsz.xcimocob.parser.WebParser;
 import com.xyrlsz.xcimocob.parser.WebParserConfig;
 import com.xyrlsz.xcimocob.rx.RxBus;
 import com.xyrlsz.xcimocob.rx.RxEvent;
+import com.xyrlsz.xcimocob.source.js.JsMangaParser;
 import com.xyrlsz.xcimocob.utils.IdCreator;
 import com.xyrlsz.xcimocob.utils.STConvertUtils;
 
@@ -198,7 +200,15 @@ public class Manga {
     }
 
     public static Observable<List<Chapter>> getComicInfo(final MangaParser parser, final Comic comic) {
-        return Observable.defer(() -> {
+        // JS 源：在单次详情流程内复用同一 QuickJS 引擎，避免多次重复编译体积较大的 SDK+脚本
+        // （见 JsMangaParser.openSession）。复用范围严格限定本流程、同线程串行、用完即弃，
+        // 不污染其它漫画/任务；非 JS 源走空会话，行为不变。
+        return Observable.using(
+                () -> (parser instanceof JsMangaParser)
+                        ? ((JsMangaParser) parser).openSession()
+                        : (java.io.Closeable) () -> {
+                },
+                session -> Observable.defer(() -> {
             String cid = comic.getCid();
             if (cid == null) {
                 return Observable.error(new Exception("Comic CID is null"));
@@ -276,7 +286,14 @@ public class Manga {
                         setForceRefreshUrl(infoUrl);
                         return Observable.error(e);
                     });
-        }).subscribeOn(Schedulers.io());
+                }),
+                session -> {
+                    try {
+                        session.close();
+                    } catch (Throwable ignore) {
+                    }
+                })
+                .subscribeOn(Schedulers.io());
     }
 
     public static Observable<List<Comic>> getCategoryComic(final Parser parser, final String format,
@@ -314,13 +331,20 @@ public class Manga {
         return Observable.defer(() -> {
             Request request = parser.getImagesRequest(cid, path);
             if (request == null) {
-                return Observable.error(new Exception("Images request returned null"));
+                // 偶发：getImagesRequest 内部引擎/JS 调用静默失败返回 null（无 JsParser/JS exception 日志）。
+                // 每次调用都会新建 QuickJS 引擎，重试一次大概率成功，避免整个章节加载失败。
+                Log.w("Manga", "[Manga] getImagesRequest null, retrying once cid=" + cid + " path=" + path);
+                request = parser.getImagesRequest(cid, path);
+                if (request == null) {
+                    return Observable.error(new Exception("Images request returned null"));
+                }
             }
             String url = request.url().toString();
             WebParserConfig imagesConfig = parser.getImagesConfig();
+            Request finalRequest = request;
             Observable<String> htmlObs = imagesConfig.isUseWebParser()
                     ? new WebParser(App.getAppContext(), url, request.headers(), "", imagesConfig).getHtmlObservable()
-                    : Observable.fromCallable(() -> getResponseBody(App.getHttpClient(), request));
+                    : Observable.fromCallable(() -> getResponseBody(App.getHttpClient(), finalRequest));
             return htmlObs
                     .flatMap(html -> {
                         List<ImageUrl> list = parser.parseImages(html, chapter);

@@ -33,7 +33,10 @@
         android:usesCleartextTraffic="true"
         tools:ignore="UnusedAttribute">
         <activity
-            android:name="com.xyrlsz.xcimocob.ui.activity.ComicSourceLoginActivity"
+            android:name="com.xyrlsz.xcimocob.ui.activity.JsSourceSettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name="com.xyrlsz.xcimocob.ui.activity.JsSourceListActivity"
             android:exported="false" />
         <activity
             android:name="com.xyrlsz.xcimocob.ui.activity.WebviewActivity"
