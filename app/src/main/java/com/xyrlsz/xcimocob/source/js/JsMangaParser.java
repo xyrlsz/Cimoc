@@ -1,6 +1,7 @@
 package com.xyrlsz.xcimocob.source.js;
 
 import android.net.Uri;
+import android.util.Pair;
 
 import com.xyrlsz.quickjs.QuickJSEngine;
 import com.xyrlsz.xcimocob.model.Chapter;
@@ -482,7 +483,7 @@ public class JsMangaParser extends MangaParser {
         if (arr == null) return list;
         long sc = sourceComic == null ? 0L : sourceComic;
         int i = 0;
-        HashSet<Chapter> chapterHashSet = new HashSet<>();
+        HashSet<Pair<String, String>> chapterHashSet = new HashSet<>();
         for (int n = 0; n < arr.length(); n++) {
             JSONObject o = arr.optJSONObject(n);
             if (o == null) continue;
@@ -494,8 +495,9 @@ public class JsMangaParser extends MangaParser {
             String group = o.optString("group");
             Chapter ch = new Chapter(IdCreator.createChapterId(sc, i++), sc, title, path);
             ch.setSourceGroup(StringUtils.isEmpty(group) ? "" : group);
-            if (!chapterHashSet.contains(ch)) {
-                chapterHashSet.add(ch);
+            Pair<String, String> tmp = new Pair<>(title, path);
+            if (!chapterHashSet.contains(tmp)) {
+                chapterHashSet.add(tmp);
                 list.add(ch);
             }
         }
@@ -707,12 +709,12 @@ public class JsMangaParser extends MangaParser {
         private final String allValue;
         private final Map<String, String> allValueMap;
         private static final String[] ATTR_KEYS = {"subject", "area", "reader", "year", "progress", "order"};
-        private final List<android.util.Pair<String, String>> subject = new ArrayList<>();
-        private final List<android.util.Pair<String, String>> area = new ArrayList<>();
-        private final List<android.util.Pair<String, String>> reader = new ArrayList<>();
-        private final List<android.util.Pair<String, String>> progress = new ArrayList<>();
-        private final List<android.util.Pair<String, String>> year = new ArrayList<>();
-        private final List<android.util.Pair<String, String>> order = new ArrayList<>();
+        private final List<Pair<String, String>> subject = new ArrayList<>();
+        private final List<Pair<String, String>> area = new ArrayList<>();
+        private final List<Pair<String, String>> reader = new ArrayList<>();
+        private final List<Pair<String, String>> progress = new ArrayList<>();
+        private final List<Pair<String, String>> year = new ArrayList<>();
+        private final List<Pair<String, String>> order = new ArrayList<>();
         private final boolean[] has = new boolean[6];
 
         JsCategory(JSONObject o) {
@@ -805,8 +807,8 @@ public class JsMangaParser extends MangaParser {
             return r;
         }
 
-        private static List<android.util.Pair<String, String>> parsePairs(JSONArray arr) {
-            List<android.util.Pair<String, String>> list = new ArrayList<>();
+        private static List<Pair<String, String>> parsePairs(JSONArray arr) {
+            List<Pair<String, String>> list = new ArrayList<>();
             if (arr == null) return list;
             for (int i = 0; i < arr.length(); i++) {
                 Object el = arr.opt(i);
@@ -819,13 +821,13 @@ public class JsMangaParser extends MangaParser {
                     String value = catVal(o, "value");
                     if (value == null) value = catVal(o, "id");
                     if (title != null && !title.isEmpty() && value != null) {
-                        list.add(android.util.Pair.create(title, value));
+                        list.add(Pair.create(title, value));
                     }
                 } else {
                     // 数组格式：[title, value]
                     JSONArray pair = arr.optJSONArray(i);
                     if (pair != null && pair.length() >= 2) {
-                        list.add(android.util.Pair.create(pair.optString(0), pair.optString(1)));
+                        list.add(Pair.create(pair.optString(0), pair.optString(1)));
                     }
                 }
             }
@@ -860,7 +862,7 @@ public class JsMangaParser extends MangaParser {
         }
 
         @Override
-        protected List<android.util.Pair<String, String>> getSubject() {
+        protected List<Pair<String, String>> getSubject() {
             return subject;
         }
 
@@ -870,7 +872,7 @@ public class JsMangaParser extends MangaParser {
         }
 
         @Override
-        public List<android.util.Pair<String, String>> getAttrList(int attr) {
+        public List<Pair<String, String>> getAttrList(int attr) {
             return switch (attr) {
                 case CATEGORY_SUBJECT -> subject;
                 case CATEGORY_AREA -> area;
