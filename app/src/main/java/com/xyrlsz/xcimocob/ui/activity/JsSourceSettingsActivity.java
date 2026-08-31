@@ -2,25 +2,25 @@ package com.xyrlsz.xcimocob.ui.activity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
+import android.net.Uri;
+import android.text.Editable;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
-
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.checkbox.MaterialCheckBox;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.xyrlsz.xcimocob.R;
 import com.xyrlsz.xcimocob.manager.SourceManager;
 import com.xyrlsz.xcimocob.parser.MangaParser;
 import com.xyrlsz.xcimocob.source.js.JsMangaParser;
+import com.xyrlsz.xcimocob.ui.widget.LoginDialog;
+import com.xyrlsz.xcimocob.ui.widget.MaterialOptionRow;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -124,45 +124,49 @@ public class JsSourceSettingsActivity extends BackActivity {
         addSectionTitle(box, getString(R.string.comic_source_js_login));
         View row = addOptionRow(box, getString(R.string.comic_source_js_login), status);
         row.setOnClickListener(v -> showLoginDialog());
-        addDivider(box);
         return box;
     }
 
     private void showLoginDialog() {
-        LinearLayout content = new LinearLayout(this);
-        content.setOrientation(LinearLayout.VERTICAL);
-        content.setPadding(dp(24), dp(12), dp(24), 0);
+        final LoginDialog dialog = new LoginDialog(this);
 
-        EditText account = new EditText(this);
-        account.setHint(R.string.comic_source_js_account);
-        account.setSingleLine(true);
-        EditText password = new EditText(this);
-        password.setHint(R.string.comic_source_js_password);
-        password.setSingleLine(true);
-        password.setInputType(android.text.InputType.TYPE_CLASS_TEXT
-                | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        content.addView(account);
-        content.addView(password);
+        // 注册链接：源声明 getRegisterUrl 时显示注册按钮，点击打开注册页
+        final String registerUrl = mParser.getRegisterUrl();
+        if (registerUrl == null || registerUrl.isEmpty()) {
+            dialog.setRegisterButtonVisible(false);
+        } else {
+            dialog.setOnRegisterListener(() -> {
+                try {
+                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(registerUrl)));
+                } catch (Exception e) {
+                    Toast.makeText(this, R.string.comic_source_js_register_open_fail, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
 
-        new AlertDialog.Builder(this)
-                .setTitle(getString(R.string.comic_source_js_login))
-                .setView(content)
-                .setNegativeButton(android.R.string.cancel, null)
-                .setNeutralButton(R.string.comic_source_js_logout, (d, w) -> {
-                    mParser.logout();
-                    Toast.makeText(this, R.string.user_login_logout_sucess, Toast.LENGTH_SHORT).show();
-                    buildAll();
-                })
-                .setPositiveButton(R.string.comic_source_js_login, (d, w) -> {
-                    JSONObject params = new JSONObject();
-                    try {
-                        params.put("account", account.getText().toString());
-                        params.put("password", password.getText().toString());
-                    } catch (Exception ignore) {
-                    }
-                    doLogin(params);
-                })
-                .show();
+        // 已登录时显示登出按钮
+        JSONObject state = mParser.getLoginState();
+        boolean loggedIn = state != null && state.optBoolean("loggedIn", false);
+        if (loggedIn) {
+            dialog.setLogoutButtonVisible(true);
+            dialog.setOnLogoutListener(() -> {
+                mParser.logout();
+                Toast.makeText(this, R.string.user_login_logout_sucess, Toast.LENGTH_SHORT).show();
+                buildAll();
+            });
+        }
+
+        dialog.setOnLoginListener((username, password) -> {
+            JSONObject params = new JSONObject();
+            try {
+                params.put("account", username);
+                params.put("password", password);
+            } catch (Exception ignore) {
+            }
+            doLogin(params);
+        });
+
+        dialog.show();
     }
 
     private void doLogin(JSONObject params) {
@@ -174,7 +178,7 @@ public class JsSourceSettingsActivity extends BackActivity {
                 boolean ok = result != null && result.optBoolean("success", false);
                 String msg = ok ? getString(R.string.user_login_sucess)
                         : (result != null && !result.optString("message").isEmpty()
-                        ? result.optString("message") : getString(R.string.user_login_failed));
+                           ? result.optString("message") : getString(R.string.user_login_failed));
                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
                 buildAll();
             });
@@ -183,63 +187,36 @@ public class JsSourceSettingsActivity extends BackActivity {
 
     /* ---------------- 通用 option 行 ---------------- */
 
-    /** 添加一行「左标签 + 右侧文字」的 option 行，返回该行（可设置点击）。 */
+    /**
+     * 添加一行「左标签 + 右侧文字」的 option 行，返回该行（可设置点击）。
+     */
     private View addOptionRow(LinearLayout box, String label, String valueText) {
-        LinearLayout row = new LinearLayout(this);
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        row.setPadding(dp(16), dp(14), dp(16), dp(14));
-
-        TextView lbl = new TextView(this);
-        lbl.setText(label);
-        lbl.setTextSize(15);
-        lbl.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
-        row.addView(lbl);
-
-        TextView value = new TextView(this);
-        value.setText(valueText == null ? "" : valueText);
-        value.setTextSize(14);
-        value.setTextColor(0xFF888888);
-        row.addView(value);
-
-        box.addView(row);
+        MaterialOptionRow row = new MaterialOptionRow(this);
+        row.setLabel(label);
+        row.setValueText(valueText == null ? "" : valueText);
+        addRowWithMargin(box, row);
         return row;
     }
 
-    /** 添加一行「左标签 + 右侧控件」的 option 行，返回该行。 */
+    /**
+     * 添加一行「左标签 + 右侧控件」的 option 行，返回该行。
+     */
     private View addOptionRow(LinearLayout box, String label, View control) {
-        LinearLayout row = new LinearLayout(this);
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        row.setPadding(dp(16), dp(8), dp(16), dp(8));
-
-        TextView lbl = new TextView(this);
-        lbl.setText(label);
-        lbl.setTextSize(15);
-        lbl.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
-        row.addView(lbl);
-
-        if (control != null) row.addView(control);
-
-        box.addView(row);
+        MaterialOptionRow row = new MaterialOptionRow(this);
+        row.setLabel(label);
+        row.setContent(control);
+        addRowWithMargin(box, row);
         return row;
     }
 
-    private void addDivider(LinearLayout box) {
-        View v = new View(this);
-        v.setBackgroundColor(0x12000000);
-        box.addView(v, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1));
+    private void addRowWithMargin(LinearLayout box, MaterialOptionRow row) {
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lp.setMargins(0, dp(4), 0, dp(4));
+        box.addView(row, lp);
     }
 
     /* ---------------- 设置区 ---------------- */
-
-    private static class SettingRow {
-        String key;
-        String type;
-        EditText edit;
-        Spinner spinner;
-        CheckBox check;
-    }
 
     private View buildSettingsSection(JSONArray settings) {
         LinearLayout box = new LinearLayout(this);
@@ -263,17 +240,16 @@ public class JsSourceSettingsActivity extends BackActivity {
 
             switch (type) {
                 case "bool": {
-                    // 勾选型 option：右侧 CheckBox，勾选即保存
-                    row.check = new CheckBox(this);
+                    // 勾选型 option：右侧 MaterialCheckBox，勾选即保存
+                    row.check = new MaterialCheckBox(this);
                     row.check.setChecked("true".equalsIgnoreCase(current) || "1".equals(current));
                     row.check.setOnCheckedChangeListener((b, checked) ->
-                            mParser.setSetting(key, checked ? "true" : "false"));
+                            mParser.setSetting(key, Boolean.toString(checked)));
                     addOptionRow(box, label, row.check);
                     break;
                 }
                 case "select": {
-                    // 下拉型 option：右侧 Spinner，选择即保存（存 value）
-                    row.spinner = new Spinner(this);
+                    // 下拉型 option：右侧 Material 下拉，选择即保存（存 value）
                     List<String> opts = new ArrayList<>();
                     List<String> vals = new ArrayList<>();
                     JSONArray arr = o.optJSONArray("options");
@@ -286,30 +262,34 @@ public class JsSourceSettingsActivity extends BackActivity {
                             }
                         }
                     }
-                    row.spinner.setAdapter(new ArrayAdapter<>(this,
-                            android.R.layout.simple_spinner_item, opts));
+                    com.google.android.material.textfield.TextInputLayout selectLayout =
+                            new com.google.android.material.textfield.TextInputLayout(this);
+                    selectLayout.setBoxBackgroundMode(
+                            com.google.android.material.textfield.TextInputLayout.BOX_BACKGROUND_OUTLINE);
+                    selectLayout.setEndIconMode(
+                            com.google.android.material.textfield.TextInputLayout.END_ICON_DROPDOWN_MENU);
+                    row.select = new com.google.android.material.textfield.MaterialAutoCompleteTextView(this);
+                    row.select.setAdapter(new ArrayAdapter<>(this,
+                            android.R.layout.simple_list_item_1, opts));
                     int idx = vals.indexOf(current);
-                    if (idx >= 0) row.spinner.setSelection(idx);
-                    row.spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                        @Override
-                        public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-                            String val = (pos >= 0 && pos < vals.size()) ? vals.get(pos) : "";
-                            mParser.setSetting(key, val);
-                        }
-
-                        @Override
-                        public void onNothingSelected(AdapterView<?> parent) {
-                        }
+                    if (idx >= 0) row.select.setText(opts.get(idx), false);
+                    row.select.setOnItemClickListener((parent, view, pos, id) -> {
+                        String val = (pos >= 0 && pos < vals.size()) ? vals.get(pos) : "";
+                        mParser.setSetting(key, val);
                     });
-                    addOptionRow(box, label, row.spinner);
+                    selectLayout.addView(row.select);
+                    selectLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                            dp(150), ViewGroup.LayoutParams.WRAP_CONTENT));
+                    addOptionRow(box, label, selectLayout);
                     break;
                 }
                 case "callback":
                 case "button": {
                     // 按钮型 option：点击调用脚本 onSettingsAction(key)（如签到）
                     String actionKey = key;
-                    Button btn = new Button(this);
+                    MaterialButton btn = new MaterialButton(this);
                     btn.setText(o.optString("buttonText", label));
+                    btn.setTextColor(getResources().getColor(R.color.white));
                     btn.setOnClickListener(v -> {
                         btn.setEnabled(false);
                         new Thread(() -> {
@@ -321,7 +301,7 @@ public class JsSourceSettingsActivity extends BackActivity {
                                 String msg = (r != null && !r.optString("message").isEmpty())
                                         ? r.optString("message")
                                         : ((r != null && r.optBoolean("success", false))
-                                        ? "操作成功" : "操作失败");
+                                           ? "操作成功" : "操作失败");
                                 Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
                             });
                         }).start();
@@ -330,21 +310,33 @@ public class JsSourceSettingsActivity extends BackActivity {
                     break;
                 }
                 default: {
-                    // 文本型 option：右侧 EditText，失去焦点时保存
-                    row.edit = new EditText(this);
+                    // 文本型 option：右侧 Material 输入框，失去焦点时保存
+                    com.google.android.material.textfield.TextInputLayout inputLayout =
+                            new com.google.android.material.textfield.TextInputLayout(this);
+                    inputLayout.setBoxBackgroundMode(
+                            com.google.android.material.textfield.TextInputLayout.BOX_BACKGROUND_OUTLINE);
+                    inputLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                            dp(150), ViewGroup.LayoutParams.WRAP_CONTENT));
+                    row.inputLayout = inputLayout;
+                    row.edit = new TextInputEditText(this);
                     row.edit.setText(current);
                     row.edit.setSingleLine(true);
                     row.edit.setGravity(android.view.Gravity.END);
                     row.edit.setOnFocusChangeListener((v, hasFocus) -> {
                         if (!hasFocus) {
-                            mParser.setSetting(key, row.edit.getText().toString());
+                            Editable textEt = row.edit.getText();
+                            String text = "";
+                            if (textEt != null) {
+                                text = textEt.toString();
+                            }
+                            mParser.setSetting(key, text);
                         }
                     });
-                    addOptionRow(box, label, row.edit);
+                    inputLayout.addView(row.edit);
+                    addOptionRow(box, label, inputLayout);
                     break;
                 }
             }
-            addDivider(box);
         }
         return box;
     }
@@ -361,5 +353,14 @@ public class JsSourceSettingsActivity extends BackActivity {
 
     private int dp(int v) {
         return Math.round(v * getResources().getDisplayMetrics().density);
+    }
+
+    private static class SettingRow {
+        String key;
+        String type;
+        TextInputLayout inputLayout;
+        TextInputEditText edit;
+        com.google.android.material.textfield.MaterialAutoCompleteTextView select;
+        MaterialCheckBox check;
     }
 }

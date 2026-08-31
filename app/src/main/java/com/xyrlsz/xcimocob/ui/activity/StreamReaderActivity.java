@@ -1,18 +1,20 @@
 package com.xyrlsz.xcimocob.ui.activity;
 
 import android.graphics.Point;
+import android.graphics.Rect;
+import android.os.Build;
+import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.slider.Slider;
 import com.xyrlsz.xcimocob.App;
 import com.xyrlsz.xcimocob.R;
 import com.xyrlsz.xcimocob.manager.PreferenceManager;
 import com.xyrlsz.xcimocob.model.ImageUrl;
 import com.xyrlsz.xcimocob.ui.adapter.ReaderAdapter;
 import com.xyrlsz.xcimocob.ui.widget.ZoomableRecyclerView;
-
-import com.google.android.material.slider.Slider;
 
 import java.util.List;
 
@@ -146,7 +148,13 @@ public class StreamReaderActivity extends ReaderActivity {
     @Override
     protected void prevPage() {
         Point point = new Point();
-        getWindowManager().getDefaultDisplay().getSize(point);
+        WindowManager wm = getWindowManager();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Rect bounds = wm.getCurrentWindowMetrics().getBounds();
+            point.set(bounds.width(), bounds.height());
+        } else {
+            wm.getDefaultDisplay().getSize(point);
+        }
         if (turn == PreferenceManager.READER_TURN_ATB) {
             mRecyclerView.smoothScrollBy(0, -point.y + point.y / 5);
         } else {
@@ -160,7 +168,13 @@ public class StreamReaderActivity extends ReaderActivity {
     @Override
     protected void nextPage() {
         Point point = new Point();
-        getWindowManager().getDefaultDisplay().getSize(point);
+        WindowManager wm = getWindowManager();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Rect bounds = wm.getCurrentWindowMetrics().getBounds();
+            point.set(bounds.width(), bounds.height());
+        } else {
+            wm.getDefaultDisplay().getSize(point);
+        }
         if (turn == PreferenceManager.READER_TURN_ATB) {
             mRecyclerView.smoothScrollBy(0, point.y - point.y / 5);
         } else {

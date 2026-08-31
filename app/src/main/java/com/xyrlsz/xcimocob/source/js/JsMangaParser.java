@@ -1004,6 +1004,22 @@ public class JsMangaParser extends MangaParser {
     }
 
     /**
+     * 脚本声明的注册链接（JS getRegisterUrl() 返回的 URL 字符串），未声明或返回空则返回 null。
+     */
+    public String getRegisterUrl() {
+        return withEngine(e -> {
+            if (!e.hasFunction("getRegisterUrl")) return null;
+            String raw = callJs(e, "getRegisterUrl", "[]");
+            if (raw == null || "null".equals(raw) || raw.isEmpty()) return null;
+            try {
+                return new JSONObject("{\"url\":" + raw + "}").optString("url", null);
+            } catch (JSONException ex) {
+                return null;
+            }
+        });
+    }
+
+    /**
      * 调用脚本 logout() 并清除宿主登录态。
      */
     public void logout() {

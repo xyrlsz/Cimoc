@@ -3,14 +3,14 @@
     android:layout_height="wrap_content"
     android:elevation="8dp"
     android:orientation="vertical"
-    android:padding="24dp">
+    android:padding="20dp">
 
     <TextView
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="12dp"
         android:text="@string/login"
         android:textColor="?attr/colorAccent"
         android:textSize="20sp"
@@ -19,14 +19,14 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:padding="12dp">
+        android:layout_marginBottom="8dp"
+        android:padding="4dp">
 
         <EditText
             android:id="@+id/username"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:minHeight="48dp"
+            android:minHeight="44dp"
             android:background="@color/transparent"
             android:hint="@string/username_item" />
 
@@ -41,14 +41,14 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
-        android:padding="12dp">
+        android:layout_marginBottom="16dp"
+        android:padding="4dp">
 
         <EditText
             android:id="@+id/password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:minHeight="48dp"
+            android:minHeight="44dp"
             android:autofillHints="password"
             android:background="@color/transparent"
             android:layout_toStartOf="@id/ib_is_show_passwd"
@@ -57,10 +57,10 @@
 
         <ImageButton
             android:id="@+id/ib_is_show_passwd"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_alignParentEnd="true"
-            android:layout_marginBottom="6dp"
+            android:layout_marginBottom="4dp"
             android:background="?attr/selectableItemBackground"
             android:contentDescription="@string/show_passwd"
             android:src="@drawable/eye_close" />
@@ -74,28 +74,35 @@
 
     </RelativeLayout>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/login_button"
+        style="?attr/materialButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:background="?attr/colorAccent"
-        android:padding="12dp"
-        android:stateListAnimator="@null"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="6dp"
         android:text="@string/login"
         android:textColor="@color/white"
         android:textSize="16sp" />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/register_button"
+        style="?attr/materialButtonStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:background="?attr/colorAccent"
-        android:padding="12dp"
-        android:stateListAnimator="@null"
+        android:layout_marginBottom="6dp"
         android:text="@string/register"
         android:textColor="@color/white"
         android:textSize="16sp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/logout_button"
+        style="?attr/materialButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/user_login_logout"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:visibility="gone" />
 
 </LinearLayout>

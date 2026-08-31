@@ -8,8 +8,10 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.ColorStateList;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.InputDevice;
 import android.view.KeyEvent;
@@ -729,7 +731,13 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
 
     private int getValue(float x, float y, boolean isLong) {
         Point point = new Point();
-        getWindowManager().getDefaultDisplay().getSize(point);
+        WindowManager wm = getWindowManager();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Rect bounds = wm.getCurrentWindowMetrics().getBounds();
+            point.set(bounds.width(), bounds.height());
+        } else {
+            wm.getDefaultDisplay().getSize(point);
+        }
         int position = getCurPosition();
         if (position == -1) {
             position = mLayoutManager.findFirstVisibleItemPosition();

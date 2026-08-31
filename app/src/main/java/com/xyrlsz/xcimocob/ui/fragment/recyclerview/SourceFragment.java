@@ -13,16 +13,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 
-import com.xyrlsz.xcimocob.component.AppGetter;
-import com.xyrlsz.xcimocob.component.DialogCaller;
-import com.xyrlsz.xcimocob.manager.JsSourceManager;
-import com.xyrlsz.xcimocob.manager.SourceManager;
-import com.xyrlsz.xcimocob.parser.MangaParser;
-import com.xyrlsz.xcimocob.source.js.JsMangaParser;
-import com.xyrlsz.xcimocob.ui.fragment.dialog.EditorDialogFragment;
-
-import io.reactivex.rxjava3.disposables.Disposable;
-
 import androidx.annotation.ColorRes;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -34,20 +24,28 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.xyrlsz.xcimocob.Constants;
 import com.xyrlsz.xcimocob.R;
+import com.xyrlsz.xcimocob.component.DialogCaller;
+import com.xyrlsz.xcimocob.manager.JsSourceManager;
+import com.xyrlsz.xcimocob.manager.SourceManager;
 import com.xyrlsz.xcimocob.model.Source;
+import com.xyrlsz.xcimocob.parser.MangaParser;
 import com.xyrlsz.xcimocob.presenter.BasePresenter;
 import com.xyrlsz.xcimocob.presenter.SourcePresenter;
+import com.xyrlsz.xcimocob.source.js.JsMangaParser;
 import com.xyrlsz.xcimocob.ui.activity.JsSourceSettingsActivity;
 import com.xyrlsz.xcimocob.ui.activity.SearchActivity;
 import com.xyrlsz.xcimocob.ui.activity.SourceDetailActivity;
 import com.xyrlsz.xcimocob.ui.activity.WebviewActivity;
 import com.xyrlsz.xcimocob.ui.adapter.BaseAdapter;
 import com.xyrlsz.xcimocob.ui.adapter.SourceAdapter;
+import com.xyrlsz.xcimocob.ui.fragment.dialog.EditorDialogFragment;
 import com.xyrlsz.xcimocob.ui.view.SourceView;
 import com.xyrlsz.xcimocob.utils.HintUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import io.reactivex.rxjava3.disposables.Disposable;
 
 
 /**
@@ -121,32 +119,32 @@ public class SourceFragment extends RecyclerViewFragment implements SourceView, 
     public boolean onOptionsItemSelected(MenuItem item) {
         int __id = item.getItemId();
         if (__id == R.id.comic_search) {
-                Intent intent = new Intent(getActivity(), SearchActivity.class);
-                startActivity(intent);
+            Intent intent = new Intent(getActivity(), SearchActivity.class);
+            startActivity(intent);
         } else if (__id == R.id.comic_inverseSelection) {
-                for (int i = 0; i < mSourceAdapter.getItemCount(); i++) {
-                    Source source = mSourceAdapter.getItem(i);
-                    source.setEnable(!source.getEnable());
-                    mPresenter.update(source);
-                }
-                mSourceAdapter.notifyDataSetChanged();
-                SourceManager.getInstance(this).clearParserCache();
+            for (int i = 0; i < mSourceAdapter.getItemCount(); i++) {
+                Source source = mSourceAdapter.getItem(i);
+                source.setEnable(!source.getEnable());
+                mPresenter.update(source);
+            }
+            mSourceAdapter.notifyDataSetChanged();
+            SourceManager.getInstance(this).clearParserCache();
         } else if (__id == R.id.comic_allSelection) {
-                for (int i = 0; i < mSourceAdapter.getItemCount(); i++) {
-                    Source source = mSourceAdapter.getItem(i);
-                    source.setEnable(true);
-                    mPresenter.update(source);
-                }
-                mSourceAdapter.notifyDataSetChanged();
-                SourceManager.getInstance(this).clearParserCache();
+            for (int i = 0; i < mSourceAdapter.getItemCount(); i++) {
+                Source source = mSourceAdapter.getItem(i);
+                source.setEnable(true);
+                mPresenter.update(source);
+            }
+            mSourceAdapter.notifyDataSetChanged();
+            SourceManager.getInstance(this).clearParserCache();
         } else if (__id == R.id.comic_AllDeselect) {
-                for (int i = 0; i < mSourceAdapter.getItemCount(); i++) {
-                    Source source = mSourceAdapter.getItem(i);
-                    source.setEnable(false);
-                    mPresenter.update(source);
-                }
-                mSourceAdapter.notifyDataSetChanged();
-                SourceManager.getInstance(this).clearParserCache();
+            for (int i = 0; i < mSourceAdapter.getItemCount(); i++) {
+                Source source = mSourceAdapter.getItem(i);
+                source.setEnable(false);
+                mPresenter.update(source);
+            }
+            mSourceAdapter.notifyDataSetChanged();
+            SourceManager.getInstance(this).clearParserCache();
         } else if (__id == R.id.comic_update_source) {
             updateSources();
         } else if (__id == R.id.comic_source_repo) {
@@ -170,7 +168,7 @@ public class SourceFragment extends RecyclerViewFragment implements SourceView, 
     }
 
     private void updateSources() {
-        JsSourceManager manager = JsSourceManager.getInstance(this );
+        JsSourceManager manager = JsSourceManager.getInstance(this);
         String repo = manager.getRepoUrl();
         if (repo == null || repo.isEmpty()) {
             HintUtils.showToast(requireActivity(), R.string.comic_update_source_empty_repo);
@@ -211,8 +209,11 @@ public class SourceFragment extends RecyclerViewFragment implements SourceView, 
         Intent intent = new Intent(getContext(), WebviewActivity.class);
         String url = source.getBaseUrl();
         SharedPreferences sharedPreferences = requireActivity().getSharedPreferences(Constants.APP_SHARED, MODE_PRIVATE);
-        boolean isUseToWebParser = sharedPreferences.getBoolean(Constants.APP_SHARED_TEST_MODE, false);
-        if (url == null || url.isEmpty() || !isUseToWebParser) {
+        boolean isUseToOpenWebview = sharedPreferences.getBoolean(Constants.APP_SHARED_TEST_MODE, false);
+        if (url == null || url.isEmpty() || !isUseToOpenWebview) {
+            if (!isUseToOpenWebview) {
+                openSourceSettings(position);
+            }
             return;
         }
         intent.putExtra(EXTRA_WEB_URL, url);
@@ -220,16 +221,20 @@ public class SourceFragment extends RecyclerViewFragment implements SourceView, 
         startActivity(intent);
     }
 
-    @Override
-    public boolean onItemLongClick(View view, int position) {
+    private void openSourceSettings(int position) {
         Source source = mSourceAdapter.getItem(position);
         MangaParser parser = SourceManager.getInstance(this).getParser(source.getType());
         if (parser instanceof JsMangaParser) {
             startActivity(JsSourceSettingsActivity.createIntent(requireActivity(), source.getType(), source.getTitle()));
-            return true;
+            return;
         }
         Intent intent = SourceDetailActivity.createIntent(getActivity(), source.getType());
         startActivity(intent);
+    }
+
+    @Override
+    public boolean onItemLongClick(View view, int position) {
+        openSourceSettings(position);
         return true;
     }
 

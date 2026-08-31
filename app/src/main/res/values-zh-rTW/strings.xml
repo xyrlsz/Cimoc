@@ -83,7 +83,7 @@
     <string name="comic_source_repo_hint">請輸入源倉庫 raw 根位址（如 https://raw.githubusercontent.com/&lt;用戶名&gt;/xcimoc-js-sources/main）</string>
     <string name="comic_update_source_running">正在更新源…</string>
     <string name="comic_update_source_empty_repo">請先設定源倉庫位址</string>
-    <string name="comic_update_source_success">更新源完成：新增 %1$d，更新 %2$d，失敗 %3$d</string>
+    <string name="comic_update_source_success">更新源完成：新增 %1$d，更新 %2$d，移除 %3$d，失敗 %4$d</string>
     <string name="comic_source_js_settings">JS 源設定</string>
     <string name="comic_source_js_account">帳號</string>
     <string name="comic_source_js_password">密碼</string>
@@ -91,6 +91,7 @@
     <string name="comic_source_js_logout">登出</string>
     <string name="comic_source_js_logged_in">已登入</string>
     <string name="comic_source_js_not_logged_in">未登入</string>
+    <string name="comic_source_js_register_open_fail">無法開啟註冊連結</string>
     <string name="comic_tag_select">標籤選擇</string>
     <string name="comic_info">漫畫資訊</string>
     <string name="comic_info_not_found">找不到漫畫資訊</string>
@@ -212,6 +213,7 @@
     <string name="settings_other_check_update_summary">WIFI 下自動檢查漫畫更新</string>
     <string name="settings_check_update">檢查軟件更新</string>
     <string name="settings_check_update_summary">關閉後不提示更新</string>
+    <string name="settings_other_js_auto_update_summary">啟動時後臺自動檢查源倉庫更新，並同步移除已下線的源</string>
     <string name="settings_other_launch">預設啟動頁</string>
     <string name="settings_other_theme">主題顏色</string>
     <string name="settings_other_dark_mod">深色模式</string>
@@ -464,4 +466,7 @@
     <string name="settings_other_permission_summary">重新申請儲存、通知等必要許可權</string>
     <string name="search_history_title">搜尋歷史</string>
     <string name="search_history_clear">清空</string>
+    <string name="settings_other_force_js_update">更新後同步內建漫畫源</string>
+    <string name="settings_other_force_js_update_summary">APK 更新時用內建 JS 源覆蓋到應用資料（防止新源不生效）</string>
+    <string name="settings_other_js_auto_update">開啟 App 自動檢查漫畫源更新</string>
 </resources>

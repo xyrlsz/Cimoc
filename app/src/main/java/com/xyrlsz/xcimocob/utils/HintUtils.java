@@ -5,6 +5,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.xyrlsz.xcimocob.App;
 import com.xyrlsz.xcimocob.R;
 
 /**
@@ -45,6 +46,11 @@ public class HintUtils {
         runOnMainThread(() -> {
             Toast.makeText(context.getApplicationContext(), text, Toast.LENGTH_SHORT).show();
         });
+    }
+
+    public static void showToast(CharSequence text) {
+        Context context = App.getAppContext();
+        showToast(context, text);
     }
 
     public static void showToastLong(Context context, CharSequence text) {
