@@ -54,7 +54,7 @@ public final class JsHost implements QuickJSEngine.HostBridge {
                 case "login" -> handleLogin(argsJson);
                 case "fetch" -> handleFetch(argsJson);
                 case "log" -> {
-                    android.util.Log.i("JsSource", "[" + arg(argsJson, "type") + "] "
+                    android.util.Log.d("JsSource", "[" + arg(argsJson, "type") + "] "
                             + arg(argsJson, "data"));
                     yield "null";
                 }
