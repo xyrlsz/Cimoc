@@ -10,7 +10,9 @@ import android.content.res.ColorStateList;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.InputDevice;
@@ -19,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
@@ -114,17 +117,60 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
     TextView mChapterTitle;
     TextView mChapterPage;
     TextView mBatteryText;
+    View mBatteryIconFill;
     private final BroadcastReceiver batteryReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())) {
                 int level = intent.getIntExtra("level", 0);
                 int scale = intent.getIntExtra("scale", 100);
-                String text = (level * 100 / scale) + "%";
+                if (scale <= 0) {
+                    scale = 100;
+                }
+                int percent = level * 100 / scale;
+                int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_UNKNOWN);
+                boolean charging = status == BatteryManager.BATTERY_STATUS_CHARGING
+                        || status == BatteryManager.BATTERY_STATUS_FULL;
+                String text = percent + "%";
                 mBatteryText.setText(text);
+                updateBatteryIcon(percent, charging);
             }
         }
     };
+
+    /**
+     * 更新电池图标填充量（0~100，竖向从底部向上）与颜色：
+     * 充电→绿；<10%→红；<20%→橙；其余→白
+     */
+    private void updateBatteryIcon(int percent, boolean charging) {
+        if (mBatteryIconFill == null) {
+            return;
+        }
+        // 图标容器固定 18dp，填充左右各缩进 5.5dp、底部缩进 2.85dp，最大填充高度 11.5dp
+        float density = getResources().getDisplayMetrics().density;
+        int maxFillPx = Math.round(11.5f * density);
+        int fillH = Math.max(0, maxFillPx * percent / 100);
+        ViewGroup.LayoutParams lp = mBatteryIconFill.getLayoutParams();
+        if (lp != null && lp.height != fillH) {
+            lp.height = fillH;
+            mBatteryIconFill.setLayoutParams(lp);
+        }
+        // 填充颜色：充电优先，其次按低电量阈值
+        int color;
+        if (charging) {
+            color = 0xFF4CAF50;      // 绿
+        } else if (percent < 10) {
+            color = 0xFFF44336;      // 红
+        } else if (percent < 20) {
+            color = 0xFFFFA726;      // 橙
+        } else {
+            color = 0xFFFFFFFF;      // 白
+        }
+        Drawable bg = mBatteryIconFill.getBackground();
+        if (bg instanceof GradientDrawable) {
+            ((GradientDrawable) bg).setColor(color);
+        }
+    }
     View mProgressLayout;
     View mBackLayout;
     View mInfoLayout;
@@ -196,6 +242,7 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
         mChapterTitle = findViewById(R.id.reader_chapter_title);
         mChapterPage = findViewById(R.id.reader_chapter_page);
         mBatteryText = findViewById(R.id.reader_battery);
+        mBatteryIconFill = findViewById(R.id.reader_battery_icon_fill);
         mProgressLayout = findViewById(R.id.reader_progress_layout);
         mBackLayout = findViewById(R.id.reader_back_layout);
         mInfoLayout = findViewById(R.id.reader_info_layout);

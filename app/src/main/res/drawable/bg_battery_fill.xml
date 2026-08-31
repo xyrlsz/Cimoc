@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 电池内部填充：白色圆角矩形，宽度由代码按电量设置 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners android:radius="1.2dp" />
+    <solid android:color="#FFFFFFFF" />
+</shape>
