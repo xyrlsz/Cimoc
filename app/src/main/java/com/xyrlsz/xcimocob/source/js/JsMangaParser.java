@@ -341,7 +341,11 @@ public class JsMangaParser extends MangaParser {
         if (cached != null) return cached;
         return withEngine(e -> {
             if (!e.hasFunction("getHeader")) return null;
-            JSONObject o = new JSONObject(callJs(e, "getHeader", "[]"));
+            // getHeader() 返回 null 表示「无特殊请求头」，是合法契约；直接返回 null，
+            // 避免 new JSONObject("null") 抛 JSONException（JSONObject.NULL）。
+            String s = callJs(e, "getHeader", "[]");
+            if (s == null || "null".equals(s)) return null;
+            JSONObject o = new JSONObject(s);
             Headers h = headersFromJson(o);
             mCachedHeader = h;
             return h;
