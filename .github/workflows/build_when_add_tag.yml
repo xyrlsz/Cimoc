@@ -2,7 +2,12 @@ name: Android CI (tag)
 
 on:
   push:
-    tags: ["v*"]
+    tags:
+      # 正式版：普通 v* tag（排除预览后缀，预览版走
+      # build_when_add_preview_tag.yml 发布为 Pre-release）
+      - "v*"
+      - "!v*-preview*"
+      - "!v*-beta*"
     # branches: ["main"]
 
 # ---------------------------------------------------------------------
@@ -129,9 +134,9 @@ jobs:
         shell: bash
         env:
           CGO_ENABLED: "1"
-          GOOS:        ${{ matrix.goos }}
-          GOARCH:      ${{ matrix.goarch }}
-          CC:          ${{ matrix.cc }}
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CC: ${{ matrix.cc }}
         run: |
           set -eux
           mkdir -p dist
@@ -153,7 +158,7 @@ jobs:
   build-and-github-release:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: build-data-server     # 先确认 Go 3 个目标都 OK，再建 Release（避免空 Release）
+    needs: build-data-server # 先确认 Go 3 个目标都 OK，再建 Release（避免空 Release）
 
     steps:
       - uses: actions/checkout@v5
@@ -224,8 +229,8 @@ jobs:
       - name: Build APK with build.sh
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS:       ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD:    ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: ./build.sh
 
       - name: Upload APK as artifact (for Gitee job)

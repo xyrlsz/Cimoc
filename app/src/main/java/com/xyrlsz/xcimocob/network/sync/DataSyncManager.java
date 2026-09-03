@@ -1110,7 +1110,9 @@ public class DataSyncManager {
         client.syncSettings(token, settingItems);
     }
 
-    /** 从服务端下载设置并合并到本地（只应用白名单内的用户设置，避免覆盖设备本地状态） */
+    /**
+     * 从服务端下载设置并合并到本地（只应用白名单内的用户设置，避免覆盖设备本地状态）
+     */
     private void downloadSettings(DataSyncClient client, String token) throws Exception {
         List<DataSyncModels.SettingServerItem> serverSettings = client.listSettings(token);
         if (serverSettings == null) return;
