@@ -249,7 +249,7 @@ public class JsSourceSettingsActivity extends BackActivity {
                     break;
                 }
                 case "select": {
-                    // 下拉型 option：右侧 Material 下拉，选择即保存（存 value）
+                    // 下拉型 option：点击展开，只读选择（选择即保存 value）
                     List<String> opts = new ArrayList<>();
                     List<String> vals = new ArrayList<>();
                     JSONArray arr = o.optJSONArray("options");
@@ -271,6 +271,19 @@ public class JsSourceSettingsActivity extends BackActivity {
                     row.select = new com.google.android.material.textfield.MaterialAutoCompleteTextView(this);
                     row.select.setAdapter(new ArrayAdapter<>(this,
                             android.R.layout.simple_list_item_1, opts));
+                    // 做成只读下拉：禁输入/光标/软键盘，仅点击弹出选项，避免像可编辑文本框
+                    row.select.setInputType(android.text.InputType.TYPE_NULL);
+                    row.select.setKeyListener(null);
+                    row.select.setShowSoftInputOnFocus(false);
+                    row.select.setCursorVisible(false);
+                    row.select.setClickable(true);
+                    row.select.setOnClickListener(v -> {
+                        if (!row.select.isPopupShowing()) row.select.showDropDown();
+                    });
+                    // 紧凑字号 + 右对齐贴近箭头，保证较长选项也能完整显示
+                    row.select.setTextSize(14);
+                    row.select.setGravity(android.view.Gravity.CENTER_VERTICAL | android.view.Gravity.END);
+                    row.select.setMaxLines(1);
                     int idx = vals.indexOf(current);
                     if (idx >= 0) row.select.setText(opts.get(idx), false);
                     row.select.setOnItemClickListener((parent, view, pos, id) -> {
@@ -279,7 +292,7 @@ public class JsSourceSettingsActivity extends BackActivity {
                     });
                     selectLayout.addView(row.select);
                     selectLayout.setLayoutParams(new LinearLayout.LayoutParams(
-                            dp(150), ViewGroup.LayoutParams.WRAP_CONTENT));
+                            dp(165), ViewGroup.LayoutParams.WRAP_CONTENT));
                     addOptionRow(box, label, selectLayout);
                     break;
                 }
