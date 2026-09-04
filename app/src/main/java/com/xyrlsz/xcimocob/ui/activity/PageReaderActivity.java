@@ -43,10 +43,8 @@ public class PageReaderActivity extends ReaderActivity implements OnPageChangedL
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                switch (newState) {
-                    case RecyclerView.SCROLL_STATE_DRAGGING:
-                        hideControl();
-                        break;
+                if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                    hideControl();
                 }
             }
         });
