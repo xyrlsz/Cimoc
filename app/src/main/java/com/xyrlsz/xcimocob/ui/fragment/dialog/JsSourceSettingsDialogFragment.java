@@ -3,11 +3,13 @@ package com.xyrlsz.xcimocob.ui.fragment.dialog;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -59,9 +61,10 @@ public class JsSourceSettingsDialogFragment extends DialogFragment {
         mType = requireArguments().getInt(EXTRA_TYPE);
         mTitle = requireArguments().getString(EXTRA_TITLE, "");
 
-        LinearLayout root = new LinearLayout(requireContext());
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(dp(24), dp(16), dp(24), dp(8));
+        // 内容容器（可滚动），避免软键盘弹出时遮挡底部按钮
+        LinearLayout content = new LinearLayout(requireContext());
+        content.setOrientation(LinearLayout.VERTICAL);
+        content.setPadding(dp(24), dp(16), dp(24), dp(8));
 
         MangaParser parser = SourceManager.getInstance(App.getApp()).getParser(mType);
         if (!(parser instanceof JsMangaParser)) {
@@ -72,24 +75,39 @@ public class JsSourceSettingsDialogFragment extends DialogFragment {
         JsMangaParser jsParser = (JsMangaParser) parser;
 
         if (jsParser.hasLogin()) {
-            root.addView(buildLoginSection(jsParser));
+            content.addView(buildLoginSection(jsParser));
         }
         JSONArray settings = jsParser.getSettings();
         if (settings != null && settings.length() > 0) {
-            root.addView(buildSettingsSection(jsParser, settings));
+            content.addView(buildSettingsSection(jsParser, settings));
         }
-        if (root.getChildCount() == 0) {
+        if (content.getChildCount() == 0) {
             TextView tv = new TextView(requireContext());
             tv.setText("该源未声明登录或设置项");
-            root.addView(tv);
+            content.addView(tv);
         }
+
+        // 包一层 ScrollView，窗口随键盘缩放后内容可滚动，底部按钮不会被键盘挡住
+        ScrollView scrollView = new ScrollView(requireContext());
+        scrollView.setFillViewport(true);
+        scrollView.addView(content);
 
         AlertDialog dialog = new AlertDialog.Builder(requireContext())
                 .setTitle(mTitle)
-                .setView(root)
+                .setView(scrollView)
                 .setPositiveButton(R.string.dialog_positive, (d, w) -> {
                 })
                 .create();
+        // 让对话框窗口随软键盘弹出而缩放，配合 ScrollView 使输入区与按钮始终可见
+        if (dialog.getWindow() != null) {
+            android.view.Window w = dialog.getWindow();
+            // 清除宿主 Activity 继承来的沉浸式 flag（windowTranslucentStatus），
+            // 否则 ADJUST_RESIZE 不生效，键盘会遮挡底部按钮
+            w.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            w.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            w.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            w.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        }
         return dialog;
     }
 

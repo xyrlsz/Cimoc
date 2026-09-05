@@ -232,11 +232,10 @@ public class SourceFragment extends RecyclerViewFragment implements SourceView, 
             boolean hasLogin = mParser.hasLogin();
             JSONArray settings = mParser.getSettings();
             int settingCount = (settings == null) ? 0 : settings.length();
-            if (!hasLogin && settingCount == 0) {
-                return;
-            } else {
+            if (hasLogin || settingCount != 0) {
                 startActivity(JsSourceSettingsActivity.createIntent(requireActivity(), source.getType(), source.getTitle()));
             }
+            return;
         }
         Intent intent = SourceDetailActivity.createIntent(getActivity(), source.getType());
         startActivity(intent);

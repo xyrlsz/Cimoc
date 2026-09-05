@@ -34,7 +34,8 @@
         tools:ignore="UnusedAttribute">
         <activity
             android:name="com.xyrlsz.xcimocob.ui.activity.JsSourceSettingsActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name="com.xyrlsz.xcimocob.ui.activity.JsSourceListActivity"
             android:exported="false" />

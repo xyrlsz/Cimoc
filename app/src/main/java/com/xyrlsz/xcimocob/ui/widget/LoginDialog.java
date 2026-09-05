@@ -99,6 +99,8 @@ public class LoginDialog extends Dialog {
 
     /**
      * 设置对话框窗口宽度为屏幕宽度的约 85%，避免过宽/贴边显示异常。
+     * 同时清除宿主 Activity 继承来的沉浸式 flag（windowTranslucentStatus），
+     * 否则 SOFT_INPUT_ADJUST_RESIZE 不生效，键盘会遮挡底部按钮。
      */
     @SuppressWarnings("deprecation")
     private void setupWindowSize() {
@@ -106,6 +108,13 @@ public class LoginDialog extends Dialog {
         if (window == null) {
             return;
         }
+        // 清除沉浸式状态栏 flag，让 adjustResize 正常生效
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        // 窗口随软键盘弹出而缩放，避免底部登录/注册按钮被键盘遮挡
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+
         Point size = new Point();
         WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         if (wm != null) {
