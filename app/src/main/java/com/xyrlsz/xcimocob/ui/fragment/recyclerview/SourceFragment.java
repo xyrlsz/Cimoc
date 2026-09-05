@@ -42,6 +42,8 @@ import com.xyrlsz.xcimocob.ui.fragment.dialog.EditorDialogFragment;
 import com.xyrlsz.xcimocob.ui.view.SourceView;
 import com.xyrlsz.xcimocob.utils.HintUtils;
 
+import org.json.JSONArray;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -225,8 +227,16 @@ public class SourceFragment extends RecyclerViewFragment implements SourceView, 
         Source source = mSourceAdapter.getItem(position);
         MangaParser parser = SourceManager.getInstance(this).getParser(source.getType());
         if (parser instanceof JsMangaParser) {
-            startActivity(JsSourceSettingsActivity.createIntent(requireActivity(), source.getType(), source.getTitle()));
-            return;
+            JsMangaParser mParser;
+            mParser = (JsMangaParser) parser;
+            boolean hasLogin = mParser.hasLogin();
+            JSONArray settings = mParser.getSettings();
+            int settingCount = (settings == null) ? 0 : settings.length();
+            if (!hasLogin && settingCount == 0) {
+                return;
+            } else {
+                startActivity(JsSourceSettingsActivity.createIntent(requireActivity(), source.getType(), source.getTitle()));
+            }
         }
         Intent intent = SourceDetailActivity.createIntent(getActivity(), source.getType());
         startActivity(intent);

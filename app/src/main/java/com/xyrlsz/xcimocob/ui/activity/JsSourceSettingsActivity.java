@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
@@ -21,6 +20,7 @@ import com.xyrlsz.xcimocob.parser.MangaParser;
 import com.xyrlsz.xcimocob.source.js.JsMangaParser;
 import com.xyrlsz.xcimocob.ui.widget.LoginDialog;
 import com.xyrlsz.xcimocob.ui.widget.MaterialOptionRow;
+import com.xyrlsz.xcimocob.utils.HintUtils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -71,11 +71,19 @@ public class JsSourceSettingsActivity extends BackActivity {
         super.initView();
         MangaParser parser = SourceManager.getInstance(this).getParser(getIntent().getIntExtra(EXTRA_TYPE, -1));
         if (!(parser instanceof JsMangaParser)) {
-            Toast.makeText(this, R.string.comic_source_js_settings, Toast.LENGTH_SHORT).show();
+            HintUtils.showToast(this, R.string.comic_source_js_settings);
             finish();
             return;
         }
         mParser = (JsMangaParser) parser;
+        boolean hasLogin = mParser.hasLogin();
+        JSONArray settings = mParser.getSettings();
+        int settingCount = (settings == null) ? 0 : settings.length();
+        if (!hasLogin && settingCount == 0) {
+            HintUtils.showToast(this, "该源未声明登录或设置项");
+            finish();
+            return;
+        }
         buildAll();
     }
 
@@ -87,7 +95,7 @@ public class JsSourceSettingsActivity extends BackActivity {
         android.util.Log.i("JsSource", "[settings] type="
                 + mParser.getType() + " hasLogin=" + hasLogin
                 + " settings=" + settingCount
-                + (settings != null ? " " + settings.toString() : ""));
+                + (settings != null ? " " + settings : ""));
         // 打印当前登录态，确认是否真的保存了
         try {
             String stored = com.xyrlsz.xcimocob.source.js.JsHost.INSTANCE
@@ -102,12 +110,6 @@ public class JsSourceSettingsActivity extends BackActivity {
         }
         if (settingCount > 0) {
             mContainer.addView(buildSettingsSection(settings));
-        }
-        if (mContainer.getChildCount() == 0) {
-            TextView tv = new TextView(this);
-            tv.setText("该源未声明登录或设置项");
-            tv.setPadding(dp(16), dp(16), dp(16), dp(16));
-            mContainer.addView(tv);
         }
     }
 
@@ -139,7 +141,7 @@ public class JsSourceSettingsActivity extends BackActivity {
                 try {
                     startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(registerUrl)));
                 } catch (Exception e) {
-                    Toast.makeText(this, R.string.comic_source_js_register_open_fail, Toast.LENGTH_SHORT).show();
+                    HintUtils.showToast(this, R.string.comic_source_js_register_open_fail);
                 }
             });
         }
@@ -151,7 +153,7 @@ public class JsSourceSettingsActivity extends BackActivity {
             dialog.setLogoutButtonVisible(true);
             dialog.setOnLogoutListener(() -> {
                 mParser.logout();
-                Toast.makeText(this, R.string.user_login_logout_sucess, Toast.LENGTH_SHORT).show();
+                HintUtils.showToast(this, R.string.user_login_logout_sucess);
                 buildAll();
             });
         }
@@ -179,7 +181,7 @@ public class JsSourceSettingsActivity extends BackActivity {
                 String msg = ok ? getString(R.string.user_login_sucess)
                         : (result != null && !result.optString("message").isEmpty()
                            ? result.optString("message") : getString(R.string.user_login_failed));
-                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+                HintUtils.showToast(this, msg);
                 buildAll();
             });
         }).start();
@@ -315,7 +317,7 @@ public class JsSourceSettingsActivity extends BackActivity {
                                         ? r.optString("message")
                                         : ((r != null && r.optBoolean("success", false))
                                            ? "操作成功" : "操作失败");
-                                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+                                HintUtils.showToast(this, msg);
                             });
                         }).start();
                     });

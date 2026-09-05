@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import com.xyrlsz.xcimocob.App;
 import com.xyrlsz.xcimocob.manager.PreferenceManager;
+import com.xyrlsz.xcimocob.utils.HintUtils;
 import com.xyrlsz.xcimocob.utils.StringUtils;
 
 import java.util.Map;
@@ -379,7 +380,7 @@ public class WebParser {
         if (cfNotified) return;
         cfNotified = true;
         try {
-            Toast.makeText(mContext, message, Toast.LENGTH_LONG).show();
+            HintUtils.showToast(mContext, message  );
         } catch (Exception ignored) {
         }
     }

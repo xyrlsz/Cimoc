@@ -16,5 +16,13 @@
             android:layout_height="match_parent"
             android:divider="?android:attr/listDivider"
             android:dividerHeight="1dp" />
+
+        <TextView
+            android:id="@android:id/empty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="没有可配置的漫画源"
+            android:textSize="14sp" />
     </LinearLayout>
 </FrameLayout>

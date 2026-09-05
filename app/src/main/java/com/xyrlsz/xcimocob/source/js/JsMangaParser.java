@@ -731,8 +731,13 @@ public class JsMangaParser extends MangaParser {
 
     /**
      * 脚本是否声明了登录能力。
+     * 优先使用 JsSource 表缓存的 hasLogin（validateScript 时计算），避免每次都跑 JS；
+     * 仅当缓存未就绪（metaReady=false）时回退到实时评估。
      */
     public boolean hasLogin() {
+        if (mSource.isMetaReady()) {
+            return mSource.isHasLogin();
+        }
         return Boolean.TRUE.equals(withEngine(e -> e.hasFunction("login") || e.hasFunction("getLoginState")));
     }
 
@@ -807,8 +812,21 @@ public class JsMangaParser extends MangaParser {
 
     /**
      * 脚本声明的设置项（JS getSettings() 返回的字段描述数组），无则返回空。
+     * 优先使用 JsSource 表缓存的 settingsJson（validateScript 时计算），避免每次都跑 JS；
+     * 仅当缓存未就绪或为空时回退到实时评估。
      */
     public JSONArray getSettings() {
+        if (mSource.isMetaReady()) {
+            String cached = mSource.getSettingsJson();
+            if (cached != null && !cached.isEmpty() && !"null".equals(cached)) {
+                try {
+                    return new JSONArray(cached);
+                } catch (JSONException e) {
+                    // 缓存损坏，回退到实时评估
+                }
+            }
+            return new JSONArray();
+        }
         return withEngine(e -> {
             if (!e.hasFunction("getSettings")) return new JSONArray();
             return new JSONArray(callJs(e, "getSettings", "[]"));

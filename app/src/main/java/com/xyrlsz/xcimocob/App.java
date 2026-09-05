@@ -265,7 +265,7 @@ public class App extends Application implements AppGetter, Thread.UncaughtExcept
         // RxJava3 全局错误处理 - 防止 UndeliverableException 崩溃
         io.reactivex.rxjava3.plugins.RxJavaPlugins.setErrorHandler(e -> {
             if (e instanceof io.reactivex.rxjava3.exceptions.UndeliverableException) {
-                e = (Throwable) e.getCause();
+                e = e.getCause();
             }
             // 所有未送达异常只记录日志，不触发崩溃
             // 常见原因：Rx 链下游已取消订阅，但上游仍在执行
@@ -287,6 +287,15 @@ public class App extends Application implements AppGetter, Thread.UncaughtExcept
             JsSourceManager.getInstance(this).seedFromAssets();
         } catch (Throwable ignore) {
         }
+
+        // 为存量 JS 源回填登录/设置元信息（metaReady=false 的源），供漫画源设置列表直接读取，
+        // 避免列表加载时逐源跑 JS。在后台线程执行，不阻塞启动。
+        new Thread(() -> {
+            try {
+                JsSourceManager.getInstance(this).backfillMeta();
+            } catch (Throwable ignore) {
+            }
+        }).start();
 
         // 启用的漫画源解析器彼此独立，放到计算线程池并行预热。
         SourceManager.getInstance(this).init();

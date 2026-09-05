@@ -3,13 +3,12 @@ package com.xyrlsz.xcimocob.ui.fragment.dialog;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,6 +21,7 @@ import com.xyrlsz.xcimocob.R;
 import com.xyrlsz.xcimocob.manager.SourceManager;
 import com.xyrlsz.xcimocob.parser.MangaParser;
 import com.xyrlsz.xcimocob.source.js.JsMangaParser;
+import com.xyrlsz.xcimocob.utils.HintUtils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -65,7 +65,7 @@ public class JsSourceSettingsDialogFragment extends DialogFragment {
 
         MangaParser parser = SourceManager.getInstance(App.getApp()).getParser(mType);
         if (!(parser instanceof JsMangaParser)) {
-            Toast.makeText(requireContext(), R.string.comic_source_js_settings, Toast.LENGTH_SHORT).show();
+            HintUtils.showToast(requireContext(), R.string.comic_source_js_settings);
             dismiss();
             return new AlertDialog.Builder(requireContext()).setTitle(mTitle).setMessage("非 JS 源").create();
         }
@@ -144,7 +144,7 @@ public class JsSourceSettingsDialogFragment extends DialogFragment {
         logoutBtn.setOnClickListener(v -> {
             parser.logout();
             status.setText(getString(R.string.comic_source_js_not_logged_in));
-            Toast.makeText(requireContext(), "已退出登录", Toast.LENGTH_SHORT).show();
+            HintUtils.showToast(requireContext(), "已退出登录");
         });
 
         box.addView(status);
@@ -159,14 +159,6 @@ public class JsSourceSettingsDialogFragment extends DialogFragment {
     }
 
     /* ---------------- 设置区 ---------------- */
-
-    private static class SettingRow {
-        String key;
-        String type;
-        EditText edit;
-        Spinner spinner;
-        CheckBox check;
-    }
 
     private View buildSettingsSection(JsMangaParser parser, JSONArray settings) {
         LinearLayout box = new LinearLayout(requireContext());
@@ -251,7 +243,7 @@ public class JsSourceSettingsDialogFragment extends DialogFragment {
                 }
                 parser.setSetting(r.key, value);
             }
-            Toast.makeText(requireContext(), "已保存", Toast.LENGTH_SHORT).show();
+            HintUtils.showToast(requireContext(), "已保存");
         });
         box.addView(save);
         return box;
@@ -259,5 +251,13 @@ public class JsSourceSettingsDialogFragment extends DialogFragment {
 
     private int dp(int v) {
         return Math.round(v * getResources().getDisplayMetrics().density);
+    }
+
+    private static class SettingRow {
+        String key;
+        String type;
+        EditText edit;
+        Spinner spinner;
+        CheckBox check;
     }
 }
