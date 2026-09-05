@@ -248,7 +248,7 @@ public class JsSourceManager {
                         + " title=" + local.getTitle());
             }
         }
-        SourceManager.getInstance(App.getApp()).clearParserCache();
+        SourceManager.getInstance(App.getApp()).refreshParserCache();
         return result;
     }
 
@@ -374,7 +374,7 @@ public class JsSourceManager {
         Log.d("JsSource", "seedFromAssets: done, added=" + added
                 + ", total=" + mBox.count());
         if (added > 0) {
-            SourceManager.getInstance(App.getApp()).clearParserCache();
+            SourceManager.getInstance(App.getApp()).refreshParserCache();
         }
         return added;
     }

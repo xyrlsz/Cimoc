@@ -100,6 +100,7 @@ public class LoginDialog extends Dialog {
     /**
      * 设置对话框窗口宽度为屏幕宽度的约 85%，避免过宽/贴边显示异常。
      */
+    @SuppressWarnings("deprecation")
     private void setupWindowSize() {
         Window window = getWindow();
         if (window == null) {

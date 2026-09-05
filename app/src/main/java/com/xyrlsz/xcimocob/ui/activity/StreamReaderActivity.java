@@ -109,21 +109,12 @@ public class StreamReaderActivity extends ReaderActivity {
         ImageUrl oldImage = mReaderAdapter.getItem(mLastPosition);
 
         if (!oldImage.getChapter().equals(newImage.getChapter())) {
-            boolean forward;
-            switch (turn) {
-                case PreferenceManager.READER_TURN_ATB:
-                    forward = dy != 0 ? dy > 0 : target > mLastPosition;
-                    break;
-                case PreferenceManager.READER_TURN_LTR:
-                    forward = dx != 0 ? dx > 0 : target > mLastPosition;
-                    break;
-                case PreferenceManager.READER_TURN_RTL:
-                    forward = dx != 0 ? dx < 0 : target > mLastPosition;
-                    break;
-                default:
-                    forward = target > mLastPosition;
-                    break;
-            }
+            boolean forward = switch (turn) {
+                case PreferenceManager.READER_TURN_ATB -> dy != 0 ? dy > 0 : target > mLastPosition;
+                case PreferenceManager.READER_TURN_LTR -> dx != 0 ? dx > 0 : target > mLastPosition;
+                case PreferenceManager.READER_TURN_RTL -> dx != 0 ? dx < 0 : target > mLastPosition;
+                default -> target > mLastPosition;
+            };
             if (forward) {
                 mPresenter.toNextChapter();
             } else {
@@ -145,6 +136,7 @@ public class StreamReaderActivity extends ReaderActivity {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected void prevPage() {
         Point point = new Point();
@@ -165,6 +157,7 @@ public class StreamReaderActivity extends ReaderActivity {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected void nextPage() {
         Point point = new Point();

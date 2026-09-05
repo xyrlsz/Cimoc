@@ -12,13 +12,15 @@ import android.content.res.Resources;
 import android.graphics.Rect;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDelegate;
-
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.xyrlsz.opencc.android.lib.ChineseConverter;
@@ -28,6 +30,7 @@ import com.xyrlsz.xcimocob.core.Storage;
 import com.xyrlsz.xcimocob.core.WebDavConf;
 import com.xyrlsz.xcimocob.fresco.ControllerBuilderProvider;
 import com.xyrlsz.xcimocob.helper.UpdateHelper;
+import com.xyrlsz.xcimocob.manager.JsSourceManager;
 import com.xyrlsz.xcimocob.manager.PreferenceManager;
 import com.xyrlsz.xcimocob.manager.SourceManager;
 import com.xyrlsz.xcimocob.misc.ActivityLifecycle;
@@ -38,7 +41,6 @@ import com.xyrlsz.xcimocob.ui.activity.MainActivity;
 import com.xyrlsz.xcimocob.ui.adapter.GridAdapter;
 import com.xyrlsz.xcimocob.utils.DocumentUtils;
 import com.xyrlsz.xcimocob.utils.FrescoUtils;
-import com.xyrlsz.xcimocob.utils.HintUtils;
 import com.xyrlsz.xcimocob.utils.StringUtils;
 import com.xyrlsz.xcimocob.utils.ThemeUtils;
 import com.xyrlsz.xcimocob.utils.TrustAllSslUtils;
@@ -282,14 +284,17 @@ public class App extends Application implements AppGetter, Thread.UncaughtExcept
 
         // 首次启动播种内置 JS 源（幂等，仅当 JsSource 表为空时写入）
         try {
-            com.xyrlsz.xcimocob.manager.JsSourceManager.getInstance(this).seedFromAssets();
+            JsSourceManager.getInstance(this).seedFromAssets();
         } catch (Throwable ignore) {
         }
+
+        // 启用的漫画源解析器彼此独立，放到计算线程池并行预热。
+        SourceManager.getInstance(this).init();
 
         // 后台自动签到：对开启了 auto_sign 设置的源（如再漫画）在打开时签到
         new Thread(() -> {
             try {
-                com.xyrlsz.xcimocob.manager.JsSourceManager.getInstance(this).autoSignIn();
+                JsSourceManager.getInstance(this).autoSignIn();
             } catch (Throwable ignore) {
             }
         }).start();
@@ -297,7 +302,7 @@ public class App extends Application implements AppGetter, Thread.UncaughtExcept
         // 打开 App 自动检查并更新漫画源（受设置开关 + 频率限制控制）
         new Thread(() -> {
             try {
-                com.xyrlsz.xcimocob.manager.JsSourceManager.getInstance(this).autoUpdateIfNeeded();
+                JsSourceManager.getInstance(this).autoUpdateIfNeeded();
             } catch (Throwable ignore) {
             }
         }).start();
@@ -307,16 +312,14 @@ public class App extends Application implements AppGetter, Thread.UncaughtExcept
         dataSyncManager.init();
 
         // 冷启动完成，尝试首次同步（此时 Activity 尚未创建，延迟到主线程执行）
-        new android.os.Handler(android.os.Looper.getMainLooper()).post(() -> {
-            dataSyncManager.onAppStart();
-        });
+        new Handler(Looper.getMainLooper()).post(dataSyncManager::onAppStart);
 
         // 注册前后台切换监听，用于自动同步
-        registerActivityLifecycleCallbacks(new android.app.Application.ActivityLifecycleCallbacks() {
+        registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
             private int mActiveCount = 0;
 
             @Override
-            public void onActivityStarted(@NonNull android.app.Activity activity) {
+            public void onActivityStarted(@NonNull Activity activity) {
                 if (mActiveCount == 0) {
                     // 应用从后台切到前台
                     dataSyncManager.onForeground();
@@ -325,7 +328,7 @@ public class App extends Application implements AppGetter, Thread.UncaughtExcept
             }
 
             @Override
-            public void onActivityStopped(@NonNull android.app.Activity activity) {
+            public void onActivityStopped(@NonNull Activity activity) {
                 mActiveCount--;
                 if (mActiveCount == 0) {
                     // 应用进入后台
@@ -334,23 +337,23 @@ public class App extends Application implements AppGetter, Thread.UncaughtExcept
             }
 
             @Override
-            public void onActivityCreated(@NonNull android.app.Activity activity, android.os.Bundle savedInstanceState) {
+            public void onActivityCreated(@NonNull Activity activity, Bundle savedInstanceState) {
             }
 
             @Override
-            public void onActivityResumed(@NonNull android.app.Activity activity) {
+            public void onActivityResumed(@NonNull Activity activity) {
             }
 
             @Override
-            public void onActivityPaused(@NonNull android.app.Activity activity) {
+            public void onActivityPaused(@NonNull Activity activity) {
             }
 
             @Override
-            public void onActivitySaveInstanceState(@NonNull android.app.Activity activity, @NonNull android.os.Bundle outState) {
+            public void onActivitySaveInstanceState(@NonNull Activity activity, @NonNull Bundle outState) {
             }
 
             @Override
-            public void onActivityDestroyed(@NonNull android.app.Activity activity) {
+            public void onActivityDestroyed(@NonNull Activity activity) {
             }
         });
 
@@ -388,7 +391,7 @@ public class App extends Application implements AppGetter, Thread.UncaughtExcept
         // 初始化OpenCC
         ChineseConverter.init(getApplicationContext());
 
-        FrescoUtils.init(this, 512);
+        FrescoUtils.init(this, 2048);
     }
 
     @Override

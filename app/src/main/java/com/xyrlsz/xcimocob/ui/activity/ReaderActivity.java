@@ -137,40 +137,6 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
             }
         }
     };
-
-    /**
-     * 更新电池图标填充量（0~100，竖向从底部向上）与颜色：
-     * 充电→绿；<10%→红；<20%→橙；其余→白
-     */
-    private void updateBatteryIcon(int percent, boolean charging) {
-        if (mBatteryIconFill == null) {
-            return;
-        }
-        // 图标容器固定 18dp，填充左右各缩进 5.5dp、底部缩进 2.85dp，最大填充高度 11.5dp
-        float density = getResources().getDisplayMetrics().density;
-        int maxFillPx = Math.round(11.5f * density);
-        int fillH = Math.max(0, maxFillPx * percent / 100);
-        ViewGroup.LayoutParams lp = mBatteryIconFill.getLayoutParams();
-        if (lp != null && lp.height != fillH) {
-            lp.height = fillH;
-            mBatteryIconFill.setLayoutParams(lp);
-        }
-        // 填充颜色：充电优先，其次按低电量阈值
-        int color;
-        if (charging) {
-            color = 0xFF4CAF50;      // 绿
-        } else if (percent < 10) {
-            color = 0xFFF44336;      // 红
-        } else if (percent < 20) {
-            color = 0xFFFFA726;      // 橙
-        } else {
-            color = 0xFFFFFFFF;      // 白
-        }
-        Drawable bg = mBatteryIconFill.getBackground();
-        if (bg instanceof GradientDrawable) {
-            ((GradientDrawable) bg).setColor(color);
-        }
-    }
     View mProgressLayout;
     View mBackLayout;
     View mInfoLayout;
@@ -205,6 +171,40 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
             return new Intent(context, PageReaderActivity.class);
         } else {
             return new Intent(context, StreamReaderActivity.class);
+        }
+    }
+
+    /**
+     * 更新电池图标填充量（0~100，竖向从底部向上）与颜色：
+     * 充电→绿；<10%→红；<20%→橙；其余→白
+     */
+    private void updateBatteryIcon(int percent, boolean charging) {
+        if (mBatteryIconFill == null) {
+            return;
+        }
+        // 图标容器固定 18dp，填充左右各缩进 5.5dp、底部缩进 2.85dp，最大填充高度 11.5dp
+        float density = getResources().getDisplayMetrics().density;
+        int maxFillPx = Math.round(11.5f * density);
+        int fillH = Math.max(0, maxFillPx * percent / 100);
+        ViewGroup.LayoutParams lp = mBatteryIconFill.getLayoutParams();
+        if (lp != null && lp.height != fillH) {
+            lp.height = fillH;
+            mBatteryIconFill.setLayoutParams(lp);
+        }
+        // 填充颜色：充电优先，其次按低电量阈值
+        int color;
+        if (charging) {
+            color = 0xFF4CAF50;      // 绿
+        } else if (percent < 10) {
+            color = 0xFFF44336;      // 红
+        } else if (percent < 20) {
+            color = 0xFFFFA726;      // 橙
+        } else {
+            color = 0xFFFFFFFF;      // 白
+        }
+        Drawable bg = mBatteryIconFill.getBackground();
+        if (bg instanceof GradientDrawable) {
+            ((GradientDrawable) bg).setColor(color);
         }
     }
 
@@ -776,6 +776,7 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
         doClickEvent(getValue(x, y, true));
     }
 
+    @SuppressWarnings("deprecation")
     private int getValue(float x, float y, boolean isLong) {
         Point point = new Point();
         WindowManager wm = getWindowManager();

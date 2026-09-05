@@ -1,9 +1,11 @@
 package com.xyrlsz.xcimocob.source.js;
 
 import android.net.Uri;
+import android.util.Log;
 import android.util.Pair;
 
 import com.xyrlsz.quickjs.QuickJSEngine;
+import com.xyrlsz.xcimocob.App;
 import com.xyrlsz.xcimocob.model.Chapter;
 import com.xyrlsz.xcimocob.model.Comic;
 import com.xyrlsz.xcimocob.model.ImageUrl;
@@ -15,6 +17,7 @@ import com.xyrlsz.xcimocob.parser.SearchIterator;
 import com.xyrlsz.xcimocob.parser.UrlFilter;
 import com.xyrlsz.xcimocob.parser.UrlFilterWithCidQueryKey;
 import com.xyrlsz.xcimocob.parser.WebParserConfig;
+import com.xyrlsz.xcimocob.utils.BinStreamUtils;
 import com.xyrlsz.xcimocob.utils.IdCreator;
 import com.xyrlsz.xcimocob.utils.StringUtils;
 
@@ -23,6 +26,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -56,9 +60,9 @@ public class JsMangaParser extends MangaParser {
         String sdk;
         try {
             sdk = new String(
-                    com.xyrlsz.xcimocob.utils.BinStreamUtils.readAllBytesCompat(
-                            com.xyrlsz.xcimocob.App.getAppContext().getAssets().open("source_sdk.js")),
-                    java.nio.charset.StandardCharsets.UTF_8);
+                    BinStreamUtils.readAllBytesCompat(
+                            App.getAppContext().getAssets().open("source_sdk.js")),
+                    StandardCharsets.UTF_8);
         } catch (Exception e) {
             sdk = "";
         }
@@ -66,18 +70,20 @@ public class JsMangaParser extends MangaParser {
     }
 
     private final JsSource mSource;
-
+    /**
+     * 当前线程的会话引擎（单次详情流程内复用）。非会话调用时 {@code withEngine} 仍每次新建引擎，
+     * 保持源脚本无跨调用状态、解析器无状态、可多线程共享的既有语义。
+     */
+    private final ThreadLocal<QuickJSEngine> mSessionEngine = new ThreadLocal<>();
     /**
      * 最近一次图片请求后缓存的请求头（用于"referer 随图片页变化"的源）。
      */
     private volatile Headers mCachedHeader;
-
     /**
      * 分类（懒加载缓存）。
      */
     private volatile Category mCategory;
     private volatile boolean mCategoryLoaded = false;
-
     /**
      * WebParser 配置是否已从 SOURCE.webConfig 应用。
      */
@@ -90,6 +96,30 @@ public class JsMangaParser extends MangaParser {
         buildFilters();
     }
 
+    /**
+     * 把 JS 返回的 JSON 字符串还原为普通字符串（null/undefined → null）。
+     */
+    private static String unquote(String json) {
+        if (json == null || json.isEmpty() || "null".equals(json)) return null;
+        try {
+            Object v = new org.json.JSONTokener(json).nextValue();
+            return v == null ? null : v.toString();
+        } catch (Exception e) {
+            return json;
+        }
+    }
+
+    /* ---------------- 引擎 ---------------- */
+
+    /**
+     * 读取 JSON 字段：JSON null 或键缺失时返回 null。
+     * 不能用 optString(key, null)——当值为 JSON null 时它返回字符串 "null" 而非默认值，
+     * 会导致搜索/分类列表更新时间显示 "null"。
+     */
+    private static String jstr(JSONObject o, String key) {
+        return o.isNull(key) ? null : o.optString(key);
+    }
+
     public JsSource getJsSource() {
         return mSource;
     }
@@ -97,8 +127,6 @@ public class JsMangaParser extends MangaParser {
     public int getType() {
         return mSource.getType();
     }
-
-    /* ---------------- 引擎 ---------------- */
 
     private QuickJSEngine createEngine() {
         QuickJSEngine engine = new QuickJSEngine();
@@ -117,16 +145,6 @@ public class JsMangaParser extends MangaParser {
         }
         return engine;
     }
-
-    private interface EngineAction<T> {
-        T run(QuickJSEngine engine) throws Exception;
-    }
-
-    /**
-     * 当前线程的会话引擎（单次详情流程内复用）。非会话调用时 {@code withEngine} 仍每次新建引擎，
-     * 保持源脚本无跨调用状态、解析器无状态、可多线程共享的既有语义。
-     */
-    private final ThreadLocal<QuickJSEngine> mSessionEngine = new ThreadLocal<>();
 
     /**
      * 开启一次引擎会话：在会话期间（同一线程串行）复用同一引擎，使详情加载的多次解析调用
@@ -157,7 +175,7 @@ public class JsMangaParser extends MangaParser {
             try {
                 return action.run(session);
             } catch (Throwable t) {
-                android.util.Log.w("JsParser", "withEngine(session) failed for type "
+                Log.w("JsParser", "withEngine(session) failed for type "
                         + mSource.getType() + ": " + t);
                 return null;
             }
@@ -165,7 +183,7 @@ public class JsMangaParser extends MangaParser {
 
         if (session != null && session.isClosed()) {
             mSessionEngine.remove();
-            android.util.Log.w("JsParser", "cleared stale closed session for type "
+            Log.w("JsParser", "cleared stale closed session for type "
                     + mSource.getType());
         }
 
@@ -174,7 +192,7 @@ public class JsMangaParser extends MangaParser {
             engine = createEngine();
             return action.run(engine);
         } catch (Throwable t) {
-            android.util.Log.w("JsParser", "withEngine failed for type "
+            Log.w("JsParser", "withEngine failed for type "
                     + mSource.getType() + ": " + t);
             return null;
         } finally {
@@ -191,6 +209,8 @@ public class JsMangaParser extends MangaParser {
         return engine.callFunction(name, argsJson);
     }
 
+    /* ---------------- 过滤器 / 元数据 ---------------- */
+
     private JSONObject requestToJson(Request req) {
         if (req == null) return null;
         JSONObject o = new JSONObject();
@@ -205,8 +225,6 @@ public class JsMangaParser extends MangaParser {
         }
         return o;
     }
-
-    /* ---------------- 过滤器 / 元数据 ---------------- */
 
     private void buildFilters() {
         filter.clear();
@@ -270,19 +288,6 @@ public class JsMangaParser extends MangaParser {
             }
             return super.getUrl(cid);
         });
-    }
-
-    /**
-     * 把 JS 返回的 JSON 字符串还原为普通字符串（null/undefined → null）。
-     */
-    private static String unquote(String json) {
-        if (json == null || json.isEmpty() || "null".equals(json)) return null;
-        try {
-            Object v = new org.json.JSONTokener(json).nextValue();
-            return v == null ? null : v.toString();
-        } catch (Exception e) {
-            return json;
-        }
     }
 
     /* ---------------- 请求头 ---------------- */
@@ -371,47 +376,6 @@ public class JsMangaParser extends MangaParser {
         });
     }
 
-    private static class JsSearchIterator implements SearchIterator {
-        private final JSONArray arr;
-        private final int type;
-        private int index = 0;
-
-        JsSearchIterator(JSONArray arr, int page, int type) {
-            this.arr = arr;
-            this.type = type;
-        }
-
-        @Override
-        public boolean empty() {
-            return arr == null || arr.length() == 0;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return arr != null && index < arr.length();
-        }
-
-        @Override
-        public Comic next() {
-            JSONObject o = arr.optJSONObject(index++);
-            if (o == null) return null;
-            return new Comic(type, jstr(o, "cid"), jstr(o, "title"),
-                    jstr(o, "cover"), jstr(o, "update"),
-                    jstr(o, "author"));
-        }
-    }
-
-    /**
-     * 读取 JSON 字段：JSON null 或键缺失时返回 null。
-     * 不能用 optString(key, null)——当值为 JSON null 时它返回字符串 "null" 而非默认值，
-     * 会导致搜索/分类列表更新时间显示 "null"。
-     */
-    private static String jstr(JSONObject o, String key) {
-        return o.isNull(key) ? null : o.optString(key);
-    }
-
-    /* ---------------- 详情 ---------------- */
-
     @Override
     public Request getInfoRequest(String cid) {
         return withEngine(e -> {
@@ -444,6 +408,8 @@ public class JsMangaParser extends MangaParser {
             return comic;
         });
     }
+
+    /* ---------------- 详情 ---------------- */
 
     @Override
     public Request getChapterRequest(String html, String cid) {
@@ -508,8 +474,6 @@ public class JsMangaParser extends MangaParser {
         return list;
     }
 
-    /* ---------------- 图片 ---------------- */
-
     @Override
     public Request getImagesRequest(String cid, String path) {
         return withEngine(e -> {
@@ -532,6 +496,8 @@ public class JsMangaParser extends MangaParser {
     public List<ImageUrl> parseImages(String html) {
         return parseImages(html, null);
     }
+
+    /* ---------------- 图片 ---------------- */
 
     @Override
     public List<ImageUrl> parseImages(String html, Chapter chapter) {
@@ -597,8 +563,6 @@ public class JsMangaParser extends MangaParser {
         });
     }
 
-    /* ---------------- 更新检查 ---------------- */
-
     @Override
     public Request getCheckRequest(String cid) {
         return withEngine(e -> {
@@ -617,7 +581,7 @@ public class JsMangaParser extends MangaParser {
         });
     }
 
-    /* ---------------- 分类 ---------------- */
+    /* ---------------- 更新检查 ---------------- */
 
     @Override
     public Category getCategory() {
@@ -646,6 +610,8 @@ public class JsMangaParser extends MangaParser {
             }
         });
     }
+
+    /* ---------------- 分类 ---------------- */
 
     @Override
     public Request getCategoryRequest(String format, int page) {
@@ -692,205 +658,6 @@ public class JsMangaParser extends MangaParser {
         });
     }
 
-    /**
-     * 由 JS getCategories() 构建的分类。
-     */
-    private static class JsCategory extends MangaCategory {
-        private final boolean composite;
-        /**
-         * getCategories() 返回的 format 模板（含 {subject}/{area}/{reader}/{year}/{progress}/{order}/{page}/{offset}/{limit} 占位符）。
-         */
-        private final String formatTemplate;
-        /**
-         * getCategories().pageSize，用于填充 {offset}/{limit}（默认 20）。
-         */
-        private final int pageSize;
-        /**
-         * 「全部」哨兵：值为空串时用于替换成后端接受的“全部”值。
-         * 可为单个字符串（作用于所有维度）或按维度 map（{subject:..,area:..,...}）。
-         * 为 null 表示后端接受空串=全部，保持原样。
-         */
-        private final String allValue;
-        private final Map<String, String> allValueMap;
-        private static final String[] ATTR_KEYS = {"subject", "area", "reader", "year", "progress", "order"};
-        private final List<Pair<String, String>> subject = new ArrayList<>();
-        private final List<Pair<String, String>> area = new ArrayList<>();
-        private final List<Pair<String, String>> reader = new ArrayList<>();
-        private final List<Pair<String, String>> progress = new ArrayList<>();
-        private final List<Pair<String, String>> year = new ArrayList<>();
-        private final List<Pair<String, String>> order = new ArrayList<>();
-        private final boolean[] has = new boolean[6];
-
-        JsCategory(JSONObject o) {
-            composite = o.optBoolean("composite", false);
-            String fmt = o.optString("format");
-            formatTemplate = (StringUtils.isEmpty(fmt) || "null".equals(fmt)) ? null : fmt;
-            int ps = o.optInt("pageSize", 20);
-            pageSize = (ps <= 0) ? 20 : ps;
-            subject.addAll(parsePairs(o.optJSONArray("subject")));
-            area.addAll(parsePairs(o.optJSONArray("area")));
-            reader.addAll(parsePairs(o.optJSONArray("reader")));
-            progress.addAll(parsePairs(o.optJSONArray("progress")));
-            year.addAll(parsePairs(o.optJSONArray("year")));
-            order.addAll(parsePairs(o.optJSONArray("order")));
-            // 解析「全部」哨兵：字符串（作用于所有维度）或对象（按维度）
-            String av = null;
-            Map<String, String> avMap = null;
-            if (o.has("allValue") && !o.isNull("allValue")) {
-                Object raw = o.opt("allValue");
-                if (raw instanceof JSONObject avObj) {
-                    avMap = new HashMap<>();
-                    Iterator<String> it = avObj.keys();
-                    while (it.hasNext()) {
-                        String k = it.next();
-                        String v = avObj.optString(k);
-                        if (!v.isEmpty() && !"null".equals(v)) {
-                            avMap.put(k, v);
-                        }
-                    }
-                } else {
-                    assert raw != null;
-                    String s = raw.toString();
-                    av = (s.isEmpty() || "null".equals(s)) ? null : s;
-                }
-            }
-            allValue = av;
-            allValueMap = avMap;
-            has[Category.CATEGORY_SUBJECT] = !subject.isEmpty();
-            has[Category.CATEGORY_AREA] = !area.isEmpty();
-            has[Category.CATEGORY_READER] = !reader.isEmpty();
-            has[Category.CATEGORY_PROGRESS] = !progress.isEmpty();
-            has[Category.CATEGORY_YEAR] = !year.isEmpty();
-            has[Category.CATEGORY_ORDER] = !order.isEmpty();
-        }
-
-        int getPageSize() {
-            return pageSize;
-        }
-
-        /**
-         * 用所选值填充 format 模板中的分类占位符；{page}/{offset}/{limit} 留给 getCategoryRequest 按页填充。
-         * 选中「全部」（值空/未选）时，若声明了 allValue 哨兵则替换为哨兵值，否则保持空串。
-         */
-        @Override
-        public String getFormat(String... args) {
-            String[] r = resolveArgs(args);
-            if (formatTemplate != null) {
-                String s = formatTemplate;
-                s = s.replace("{subject}", r[0]);
-                s = s.replace("{area}", r[1]);
-                s = s.replace("{reader}", r[2]);
-                s = s.replace("{year}", r[3]);
-                s = s.replace("{progress}", r[4]);
-                s = s.replace("{order}", r[5]);
-                return s;
-            }
-            return super.getFormat(r);
-        }
-
-        /**
-         * 解析单个维度实际值：非空选中原样返回；空/未选（「全部」）按 allValue 哨兵替换，
-         * 未声明哨兵则保持空串。
-         */
-        private String resolveValue(int idx, String selected) {
-            if (selected != null && !selected.isEmpty()) return selected;
-            if (allValue != null) return allValue;
-            if (allValueMap != null) {
-                String v = allValueMap.get(ATTR_KEYS[idx]);
-                return v != null ? v : "";
-            }
-            return "";
-        }
-
-        private String[] resolveArgs(String... args) {
-            String[] r = new String[6];
-            for (int i = 0; i < 6; i++) {
-                String sel = (args != null && i < args.length) ? args[i] : null;
-                r[i] = resolveValue(i, sel);
-            }
-            return r;
-        }
-
-        private static List<Pair<String, String>> parsePairs(JSONArray arr) {
-            List<Pair<String, String>> list = new ArrayList<>();
-            if (arr == null) return list;
-            for (int i = 0; i < arr.length(); i++) {
-                Object el = arr.opt(i);
-                if (el instanceof JSONObject o) {
-                    // 对象格式：{ title: "全部", value: "" }（源脚本统一用此格式）
-                    String title = catStr(o, "title");
-                    if (title == null) title = catStr(o, "name");
-                    // value 允许空串 ''（表示「全部」），仅 JSON null/缺失才视为无效，
-                    // 不能用 catStr（会把空串折叠成 null，导致「全部」选项被整条丢弃）
-                    String value = catVal(o, "value");
-                    if (value == null) value = catVal(o, "id");
-                    if (title != null && !title.isEmpty() && value != null) {
-                        list.add(Pair.create(title, value));
-                    }
-                } else {
-                    // 数组格式：[title, value]
-                    JSONArray pair = arr.optJSONArray(i);
-                    if (pair != null && pair.length() >= 2) {
-                        list.add(Pair.create(pair.optString(0), pair.optString(1)));
-                    }
-                }
-            }
-            return list;
-        }
-
-        /**
-         * 读取对象字段，JSON null/缺失返回 null。
-         */
-        private static String catStr(JSONObject o, String key) {
-            if (o.has(key) && !o.isNull(key)) {
-                String s = o.optString(key);
-                return (StringUtils.isEmpty(s) || "null".equals(s)) ? null : s;
-            }
-            return null;
-        }
-
-        /**
-         * 读取分类项 value：JSON null/缺失返回 null，空串 ''（「全部」标记）原样保留。
-         */
-        private static String catVal(JSONObject o, String key) {
-            if (o.has(key) && !o.isNull(key)) {
-                String s = o.optString(key);
-                return "null".equals(s) ? null : s;
-            }
-            return null;
-        }
-
-        @Override
-        public boolean isComposite() {
-            return composite;
-        }
-
-        @Override
-        protected List<Pair<String, String>> getSubject() {
-            return subject;
-        }
-
-        @Override
-        public boolean hasAttribute(int attr) {
-            return has[attr];
-        }
-
-        @Override
-        public List<Pair<String, String>> getAttrList(int attr) {
-            return switch (attr) {
-                case CATEGORY_SUBJECT -> subject;
-                case CATEGORY_AREA -> area;
-                case CATEGORY_READER -> reader;
-                case CATEGORY_PROGRESS -> progress;
-                case CATEGORY_YEAR -> year;
-                case CATEGORY_ORDER -> order;
-                default -> null;
-            };
-        }
-    }
-
-    /* ---------------- WebParser 配置（SOURCE.webConfig） ---------------- */
-
     private void applyConfigSourceTitle(String title) {
         getSearchConfig().setSourceTitle(title);
         getInfoConfig().setSourceTitle(title);
@@ -930,6 +697,8 @@ public class JsMangaParser extends MangaParser {
             cfg.setInteractiveChallenge(o.optBoolean("interactiveChallenge"));
     }
 
+    /* ---------------- WebParser 配置（SOURCE.webConfig） ---------------- */
+
     @Override
     public WebParserConfig getSearchConfig() {
         ensureConfig();
@@ -959,8 +728,6 @@ public class JsMangaParser extends MangaParser {
         ensureConfig();
         return super.getImagesLazyConfig();
     }
-
-    /* ---------------- 登录 / 设置（供 UI 调用） ---------------- */
 
     /**
      * 脚本是否声明了登录能力。
@@ -1006,6 +773,8 @@ public class JsMangaParser extends MangaParser {
             }
         });
     }
+
+    /* ---------------- 登录 / 设置（供 UI 调用） ---------------- */
 
     /**
      * 脚本声明的注册链接（JS getRegisterUrl() 返回的 URL 字符串），未声明或返回空则返回 null。
@@ -1075,8 +844,6 @@ public class JsMangaParser extends MangaParser {
         });
     }
 
-    /* ---------------- 其它 ---------------- */
-
     @Override
     public boolean isHere(Uri uri) {
         return super.isHere(uri);
@@ -1085,5 +852,238 @@ public class JsMangaParser extends MangaParser {
     @Override
     public String getComicId(Uri uri) {
         return super.getComicId(uri);
+    }
+
+    private interface EngineAction<T> {
+        T run(QuickJSEngine engine) throws Exception;
+    }
+
+    /* ---------------- 其它 ---------------- */
+
+    private static class JsSearchIterator implements SearchIterator {
+        private final JSONArray arr;
+        private final int type;
+        private int index = 0;
+
+        JsSearchIterator(JSONArray arr, int page, int type) {
+            this.arr = arr;
+            this.type = type;
+        }
+
+        @Override
+        public boolean empty() {
+            return arr == null || arr.length() == 0;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return arr != null && index < arr.length();
+        }
+
+        @Override
+        public Comic next() {
+            JSONObject o = arr.optJSONObject(index++);
+            if (o == null) return null;
+            return new Comic(type, jstr(o, "cid"), jstr(o, "title"),
+                    jstr(o, "cover"), jstr(o, "update"),
+                    jstr(o, "author"));
+        }
+    }
+
+    /**
+     * 由 JS getCategories() 构建的分类。
+     */
+    private static class JsCategory extends MangaCategory {
+        private static final String[] ATTR_KEYS = {"subject", "area", "reader", "year", "progress", "order"};
+        private final boolean composite;
+        /**
+         * getCategories() 返回的 format 模板（含 {subject}/{area}/{reader}/{year}/{progress}/{order}/{page}/{offset}/{limit} 占位符）。
+         */
+        private final String formatTemplate;
+        /**
+         * getCategories().pageSize，用于填充 {offset}/{limit}（默认 20）。
+         */
+        private final int pageSize;
+        /**
+         * 「全部」哨兵：值为空串时用于替换成后端接受的“全部”值。
+         * 可为单个字符串（作用于所有维度）或按维度 map（{subject:..,area:..,...}）。
+         * 为 null 表示后端接受空串=全部，保持原样。
+         */
+        private final String allValue;
+        private final Map<String, String> allValueMap;
+        private final List<Pair<String, String>> subject = new ArrayList<>();
+        private final List<Pair<String, String>> area = new ArrayList<>();
+        private final List<Pair<String, String>> reader = new ArrayList<>();
+        private final List<Pair<String, String>> progress = new ArrayList<>();
+        private final List<Pair<String, String>> year = new ArrayList<>();
+        private final List<Pair<String, String>> order = new ArrayList<>();
+        private final boolean[] has = new boolean[6];
+
+        JsCategory(JSONObject o) {
+            composite = o.optBoolean("composite", false);
+            String fmt = o.optString("format");
+            formatTemplate = (StringUtils.isEmpty(fmt) || "null".equals(fmt)) ? null : fmt;
+            int ps = o.optInt("pageSize", 20);
+            pageSize = (ps <= 0) ? 20 : ps;
+            subject.addAll(parsePairs(o.optJSONArray("subject")));
+            area.addAll(parsePairs(o.optJSONArray("area")));
+            reader.addAll(parsePairs(o.optJSONArray("reader")));
+            progress.addAll(parsePairs(o.optJSONArray("progress")));
+            year.addAll(parsePairs(o.optJSONArray("year")));
+            order.addAll(parsePairs(o.optJSONArray("order")));
+            // 解析「全部」哨兵：字符串（作用于所有维度）或对象（按维度）
+            String av = null;
+            Map<String, String> avMap = null;
+            if (o.has("allValue") && !o.isNull("allValue")) {
+                Object raw = o.opt("allValue");
+                if (raw instanceof JSONObject avObj) {
+                    avMap = new HashMap<>();
+                    Iterator<String> it = avObj.keys();
+                    while (it.hasNext()) {
+                        String k = it.next();
+                        String v = avObj.optString(k);
+                        if (!v.isEmpty() && !"null".equals(v)) {
+                            avMap.put(k, v);
+                        }
+                    }
+                } else {
+                    assert raw != null;
+                    String s = raw.toString();
+                    av = (s.isEmpty() || "null".equals(s)) ? null : s;
+                }
+            }
+            allValue = av;
+            allValueMap = avMap;
+            has[Category.CATEGORY_SUBJECT] = !subject.isEmpty();
+            has[Category.CATEGORY_AREA] = !area.isEmpty();
+            has[Category.CATEGORY_READER] = !reader.isEmpty();
+            has[Category.CATEGORY_PROGRESS] = !progress.isEmpty();
+            has[Category.CATEGORY_YEAR] = !year.isEmpty();
+            has[Category.CATEGORY_ORDER] = !order.isEmpty();
+        }
+
+        private static List<Pair<String, String>> parsePairs(JSONArray arr) {
+            List<Pair<String, String>> list = new ArrayList<>();
+            if (arr == null) return list;
+            for (int i = 0; i < arr.length(); i++) {
+                Object el = arr.opt(i);
+                if (el instanceof JSONObject o) {
+                    // 对象格式：{ title: "全部", value: "" }（源脚本统一用此格式）
+                    String title = catStr(o, "title");
+                    if (title == null) title = catStr(o, "name");
+                    // value 允许空串 ''（表示「全部」），仅 JSON null/缺失才视为无效，
+                    // 不能用 catStr（会把空串折叠成 null，导致「全部」选项被整条丢弃）
+                    String value = catVal(o, "value");
+                    if (value == null) value = catVal(o, "id");
+                    if (title != null && !title.isEmpty() && value != null) {
+                        list.add(Pair.create(title, value));
+                    }
+                } else {
+                    // 数组格式：[title, value]
+                    JSONArray pair = arr.optJSONArray(i);
+                    if (pair != null && pair.length() >= 2) {
+                        list.add(Pair.create(pair.optString(0), pair.optString(1)));
+                    }
+                }
+            }
+            return list;
+        }
+
+        /**
+         * 读取对象字段，JSON null/缺失返回 null。
+         */
+        private static String catStr(JSONObject o, String key) {
+            if (o.has(key) && !o.isNull(key)) {
+                String s = o.optString(key);
+                return (StringUtils.isEmpty(s) || "null".equals(s)) ? null : s;
+            }
+            return null;
+        }
+
+        /**
+         * 读取分类项 value：JSON null/缺失返回 null，空串 ''（「全部」标记）原样保留。
+         */
+        private static String catVal(JSONObject o, String key) {
+            if (o.has(key) && !o.isNull(key)) {
+                String s = o.optString(key);
+                return "null".equals(s) ? null : s;
+            }
+            return null;
+        }
+
+        int getPageSize() {
+            return pageSize;
+        }
+
+        /**
+         * 用所选值填充 format 模板中的分类占位符；{page}/{offset}/{limit} 留给 getCategoryRequest 按页填充。
+         * 选中「全部」（值空/未选）时，若声明了 allValue 哨兵则替换为哨兵值，否则保持空串。
+         */
+        @Override
+        public String getFormat(String... args) {
+            String[] r = resolveArgs(args);
+            if (formatTemplate != null) {
+                String s = formatTemplate;
+                s = s.replace("{subject}", r[0]);
+                s = s.replace("{area}", r[1]);
+                s = s.replace("{reader}", r[2]);
+                s = s.replace("{year}", r[3]);
+                s = s.replace("{progress}", r[4]);
+                s = s.replace("{order}", r[5]);
+                return s;
+            }
+            return super.getFormat(r);
+        }
+
+        /**
+         * 解析单个维度实际值：非空选中原样返回；空/未选（「全部」）按 allValue 哨兵替换，
+         * 未声明哨兵则保持空串。
+         */
+        private String resolveValue(int idx, String selected) {
+            if (selected != null && !selected.isEmpty()) return selected;
+            if (allValue != null) return allValue;
+            if (allValueMap != null) {
+                String v = allValueMap.get(ATTR_KEYS[idx]);
+                return v != null ? v : "";
+            }
+            return "";
+        }
+
+        private String[] resolveArgs(String... args) {
+            String[] r = new String[6];
+            for (int i = 0; i < 6; i++) {
+                String sel = (args != null && i < args.length) ? args[i] : null;
+                r[i] = resolveValue(i, sel);
+            }
+            return r;
+        }
+
+        @Override
+        public boolean isComposite() {
+            return composite;
+        }
+
+        @Override
+        protected List<Pair<String, String>> getSubject() {
+            return subject;
+        }
+
+        @Override
+        public boolean hasAttribute(int attr) {
+            return has[attr];
+        }
+
+        @Override
+        public List<Pair<String, String>> getAttrList(int attr) {
+            return switch (attr) {
+                case CATEGORY_SUBJECT -> subject;
+                case CATEGORY_AREA -> area;
+                case CATEGORY_READER -> reader;
+                case CATEGORY_PROGRESS -> progress;
+                case CATEGORY_YEAR -> year;
+                case CATEGORY_ORDER -> order;
+                default -> null;
+            };
+        }
     }
 }

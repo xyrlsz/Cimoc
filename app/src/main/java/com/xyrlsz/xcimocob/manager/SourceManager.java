@@ -1,7 +1,5 @@
 package com.xyrlsz.xcimocob.manager;
 
-import android.util.SparseArray;
-
 import com.xyrlsz.xcimocob.component.AppGetter;
 import com.xyrlsz.xcimocob.model.JsSource;
 import com.xyrlsz.xcimocob.model.Source;
@@ -10,9 +8,11 @@ import com.xyrlsz.xcimocob.parser.MangaParser;
 import com.xyrlsz.xcimocob.source.Locality;
 import com.xyrlsz.xcimocob.source.Null;
 import com.xyrlsz.xcimocob.source.js.JsMangaParser;
+import com.xyrlsz.xcimocob.utils.ThreadPoolManager;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
@@ -27,14 +27,12 @@ public class SourceManager {
 
     private static volatile SourceManager mInstance;
 
-    // 1. 修改：使用 ObjectBox 的 Box 替代 SourceDao
     private final Box<Source> mSourceBox;
     private final AppGetter mGetter;
-    private final SparseArray<MangaParser> mParserArray = new SparseArray<>();
+    private final ConcurrentHashMap<Integer, MangaParser> mParserArray = new ConcurrentHashMap<>();
 
     private SourceManager(AppGetter getter) {
         mGetter = getter;
-        // 2. 修改：从 BoxStore 获取 Box
         BoxStore boxStore = getter.getAppInstance().getBoxStore();
         mSourceBox = boxStore.boxFor(Source.class);
     }
@@ -101,19 +99,44 @@ public class SourceManager {
         mParserArray.clear();
     }
 
+    /** 清理旧解析器并在后台并行预热当前启用的漫画源。 */
+    public void refreshParserCache() {
+        clearParserCache();
+        init();
+    }
+
+    /** 后台并行预热所有启用的漫画源解析器。 */
+    public void init() {
+        ThreadPoolManager.getInstance().getComputeExecutor().execute(() -> {
+            for (Source source : listEnable()) {
+                ThreadPoolManager.getInstance().getComputeExecutor().execute(() -> {
+                    try {
+                        getParser(source.getType());
+                    } catch (Throwable t) {
+                        android.util.Log.w("SourceManager", "init source failed: " + source.getType(), t);
+                    }
+                });
+            }
+        });
+    }
+
     // 6. 解析器管理：优先启用状态的 JS 源（覆盖内置），否则回退到内置实现
     public MangaParser getParser(int type) {
         MangaParser parser = mParserArray.get(type);
         if (parser == null) {
+            MangaParser created;
             if (type == Locality.TYPE) {
                 // 本地漫画源（非网络源），保持内置
-                parser = new Locality();
+                created = new Locality();
             } else {
                 // 网络漫画源统一由 JS 源提供；无对应 JS 源时回退到空实现
                 JsSource js = JsSourceManager.getInstance(mGetter).loadEnabledByType(type);
-                parser = (js != null) ? new JsMangaParser(js) : new Null();
+                created = (js != null) ? new JsMangaParser(js) : new Null();
             }
-            mParserArray.put(type, parser);
+            parser = mParserArray.putIfAbsent(type, created);
+            if (parser == null) {
+                parser = created;
+            }
         }
         return parser;
     }
