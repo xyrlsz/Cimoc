@@ -74,6 +74,12 @@ public class JsSource {
     private String settingsJson;
 
     /**
+     * 脚本是否声明了分类能力（实现了 getCategories 函数）。由 validateScript 计算并缓存，
+     * 分类页据此过滤支持分类的源，避免打开分类页时逐源跑 JS 引擎。
+     */
+    private boolean hasCategory;
+
+    /**
      * hasLogin/settingCount/settingsJson 是否已计算并缓存。存量源首次需回填。
      */
     private boolean metaReady;
@@ -208,6 +214,14 @@ public class JsSource {
 
     public void setSettingsJson(String settingsJson) {
         this.settingsJson = settingsJson;
+    }
+
+    public boolean isHasCategory() {
+        return hasCategory;
+    }
+
+    public void setHasCategory(boolean hasCategory) {
+        this.hasCategory = hasCategory;
     }
 
     public boolean isMetaReady() {

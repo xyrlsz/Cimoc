@@ -395,7 +395,7 @@
     },
     {
       "id": "9:3996711962368286713",
-      "lastPropertyId": "11:6308076794763841072",
+      "lastPropertyId": "15:2428302643025624111",
       "name": "JsSource",
       "properties": [
         {
@@ -455,6 +455,26 @@
           "id": "11:6308076794763841072",
           "name": "cidQuery",
           "type": 9
+        },
+        {
+          "id": "12:3992723721725005526",
+          "name": "hasLogin",
+          "type": 1
+        },
+        {
+          "id": "13:2024435661573430126",
+          "name": "settingCount",
+          "type": 5
+        },
+        {
+          "id": "14:2100340289086515225",
+          "name": "settingsJson",
+          "type": 9
+        },
+        {
+          "id": "15:2428302643025624111",
+          "name": "metaReady",
+          "type": 1
         }
       ],
       "relations": []

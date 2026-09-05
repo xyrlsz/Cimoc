@@ -79,6 +79,7 @@ public class JsSourceListActivity extends BackActivity {
                         s.setHasLogin(meta.optBoolean("__hasLogin", false));
                         s.setSettingCount(meta.optInt("__settingCount", 0));
                         s.setSettingsJson(meta.optString("__settingsJson", ""));
+                        s.setHasCategory(meta.optBoolean("__hasCategory", false));
                         s.setMetaReady(true);
                         manager.put(s);
                     } catch (Exception e) {

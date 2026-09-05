@@ -16,6 +16,7 @@ public class Source {
     private int type;
     private boolean enable;
     private String baseUrl;
+    private boolean hasCategory;
 
     public Source() {
         // id 必须为 0：ObjectBox 对 @Id(assignable=true) 且 id<=0 的实体自动分配唯一 id；
@@ -96,5 +97,13 @@ public class Source {
 
     public void setBaseUrl(String baseUrl) {
         this.baseUrl = baseUrl;
+    }
+
+    public boolean isHasCategory() {
+        return this.hasCategory;
+    }
+
+    public void setHasCategory(boolean hasCategory) {
+        this.hasCategory = hasCategory;
     }
 }

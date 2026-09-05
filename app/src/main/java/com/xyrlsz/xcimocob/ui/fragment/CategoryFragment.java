@@ -42,8 +42,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
-import io.reactivex.rxjava3.disposables.Disposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 
 public class CategoryFragment extends BaseFragment implements CategoryView, AdapterView.OnItemSelectedListener {
@@ -68,7 +69,10 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
     CategoryGridAdapter categoryGridAdapter;
     int mSource;
     View headView;
+    View mProgressOverlay;
+    View mContentContainer;
     FloatingActionButton actionButton;
+    FloatingActionButton actionButtonToTop;
     ImageButton toggleHeadButton;
     private Category mCategory;
     private SourceManager mSourceManager;
@@ -122,27 +126,74 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
         }
     }
 
-    private void updateSourceList() {
-        mSourceManager = SourceManager.getInstance(this);
+    /**
+     * 后台构建「支持分类」的源列表。
+     * <p>
+     * 优先用 Source 表缓存的 {@code hasCategory} 标志快速过滤（无需启动 JS 引擎）；
+     * 对尚未回填元信息的源（hasCategory=false 但可能实际支持分类），回退调用
+     * {@code getCategory()} 在后台线程判定，避免漏显。整个过程不阻塞主线程。
+     */
+    private LinkedList<Pair<String, String>> buildSourceList() {
         List<Source> sourceList = mSourceManager.listEnable();
-        mSourceList = new LinkedList<>();
+        LinkedList<Pair<String, String>> result = new LinkedList<>();
         for (Source source : sourceList) {
-            if (source.getEnable()) {
-                mCategory = mSourceManager.getParser(source.getType()).getCategory();
-                if (mCategory != null) {
-                    mSourceList.add(new Pair<>(source.getTitle(), Integer.toString(source.getType())));
-                }
+            if (!source.getEnable()) {
+                continue;
+            }
+            boolean hasCategory = source.isHasCategory();
+            if (!hasCategory) {
+                // 元信息未回填：后台跑一次 getCategory 判定（结果会被解析器自身缓存）
+                Category cat = mSourceManager.getParser(source.getType()).getCategory();
+                hasCategory = cat != null;
+            }
+            if (hasCategory) {
+                result.add(new Pair<>(source.getTitle(), Integer.toString(source.getType())));
             }
         }
-        if (mSourceList.isEmpty()) {
-            mSource = -1;
-            mCategorySourceSpinner.setAdapter(new CategoryAdapter(getContext(), mSourceList));
-            mCategorySourceSpinner.setSelection(0);
-            return;
+        return result;
+    }
+
+    /**
+     * 异步加载源列表：后台过滤 → 主线程更新 Spinner 与状态。
+     */
+    private void loadSourceListAsync() {
+        mCompositeSubscription.add(Observable.fromCallable(this::buildSourceList)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(list -> {
+                    mSourceList = list;
+                    if (list.isEmpty()) {
+                        mSource = -1;
+                        mCategorySourceSpinner.setAdapter(new CategoryAdapter(getContext(), mSourceList));
+                        mCategorySourceSpinner.setSelection(0);
+                    } else {
+                        mSource = Integer.parseInt(list.get(0).second);
+                        mCategorySourceSpinner.setAdapter(new CategoryAdapter(getContext(), mSourceList));
+                        mCategorySourceSpinner.setSelection(0);
+                        // setSelection 会触发 onItemSelected → initSpinner，这里显式调用一次保证初始化
+                        initSpinner(mSource);
+                        if (mCurrentState != null) {
+                            mCurrentState.source = mSource;
+                        }
+                    }
+                    hideProgressOverlay();
+                }, throwable -> {
+                    throwable.printStackTrace();
+                    hideProgressOverlay();
+                }));
+    }
+
+    private void hideProgressOverlay() {
+        if (mProgressOverlay != null) {
+            mProgressOverlay.setVisibility(View.GONE);
         }
-        mSource = Integer.parseInt(mSourceList.get(0).second);
-        mCategorySourceSpinner.setAdapter(new CategoryAdapter(getContext(), mSourceList));
-        mCategorySourceSpinner.setSelection(0);
+        // 数据加载完毕，显示内容区与回顶按钮
+        if (mContentContainer != null) {
+            mContentContainer.setVisibility(View.VISIBLE);
+        }
+        if (actionButtonToTop != null) {
+            actionButtonToTop.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -170,7 +221,15 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
         actionButton = mRootView.findViewById(R.id.category_action_button);
         toggleHeadButton = mRootView.findViewById(R.id.category_action_toggle_head);
 
-        updateSourceList();
+        mSourceManager = SourceManager.getInstance(this);
+        mSourceList = new LinkedList<>();
+        mSource = -1;
+        mCompositeSubscription = new CompositeDisposable();
+
+        mCurrentState = new State();
+        mCurrentState.source = mSource;
+        mCurrentState.page = 0;
+        mCurrentState.state = STATE_NULL;
 
         mCategorySourceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -185,19 +244,14 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
                 initSpinner(mSourceList.get(0).second);
             }
         });
-        mCompositeSubscription = new CompositeDisposable();
-
-        mCurrentState = new State();
-        mCurrentState.source = mSource;
-        mCurrentState.page = 0;
-        mCurrentState.state = STATE_NULL;
     }
 
     @Override
     protected void initView() {
         setHasOptionsMenu(true);
 
-        mRootView.findViewById(R.id.category_action_button_to_top).setOnClickListener(v -> onToTopButtonClick());
+        actionButtonToTop = mRootView.findViewById(R.id.category_action_button_to_top);
+        actionButtonToTop.setOnClickListener(v -> onToTopButtonClick());
         mRootView.findViewById(R.id.category_action_button).setOnClickListener(v -> onActionButtonClick());
 
         categoryGridAdapter = new CategoryGridAdapter(getContext(), mComicList);
@@ -213,9 +267,12 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
         mRecyclerView.setItemAnimator(null);
         mRecyclerView.setLayoutManager(initLayoutManager());
 
-        if (!mSourceList.isEmpty()) {
-            initSpinner(mSourceList.get(0).second);
-        }
+        // 加载蒙层（含居中 ProgressBar）与内容容器：初始仅显示进度条，加载完成后显示内容
+        mProgressOverlay = mRootView.findViewById(R.id.category_progress_overlay);
+        mContentContainer = mRootView.findViewById(R.id.category_content_container);
+
+        // 源列表在后台构建，完成后再填充 Spinner 并初始化分类选项
+        loadSourceListAsync();
         GridLayoutManager layoutManager = (GridLayoutManager) mRecyclerView.getLayoutManager();
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             private ScrollDirection lastDirection = ScrollDirection.NONE;
@@ -494,7 +551,17 @@ public class CategoryFragment extends BaseFragment implements CategoryView, Adap
     public boolean onOptionsItemSelected(MenuItem item) {
         int __id = item.getItemId();
         if (__id == R.id.category_refresh) {
-                updateSourceList();
+                // 刷新时重新进入加载态：隐藏内容区，只显示进度条
+                if (mContentContainer != null) {
+                    mContentContainer.setVisibility(View.GONE);
+                }
+                if (actionButtonToTop != null) {
+                    actionButtonToTop.setVisibility(View.GONE);
+                }
+                if (mProgressOverlay != null) {
+                    mProgressOverlay.setVisibility(View.VISIBLE);
+                }
+                loadSourceListAsync();
                 // mComicList.clear();
                 // categoryGridAdapter.notifyDataSetChanged();
         }

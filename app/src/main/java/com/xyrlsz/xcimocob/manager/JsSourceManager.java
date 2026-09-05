@@ -49,6 +49,10 @@ public class JsSourceManager {
      * 记录上次播种/强制覆盖所用的 APK 版本号（versionCode），用于 APK 更新时强制覆盖打包 JS 源。
      */
     private static final String KEY_APP_VERSION = "app_version_seeded";
+    /**
+     * 标记是否已为存量源回填过 hasCategory 元信息（用于兼容升级）。
+     */
+    private static final String KEY_CATEGORY_META_BACKFILLED = "category_meta_backfilled";
     // 内置 JS 源来自 git 子模块 xcimoc-js-sources，其根目录即 assets 根
     private static final String ASSETS_INDEX = "index.json";
     private static volatile JsSourceManager mInstance;
@@ -123,6 +127,7 @@ public class JsSourceManager {
         js.setHasLogin(meta.optBoolean("__hasLogin", false));
         js.setSettingCount(meta.optInt("__settingCount", 0));
         js.setSettingsJson(meta.optString("__settingsJson", ""));
+        js.setHasCategory(meta.optBoolean("__hasCategory", false));
         js.setMetaReady(true);
     }
 
@@ -479,6 +484,7 @@ public class JsSourceManager {
         }
         s.setTitle(js.getTitle());
         s.setBaseUrl(js.getBaseUrl());
+        s.setHasCategory(js.isHasCategory());
         box.put(s);
     }
 
@@ -486,13 +492,14 @@ public class JsSourceManager {
      * 校验一段源脚本：在 QuickJS 中评估 SDK+脚本并读取 SOURCE 元数据。
      * 非法（type < 0 或读取不到）时抛 {@link IllegalArgumentException}。
      * <p>
-     * 同时计算登录/设置元信息并写入返回的 meta：
+     * 同时计算登录/设置/分类元信息并写入返回的 meta：
      * <ul>
      *   <li>{@code __hasLogin}：脚本是否声明 login 或 getLoginState</li>
      *   <li>{@code __settingCount}：getSettings 返回数组长度</li>
      *   <li>{@code __settingsJson}：getSettings 返回的数组原文（供设置页直接渲染）</li>
+     *   <li>{@code __hasCategory}：脚本是否实现 getCategories（供分类页过滤支持分类的源）</li>
      * </ul>
-     * 这些值在源入库时缓存到 JsSource 表，列表加载时直接读取，避免逐源跑 JS。
+     * 这些值在源入库时缓存到 JsSource 表，列表/分类加载时直接读取，避免逐源跑 JS。
      */
     public JSONObject validateScript(String script) throws Exception {
         QuickJSEngine engine = new QuickJSEngine();
@@ -531,6 +538,8 @@ public class JsSourceManager {
             meta.put("__hasLogin", hasLogin);
             meta.put("__settingCount", settingCount);
             meta.put("__settingsJson", settingsJson);
+            // 分类能力：仅判断是否实现 getCategories，不执行它（执行交给分类页按需懒加载）。
+            meta.put("__hasCategory", engine.hasFunction("getCategories"));
             return meta;
         } finally {
             try {
@@ -541,24 +550,33 @@ public class JsSourceManager {
     }
 
     /**
-     * 为存量 JsSource 回填登录/设置元信息（metaReady=false 的源）。
-     * 逐个评估脚本并把 hasLogin/settingCount/settingsJson 写回 DB。
-     * App 启动时在后台线程调用一次即可，之后列表加载直接读缓存。
+     * 为存量 JsSource 回填登录/设置/分类元信息。
+     * 逐个评估脚本并把 hasLogin/settingCount/settingsJson/hasCategory 写回 DB，
+     * 再同步到 Source 表。App 启动时在后台线程调用一次即可，之后列表/分类加载直接读缓存。
+     * <p>
+     * 为兼容已回填过登录/设置元信息（metaReady=true）但尚未计算 hasCategory 的存量源，
+     * 首次运行（{@code KEY_CATEGORY_META_BACKFILLED} 未置位）会重新评估所有源一次。
      */
     public void backfillMeta() {
+        boolean categoryBackfilled = prefs().getBoolean(KEY_CATEGORY_META_BACKFILLED, false);
         List<JsSource> all = mBox.getAll();
         int done = 0;
         for (JsSource js : all) {
-            if (js.isMetaReady()) continue;
+            // metaReady 且分类元信息已回填过的源跳过；其余（含首次全量回填）重新评估
+            if (js.isMetaReady() && categoryBackfilled) continue;
             try {
                 JSONObject meta = validateScript(js.getScript());
                 applyMeta(js, meta);
                 mBox.put(js);
+                syncSource(js); // 把 hasCategory 同步到 Source 表
                 done++;
             } catch (Exception e) {
                 Log.w("JsSource", "backfillMeta: type=" + js.getType()
                         + " title=" + js.getTitle() + " failed: " + e);
             }
+        }
+        if (!categoryBackfilled) {
+            prefs().edit().putBoolean(KEY_CATEGORY_META_BACKFILLED, true).apply();
         }
         if (done > 0) {
             Log.i("JsSource", "backfillMeta: done " + done + " sources");
