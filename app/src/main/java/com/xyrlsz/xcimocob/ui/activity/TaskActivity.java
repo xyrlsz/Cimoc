@@ -102,6 +102,10 @@ public class TaskActivity extends CoordinatorActivity implements TaskView {
         long key = getIntent().getLongExtra(Extra.EXTRA_ID, -1);
         mTaskOrder = mPreference.getBoolean(PreferenceManager.PREF_CHAPTER_ASCEND_MODE, false);
         mPresenter.load(key, mTaskOrder);
+        enablePullRefresh(() -> {
+            mTaskAdapter.clear();
+            mPresenter.load(key, mTaskOrder);
+        });
     }
 
     @Override
@@ -297,23 +301,29 @@ public class TaskActivity extends CoordinatorActivity implements TaskView {
 
     @Override
     public void onTaskLoadSuccess(final List<Task> list, boolean local) {
+        stopPullRefresh();
         mTaskAdapter.setColorId(ThemeUtils.getResourceId(this, R.attr.colorAccent));
         mTaskAdapter.setLast(mPresenter.getComic().getLast());
         mTaskAdapter.addAll(list);
         if (!local) {
-            mConnection = new ServiceConnection() {
-                @Override
-                public void onServiceConnected(ComponentName name, IBinder service) {
-                    mBinder = (DownloadServiceBinder) service;
-                    mBinder.getService().initTask(mTaskAdapter.getDateSet());
-                    hideProgressBar();
-                }
+            if (mConnection == null) {
+                mConnection = new ServiceConnection() {
+                    @Override
+                    public void onServiceConnected(ComponentName name, IBinder service) {
+                        mBinder = (DownloadServiceBinder) service;
+                        mBinder.getService().initTask(mTaskAdapter.getDateSet());
+                        hideProgressBar();
+                    }
 
-                @Override
-                public void onServiceDisconnected(ComponentName name) {
-                }
-            };
-            bindService(new Intent(this, DownloadService.class), mConnection, BIND_AUTO_CREATE);
+                    @Override
+                    public void onServiceDisconnected(ComponentName name) {
+                    }
+                };
+                bindService(new Intent(this, DownloadService.class), mConnection, BIND_AUTO_CREATE);
+            } else if (mBinder != null) {
+                mBinder.getService().initTask(mTaskAdapter.getDateSet());
+                hideProgressBar();
+            }
         } else {
             hideProgressBar();
             mLayoutView.removeView(mActionButton);
@@ -322,6 +332,7 @@ public class TaskActivity extends CoordinatorActivity implements TaskView {
 
     @Override
     public void onTaskLoadFail() {
+        stopPullRefresh();
         hideProgressBar();
         mLayoutView.removeView(mActionButton);
         showSnackbar(R.string.task_load_task_fail);
