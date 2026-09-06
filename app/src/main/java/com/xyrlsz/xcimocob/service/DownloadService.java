@@ -67,6 +67,8 @@ import okhttp3.Response;
 public class DownloadService extends Service implements AppGetter {
 
     private static final String NOTIFICATION_DOWNLOAD = "NOTIFICATION_DOWNLOAD";
+    private static final int MAX_PARALLEL_PAGE_DOWNLOADS = 3;
+    private static final long NOTIFICATION_UPDATE_INTERVAL_MS = 1000L;
 
     private static boolean sRunning;
 
@@ -79,6 +81,7 @@ public class DownloadService extends Service implements AppGetter {
     private ComicManager mComicManager;
     private ChapterManager mChapterManager;
     private ContentResolver mContentResolver;
+    private long mLastNotificationUpdate;
 
     public static Intent createIntent(Context context, Task task) {
         ArrayList<Task> list = new ArrayList<>(1);
@@ -220,6 +223,11 @@ public class DownloadService extends Service implements AppGetter {
      */
     public synchronized void updateNotification() {
         if (mNotification == null) return;
+        long now = System.currentTimeMillis();
+        if (now - mLastNotificationUpdate < NOTIFICATION_UPDATE_INTERVAL_MS) {
+            return;
+        }
+        mLastNotificationUpdate = now;
         try {
             mNotification.post(getString(R.string.download_service_doing), true);
         } catch (Exception e) {
@@ -313,8 +321,7 @@ public class DownloadService extends Service implements AppGetter {
                         updateNotification();
 
                         // 根据 CPU 核心数和文件系统性能确定页级并发数
-                        int cpuCount = Runtime.getRuntime().availableProcessors();
-                        int parallelPages = Math.min(Math.max(cpuCount, 3), 8);
+                        int parallelPages = MAX_PARALLEL_PAGE_DOWNLOADS;
 
                         // 从断点开始下载
                         int startPage = mTask.getProgress();

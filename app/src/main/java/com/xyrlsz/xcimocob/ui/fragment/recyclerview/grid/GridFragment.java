@@ -188,15 +188,5 @@ public abstract class GridFragment extends RecyclerViewFragment implements GridV
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        // 移除 5 秒 sleep 阻塞，改为延迟检查，避免 ANR
-        if (!App.isNormalExited()) {
-            android.util.Log.w("GridFragment", "非正常退出，触发延迟重启");
-            mRootView.postDelayed(() -> {
-                if (!App.isNormalExited() && isAdded()) {
-                    HintUtils.showToastLong(requireActivity(), R.string.fragment_destroy_tip);
-                    App.restartApp();
-                }
-            }, 2000);
-        }
     }
 }

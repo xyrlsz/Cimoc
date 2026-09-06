@@ -86,6 +86,10 @@ public class TaskActivity extends CoordinatorActivity implements TaskView {
     }
 
     void onActionButton2Click() {
+        DownloadService service = getBoundDownloadService();
+        if (service == null) {
+            return;
+        }
         for (int i = 0; i < mTaskAdapter.getDateSet().size(); i++) {
             Task task = mTaskAdapter.getItem(i);
             if (task.getState() == Task.STATE_PAUSE || task.getState() == Task.STATE_ERROR) {
@@ -150,11 +154,17 @@ public class TaskActivity extends CoordinatorActivity implements TaskView {
             case Task.STATE_WAIT:
                 task.setState(Task.STATE_PAUSE);
                 mTaskAdapter.notifyItemChanged(position);
-                mBinder.getService().removeDownload(task.getId());
+                DownloadService service = getBoundDownloadService();
+                if (service != null) {
+                    service.removeDownload(task.getId());
+                }
                 break;
             case Task.STATE_DOING:
             case Task.STATE_PARSE:
-                mBinder.getService().removeDownload(task.getId());
+                DownloadService downloadService = getBoundDownloadService();
+                if (downloadService != null) {
+                    downloadService.removeDownload(task.getId());
+                }
                 break;
         }
     }
@@ -185,7 +195,10 @@ public class TaskActivity extends CoordinatorActivity implements TaskView {
                         Long id = IdCreator.createChapterId(sourceComic, 0);
                         list.add(new Chapter(id, sourceComic, mSavedTask.getTitle(), mSavedTask.getPath(), mSavedTask.getId()));
                         if (!mPresenter.getComic().getLocal()) {
-                            mBinder.getService().removeDownload(mSavedTask.getId());
+                            DownloadService service = getBoundDownloadService();
+                            if (service != null) {
+                                service.removeDownload(mSavedTask.getId());
+                            }
                         }
                         mPresenter.deleteTask(list, mTaskAdapter.getItemCount() == 1);
                         break;
@@ -274,8 +287,13 @@ public class TaskActivity extends CoordinatorActivity implements TaskView {
                         List<Chapter> list = ChapterActivity.takeResultList(key);
                         if (list != null && !list.isEmpty()) {
                         showProgressDialog();
+                        DownloadService service = getBoundDownloadService();
+                        if (service == null) {
+                            hideProgressDialog();
+                            return;
+                        }
                         for (Chapter chapter : list) {
-                            mBinder.getService().removeDownload(chapter.getTid());
+                            service.removeDownload(chapter.getTid());
                         }
                         mPresenter.deleteTask(list, mTaskAdapter.getItemCount() == list.size());
                     } else {
@@ -357,6 +375,14 @@ public class TaskActivity extends CoordinatorActivity implements TaskView {
                 notifyItemChanged(position);
             }
         }
+    }
+
+    private DownloadService getBoundDownloadService() {
+        if (mBinder == null) {
+            showSnackbar(R.string.common_execute_fail);
+            return null;
+        }
+        return mBinder.getService();
     }
 
     @Override
