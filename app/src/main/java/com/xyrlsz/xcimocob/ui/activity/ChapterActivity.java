@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.xyrlsz.xcimocob.R;
 import com.xyrlsz.xcimocob.global.Extra;
+import com.xyrlsz.xcimocob.manager.ChapterManager;
 import com.xyrlsz.xcimocob.manager.PreferenceManager;
 import com.xyrlsz.xcimocob.misc.Switcher;
 import com.xyrlsz.xcimocob.model.Chapter;
@@ -32,6 +33,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 
 
@@ -40,6 +43,12 @@ import java.util.Objects;
  */
 
 public class ChapterActivity extends BackActivity implements BaseAdapter.OnItemClickListener {
+
+    /**
+     * 章节列表内存缓存，避免通过 Intent 传递大列表导致 Binder 事务过大。
+     */
+    private static final ConcurrentHashMap<Long, ArrayList<Chapter>> sChapterCache = new ConcurrentHashMap<>();
+    private static final AtomicLong sChapterKeyGenerator = new AtomicLong(0);
 
     RecyclerView mRecyclerView;
     CoordinatorLayout mCoordinatorLayout;
@@ -52,9 +61,28 @@ public class ChapterActivity extends BackActivity implements BaseAdapter.OnItemC
     private RecyclerView.ItemDecoration mDecoration;
 
     public static Intent createIntent(Context context, ArrayList<Chapter> list) {
+        return createIntent(context, list, -1L);
+    }
+
+    public static Intent createIntent(Context context, ArrayList<Chapter> list, long sourceComic) {
         Intent intent = new Intent(context, ChapterActivity.class);
-        intent.putExtra(Extra.EXTRA_CHAPTER, list);
+        long key = sChapterKeyGenerator.incrementAndGet();
+        sChapterCache.put(key, list);
+        intent.putExtra(Extra.EXTRA_CHAPTER_KEY, key);
+        if (sourceComic != -1L) {
+            intent.putExtra(Extra.EXTRA_SOURCE_COMIC, sourceComic);
+        }
         return intent;
+    }
+
+    public static long putResultList(ArrayList<Chapter> list) {
+        long key = sChapterKeyGenerator.incrementAndGet();
+        sChapterCache.put(key, list);
+        return key;
+    }
+
+    public static ArrayList<Chapter> takeResultList(long key) {
+        return key == -1L ? null : sChapterCache.remove(key);
     }
 
     @Override
@@ -105,8 +133,18 @@ public class ChapterActivity extends BackActivity implements BaseAdapter.OnItemC
 
     private List<Switcher<Chapter>> getAdapterList() {
         isAscendMode = mPreference.getBoolean(PreferenceManager.PREF_CHAPTER_ASCEND_MODE, false);
-        List<Chapter> list = getIntent().getParcelableArrayListExtra(Extra.EXTRA_CHAPTER);
-        List<Switcher<Chapter>> result = new ArrayList<>(Objects.requireNonNull(list).size());
+        long key = getIntent().getLongExtra(Extra.EXTRA_CHAPTER_KEY, -1);
+        List<Chapter> list = key != -1 ? sChapterCache.remove(key) : null;
+        if (list == null) {
+            long sourceComic = getIntent().getLongExtra(Extra.EXTRA_SOURCE_COMIC, -1L);
+            if (sourceComic != -1L) {
+                list = ChapterManager.getInstance(this).getChapterList(sourceComic);
+            }
+        }
+        if (list == null) {
+            list = new ArrayList<>();
+        }
+        List<Switcher<Chapter>> result = new ArrayList<>(list.size());
         for (int i = 0; i < list.size(); ++i) {
             result.add(new Switcher<>(list.get(i), list.get(i).isDownload()));
         }
@@ -179,7 +217,7 @@ public class ChapterActivity extends BackActivity implements BaseAdapter.OnItemC
             showSnackbar(R.string.chapter_download_empty);
         } else if (PermissionUtils.hasStoragePermission(this)) {
             Intent intent = new Intent();
-            intent.putParcelableArrayListExtra(Extra.EXTRA_CHAPTER, list);
+            intent.putExtra(Extra.EXTRA_CHAPTER_KEY, putResultList(list));
             setResult(Activity.RESULT_OK, intent);
             finish();
         } else {

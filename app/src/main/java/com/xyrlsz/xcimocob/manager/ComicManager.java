@@ -14,6 +14,7 @@ import java.util.concurrent.Callable;
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
 import io.objectbox.exception.UniqueViolationException;
+import io.objectbox.query.Query;
 import io.objectbox.query.QueryBuilder;
 import io.reactivex.rxjava3.core.Observable;
 
@@ -53,11 +54,15 @@ public class ComicManager {
     }
 
     public List<Comic> listDownload() {
-        return mComicBox.query().notNull(Comic_.download).build().find();
+        try (Query<Comic> query = mComicBox.query().notNull(Comic_.download).build()) {
+            return query.find();
+        }
     }
 
     public List<Comic> listLocal() {
-        return mComicBox.query().equal(Comic_.local, true).build().find();
+        try (Query<Comic> query = mComicBox.query().equal(Comic_.local, true).build()) {
+            return query.find();
+        }
     }
 
     public Observable<List<Comic>> listLocalInRx() {
@@ -71,7 +76,9 @@ public class ComicManager {
     public List<Comic> listFavoriteOrHistory() {
         QueryBuilder<Comic> queryBuilder =
                 mComicBox.query(Comic_.favorite.notNull().or(Comic_.history.notNull()));
-        return queryBuilder.build().find();
+        try (Query<Comic> query = queryBuilder.build()) {
+            return query.find();
+        }
     }
 
     /**
@@ -97,83 +104,96 @@ public class ComicManager {
     }
 
     public List<Comic> listFavorite() {
-        return mComicBox.query(Comic_.favorite.notNull()).build().find();
+        try (Query<Comic> query = mComicBox.query(Comic_.favorite.notNull()).build()) {
+            return query.find();
+        }
     }
 
     public Observable<List<Comic>> listFavoriteInRx() {
-        return Observable.fromCallable(()
-                -> mComicBox.query(Comic_.favorite.notNull())
-                .orderDesc(Comic_.highlight)
-                .orderDesc(Comic_.favorite)
-                .build()
-                .find());
+        return Observable.fromCallable(() -> {
+            try (Query<Comic> query = mComicBox.query(Comic_.favorite.notNull())
+                    .orderDesc(Comic_.highlight)
+                    .orderDesc(Comic_.favorite)
+                    .build()) {
+                return query.find();
+            }
+        });
     }
 
     public Observable<List<Comic>> listFinishInRx() {
         return Observable.fromCallable(() -> {
-            return mComicBox.query(Comic_.favorite.notNull())
+            try (Query<Comic> query = mComicBox.query(Comic_.favorite.notNull())
                     .equal(Comic_.finish, true)
                     .orderDesc(Comic_.highlight)
                     .orderDesc(Comic_.favorite)
-                    .build()
-                    .find();
+                    .build()) {
+                return query.find();
+            }
         });
     }
 
     public Observable<List<Comic>> listContinueInRx() {
-        return Observable.fromCallable(()
-                -> mComicBox.query(Comic_.favorite.notNull())
-                .notEqual(Comic_.finish, true)
-                .orderDesc(Comic_.highlight)
-                .orderDesc(Comic_.favorite)
-                .build()
-                .find());
+        return Observable.fromCallable(() -> {
+            try (Query<Comic> query = mComicBox.query(Comic_.favorite.notNull())
+                    .notEqual(Comic_.finish, true)
+                    .orderDesc(Comic_.highlight)
+                    .orderDesc(Comic_.favorite)
+                    .build()) {
+                return query.find();
+            }
+        });
     }
 
     public Observable<List<Comic>> listHistoryInRx() {
-        return Observable.fromCallable(()
-                -> mComicBox.query(Comic_.history.notNull())
-                .orderDesc(Comic_.history)
-                .build()
-                .find());
+        return Observable.fromCallable(() -> {
+            try (Query<Comic> query = mComicBox.query(Comic_.history.notNull())
+                    .orderDesc(Comic_.history)
+                    .build()) {
+                return query.find();
+            }
+        });
     }
 
     public Observable<List<Comic>> listDownloadInRx() {
         return Observable.fromCallable(() -> {
-            return mComicBox.query()
+            try (Query<Comic> query = mComicBox.query()
                     .notNull(Comic_.download)
                     .orderDesc(Comic_.download)
-                    .build()
-                    .find();
+                    .build()) {
+                return query.find();
+            }
         });
     }
 
     public Observable<List<Comic>> listFavoriteByTag(long id) {
         return Observable.fromCallable(() -> {
             // 直接获取 ID 数组
-            Long[] cids = mTagRefBox.query()
+            Long[] cids;
+            try (Query<TagRef> tagQuery = mTagRefBox.query()
                     .equal(TagRef_.tid, id)
-                    .build()
-                    .find() // 获取 List<TagRef>
-                    .stream()
-                    .map(TagRef::getCid) // 转换为 Stream<Long>
-                    .toArray(Long[]::new); // 转换为 Long[]
+                    .build()) {
+                cids = tagQuery.find() // 获取 List<TagRef>
+                        .stream()
+                        .map(TagRef::getCid) // 转换为 Stream<Long>
+                        .toArray(Long[]::new); // 转换为 Long[]
+            }
 
             // 如果没有数据，直接返回空列表
             if (cids.length == 0) {
-                return new ArrayList<>();
+                return new ArrayList<Comic>();
             }
             long[] cidsLong = new long[cids.length];
             for (int i = 0; i < cids.length; i++) {
                 cidsLong[i] = cids[i];
             }
             // 查询 Comic
-            return mComicBox.query(Comic_.favorite.notNull())
+            try (Query<Comic> query = mComicBox.query(Comic_.favorite.notNull())
                     .in(Comic_.id, cidsLong)
                     .orderDesc(Comic_.highlight)
                     .orderDesc(Comic_.favorite)
-                    .build()
-                    .find();
+                    .build()) {
+                return query.find();
+            }
         });
     }
 
@@ -185,18 +205,20 @@ public class ComicManager {
                 collectionsLong[i] = cid;
                 i++;
             }
-            return mComicBox.query(Comic_.favorite.notNull())
+            try (Query<Comic> query = mComicBox.query(Comic_.favorite.notNull())
                     .notIn(Comic_.id, collectionsLong)
-                    .build()
-                    .find();
+                    .build()) {
+                return query.find();
+            }
         });
     }
 
     public long countBySource(int type) {
-        return mComicBox.query(Comic_.favorite.notNull())
+        try (Query<Comic> query = mComicBox.query(Comic_.favorite.notNull())
                 .equal(Comic_.source, type)
-                .build()
-                .count();
+                .build()) {
+            return query.count();
+        }
     }
 
     public Comic load(long id) {
@@ -207,12 +229,12 @@ public class ComicManager {
     }
 
     public Comic load(int source, String cid) {
-        List<Comic> list =
-                mComicBox.query(Comic_.cid.equal(cid)).equal(Comic_.source, source)
-                        .order(Comic_.id)
-                        .build()
-                        .find(0, 1);
-        return list.isEmpty() ? null : list.get(0);
+        try (Query<Comic> query = mComicBox.query(Comic_.cid.equal(cid)).equal(Comic_.source, source)
+                .order(Comic_.id)
+                .build()) {
+            List<Comic> list = query.find(0, 1);
+            return list.isEmpty() ? null : list.get(0);
+        }
     }
 
     public Comic loadOrCreate(int source, String cid) {
@@ -222,8 +244,10 @@ public class ComicManager {
 
     public Observable<Comic> loadLast() {
         return Observable.defer(() -> {
-            List<Comic> list =
-                    mComicBox.query(Comic_.history.notNull()).orderDesc(Comic_.history).build().find();
+            List<Comic> list;
+            try (Query<Comic> query = mComicBox.query(Comic_.history.notNull()).orderDesc(Comic_.history).build()) {
+                list = query.find();
+            }
             return list.isEmpty() ? Observable.empty() : Observable.just(list.get(0));
         });
     }
@@ -231,12 +255,14 @@ public class ComicManager {
     public void cancelHighlight() {
         // 使用事务确保查询 + 更新的原子性
         runInTx(() -> {
-            List<Comic> comics = mComicBox.query().equal(Comic_.highlight, true).build().find();
-            if (comics.isEmpty()) return;
-            for (Comic comic : comics) {
-                comic.setHighlight(false);
+            try (Query<Comic> query = mComicBox.query().equal(Comic_.highlight, true).build()) {
+                List<Comic> comics = query.find();
+                if (comics.isEmpty()) return;
+                for (Comic comic : comics) {
+                    comic.setHighlight(false);
+                }
+                mComicBox.put(comics);
             }
-            mComicBox.put(comics);
         });
     }
 

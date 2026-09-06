@@ -8,6 +8,7 @@ import java.util.List;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
+import io.objectbox.query.Query;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
@@ -52,26 +53,29 @@ public class TagRefManager {
 
     // 4. 修改：查询方法
     public List<TagRef> listByTag(long tid) {
-        return mRefBox.query()
+        try (Query<TagRef> query = mRefBox.query()
                 .equal(TagRef_.tid, tid)
-                .build()
-                .find();
+                .build()) {
+            return query.find();
+        }
     }
 
     public List<TagRef> listByComic(long cid) {
-        return mRefBox.query()
+        try (Query<TagRef> query = mRefBox.query()
                 .equal(TagRef_.cid, cid)
-                .build()
-                .find();
+                .build()) {
+            return query.find();
+        }
     }
 
     // 5. 修改：load 方法。ObjectBox 使用 findFirst 替代 unique
     public TagRef load(long tid, long cid) {
-        return mRefBox.query()
+        try (Query<TagRef> query = mRefBox.query()
                 .equal(TagRef_.tid, tid)
                 .equal(TagRef_.cid, cid)
-                .build()
-                .findFirst();
+                .build()) {
+            return query.findFirst();
+        }
     }
 
     // 6. 修改：插入操作
@@ -88,25 +92,28 @@ public class TagRefManager {
     }
 
     public void deleteByTag(long tid) {
-        mRefBox.query()
+        try (Query<TagRef> query = mRefBox.query()
                 .equal(TagRef_.tid, tid)
-                .build()
-                .remove();
+                .build()) {
+            query.remove();
+        }
     }
 
     public void deleteByComic(long cid) {
-        mRefBox.query()
+        try (Query<TagRef> query = mRefBox.query()
                 .equal(TagRef_.cid, cid)
-                .build()
-                .remove();
+                .build()) {
+            query.remove();
+        }
     }
 
     public void delete(long tid, long cid) {
-        mRefBox.query()
+        try (Query<TagRef> query = mRefBox.query()
                 .equal(TagRef_.tid, tid)
                 .equal(TagRef_.cid, cid)
-                .build()
-                .remove();
+                .build()) {
+            query.remove();
+        }
     }
 
 }

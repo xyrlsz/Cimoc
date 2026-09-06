@@ -88,7 +88,11 @@ public class DownloadService extends Service implements AppGetter {
 
     public static Intent createIntent(Context context, ArrayList<Task> list) {
         Intent intent = new Intent(context, DownloadService.class);
-        intent.putParcelableArrayListExtra(Extra.EXTRA_TASK, list);
+        long[] ids = new long[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            ids[i] = list.get(i).getId();
+        }
+        intent.putExtra(Extra.EXTRA_TASK_IDS, ids);
         return intent;
     }
 
@@ -133,8 +137,15 @@ public class DownloadService extends Service implements AppGetter {
                     // 如果前台服务启动失败，仍然继续执行下载任务
                 }
             }
-            List<Task> list = intent.getParcelableArrayListExtra(Extra.EXTRA_TASK);
-            for (Task task : Objects.requireNonNull(list)) {
+            long[] ids = intent.getLongArrayExtra(Extra.EXTRA_TASK_IDS);
+            List<Task> list = ids == null ? new ArrayList<>() : mTaskManager.listByIds(ids);
+            for (Task task : list) {
+                Comic comic = mComicManager.load(task.getKey());
+                if (comic == null) {
+                    continue;
+                }
+                task.setSource(comic.getSource());
+                task.setCid(comic.getCid());
                 Worker worker = new Worker(task);
                 Future future = mExecutorService.submit(worker);
                 addWorker(task.getId(), worker, future);

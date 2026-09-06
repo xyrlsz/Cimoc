@@ -8,6 +8,7 @@ import java.util.List;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
+import io.objectbox.query.Query;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
@@ -41,17 +42,19 @@ public class SearchHistoryManager {
      * 查询所有搜索历史，按时间倒序排列（同步）
      */
     public List<SearchHistory> list() {
-        return mHistoryBox.query()
+        try (Query<SearchHistory> query = mHistoryBox.query()
                 .orderDesc(SearchHistory_.timestamp)
-                .build()
-                .find();
+                .build()) {
+            return query.find();
+        }
     }
 
     public List<SearchHistory> list(long offset, long count) {
-        return mHistoryBox.query()
+        try (Query<SearchHistory> query = mHistoryBox.query()
                 .orderDesc(SearchHistory_.timestamp)
-                .build()
-                .find(offset, count);
+                .build()) {
+            return query.find(offset, count);
+        }
     }
 
     /**
@@ -71,9 +74,12 @@ public class SearchHistoryManager {
      * 插入或更新搜索历史（若已存在相同关键词则更新时间戳）
      */
     public void insertOrUpdate(String keyword) {
-        SearchHistory existing = mHistoryBox.query(
+        SearchHistory existing;
+        try (Query<SearchHistory> query = mHistoryBox.query(
                 SearchHistory_.keyword.equal(keyword)
-        ).build().findFirst();
+        ).build()) {
+            existing = query.findFirst();
+        }
         if (existing != null) {
             existing.setTimestamp(System.currentTimeMillis());
             mHistoryBox.put(existing);

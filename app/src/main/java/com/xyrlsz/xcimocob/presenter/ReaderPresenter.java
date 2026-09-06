@@ -19,6 +19,7 @@ import com.xyrlsz.xcimocob.rx.RxBus;
 import com.xyrlsz.xcimocob.rx.RxEvent;
 import com.xyrlsz.xcimocob.saf.CimocDocumentFile;
 import com.xyrlsz.xcimocob.ui.view.ReaderView;
+import com.xyrlsz.xcimocob.utils.IdCreator;
 import com.xyrlsz.xcimocob.utils.StringUtils;
 import com.xyrlsz.xcimocob.utils.pictureUtils;
 
@@ -46,6 +47,7 @@ public class ReaderPresenter extends BasePresenter<ReaderView> {
     private ImageUrlManager mImageUrlManager;
     private ComicManager mComicManager;
     private SourceManager mSourceManager;
+    private ChapterManager mChapterManager;
     private Comic mComic;
 
     private boolean isShowNext = true;
@@ -58,7 +60,7 @@ public class ReaderPresenter extends BasePresenter<ReaderView> {
         mComicManager = ComicManager.getInstance(mBaseView);
         mSourceManager = SourceManager.getInstance(mBaseView);
         mImageUrlManager = ImageUrlManager.getInstance(mBaseView);
-        ChapterManager.getInstance(mBaseView);
+        mChapterManager = ChapterManager.getInstance(mBaseView);
     }
 
     @Override
@@ -88,6 +90,16 @@ public class ReaderPresenter extends BasePresenter<ReaderView> {
 
     public void loadInit(long id, Chapter[] array) {
         mComic = mComicManager.load(id);
+        if (mComic == null) {
+            return;
+        }
+
+        // 若调用方未传入章节列表（如进程被回收后缓存丢失），则从数据库按漫画加载全部章节。
+        if (array == null || array.length == 0) {
+            long sourceComic = IdCreator.createSourceComic(mComic);
+            List<Chapter> dbList = mChapterManager.getChapterList(sourceComic);
+            array = dbList.toArray(new Chapter[0]);
+        }
 
         for (int i = 0; i != array.length; ++i) {
             if (array[i].getPath().equals(mComic.getLast())) {
@@ -204,6 +216,14 @@ public class ReaderPresenter extends BasePresenter<ReaderView> {
 
     public void switchNight() {
         RxBus.getInstance().post(new RxEvent(RxEvent.EVENT_SWITCH_NIGHT));
+    }
+
+    /**
+     * 返回当前阅读器持有的章节数组，供切换阅读模式（Page/Stream）时
+     * 重新放入 Intent 缓存，避免再次通过 Binder 传递大对象。
+     */
+    public Chapter[] getChapterArray() {
+        return mReaderChapterManger != null ? mReaderChapterManger.getArray() : null;
     }
 
     /**
@@ -348,6 +368,10 @@ public class ReaderPresenter extends BasePresenter<ReaderView> {
 
         Chapter moveNext() {
             return array[next--];
+        }
+
+        Chapter[] getArray() {
+            return array;
         }
 
     }

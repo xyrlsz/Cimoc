@@ -12,6 +12,7 @@ import java.util.concurrent.Callable;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
+import io.objectbox.query.Query;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
@@ -52,19 +53,21 @@ public class ImageUrlManager {
 
     // 4. 修改：使用 ObjectBox Query 查询
     public Observable<List<ImageUrl>> getListImageUrlRX(Long comicChapter) {
-        return Observable.fromCallable(() ->
-                mImageUrlBox.query()
-                        .equal(ImageUrl_.comicChapter, comicChapter) // 注意：ObjectBox 使用字段名直接比较
-                        .build()
-                        .find()
-        ).subscribeOn(Schedulers.io());
+        return Observable.fromCallable(() -> {
+            try (Query<ImageUrl> query = mImageUrlBox.query()
+                    .equal(ImageUrl_.comicChapter, comicChapter)
+                    .build()) {
+                return query.find();
+            }
+        }).subscribeOn(Schedulers.io());
     }
 
     public List<ImageUrl> getListImageUrl(Long comicChapter) {
-        return mImageUrlBox.query()
+        try (Query<ImageUrl> query = mImageUrlBox.query()
                 .equal(ImageUrl_.comicChapter, comicChapter)
-                .build()
-                .find();
+                .build()) {
+            return query.find();
+        }
     }
 
     // 5. 修改：load 方法
@@ -95,10 +98,12 @@ public class ImageUrlManager {
     // 10. 修改：根据 comicChapter 删除（使用事务 + 批量删除）
     public void deleteByComicChapter(Long comicChapter) {
         runInTx(() -> {
-            long[] ids = mImageUrlBox.query()
+            long[] ids;
+            try (Query<ImageUrl> query = mImageUrlBox.query()
                     .equal(ImageUrl_.comicChapter, comicChapter)
-                    .build()
-                    .findIds();
+                    .build()) {
+                ids = query.findIds();
+            }
             if (ids.length > 0) {
                 mImageUrlBox.remove(ids);
             }

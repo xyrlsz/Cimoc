@@ -41,6 +41,7 @@ import com.xyrlsz.xcimocob.ui.adapter.BaseAdapter;
 import com.xyrlsz.xcimocob.ui.adapter.DetailAdapter;
 import com.xyrlsz.xcimocob.ui.view.DetailView;
 import com.xyrlsz.xcimocob.utils.STConvertUtils;
+import com.xyrlsz.xcimocob.utils.IdCreator;
 import com.xyrlsz.xcimocob.utils.StringUtils;
 import com.xyrlsz.xcimocob.utils.ThemeUtils;
 
@@ -176,7 +177,9 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
 //                    break;
             if (__id == R.id.detail_download) {
                     if (!mDetailAdapter.getDateSet().isEmpty()) {
-                        Intent intent1 = ChapterActivity.createIntent(this, new ArrayList<>(mDetailAdapter.getDateSet()));
+                        Intent intent1 = ChapterActivity.createIntent(this,
+                            new ArrayList<>(mDetailAdapter.getDateSet()),
+                            IdCreator.createSourceComic(mPresenter.getComic()));
                         startActivityForResult(intent1, REQUEST_CODE_DOWNLOAD);
                     }
 //                case R.id.detail_tag:
@@ -246,7 +249,13 @@ public class DetailActivity extends CoordinatorActivity implements DetailView {
             switch (requestCode) {
                 case REQUEST_CODE_DOWNLOAD:
                     showProgressDialog();
-                    List<Chapter> list = data.getParcelableArrayListExtra(Extra.EXTRA_CHAPTER);
+                    long key = data == null ? -1L
+                            : data.getLongExtra(Extra.EXTRA_CHAPTER_KEY, -1L);
+                    List<Chapter> list = ChapterActivity.takeResultList(key);
+                    if (list == null || list.isEmpty()) {
+                        showSnackbar(R.string.chapter_download_empty);
+                        break;
+                    }
                     mPresenter.addTask(mDetailAdapter.getDateSet(), list);
                     break;
             }

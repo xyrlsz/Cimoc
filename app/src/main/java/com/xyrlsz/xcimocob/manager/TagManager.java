@@ -9,6 +9,7 @@ import java.util.List;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
+import io.objectbox.query.Query;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
@@ -49,19 +50,20 @@ public class TagManager {
     }
 
     public Observable<List<Tag>> listInRx() {
-        return Observable.fromCallable(() ->
-                mTagBox.query().build().find()
-        ).subscribeOn(Schedulers.io());
+        return Observable.fromCallable(() -> {
+            try (Query<Tag> query = mTagBox.query().build()) {
+                return query.find();
+            }
+        }).subscribeOn(Schedulers.io());
     }
 
     // 4. 修改：load 方法。根据 title 查询
     public Tag load(String title) {
         if (StringUtils.isEmpty(title)) return null;
 
-        return mTagBox.query(Tag_.title.equal(title))
-
-                .build()
-                .findFirst();
+        try (Query<Tag> query = mTagBox.query(Tag_.title.equal(title)).build()) {
+            return query.findFirst();
+        }
     }
 
     // 5. 修改：CRUD 操作

@@ -20,6 +20,7 @@ import java.util.Map;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
+import io.objectbox.query.Query;
 
 /**
  * Created by Hiroshi on 2017/1/18.
@@ -70,8 +71,10 @@ public class UpdateHelper {
             if (type == Locality.TYPE || type == Null.TYPE) {
                 continue;
             }
-            if (jsBox.query().equal(JsSource_.type, type).build().findFirst() == null) {
-                toRemove.add(source);
+            try (Query<JsSource> query = jsBox.query().equal(JsSource_.type, type).build()) {
+                if (query.findFirst() == null) {
+                    toRemove.add(source);
+                }
             }
         }
         if (!toRemove.isEmpty()) {

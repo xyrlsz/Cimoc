@@ -1,5 +1,7 @@
 package com.xyrlsz.xcimocob.network.sync;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -46,6 +48,11 @@ public class DataSyncManager {
 
     private static final String TAG = "DataSyncManager";
     private static final long DEBOUNCE_MS = 3000; // 3 秒防抖
+    /**
+     * 冷启动全量同步延迟：避免与首帧渲染、WebView 初始化争抢 CPU/DB 锁资源，
+     * 降低启动阶段 Choreographer 跳帧（Skipped frames）。
+     */
+    private static final long COLD_START_SYNC_DELAY_MS = 3000L;
 
     private static volatile DataSyncManager sInstance;
 
@@ -61,6 +68,12 @@ public class DataSyncManager {
      * 防止多个同步触发源（冷启动、前台切换、防抖）并发执行同步
      */
     private final AtomicBoolean mSyncRunning = new AtomicBoolean(false);
+
+    /**
+     * 冷启动同步是否已排期（延迟执行）。冷启动期间前台同步应跳过，
+     * 统一由延迟的冷启动同步处理，避免与首帧渲染争抢资源。
+     */
+    private final AtomicBoolean mColdStartPending = new AtomicBoolean(false);
 
     private DataSyncManager() {
         // 使用 App 实例作为 AppGetter（App 实现了 AppGetter 接口）
@@ -105,8 +118,14 @@ public class DataSyncManager {
      */
     public void onAppStart() {
         mIsForeground.set(true);
-        Log.d(TAG, "App cold start -> try full bidirectional sync");
-        trySyncNow();
+        mColdStartPending.set(true);
+        Log.d(TAG, "App cold start -> try full bidirectional sync (delayed "
+                + COLD_START_SYNC_DELAY_MS + "ms)");
+        // 延迟触发冷启动全量同步，避免与首帧渲染/WebView 初始化争抢资源导致跳帧
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            mColdStartPending.set(false);
+            trySyncNow();
+        }, COLD_START_SYNC_DELAY_MS);
     }
 
     /**
@@ -114,6 +133,11 @@ public class DataSyncManager {
      */
     public void onForeground() {
         mIsForeground.set(true);
+        if (mColdStartPending.get()) {
+            // 冷启动同步已排期，跳过本次前台触发，避免重复同步
+            Log.d(TAG, "App foreground -> skip (cold start sync pending)");
+            return;
+        }
         Log.d(TAG, "App foreground -> try full bidirectional sync");
         trySyncNow();
     }

@@ -4,10 +4,12 @@ import com.xyrlsz.xcimocob.component.AppGetter;
 import com.xyrlsz.xcimocob.model.Task;
 import com.xyrlsz.xcimocob.model.Task_;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
+import io.objectbox.query.Query;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
@@ -45,27 +47,41 @@ public class TaskManager {
     }
 
     public List<Task> listValid() {
-        return mTaskBox.query()
-                .notEqual(Task_.max, 0) // 对应 .notEq(0)
-                .build()
-                .find();
+        try (Query<Task> query = mTaskBox.query()
+                .notEqual(Task_.max, 0)
+                .build()) {
+            return query.find();
+        }
     }
 
     public List<Task> list(long key) {
-        return mTaskBox.query()
+        try (Query<Task> query = mTaskBox.query()
                 .equal(Task_.key, key)
-                .build()
-                .find();
+                .build()) {
+            return query.find();
+        }
+    }
+
+    public List<Task> listByIds(long[] ids) {
+        List<Task> result = new ArrayList<>(ids.length);
+        for (long id : ids) {
+            Task task = mTaskBox.get(id);
+            if (task != null) {
+                result.add(task);
+            }
+        }
+        return result;
     }
 
     // 4. 修改：RxJava 查询
     public Observable<List<Task>> listInRx(long key) {
-        return Observable.fromCallable(() ->
-                mTaskBox.query()
-                        .equal(Task_.key, key)
-                        .build()
-                        .find()
-        ).subscribeOn(Schedulers.io());
+        return Observable.fromCallable(() -> {
+            try (Query<Task> query = mTaskBox.query()
+                    .equal(Task_.key, key)
+                    .build()) {
+                return query.find();
+            }
+        }).subscribeOn(Schedulers.io());
     }
 
     public Observable<List<Task>> listInRx() {
@@ -112,10 +128,11 @@ public class TaskManager {
 
     public void deleteByComicId(long id) {
         // ObjectBox 没有 buildDelete，使用 query().build().remove()
-        mTaskBox.query()
+        try (Query<Task> query = mTaskBox.query()
                 .equal(Task_.key, id)
-                .build()
-                .remove();
+                .build()) {
+            query.remove();
+        }
     }
 
     // 7. 修改：insertIfNotExist 逻辑
@@ -124,11 +141,12 @@ public class TaskManager {
         mTaskBox.getStore().runInTx(() -> {
             for (Task task : entities) {
                 // 查询是否存在相同的 Key 和 Path
-                Task existing = mTaskBox.query(Task_.path.equal(task.getPath()))
+                Task existing;
+                try (Query<Task> query = mTaskBox.query(Task_.path.equal(task.getPath()))
                         .equal(Task_.key, task.getKey())
-
-                        .build()
-                        .findFirst();
+                        .build()) {
+                    existing = query.findFirst();
+                }
 
                 if (existing == null) {
                     mTaskBox.put(task);

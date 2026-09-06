@@ -37,10 +37,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
-
-
-
 /**
  * Created by Hiroshi on 2016/9/7.
  */
@@ -269,8 +265,10 @@ public class TaskActivity extends CoordinatorActivity implements TaskView {
         if (resultCode == Activity.RESULT_OK) {
             switch (requestCode) {
                 case REQUEST_CODE_DELETE:
-                    List<Chapter> list = data.getParcelableArrayListExtra(Extra.EXTRA_CHAPTER);
-                    if (!Objects.requireNonNull(list).isEmpty()) {
+                        long key = data == null ? -1L
+                            : data.getLongExtra(Extra.EXTRA_CHAPTER_KEY, -1L);
+                        List<Chapter> list = ChapterActivity.takeResultList(key);
+                        if (list != null && !list.isEmpty()) {
                         showProgressDialog();
                         for (Chapter chapter : list) {
                             mBinder.getService().removeDownload(chapter.getTid());

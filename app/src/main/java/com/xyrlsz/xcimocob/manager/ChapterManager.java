@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
+import io.objectbox.query.Query;
 import io.reactivex.rxjava3.core.Observable;
 
 /**
@@ -49,36 +50,43 @@ public class ChapterManager {
         return Observable.fromCallable(() -> {
 
             Long sourceComic0 = IdCreator.recreateSourceComic(sourceComic, 0L);
-            List<Chapter> list = mChapterBox.query()
+            try (Query<Chapter> query = mChapterBox.query()
                     .equal(Chapter_.sourceComic, sourceComic)
-                    .build()
-                    .find();
+                    .build()) {
+                List<Chapter> list = query.find();
 
-            return list.stream()
-                    .filter(chapter -> !IdCreator.getSourceComicFromChapter(chapter.getId()).equals(sourceComic0))
-                    .collect(Collectors.toList());
+                return list.stream()
+                        .filter(chapter -> !IdCreator.getSourceComicFromChapter(chapter.getId()).equals(sourceComic0))
+                        .collect(Collectors.toList());
+            }
         });
     }
 
     public List<Chapter> getChapterList(long sourceComic) {
-        return mChapterBox.query().equal(Chapter_.sourceComic, sourceComic).build().find();
+        try (Query<Chapter> query = mChapterBox.query().equal(Chapter_.sourceComic, sourceComic).build()) {
+            return query.find();
+        }
     }
 
     public List<Chapter> getChapter(String path, String title) {
-        return mChapterBox.query(Chapter_.path.equal(path).and(Chapter_.title.equal(title)))
-                .build()
-                .find();
+        try (Query<Chapter> query = mChapterBox.query(Chapter_.path.equal(path).and(Chapter_.title.equal(title)))
+                .build()) {
+            return query.find();
+        }
     }
 
     public List<Chapter> getChapter(String path) {
-        return mChapterBox.query(Chapter_.path.equal(path)).build().find();
+        try (Query<Chapter> query = mChapterBox.query(Chapter_.path.equal(path)).build()) {
+            return query.find();
+        }
     }
 
     public List<Chapter> getChapter(long sourceComic, String path) {
-        return mChapterBox.query(Chapter_.path.equal(path))
+        try (Query<Chapter> query = mChapterBox.query(Chapter_.path.equal(path))
                 .equal(Chapter_.sourceComic, sourceComic)
-                .build()
-                .find();
+                .build()) {
+            return query.find();
+        }
     }
 
     public Chapter load(long id) {
@@ -103,10 +111,11 @@ public class ChapterManager {
     }
 
     public void deleteBySourceComic(long sourceComic) {
-        List<Chapter> chapters =
-                mChapterBox.query().equal(Chapter_.sourceComic, sourceComic).build().find();
-        if (!chapters.isEmpty()) {
-            mChapterBox.remove(chapters);
+        try (Query<Chapter> query = mChapterBox.query().equal(Chapter_.sourceComic, sourceComic).build()) {
+            List<Chapter> chapters = query.find();
+            if (!chapters.isEmpty()) {
+                mChapterBox.remove(chapters);
+            }
         }
     }
 }

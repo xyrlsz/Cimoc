@@ -83,9 +83,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 import okhttp3.Headers;
 
@@ -97,6 +100,19 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
 
     private static final String SAVED_STATE_PROGRESS = "saved_state_progress";
     private static final String SAVED_STATE_MAX = "saved_state_max";
+
+    /**
+     * 章节列表内存缓存。
+     * <p>
+     * 章节列表可能包含成百上千个 Chapter（每个含 title/path 字符串），
+     * 若直接通过 Intent 的 ParcelableArrayList 传递，会触发 Binder 事务过大
+     * （Large outgoing transaction of ~600KB），导致系统杀死进程并重启。
+     * 改为：调用方将列表放入此缓存，Intent 仅传递一个 long 型 key，
+     * ReaderActivity 在 initData 中取出并移除。若缓存缺失（如进程被回收），
+     * 则回退到从数据库按漫画 ID 加载章节列表。
+     */
+    private static final ConcurrentHashMap<Long, List<Chapter>> sChapterCache = new ConcurrentHashMap<>();
+    private static final AtomicLong sChapterKeyGenerator = new AtomicLong(0);
 
     private final boolean[] JoyLock = {false, false};
     private final int[] JoyEvent = {7, 8};
@@ -161,7 +177,11 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
     public static Intent createIntent(Context context, long id, List<Chapter> list, int mode) {
         Intent intent = getIntent(context, mode);
         intent.putExtra(Extra.EXTRA_ID, id);
-        intent.putExtra(Extra.EXTRA_CHAPTER, new ArrayList<>(list));
+        // 不再通过 Intent 传递整个 List<Chapter>（会导致 Binder 事务过大），
+        // 改为放入进程内缓存，Intent 仅传递 key。
+        long key = sChapterKeyGenerator.incrementAndGet();
+        sChapterCache.put(key, list);
+        intent.putExtra(Extra.EXTRA_CHAPTER_KEY, key);
         intent.putExtra(Extra.EXTRA_MODE, mode);
         return intent;
     }
@@ -417,8 +437,11 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
             mLongClickArray = mode == PreferenceManager.READER_MODE_PAGE ?
                     ClickEvents.getPageLongClickEventChoice(mPreference) : ClickEvents.getStreamLongClickEventChoice(mPreference);
             long id = getIntent().getLongExtra(Extra.EXTRA_ID, -1);
-            List<Chapter> list = getIntent().getParcelableArrayListExtra(Extra.EXTRA_CHAPTER);
-            mPresenter.loadInit(id, Objects.requireNonNull(list).toArray(new Chapter[list.size()]));
+            long key = getIntent().getLongExtra(Extra.EXTRA_CHAPTER_KEY, -1);
+            List<Chapter> list = key != -1 ? sChapterCache.remove(key) : null;
+            Chapter[] array = (list != null && !list.isEmpty())
+                    ? list.toArray(new Chapter[0]) : null;
+            mPresenter.loadInit(id, array);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -979,6 +1002,13 @@ public abstract class ReaderActivity extends BaseActivity implements OnTapGestur
         }
         // 同步更新默认阅读模式，下次打开漫画时沿用新选择的模式
         mPreference.putNumber(PreferenceManager.PREF_READER_MODE, newMode);
+        // 切换模式会重建 Activity，需将章节列表重新放入缓存（原缓存已在 initData 中取出）
+        Chapter[] array = mPresenter.getChapterArray();
+        if (array != null && array.length > 0) {
+            long newKey = sChapterKeyGenerator.incrementAndGet();
+            sChapterCache.put(newKey, Arrays.asList(array));
+            intent.putExtra(Extra.EXTRA_CHAPTER_KEY, newKey);
+        }
         intent.putExtra(Extra.EXTRA_MODE, newMode);
         finish();
         startActivity(intent);

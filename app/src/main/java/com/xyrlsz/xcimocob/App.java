@@ -282,36 +282,29 @@ public class App extends Application implements AppGetter, Thread.UncaughtExcept
         // 获取栈顶Activity以及当前App上下文
         mApp = this;
 
-        // 首次启动播种内置 JS 源（幂等，仅当 JsSource 表为空时写入）
-        try {
-            JsSourceManager.getInstance(this).seedFromAssets();
-        } catch (Throwable ignore) {
-        }
+        // 首次启动播种内置 JS 源（幂等，仅当 JsSource 表为空时写入）。
+        // 播种和解析器初始化必须保持顺序，避免解析器先缓存 Null 实现。
+        new Thread(() -> {
+            try {
+                JsSourceManager.getInstance(this).seedFromAssets();
+            } catch (Throwable ignore) {
+            }
+            SourceManager.getInstance(this).init();
+            try {
+                JsSourceManager.getInstance(this).autoSignIn();
+            } catch (Throwable ignore) {
+            }
+            try {
+                JsSourceManager.getInstance(this).autoUpdateIfNeeded();
+            } catch (Throwable ignore) {
+            }
+        }).start();
 
         // 为存量 JS 源回填登录/设置元信息（metaReady=false 的源），供漫画源设置列表直接读取，
         // 避免列表加载时逐源跑 JS。在后台线程执行，不阻塞启动。
         new Thread(() -> {
             try {
                 JsSourceManager.getInstance(this).backfillMeta();
-            } catch (Throwable ignore) {
-            }
-        }).start();
-
-        // 启用的漫画源解析器彼此独立，放到计算线程池并行预热。
-        SourceManager.getInstance(this).init();
-
-        // 后台自动签到：对开启了 auto_sign 设置的源（如再漫画）在打开时签到
-        new Thread(() -> {
-            try {
-                JsSourceManager.getInstance(this).autoSignIn();
-            } catch (Throwable ignore) {
-            }
-        }).start();
-
-        // 打开 App 自动检查并更新漫画源（受设置开关 + 频率限制控制）
-        new Thread(() -> {
-            try {
-                JsSourceManager.getInstance(this).autoUpdateIfNeeded();
             } catch (Throwable ignore) {
             }
         }).start();

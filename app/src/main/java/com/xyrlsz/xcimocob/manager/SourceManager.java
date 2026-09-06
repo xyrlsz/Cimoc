@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
+import io.objectbox.query.Query;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import okhttp3.Headers;
@@ -50,38 +51,43 @@ public class SourceManager {
 
     // 3. 修改：使用 ObjectBox Query 查询，包装在 Observable 中
     public Observable<List<Source>> list() {
-        return Observable.fromCallable(() ->
-                mSourceBox.query()
-                        .order(Source_.type) // 升序
-                        .build()
-                        .find()
-        ).subscribeOn(Schedulers.io());
+        return Observable.fromCallable(() -> {
+            try (Query<Source> query = mSourceBox.query()
+                    .order(Source_.type)
+                    .build()) {
+                return query.find();
+            }
+        }).subscribeOn(Schedulers.io());
     }
 
     public Observable<List<Source>> listEnableInRx() {
-        return Observable.fromCallable(() ->
-                mSourceBox.query()
-                        .equal(Source_.enable, true)
-                        .order(Source_.type)
-                        .build()
-                        .find()
-        ).subscribeOn(Schedulers.io());
+        return Observable.fromCallable(() -> {
+            try (Query<Source> query = mSourceBox.query()
+                    .equal(Source_.enable, true)
+                    .order(Source_.type)
+                    .build()) {
+                return query.find();
+            }
+        }).subscribeOn(Schedulers.io());
     }
 
     public List<Source> listEnable() {
-        return mSourceBox.query()
+        try (Query<Source> query = mSourceBox.query()
                 .equal(Source_.enable, true)
                 .order(Source_.type)
-                .build()
-                .find();
+                .build()) {
+            return query.find();
+        }
     }
 
     // 4. 修改：load 方法。ObjectBox 没有直接的 unique 方法，使用 findFirst
     public Source load(int type) {
-        Source res = mSourceBox.query()
+        Source res;
+        try (Query<Source> query = mSourceBox.query()
                 .equal(Source_.type, type)
-                .build()
-                .findFirst();
+                .build()) {
+            res = query.findFirst();
+        }
         return Objects.requireNonNullElseGet(res, Source::new);
     }
 

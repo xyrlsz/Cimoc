@@ -7,7 +7,10 @@ package com.xyrlsz.xcimocob.global;
 public class Extra {
 
     public static final String EXTRA_CHAPTER = "cimoc.intent.extra.EXTRA_CHAPTER";
+    public static final String EXTRA_CHAPTER_KEY = "cimoc.intent.extra.EXTRA_CHAPTER_KEY";
+    public static final String EXTRA_SOURCE_COMIC = "cimoc.intent.extra.EXTRA_SOURCE_COMIC";
     public static final String EXTRA_TASK = "cimoc.intent.extra.EXTRA_TASK";
+    public static final String EXTRA_TASK_IDS = "cimoc.intent.extra.EXTRA_TASK_IDS";
     public static final String EXTRA_ID = "cimoc.intent.extra.EXTRA_ID";
     public static final String EXTRA_SOURCE = "cimoc.intent.extra.EXTRA_SOURCE";
     public static final String EXTRA_CID = "cimoc.intent.extra.EXTRA_CID";

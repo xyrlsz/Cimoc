@@ -21,6 +21,7 @@ import java.util.List;
 
 import io.objectbox.Box;
 import io.objectbox.BoxStore;
+import io.objectbox.query.Query;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
@@ -193,16 +194,23 @@ public class JsSourceManager {
     /* ---------------- 在线更新 ---------------- */
 
     public Observable<List<JsSource>> list() {
-        return Observable.fromCallable(() -> mBox.query().order(JsSource_.type).build().find())
-                .subscribeOn(Schedulers.io());
+        return Observable.fromCallable(() -> {
+            try (Query<JsSource> query = mBox.query().order(JsSource_.type).build()) {
+                return query.find();
+            }
+        }).subscribeOn(Schedulers.io());
     }
 
     public List<JsSource> listEnabled() {
-        return mBox.query().equal(JsSource_.enable, true).order(JsSource_.type).build().find();
+        try (Query<JsSource> query = mBox.query().equal(JsSource_.enable, true).order(JsSource_.type).build()) {
+            return query.find();
+        }
     }
 
     public JsSource loadByType(int type) {
-        return mBox.query().equal(JsSource_.type, type).build().findFirst();
+        try (Query<JsSource> query = mBox.query().equal(JsSource_.type, type).build()) {
+            return query.findFirst();
+        }
     }
 
     public JsSource loadEnabledByType(int type) {
@@ -212,7 +220,10 @@ public class JsSourceManager {
             return null;
         }
         // 启用状态以 Source 表为准（源列表切换即改 Source.enable）
-        Source s = mBoxStore.boxFor(Source.class).query().equal(Source_.type, type).build().findFirst();
+        Source s;
+        try (Query<Source> query = mBoxStore.boxFor(Source.class).query().equal(Source_.type, type).build()) {
+            s = query.findFirst();
+        }
         if (s == null || !s.getEnable()) {
             Log.w("JsSource", "loadEnabledByType(" + type + "): Source row missing/disabled (source="
                     + (s == null ? "null" : ("enable=" + s.getEnable())) + ")");
@@ -351,7 +362,10 @@ public class JsSourceManager {
     public void removeSourceCompletely(int type) {
         delete(type);
         Box<Source> sbox = mBoxStore.boxFor(Source.class);
-        Source s = sbox.query().equal(Source_.type, type).build().findFirst();
+        Source s;
+        try (Query<Source> query = sbox.query().equal(Source_.type, type).build()) {
+            s = query.findFirst();
+        }
         if (s != null) {
             sbox.remove(s);
         }
@@ -476,7 +490,10 @@ public class JsSourceManager {
      */
     private void syncSource(JsSource js) {
         Box<Source> box = mBoxStore.boxFor(Source.class);
-        Source s = box.query().equal(Source_.type, js.getType()).build().findFirst();
+        Source s;
+        try (Query<Source> query = box.query().equal(Source_.type, js.getType()).build()) {
+            s = query.findFirst();
+        }
         if (s == null) {
             s = new Source();
             s.setType(js.getType());
